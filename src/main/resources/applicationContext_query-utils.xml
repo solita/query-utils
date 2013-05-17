@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans default-autowire="constructor"
+       xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+    
+    <bean id="query-utils_JpaCriteriaQuery"     class="fi.solita.utils.query.generation.JpaCriteriaQuery" />
+    <bean id="query-utils_Restrict"             class="fi.solita.utils.query.generation.Restrict" />
+    
+    <bean id="query-utils_Project"              class="fi.solita.utils.query.projection.Project" />
+    <bean id="query-utils_ProjectionSupport"    class="fi.solita.utils.query.projection.ProjectionSupport" />
+    
+    <bean id="query-utils_JpaProjectionQueries" class="fi.solita.utils.query.execution.JpaProjectionQueries" />
+    <bean id="query-utils_JpaBasicQueries"      class="fi.solita.utils.query.execution.JpaBasicQueries" />
+    <bean id="query-utils_JpaCriteriaQueries"   class="fi.solita.utils.query.execution.JpaCriteriaQueries" />
+    <bean id="query-utils_NativeQueries"        class="fi.solita.utils.query.execution.NativeQueries" />
+    <bean id="query-utils_QLQueries"            class="fi.solita.utils.query.execution.QLQueries" />
+    
+    <bean id="query-utils_Dao"                  class="fi.solita.utils.query.Dao" />
+</beans>

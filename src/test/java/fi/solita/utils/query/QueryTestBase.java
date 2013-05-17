@@ -1,0 +1,30 @@
+package fi.solita.utils.query;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath:/testApplicationContext.xml" })
+@Transactional
+public abstract class QueryTestBase {
+
+    @PersistenceContext
+    protected EntityManager em;
+
+    @Before
+    public void resetDatabase() {
+        em.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
+        try {
+            em.createNativeQuery("TRUNCATE TABLE Employee").executeUpdate();
+            em.createNativeQuery("TRUNCATE TABLE Department").executeUpdate();
+        } finally {
+            em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+        }
+    }
+}
