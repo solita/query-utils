@@ -1,6 +1,5 @@
 package fi.solita.utils.query.generation;
 
-import static fi.solita.utils.query.QueryUtils.copyCriteriaWithoutSelect;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
 import javax.persistence.EntityManager;
@@ -18,10 +17,12 @@ import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.proxy.HibernateProxyHelper;
-import fi.solita.utils.query.Id;
-import fi.solita.utils.query.QueryUtils;
+
 import fi.solita.utils.query.IEntity;
+import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
+import fi.solita.utils.query.JpaCriteriaCopy;
+import fi.solita.utils.query.QueryUtils;
 
 public class JpaCriteriaQuery {
 
@@ -138,7 +139,7 @@ public class JpaCriteriaQuery {
     CriteriaQuery<R> doRelated(CriteriaQuery<E> query, Attribute<?,?>... attributes) {
         CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
 
-        copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
+        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
         From<?,?> join = resolveSelection(query, q);
         for (Attribute<?, ?> attr : attributes) {
             // Hibernate fails with String-bases api; Join.join(String, JoinType)

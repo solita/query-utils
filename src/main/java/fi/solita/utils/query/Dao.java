@@ -106,20 +106,20 @@ public class Dao {
         return jpaCriteriaQueries.findFirst(query, ordering);
     }
 
-    public <T> Collection<T> getList(CriteriaQuery<T> query) {
-        return jpaCriteriaQueries.getList(query);
+    public <T> Collection<T> getMany(CriteriaQuery<T> query) {
+        return jpaCriteriaQueries.getMany(query);
     }
 
-    public <T> List<T> getList(CriteriaQuery<T> query, Page page) throws NoOrderingSpecifiedException {
-        return jpaCriteriaQueries.getList(query, page);
+    public <T> List<T> getMany(CriteriaQuery<T> query, Page page) throws NoOrderingSpecifiedException {
+        return jpaCriteriaQueries.getMany(query, page);
     }
 
-    public <E extends IEntity> List<E> getList(CriteriaQuery<E> query, Iterable<? extends Order<? super E, ?>> ordering) {
-        return jpaCriteriaQueries.getList(query, ordering);
+    public <E extends IEntity> List<E> getMany(CriteriaQuery<E> query, Iterable<? extends Order<? super E, ?>> ordering) {
+        return jpaCriteriaQueries.getMany(query, ordering);
     }
 
-    public <E extends IEntity> List<E> getList(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering) {
-        return jpaCriteriaQueries.getList(query, page, ordering);
+    public <E extends IEntity> List<E> getMany(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering) {
+        return jpaCriteriaQueries.getMany(query, page, ordering);
     }
 
 
@@ -140,20 +140,20 @@ public class Dao {
         return jpaProjectionQueries.findFirst(query, constructor, ordering);
     }
 
-    public <E extends IEntity,R> Collection<R> getList(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) {
-        return jpaProjectionQueries.getList(query, constructor);
+    public <E extends IEntity,R> Collection<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) {
+        return jpaProjectionQueries.getMany(query, constructor);
     }
 
-    public <E extends IEntity,R> List<R> getList(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page) throws NoOrderingSpecifiedException {
-        return jpaProjectionQueries.getList(query, constructor, page);
+    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page) throws NoOrderingSpecifiedException {
+        return jpaProjectionQueries.getMany(query, constructor, page);
     }
 
-    public <E extends IEntity,R> List<R> getList(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
-        return jpaProjectionQueries.getList(query, constructor, ordering);
+    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
+        return jpaProjectionQueries.getMany(query, constructor, ordering);
     }
 
-    public <E extends IEntity,R> List<R> getList(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page, Iterable<? extends Order<? super E,?>> ordering) {
-        return jpaProjectionQueries.getList(query, constructor, page, ordering);
+    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page, Iterable<? extends Order<? super E,?>> ordering) {
+        return jpaProjectionQueries.getMany(query, constructor, page, ordering);
     }
 
 
@@ -190,20 +190,20 @@ public class Dao {
         return nativeQueries.findFirst(query, constructor);
     }
 
-    public <T> List<T> getList(NativeQuery<T> query) {
-        return nativeQueries.getList(query);
+    public <T> List<T> getMany(NativeQuery<T> query) {
+        return nativeQueries.getMany(query);
     }
 
-    public <T, P> List<P> getList(NativeQuery<T> query, Apply<T, P> constructor) {
-        return nativeQueries.getList(query, constructor);
+    public <T, P> List<P> getMany(NativeQuery<T> query, Apply<T, P> constructor) {
+        return nativeQueries.getMany(query, constructor);
     }
 
-    public <T> List<T> getList(NativeQuery<T> query, Page page) {
-        return nativeQueries.getList(query, page);
+    public <T> List<T> getMany(NativeQuery<T> query, Page page) {
+        return nativeQueries.getMany(query, page);
     }
 
-    public <T, P> List<P> getList(NativeQuery<T> query, Page page, Apply<T, P> constructor) {
-        return nativeQueries.getList(query, page, constructor);
+    public <T, P> List<P> getMany(NativeQuery<T> query, Page page, Apply<T, P> constructor) {
+        return nativeQueries.getMany(query, page, constructor);
     }
 
 
@@ -240,19 +240,19 @@ public class Dao {
         return qlQueries.find(query, constructor);
     }
 
-    public <T> List<T> getList(QLQuery<T> query) {
-        return qlQueries.getList(query);
+    public <T> List<T> getMany(QLQuery<T> query) {
+        return qlQueries.getMany(query);
     }
 
-    public <T, P> List<P> getList(QLQuery<T> query, Apply<T, P> constructor) {
-        return qlQueries.getList(query, constructor);
+    public <T, P> List<P> getMany(QLQuery<T> query, Apply<T, P> constructor) {
+        return qlQueries.getMany(query, constructor);
     }
 
-    public <T> List<T> getList(QLQuery<T> query, Page page) {
-        return qlQueries.getList(query, page);
+    public <T> List<T> getMany(QLQuery<T> query, Page page) {
+        return qlQueries.getMany(query, page);
     }
 
-    public <T, P> List<P> getList(QLQuery<T> query, Page page, Apply<T, P> constructor) {
-        return qlQueries.getList(query, page, constructor);
+    public <T, P> List<P> getMany(QLQuery<T> query, Page page, Apply<T, P> constructor) {
+        return qlQueries.getMany(query, page, constructor);
     }
 }

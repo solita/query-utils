@@ -28,7 +28,7 @@ public class IdGenerator extends SequenceStyleGenerator {
             try {
                 c = longIdClass.getDeclaredConstructor();
                 c.setAccessible(true);
-                return c.newInstance().id = id;
+                return c.newInstance().setId(id);
             } catch (Exception e) {
                 throw new HibernateException(e);
             }

@@ -118,7 +118,7 @@ public class ProjectTest extends QueryTestBase {
         em.persist(emp1);
         em.persist(emp2);
 
-        assertEquals(newSet(Some(new Money(1)), Option.<Money>None()), newSet(dao.getList(query.all(Employee.class), Project.value(Cast.optional(Employee_.salary)))));
+        assertEquals(newSet(Some(new Money(1)), Option.<Money>None()), newSet(dao.getMany(query.all(Employee.class), Project.value(Cast.optional(Employee_.salary)))));
     }
 
     @Test
@@ -183,7 +183,7 @@ public class ProjectTest extends QueryTestBase {
         Department dep = new Department();
         em.persist(dep);
 
-        Collection<Pair<Department, String>> list = dao.getList(
+        Collection<Pair<Department, String>> list = dao.getMany(
                 query.all(Department.class),
                     Project.pair(Select.<Department>self(),
                                  Department_.name));

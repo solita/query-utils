@@ -44,7 +44,7 @@ public class QueryTest extends QueryTestBase {
         em.persist(dep1);
         em.persist(dep2);
 
-        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getList(query.all(Department.class)), Department__.getId)));
+        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getMany(query.all(Department.class)), Department__.getId)));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class QueryTest extends QueryTestBase {
         em.persist(dep2);
 
         assertEquals("find by single id", dep1.getId(), dao.get(query.ofIds(newList(dep1.getId()), Department.class)).getId());
-        assertEquals("find by multiple ids", newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getList(query.ofIds(newList(dep1.getId(), dep2.getId()), Department.class)), Department__.getId)));
+        assertEquals("find by multiple ids", newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getMany(query.ofIds(newList(dep1.getId(), dep2.getId()), Department.class)), Department__.getId)));
     }
 
     @Test(expected = NoResultException.class)

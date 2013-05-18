@@ -10,7 +10,7 @@ import javax.persistence.MappedSuperclass;
 @Access(AccessType.FIELD)
 class LongId<T> implements Id<T>, Serializable {
 
-    long id;
+    private long id;
 
     LongId() {
     }
@@ -23,6 +23,11 @@ class LongId<T> implements Id<T>, Serializable {
     @Override
     public int hashCode() {
         return Long.valueOf(id).hashCode();
+    }
+    
+    LongId<T> setId(long id) {
+        this.id = id;
+        return this;
     }
 
     @Override

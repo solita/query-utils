@@ -6,7 +6,6 @@ import static fi.solita.utils.functional.Functional.headOption;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
-import static fi.solita.utils.query.QueryUtils.NoPaging;
 
 import java.util.List;
 
@@ -58,30 +57,30 @@ public class NativeQueries {
     }
 
     public <T> Option<T> findFirst(NativeQuery<T> query) {
-        return headOption(getList(query, Page.FIRST.withSize(1)));
+        return headOption(getMany(query, Page.FIRST.withSize(1)));
     }
 
     public <T, P> Option<P> findFirst(NativeQuery<T> query, Apply<T, P> constructor) {
-        List<T> t = getList(query, Page.FIRST.withSize(1));
+        List<T> t = getMany(query, Page.FIRST.withSize(1));
         if (t.isEmpty()) {
             return None();
         }
         return Some(constructor.apply(head(t)));
     }
 
-    public <T> List<T> getList(NativeQuery<T> query) {
-        return getList(query, NoPaging);
+    public <T> List<T> getMany(NativeQuery<T> query) {
+        return getMany(query, Page.NoPaging);
     }
 
-    public <T, P> List<P> getList(NativeQuery<T> query, Apply<T, P> constructor) {
-        return getList(query, NoPaging, constructor);
+    public <T, P> List<P> getMany(NativeQuery<T> query, Apply<T, P> constructor) {
+        return getMany(query, Page.NoPaging, constructor);
     }
 
-    public <T> List<T> getList(NativeQuery<T> query, Page page) {
+    public <T> List<T> getMany(NativeQuery<T> query, Page page) {
         return queryExecutor.getMany(query, page);
     }
 
-    public <T, P> List<P> getList(NativeQuery<T> query, Page page, Apply<T, P> constructor) {
-        return newList(map(getList(query, page), constructor));
+    public <T, P> List<P> getMany(NativeQuery<T> query, Page page, Apply<T, P> constructor) {
+        return newList(map(getMany(query, page), constructor));
     }
 }

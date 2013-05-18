@@ -2,7 +2,6 @@ package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.query.QueryUtils.NoPaging;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,10 +19,8 @@ import org.hibernate.Session;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
-import fi.solita.utils.functional.Transformers;
 import fi.solita.utils.functional.Tuple_;
 import fi.solita.utils.query.Page;
-import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 import fi.solita.utils.query.backend.NativeQueryExecutor;
 import fi.solita.utils.query.backend.QLQueryExecutor;
@@ -46,14 +43,14 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         TypedQuery<T> query = em.createQuery(q);
         int originalFirstResult = query.getFirstResult();
         int originalMaxResults = query.getMaxResults();
-        if (page != NoPaging) {
+        if (page != Page.NoPaging) {
             query.setFirstResult(page.getFirstResult());
             query.setMaxResults(page.getMaxResults());
         }
         try {
             return query.getResultList();
         } finally {
-            if (page != NoPaging) {
+            if (page != Page.NoPaging) {
                 query.setFirstResult(originalFirstResult);
                 query.setMaxResults(originalMaxResults);
             }
@@ -164,7 +161,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     }
 
     private static Query applyPaging(Query q, Page page) {
-        if (page != QueryUtils.NoPaging) {
+        if (page != Page.NoPaging) {
             q.setFirstResult(page.getFirstResult())
              .setMaxResults(page.getMaxResults());
         }

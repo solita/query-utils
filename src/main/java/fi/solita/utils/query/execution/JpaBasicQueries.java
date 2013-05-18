@@ -1,9 +1,8 @@
 package fi.solita.utils.query.execution;
 
-import static fi.solita.utils.query.QueryUtils.copyCriteriaWithoutSelect;
+import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
-import static fi.solita.utils.functional.Option.None;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -16,15 +15,14 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.metamodel.SingularAttribute;
 
-import org.hibernate.Hibernate;
-
+import fi.solita.utils.functional.Option;
+import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
+import fi.solita.utils.query.Identifiable;
+import fi.solita.utils.query.JpaCriteriaCopy;
+import fi.solita.utils.query.Removable;
 import fi.solita.utils.query.projection.Project;
 import fi.solita.utils.query.projection.ProjectionSupport;
-import fi.solita.utils.query.IEntity;
-import fi.solita.utils.query.Identifiable;
-import fi.solita.utils.query.Removable;
-import fi.solita.utils.functional.Option;
 
 public class JpaBasicQueries {
 
@@ -52,7 +50,7 @@ public class JpaBasicQueries {
 
     public <E extends IEntity & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
         CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
-        copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
+        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
         @SuppressWarnings("unchecked")
         From<?,E> selection = (From<?, E>) resolveSelection(query, q);
         q.select(selection);
@@ -88,9 +86,7 @@ public class JpaBasicQueries {
      */
     @SuppressWarnings("unchecked")
     public <E extends IEntity, T extends IEntity> Option<T> getProxy(E entity, SingularAttribute<? super E, T> relation) {
-        if (!Hibernate.isInitialized(entity)) {
-            Hibernate.initialize(entity);
-        }
+        entity.toString(); // initialize
         Field field = (Field)relation.getJavaMember();
         field.setAccessible(true);
         try {

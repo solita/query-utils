@@ -1,14 +1,12 @@
 package fi.solita.utils.query.execution;
 
-import static fi.solita.utils.query.QueryUtils.NoPaging;
-import static fi.solita.utils.query.QueryUtils.copyCriteriaWithoutSelect;
-import static fi.solita.utils.query.QueryUtils.resolveSelection;
-import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.headOption;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
+import static fi.solita.utils.query.QueryUtils.resolveSelection;
+import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,15 +19,16 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 
-import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
-import fi.solita.utils.query.codegen.ConstructorMeta_;
+import fi.solita.utils.functional.Option;
+import fi.solita.utils.query.IEntity;
+import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Order;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
+import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
+import fi.solita.utils.query.codegen.ConstructorMeta_;
 import fi.solita.utils.query.projection.ProjectionSupport;
-import fi.solita.utils.query.IEntity;
-import fi.solita.utils.functional.Option;
 
 public class JpaProjectionQueries {
 
@@ -47,7 +46,7 @@ public class JpaProjectionQueries {
 
     public <E extends IEntity, R> R get(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) throws NoResultException, NonUniqueResultException {
         CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
-        copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
+        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
         From<?,?> selection = QueryUtils.resolveSelection(query, q);
         q.multiselect(projectionSupport.transformParametersForQuery(constructor, selection));
         return head(projectionSupport.replaceRelatedProjectionPlaceholdersWithResultsFromSubquery(newList(queryExecutor.get(q)), constructor));
@@ -62,31 +61,31 @@ public class JpaProjectionQueries {
     }
 
     public <E extends IEntity,R> Option<R> findFirst(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) throws NoOrderingSpecifiedException {
-        return headOption(getList(query, constructor, Page.FIRST.withSize(1)));
+        return headOption(getMany(query, constructor, Page.FIRST.withSize(1)));
     }
 
     public <E extends IEntity,R> Option<R> findFirst(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
-        return headOption(getList(query, constructor, Page.FIRST.withSize(1), ordering));
+        return headOption(getMany(query, constructor, Page.FIRST.withSize(1), ordering));
     }
 
-    public <E extends IEntity,R> Collection<R> getList(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) throws NoOrderingSpecifiedException {
-        return getList(query, constructor, NoPaging);
+    public <E extends IEntity,R> Collection<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) throws NoOrderingSpecifiedException {
+        return getMany(query, constructor, Page.NoPaging);
     }
 
-    public <E extends IEntity,R> List<R> getList(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page) throws NoOrderingSpecifiedException {
+    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page) throws NoOrderingSpecifiedException {
         QueryUtils.applyOrder(query, resolveSelectionPath(query), em.getCriteriaBuilder());
         QueryUtils.checkOrdering(query, page);
         List<Order<? super E,?>> noOrdering = Collections.emptyList();
-        return getList(query, constructor, page, noOrdering);
+        return getMany(query, constructor, page, noOrdering);
     }
 
-    public <E extends IEntity,R> List<R> getList(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
-        return getList(query, constructor, NoPaging, ordering);
+    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
+        return getMany(query, constructor, Page.NoPaging, ordering);
     }
 
-    public <E extends IEntity,R> List<R> getList(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page, Iterable<? extends Order<? super E,?>> ordering) {
+    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page, Iterable<? extends Order<? super E,?>> ordering) {
         CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
-        copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
+        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
         @SuppressWarnings("unchecked")
         From<?,E> selection = (From<?, E>) resolveSelection(query, q);
         q.select(selection);

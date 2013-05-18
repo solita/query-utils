@@ -144,18 +144,18 @@ public class CriteriaQueriesTest extends QueryTestBase {
 
         CriteriaQuery<Department> q = query.all(Department.class);
 
-        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getList(q), Department__.getId)));
+        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getMany(q), Department__.getId)));
 
-        assertEquals(newList(dep1.getId(), dep2.getId()), newList(map(dao.getList(q, Order.by(Department_.name)), Department__.getId)));
-        assertEquals(newList(dep2.getId(), dep1.getId()), newList(map(dao.getList(q, Order.by(Department_.name).desc), Department__.getId)));
+        assertEquals(newList(dep1.getId(), dep2.getId()), newList(map(dao.getMany(q, Order.by(Department_.name)), Department__.getId)));
+        assertEquals(newList(dep2.getId(), dep1.getId()), newList(map(dao.getMany(q, Order.by(Department_.name).desc), Department__.getId)));
 
-        assertEquals(newList(dep2.getId()), newList(map(dao.getList(q, Page.of(0, 1), Order.by(Department_.name).desc), Department__.getId)));
-        assertEquals(newList(dep1.getId(), dep2.getId()), newList(map(dao.getList(q, Page.of(0, 2), Order.by(Department_.name)), Department__.getId)));
+        assertEquals(newList(dep2.getId()), newList(map(dao.getMany(q, Page.of(0, 1), Order.by(Department_.name).desc), Department__.getId)));
+        assertEquals(newList(dep1.getId(), dep2.getId()), newList(map(dao.getMany(q, Page.of(0, 2), Order.by(Department_.name)), Department__.getId)));
     }
 
     @Test(expected = NoOrderingSpecifiedException.class)
     public void getList_pagingWithoutOrderingFails() {
-        dao.getList(query.all(Department.class), Page.of(0, 2));
+        dao.getMany(query.all(Department.class), Page.of(0, 2));
     }
 
     @Test
@@ -167,8 +167,8 @@ public class CriteriaQueriesTest extends QueryTestBase {
 
         CriteriaQuery<Department> qOrdered = query.all(Department.class);
         qOrdered.orderBy(em.getCriteriaBuilder().asc(qOrdered.getRoots().iterator().next().get("name")));
-        assertEquals(newList(dep1.getId()), newList(map(dao.getList(qOrdered, Page.of(0, 1)), Department__.getId)));
-        assertEquals(newList(dep2.getId()), newList(map(dao.getList(qOrdered, Page.of(1, 1)), Department__.getId)));
+        assertEquals(newList(dep1.getId()), newList(map(dao.getMany(qOrdered, Page.of(0, 1)), Department__.getId)));
+        assertEquals(newList(dep2.getId()), newList(map(dao.getMany(qOrdered, Page.of(1, 1)), Department__.getId)));
     }
 
     @Test
@@ -178,8 +178,8 @@ public class CriteriaQueriesTest extends QueryTestBase {
         em.persist(dep1);
         em.persist(dep2);
 
-        assertEquals(newList(dep1.getId(), dep2.getId()), newList(map(dao.getList(query.all(Department.class), Order.by(Department_.name)), Department__.getId)));
-        assertEquals(newList(dep2.getId(), dep1.getId()), newList(map(dao.getList(query.all(Department.class), Order.by(Department_.name).desc), Department__.getId)));
+        assertEquals(newList(dep1.getId(), dep2.getId()), newList(map(dao.getMany(query.all(Department.class), Order.by(Department_.name)), Department__.getId)));
+        assertEquals(newList(dep2.getId(), dep1.getId()), newList(map(dao.getMany(query.all(Department.class), Order.by(Department_.name).desc), Department__.getId)));
     }
 
     @Test
@@ -189,8 +189,8 @@ public class CriteriaQueriesTest extends QueryTestBase {
         em.persist(dep1);
         em.persist(dep2);
 
-        assertEquals(newList(dep1.getId()), newList(map(dao.getList(query.all(Department.class), Page.FIRST.withSize(1), Order.by(Department_.name)), Department__.getId)));
-        assertEquals(newList(dep2.getId()), newList(map(dao.getList(query.all(Department.class), Page.FIRST.withSize(1), Order.by(Department_.name).desc), Department__.getId)));
+        assertEquals(newList(dep1.getId()), newList(map(dao.getMany(query.all(Department.class), Page.FIRST.withSize(1), Order.by(Department_.name)), Department__.getId)));
+        assertEquals(newList(dep2.getId()), newList(map(dao.getMany(query.all(Department.class), Page.FIRST.withSize(1), Order.by(Department_.name).desc), Department__.getId)));
     }
 
     @Test
@@ -200,7 +200,7 @@ public class CriteriaQueriesTest extends QueryTestBase {
         em.persist(dep);
         em.persist(emp);
 
-        assertEquals(newList(emp.getId()), newList(map(dao.getList(query.related(dep, Department_.employees), Page.of(0, 2)), Employee__.getId)));
+        assertEquals(newList(emp.getId()), newList(map(dao.getMany(query.related(dep, Department_.employees), Page.of(0, 2)), Employee__.getId)));
     }
 
     private CriteriaQuery<Department> allDepartmentsOrdered() {
