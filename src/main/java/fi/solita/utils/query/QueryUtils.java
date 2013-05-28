@@ -56,8 +56,6 @@ public abstract class QueryUtils {
         }
     }
 
-    static final AtomicInteger aliasCounter = new AtomicInteger();
-
     private QueryUtils() {
         //
     }

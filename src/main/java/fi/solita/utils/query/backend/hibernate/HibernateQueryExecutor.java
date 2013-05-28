@@ -20,6 +20,7 @@ import org.hibernate.Session;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple_;
+import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 import fi.solita.utils.query.backend.NativeQueryExecutor;
@@ -34,25 +35,29 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     private EntityManager em;
 
     @Override
-    public <T> T get(CriteriaQuery<T> q) {
-        return em.createQuery(q).getSingleResult();
+    public <T> T get(CriteriaQuery<T> query) {
+        JpaCriteriaCopy.createMissingAliases(query);
+        return em.createQuery(query).getSingleResult();
     }
 
     @Override
-    public <T> List<T> getMany(CriteriaQuery<T> q, Page page) {
-        TypedQuery<T> query = em.createQuery(q);
-        int originalFirstResult = query.getFirstResult();
-        int originalMaxResults = query.getMaxResults();
+    public <T> List<T> getMany(CriteriaQuery<T> query, Page page) {
+        JpaCriteriaCopy.createMissingAliases(query);
+        
+        TypedQuery<T> q = em.createQuery(query);
+        int originalFirstResult = q.getFirstResult();
+        int originalMaxResults = q.getMaxResults();
+        
         if (page != Page.NoPaging) {
-            query.setFirstResult(page.getFirstResult());
-            query.setMaxResults(page.getMaxResults());
+            q.setFirstResult(page.getFirstResult());
+            q.setMaxResults(page.getMaxResults());
         }
         try {
-            return query.getResultList();
+            return q.getResultList();
         } finally {
             if (page != Page.NoPaging) {
-                query.setFirstResult(originalFirstResult);
-                query.setMaxResults(originalMaxResults);
+                q.setFirstResult(originalFirstResult);
+                q.setMaxResults(originalMaxResults);
             }
         }
     }

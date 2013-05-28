@@ -16,7 +16,7 @@ import fi.solita.utils.query.execution.JpaCriteriaQueries;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
 
-public class QueryTest extends QueryTestBase {
+public class JpaCriteriaQueriesTest extends QueryTestBase {
 
     @Autowired
     private JpaCriteriaQuery query;
@@ -118,9 +118,9 @@ public class QueryTest extends QueryTestBase {
                     Department_.employees,
                     Employee_.municipality)).getId());
 
-            assertEquals(emp.getId(), dao.get(
-                query.related(
-                        query.single(dep.getId()),
-                        Department_.employees)).getId());
+        assertEquals(emp.getId(), dao.get(
+            query.related(
+                    query.single(dep.getId()),
+                    Department_.employees)).getId());
     }
 }

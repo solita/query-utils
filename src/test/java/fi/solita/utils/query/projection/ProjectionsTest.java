@@ -16,7 +16,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fi.solita.utils.query.*;
-import fi.solita.utils.query.Page;
 import fi.solita.utils.query.execution.JpaProjectionQueries;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 import fi.solita.utils.query.projection.Project;
@@ -145,6 +144,19 @@ public class ProjectionsTest extends QueryTestBase {
 
         assertEquals(newList(dep1.getId()), dao.getMany(query.all(Department.class), Project.id(), Page.FIRST.withSize(1), Order.by(Department_.name)));
         assertEquals(newList(dep2.getId()), dao.getMany(query.all(Department.class), Project.id(), Page.FIRST.withSize(1), Order.by(Department_.name).desc));
+    }
+    
+    @Test
+    public void related_query() {
+        Department dep = new Department();
+        Employee emp = new Employee("", dep);
+        em.persist(dep);
+        em.persist(emp);
+
+        assertEquals(emp.getId(), dao.get(
+                query.related(
+                        query.single(dep.getId()),
+                        Department_.employees), Project.<Employee>id()));
     }
 
     private CriteriaQuery<Department> allDepartmentsOrdered() {
