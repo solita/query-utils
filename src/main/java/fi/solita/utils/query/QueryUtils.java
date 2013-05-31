@@ -9,7 +9,6 @@ import static fi.solita.utils.functional.Functional.head;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -61,9 +60,9 @@ public abstract class QueryUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E> SingularAttribute<? super E, Id<E>> id(Class<? extends E> entityClass, EntityManager em) {
+    public static <E> SingularAttribute<E, Id<E>> id(Class<? extends E> entityClass, EntityManager em) {
         EntityType<?> e = em.getMetamodel().entity(entityClass);
-        return (SingularAttribute<? super E, Id<E>>) e.getId(e.getIdType().getJavaType());
+        return (SingularAttribute<E, Id<E>>) e.getId(e.getIdType().getJavaType());
     }
 
     public static void addListAttributeOrdering(CriteriaQuery<?> query, Expression<?> listAttributePath, CriteriaBuilder cb) {
@@ -96,13 +95,14 @@ public abstract class QueryUtils {
         return (Path<E>) resolveSelection(query);
     }
 
-    public static From<?,?> resolveSelection(CriteriaQuery<?> from, CriteriaQuery<?> to) {
+    @SuppressWarnings("unchecked")
+    public static <T> From<?,T> resolveSelection(CriteriaQuery<T> from, CriteriaQuery<?> to) {
         if (from.getSelection() != null) {
             Selection<?> selection = (Selection<?>) from.getSelection();
             if (selection instanceof Root) {
                 for (Root<?> root: to.getRoots()) {
                     if (root.getJavaType().equals(selection.getJavaType())) {
-                        return (Root<?>) root;
+                        return (Root<T>) root;
                     }
                 }
             }
@@ -110,14 +110,14 @@ public abstract class QueryUtils {
                 for (Root<?> root: to.getRoots()) {
                     for (Join<?,?> join: getAllJoins(root)) {
                         if (join.getAttribute().equals(((Join<?,?>)selection).getAttribute())) {
-                            return (From<?,?>) join;
+                            return (From<?,T>) join;
                         }
                     }
                 }
             }
         }
         if (to.getRoots().size() == 1) {
-            return (From<?, ?>)head(to.getRoots());
+            return (From<?, T>)head(to.getRoots());
         }
         throw new RuntimeException("Could not resolve selection.");
     }

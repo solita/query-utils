@@ -47,9 +47,11 @@ public class JpaProjectionQueries {
     public <E extends IEntity, R> R get(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) throws NoResultException, NonUniqueResultException {
         CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
-        From<?,?> selection = QueryUtils.resolveSelection(query, q);
+        From<?,E> selection = QueryUtils.resolveSelection(query, q);
         q.multiselect(projectionSupport.transformParametersForQuery(constructor, selection));
-        return head(projectionSupport.replaceRelatedProjectionPlaceholdersWithResultsFromSubquery(newList(queryExecutor.get(q)), constructor));
+        
+        List<Object> results = newList(queryExecutor.get(q));
+        return head(projectionSupport.performAdditionalQueriesAndTransformResults(results, constructor));
     }
 
     public <E extends IEntity, R> Option<R> find(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) throws NonUniqueResultException {
@@ -86,15 +88,15 @@ public class JpaProjectionQueries {
     public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page, Iterable<? extends Order<? super E,?>> ordering) {
         CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
-        @SuppressWarnings("unchecked")
-        From<?,E> selection = (From<?, E>) resolveSelection(query, q);
+        From<?,E> selection = resolveSelection(query, q);
         q.select(selection);
 
         @SuppressWarnings("unchecked")
         CriteriaQuery<Object> ordered = (CriteriaQuery<Object>)(Object)JpaCriteriaQueries.applyOrder((CriteriaQuery<E>)(Object)q, selection, ordering, em.getCriteriaBuilder());
 
         q.multiselect(projectionSupport.transformParametersForQuery(constructor, selection));
+        
         List<Object> results = queryExecutor.getMany(ordered, page);
-        return projectionSupport.replaceRelatedProjectionPlaceholdersWithResultsFromSubquery(results, constructor);
+        return projectionSupport.performAdditionalQueriesAndTransformResults(results, constructor);
     }
 }

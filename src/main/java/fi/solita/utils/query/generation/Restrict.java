@@ -139,7 +139,7 @@ public class Restrict {
             }
         });
 
-        return query.where(existingRestriction, em.getCriteriaBuilder().or(newArray(typeRestrictions, Predicate.class)));
+        return query.where(existingRestriction, em.getCriteriaBuilder().or(newArray(Predicate.class, typeRestrictions)));
     }
 
     /**

@@ -122,7 +122,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     }
 
     private static SQLQuery bindTransformer(SQLQuery q, NativeQuery<?> query) {
-        String[] retvals = newArray(map(query.retvals, Tuple_._1_.<String>get_1()), String.class);
+        String[] retvals = newArray(String.class, map(query.retvals, Tuple_._1_.<String>get_1()));
         if (query instanceof NativeQuery.NativeQueryPair) {
             q.setResultTransformer(TupleResultTransformers.Tuple2(retvals));
         } else if (query instanceof NativeQuery.NativeQueryT3) {

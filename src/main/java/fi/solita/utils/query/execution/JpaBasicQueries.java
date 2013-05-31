@@ -51,14 +51,13 @@ public class JpaBasicQueries {
     public <E extends IEntity & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
         CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
-        @SuppressWarnings("unchecked")
         From<?,E> selection = (From<?, E>) resolveSelection(query, q);
         q.select(selection);
 
         q.multiselect(projectionSupport.transformParametersForQuery(Project.<E>id(), selection));
         List<Object> results = em.createQuery(q).getResultList();
 
-        Collection<Id<E>> idList = projectionSupport.replaceRelatedProjectionPlaceholdersWithResultsFromSubquery(results, Project.<E>id());
+        Collection<Id<E>> idList = projectionSupport.performAdditionalQueriesAndTransformResults(results, Project.<E>id());
         if (!idList.isEmpty()) {
             em.createQuery("delete from " + resolveSelectionPath(query).getJavaType().getName() + " e where e.id in(:idList)").setParameter("idList", idList).executeUpdate();
         }
