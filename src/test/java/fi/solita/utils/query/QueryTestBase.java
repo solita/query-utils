@@ -3,6 +3,7 @@ package fi.solita.utils.query;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hibernate.Session;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -26,5 +27,9 @@ public abstract class QueryTestBase {
         } finally {
             em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
         }
+    }
+    
+    protected long getQueryCount() {
+        return em.unwrap(Session.class).getSessionFactory().getStatistics().getQueryExecutionCount();
     }
 }

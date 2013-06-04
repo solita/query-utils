@@ -6,10 +6,14 @@ import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.Functional.grouped;
 import static fi.solita.utils.functional.Functional.head;
 
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Member;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -23,18 +27,20 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
+import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ListAttribute;
+import javax.persistence.metamodel.MapAttribute;
+import javax.persistence.metamodel.PluralAttribute;
+import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import fi.solita.utils.codegen.NoMetadataGeneration;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.query.attributes.AttributeProxy;
 import fi.solita.utils.query.attributes.LiteralAttribute;
 import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.attributes.SelfAttribute;
 
-@NoMetadataGeneration
 public abstract class QueryUtils {
     
     public static final class NoOrderingSpecifiedException extends RuntimeException {
@@ -159,7 +165,26 @@ public abstract class QueryUtils {
             return;
         }
     
-        boolean metaModelAttributeIsRequired = param.isCollection() || param instanceof SingularAttribute && (!((SingularAttribute<?,?>)param).isOptional() || ((SingularAttribute<?,?>)param).getPersistentAttributeType() == PersistentAttributeType.EMBEDDED);
+        boolean metaModelAttributeIsRequired;
+        if (param instanceof SingularAttribute && ((SingularAttribute<?,?>)param).getPersistentAttributeType() == PersistentAttributeType.EMBEDDED) {
+            if (!((SingularAttribute<?,?>)param).isOptional()) {
+                metaModelAttributeIsRequired = true;
+            } else {
+                Member member = ((SingularAttribute<?,?>)param).getJavaMember();
+                if (member instanceof AnnotatedElement) {
+                    Column column = ((AnnotatedElement)member).getAnnotation(Column.class);
+                    Basic basic = ((AnnotatedElement)member).getAnnotation(Basic.class);
+                    metaModelAttributeIsRequired = column != null && column.nullable() == false ||
+                                                    basic != null && basic.optional() == false;
+                } else {
+                    metaModelAttributeIsRequired = false;
+                }
+            }
+        } else if (param instanceof SingularAttribute) {
+            metaModelAttributeIsRequired = !((SingularAttribute<?,?>)param).isOptional();
+        } else {
+            metaModelAttributeIsRequired = param.isCollection();
+        }
         boolean queryAttributeIsRequired = !AttributeProxy.unwrap(param, OptionalAttribute.class).isDefined();
     
         if (!metaModelAttributeIsRequired && queryAttributeIsRequired) {
@@ -167,5 +192,23 @@ public abstract class QueryUtils {
         } else if (metaModelAttributeIsRequired && !queryAttributeIsRequired) {
             throw new RequiredAttributeMustNotHaveOptionTypeException(param);
         }
+    }
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static Join<?,?> join(From<?, ?> join, Attribute<?,?> attr) {
+        return attr instanceof SingularAttribute ? join.join((SingularAttribute) attr) :
+               attr instanceof SetAttribute ? join.join((SetAttribute) attr) :
+               attr instanceof ListAttribute ? join.join((ListAttribute) attr) :
+               attr instanceof MapAttribute ? join.join((MapAttribute) attr) :
+                                              join.join((CollectionAttribute) attr);
+    }
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static Expression<?> get(Path<?> path, Attribute<?,?> attr) {
+        return attr instanceof SingularAttribute ? path.get((SingularAttribute) attr) :
+               attr instanceof SetAttribute ? path.get((SetAttribute) attr) :
+               attr instanceof ListAttribute ? path.get((ListAttribute) attr) :
+               attr instanceof MapAttribute ? path.get((PluralAttribute) attr) :
+                                               path.get((CollectionAttribute) attr);
     }
 }

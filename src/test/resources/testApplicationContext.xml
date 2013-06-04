@@ -41,7 +41,9 @@
         <property name="jpaPropertyMap">
             <map>
                 <entry key="hibernate.dialect" value="org.hibernate.dialect.H2Dialect" />
+                <entry key="hibernate.generate_statistics" value="true" />
                 <entry key="hibernate.hbm2ddl.auto" value="create" />
+                <entry key="hibernate.show_sql" value="true" />
             </map>
         </property>
     </bean>

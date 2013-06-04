@@ -2,30 +2,21 @@ package fi.solita.utils.query;
 
 import java.util.List;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
+import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
-
-import fi.solita.utils.query.IEntity;
-import fi.solita.utils.query.Identifiable;
-import fi.solita.utils.query.Removable;
 
 @Entity
 @Access(AccessType.FIELD)
 public class Department implements IEntity, Identifiable<Department.ID>, Removable {
 
+    @Embeddable
     public static class ID extends LongId<Department> {
         ID() {
             // for Hibernate
         }
     }
-
+    
     private ID id;
 
     @Column(nullable = false)
@@ -33,11 +24,19 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
 
     @Column(nullable = false)
     private int number;
+    
+    @ElementCollection
+    @OrderColumn(name = "index")
+    private List<Integer> numbers;
 
     @OneToMany(mappedBy = "department")
     @OrderColumn(name = "index")
     private List<Employee> employees;
 
+    @ElementCollection
+    @OrderColumn(name = "index")
+    private List<Report> reports;
+    
     public Department() {
         this("");
     }
@@ -49,6 +48,16 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
     public Department(String name, int number) {
         this.name = name;
         this.number = number;
+    }
+    
+    public Department(List<Integer> numbers) {
+        this("", 0);
+        this.numbers = numbers;
+    }
+    
+    public Department(String name, List<Report> reports) {
+        this(name, 0);
+        this.reports = reports;
     }
 
     @Override

@@ -26,7 +26,11 @@ import fi.solita.utils.query.Department__;
 import fi.solita.utils.query.Employee;
 import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Id;
+import fi.solita.utils.query.Municipality;
 import fi.solita.utils.query.QueryTestBase;
+import fi.solita.utils.query.QueryUtils.OptionalAttributeNeedOptionTypeException;
+import fi.solita.utils.query.QueryUtils.RequiredAttributeMustNotHaveOptionTypeException;
+import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 import fi.solita.utils.query.generation.Restrict;
 
@@ -151,9 +155,82 @@ public class JpaBasicQueriesTest extends QueryTestBase {
 
         Employee v = dao.get(emp.getId());
         long fetched = em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount();
-        Option<Department> proxy = dao.getProxy(v, Employee_.department);
+        Department proxy = dao.getProxy(v, Employee_.department);
+        assertEquals(fetched, em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount());
+        assertFalse(Hibernate.isInitialized(proxy));
+    }
+    
+    @Test
+    public void getProxyFromEntity_none() {
+        Department dep = new Department();
+        Employee emp = new Employee("", dep);
+        em.persist(dep);
+        em.persist(emp);
+        em.flush();
+        em.clear();
+
+        Employee v = dao.get(emp.getId());
+        long fetched = em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount();
+        Option<Municipality> proxy = dao.getProxy(v, Cast.optional(Employee_.municipality));
+        assertEquals(fetched, em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount());
+        assertEquals(None(), proxy);
+    }
+    @Test
+    public void getProxyFromEntity_some() {
+        Department dep = new Department();
+        Municipality mun = new Municipality();
+        Employee emp = new Employee("", dep, mun);
+        em.persist(dep);
+        em.persist(mun);
+        em.persist(emp);
+        em.flush();
+        em.clear();
+
+        Employee v = dao.get(emp.getId());
+        long fetched = em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount();
+        Option<Municipality> proxy = dao.getProxy(v, Cast.optional(Employee_.municipality));
         assertEquals(fetched, em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount());
         assertFalse(Hibernate.isInitialized(proxy.get()));
+    }
+    
+    @Test(expected = OptionalAttributeNeedOptionTypeException.class)
+    public void getProxyFromEntity_failsIfMissingOptional() {
+        Department dep = new Department();
+        Employee emp = new Employee("", dep);
+        em.persist(dep);
+        em.persist(emp);
+        em.flush();
+        em.clear();
+
+        Employee v = dao.get(emp.getId());
+        dao.getProxy(v, Employee_.municipality);
+    }
+    
+    @Test(expected = RequiredAttributeMustNotHaveOptionTypeException.class)
+    public void getProxyFromEntity_failsIfAdditionalOptional() {
+        Department dep = new Department();
+        Employee emp = new Employee("", dep);
+        em.persist(dep);
+        em.persist(emp);
+        em.flush();
+        em.clear();
+
+        Employee v = dao.get(emp.getId());
+        dao.getProxy(v, Cast.optional(Employee_.department));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void getProxyFromProxyFails() {
+        Department dep = new Department();
+        Employee emp = new Employee("", dep);
+        em.persist(dep);
+        em.persist(emp);
+        em.flush();
+        em.clear();
+
+        Employee v = dao.getProxy(emp.getId());
+        assertFalse(Hibernate.isInitialized(v));
+        dao.getProxy(v, Employee_.department);
     }
 
     @Test

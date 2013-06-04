@@ -1,25 +1,17 @@
 package fi.solita.utils.query;
 
-
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
 
 import fi.solita.utils.functional.*;
-import fi.solita.utils.query.IEntity;
-import fi.solita.utils.query.Identifiable;
 
 
 @Entity
 @Access(AccessType.FIELD)
 public class Employee implements IEntity, Identifiable<Employee.ID> {
 
+    @Embeddable
     public static class ID extends LongId<Employee> {
         ID() {
             // for Hibernate
@@ -40,6 +32,10 @@ public class Employee implements IEntity, Identifiable<Employee.ID> {
     @ManyToOne(fetch = FetchType.LAZY)
     private Municipality municipality;
     
+    @Embedded
+    @Basic(optional = true)
+    private Report report;
+    
     Employee() {
         // for hibernate
     }
@@ -57,6 +53,11 @@ public class Employee implements IEntity, Identifiable<Employee.ID> {
     public Employee(String name, Department department, Municipality municipality) {
         this(name, department);
         this.municipality = municipality;
+    }
+    
+    public Employee(String name, Department department, Report report) {
+        this(name, department);
+        this.report = report;
     }
 
     @Override

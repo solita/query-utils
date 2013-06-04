@@ -8,7 +8,7 @@
     <bean id="query-utils_Restrict"             class="fi.solita.utils.query.generation.Restrict" />
     
     <bean id="query-utils_Project"              class="fi.solita.utils.query.projection.Project" />
-    <bean id="query-utils_ProjectionSupport"    class="fi.solita.utils.query.projection.ProjectionSupport" />
+    <bean id="query-utils_ProjectionHelper"     class="fi.solita.utils.query.projection.ProjectionHelper" />
     
     <bean id="query-utils_JpaProjectionQueries" class="fi.solita.utils.query.execution.JpaProjectionQueries" />
     <bean id="query-utils_JpaBasicQueries"      class="fi.solita.utils.query.execution.JpaBasicQueries" />

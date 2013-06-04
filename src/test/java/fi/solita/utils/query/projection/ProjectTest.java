@@ -1,12 +1,9 @@
 package fi.solita.utils.query.projection;
 
 import static fi.solita.utils.functional.Collections.newSet;
-import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
-
-import java.util.Collection;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -17,11 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple3;
-import fi.solita.utils.query.*;
+import fi.solita.utils.query.Department;
+import fi.solita.utils.query.Department_;
+import fi.solita.utils.query.Employee;
+import fi.solita.utils.query.Employee_;
+import fi.solita.utils.query.Money;
+import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.execution.JpaProjectionQueries;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
-import fi.solita.utils.query.projection.Project;
 
 public class ProjectTest extends QueryTestBase {
 
@@ -33,16 +34,6 @@ public class ProjectTest extends QueryTestBase {
 
     @Autowired
     private JpaProjectionQueries dao;
-
-    @Test(expected = QueryUtils.OptionalAttributeNeedOptionTypeException.class)
-    public void get_fails_without_manual_option_projection() {
-        dao.get(query.all(Employee.class), Project.value(Employee_.salary));
-    }
-
-    @Test(expected = QueryUtils.RequiredAttributeMustNotHaveOptionTypeException.class)
-    public void get_fails_with_manual_option_projection_for_mandatory_attribute() {
-        dao.get(query.all(Employee.class), Project.value(Cast.optional(Employee_.name)));
-    }
 
     @Test
     public void option_get() {
@@ -122,15 +113,6 @@ public class ProjectTest extends QueryTestBase {
     }
 
     @Test
-    public void literal() {
-        Department dep = new Department();
-        em.persist(dep);
-
-        Pair<Integer, String> pair = dao.get(query.all(Department.class), Project.pair(Select.literal(42), Select.literal("foo")));
-        assertEquals(Pair.of(Integer.valueOf(42), "foo"), pair);
-    }
-
-    @Test
     public void pair() {
         Department dep = new Department();
         Employee emp = new Employee("foo", new Money(1), dep);
@@ -176,18 +158,5 @@ public class ProjectTest extends QueryTestBase {
         em.persist(emp);
 
         assertEquals("foo", dao.get(query.related(query.all(Department.class), Department_.employees), Project.<Employee,String>value(Employee_.name)));
-    }
-
-    @Test
-    public void self() {
-        Department dep = new Department();
-        em.persist(dep);
-
-        Collection<Pair<Department, String>> list = dao.getMany(
-                query.all(Department.class),
-                    Project.pair(Select.<Department>self(),
-                                 Department_.name));
-
-        assertEquals(dep.getId(), head(list)._1.getId());
     }
 }

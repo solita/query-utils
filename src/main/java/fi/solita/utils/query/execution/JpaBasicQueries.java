@@ -1,5 +1,6 @@
 package fi.solita.utils.query.execution;
 
+import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
@@ -20,18 +21,22 @@ import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.JpaCriteriaCopy;
+import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.Removable;
+import fi.solita.utils.query.attributes.AttributeProxy;
+import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.projection.Project;
-import fi.solita.utils.query.projection.ProjectionSupport;
+import fi.solita.utils.query.projection.ProjectionHelper;
+import fi.solita.utils.query.projection.ProjectionUtil_;
 
 public class JpaBasicQueries {
 
     @PersistenceContext
     private EntityManager em;
 
-    private final ProjectionSupport projectionSupport;
+    private final ProjectionHelper projectionSupport;
 
-    public JpaBasicQueries(ProjectionSupport projectionSupport) {
+    public JpaBasicQueries(ProjectionHelper projectionSupport) {
         this.projectionSupport = projectionSupport;
     }
 
@@ -52,12 +57,11 @@ public class JpaBasicQueries {
         CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
         From<?,E> selection = (From<?, E>) resolveSelection(query, q);
-        q.select(selection);
 
-        q.multiselect(projectionSupport.transformParametersForQuery(Project.<E>id(), selection));
+        q.multiselect(projectionSupport.prepareProjectingQuery(Project.<E>id(), selection));
         List<Object> results = em.createQuery(q).getResultList();
 
-        Collection<Id<E>> idList = projectionSupport.performAdditionalQueriesAndTransformResults(results, Project.<E>id());
+        Collection<Id<E>> idList = projectionSupport.finalizeProjectingQuery(Project.<E>id(), map(results, ProjectionUtil_.objectToObjectList));
         if (!idList.isEmpty()) {
             em.createQuery("delete from " + resolveSelectionPath(query).getJavaType().getName() + " e where e.id in(:idList)").setParameter("idList", idList).executeUpdate();
         }
@@ -84,14 +88,24 @@ public class JpaBasicQueries {
      * (<i>entity</i> already has an ID for a ToOne relation, so this is possible)
      */
     @SuppressWarnings("unchecked")
-    public <E extends IEntity, T extends IEntity> Option<T> getProxy(E entity, SingularAttribute<? super E, T> relation) {
-        entity.toString(); // initialize
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T> T getProxy(E entity, SingularAttribute<? super E, T> relation) {
+        QueryUtils.checkOptionalAttributes(relation);
+        
         Field field = (Field)relation.getJavaMember();
         field.setAccessible(true);
+        Object ret;
         try {
-            return Option.of((T) field.get(entity));
+            ret = field.get(entity);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
+        }
+        if (AttributeProxy.unwrap(relation, OptionalAttribute.class).isDefined()) {
+            return (T) Option.of(ret);
+        } else {
+            if (ret == null) {
+                throw new IllegalArgumentException("Failed. Did you try to get an attribute from a proxy?");
+            }
+            return (T) ret;
         }
     }
 

@@ -10,11 +10,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.CollectionAttribute;
-import javax.persistence.metamodel.ListAttribute;
-import javax.persistence.metamodel.MapAttribute;
-import javax.persistence.metamodel.SetAttribute;
-import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.proxy.HibernateProxyHelper;
 
@@ -105,14 +100,7 @@ public class JpaCriteriaQuery {
         query.where(em.getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em)), entity.getId()));
         From<?, ?> join = root;
         for (Attribute<?, ?> attr : attributes) {
-            // Hibernate fails with String-bases api; Join.join(String, JoinType)
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            From<?, ?> j = attr instanceof SingularAttribute ? join.join((SingularAttribute) attr) :
-                attr instanceof SetAttribute ? join.join((SetAttribute) attr) :
-                attr instanceof ListAttribute ? join.join((ListAttribute) attr) :
-                attr instanceof MapAttribute ? join.join((MapAttribute) attr) :
-                join.join((CollectionAttribute) attr);
-            join = j;
+            join = QueryUtils.join(join, attr);
         }
 
         @SuppressWarnings("unchecked")
@@ -142,14 +130,7 @@ public class JpaCriteriaQuery {
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
         From<?,?> join = resolveSelection(query, q);
         for (Attribute<?, ?> attr : attributes) {
-            // Hibernate fails with String-bases api; Join.join(String, JoinType)
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            From<?, ?> j = attr instanceof SingularAttribute ? join.join((SingularAttribute) attr) :
-                attr instanceof SetAttribute ? join.join((SetAttribute) attr) :
-                attr instanceof ListAttribute ? join.join((ListAttribute) attr) :
-                attr instanceof MapAttribute ? join.join((MapAttribute) attr) :
-                join.join((CollectionAttribute) attr);
-            join = j;
+            join = QueryUtils.join(join, attr);
         }
 
         @SuppressWarnings("unchecked")

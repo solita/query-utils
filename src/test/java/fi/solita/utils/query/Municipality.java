@@ -1,22 +1,18 @@
 package fi.solita.utils.query;
 
+import static fi.solita.utils.functional.Collections.newSet;
+
 import java.util.Set;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 
 import org.hibernate.annotations.GenericGenerator;
-
-import fi.solita.utils.query.IEntity;
-import fi.solita.utils.query.Identifiable;
 
 @Entity
 @Access(AccessType.FIELD)
 public class Municipality implements IEntity, Identifiable<Municipality.ID> {
 
+    @Embeddable
     public static class ID extends LongId<Municipality> {
         ID() {
             // for Hibernate
@@ -24,10 +20,38 @@ public class Municipality implements IEntity, Identifiable<Municipality.ID> {
     }
 
     private ID id;
+    
+    @ElementCollection
+    private Set<Integer> postalCodes = newSet();
 
     @OneToMany(mappedBy = "municipality")
     private Set<Employee> employees;
+    
+    @ElementCollection
+    private Set<Report> reports;
+    
+    @Embedded
+    @Basic(optional = false)
+    private Report report;
 
+    public Municipality() {
+        this(new Report(123));
+    }
+    
+    public Municipality(Report report) {
+        this.report = report;
+    }
+    
+    public Municipality(Set<Integer> postalCodes) {
+        this(new Report(123));
+        this.postalCodes = postalCodes;
+    }
+    
+    public Municipality(Set<Report> reports, boolean _) {
+        this(new Report(123));
+        this.reports = reports;
+    }
+    
     @Override
     @javax.persistence.Id
     @GeneratedValue(generator = "IdGenerator")

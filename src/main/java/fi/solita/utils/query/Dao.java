@@ -68,7 +68,7 @@ public class Dao {
         return jpaBasicQueries.find(id);
     }
 
-    public <E extends IEntity, T extends IEntity> Option<T> getProxy(E entity, SingularAttribute<? super E, T> relation) {
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T> T getProxy(E entity, SingularAttribute<? super E, T> relation) {
         return jpaBasicQueries.getProxy(entity, relation);
     }
 

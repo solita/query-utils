@@ -3,6 +3,7 @@ package fi.solita.utils.query.execution;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.headOption;
+import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
@@ -28,18 +29,20 @@ import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 import fi.solita.utils.query.codegen.ConstructorMeta_;
-import fi.solita.utils.query.projection.ProjectionSupport;
+import fi.solita.utils.query.projection.ProjectionHelper;
+import fi.solita.utils.query.projection.ProjectionUtil;
+import fi.solita.utils.query.projection.ProjectionUtil_;
 
 public class JpaProjectionQueries {
 
-    private final ProjectionSupport projectionSupport;
+    private final ProjectionHelper projectionSupport;
 
     @PersistenceContext
     private EntityManager em;
 
     private final JpaCriteriaQueryExecutor queryExecutor;
 
-    public JpaProjectionQueries(ProjectionSupport projectionSupport, JpaCriteriaQueryExecutor queryExecutor) {
+    public JpaProjectionQueries(ProjectionHelper projectionSupport, JpaCriteriaQueryExecutor queryExecutor) {
         this.projectionSupport = projectionSupport;
         this.queryExecutor = queryExecutor;
     }
@@ -48,10 +51,11 @@ public class JpaProjectionQueries {
         CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
         From<?,E> selection = QueryUtils.resolveSelection(query, q);
-        q.multiselect(projectionSupport.transformParametersForQuery(constructor, selection));
+        q.multiselect(projectionSupport.prepareProjectingQuery(constructor, selection));
         
-        List<Object> results = newList(queryExecutor.get(q));
-        return head(projectionSupport.performAdditionalQueriesAndTransformResults(results, constructor));
+        List<Iterable<Object>> res = newList();
+        res.add(ProjectionUtil.objectToObjectList(queryExecutor.get(q)));
+        return head(projectionSupport.finalizeProjectingQuery(constructor, res));
     }
 
     public <E extends IEntity, R> Option<R> find(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) throws NonUniqueResultException {
@@ -89,14 +93,13 @@ public class JpaProjectionQueries {
         CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
         From<?,E> selection = resolveSelection(query, q);
-        q.select(selection);
 
         @SuppressWarnings("unchecked")
         CriteriaQuery<Object> ordered = (CriteriaQuery<Object>)(Object)JpaCriteriaQueries.applyOrder((CriteriaQuery<E>)(Object)q, selection, ordering, em.getCriteriaBuilder());
 
-        q.multiselect(projectionSupport.transformParametersForQuery(constructor, selection));
+        q.multiselect(projectionSupport.prepareProjectingQuery(constructor, selection));
         
         List<Object> results = queryExecutor.getMany(ordered, page);
-        return projectionSupport.performAdditionalQueriesAndTransformResults(results, constructor);
+        return projectionSupport.finalizeProjectingQuery(constructor, map(results, ProjectionUtil_.objectToObjectList));
     }
 }

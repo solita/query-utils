@@ -29,13 +29,29 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.0</version>
+                <executions>
+                    <execution>
+                        <id>compileProcessorForAnnotationProcessing</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <includes>
+                                <include>fi/solita/utils/query/codegen/**.*</include>
+                            </includes>
+                            <proc>none</proc>
+                        </configuration>
+                    </execution>
+                </executions>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
                     <encoding>UTF-8</encoding>
                     <annotationProcessors>
                         <annotationProcessor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</annotationProcessor>
-                        <annotationProcessor>fi.solita.utils.codegen.CommonMetadataProcessor</annotationProcessor>
+                        <annotationProcessor>fi.solita.utils.query.codegen.MetadataProcessor</annotationProcessor>
                     </annotationProcessors>
                 </configuration>
             </plugin>
