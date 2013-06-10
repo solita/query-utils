@@ -15,10 +15,14 @@ import javax.persistence.criteria.CriteriaQuery;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.query.*;
+import fi.solita.utils.query.Department;
+import fi.solita.utils.query.Department_;
+import fi.solita.utils.query.Employee;
+import fi.solita.utils.query.Order;
+import fi.solita.utils.query.Page;
+import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.execution.JpaProjectionQueries;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
-import fi.solita.utils.query.projection.Project;
 
 public class ProjectionsTest extends QueryTestBase {
 
@@ -34,7 +38,7 @@ public class ProjectionsTest extends QueryTestBase {
     @Test
     public void get_projectSingle() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         assertEquals(dep.getId(), dao.get(query.single(dep.getId()), Project.id()));
     }
@@ -46,8 +50,7 @@ public class ProjectionsTest extends QueryTestBase {
 
     @Test(expected = NonUniqueResultException.class)
     public void get_projectMultiple() {
-        em.persist(new Department());
-        em.persist(new Department());
+        persist(new Department(), new Department());
 
         dao.get(query.all(Department.class), Project.id());
     }
@@ -55,7 +58,7 @@ public class ProjectionsTest extends QueryTestBase {
     @Test
     public void find_projectSingle() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         assertEquals(dep.getId(), dao.find(query.single(dep.getId()), Project.id()).get());
     }
@@ -67,15 +70,14 @@ public class ProjectionsTest extends QueryTestBase {
 
     @Test(expected = NonUniqueResultException.class)
     public void find_projectMultiple() {
-        em.persist(new Department());
-        em.persist(new Department());
+        persist(new Department(), new Department());
 
         dao.find(query.all(Department.class), Project.id());
     }
 
     @Test
     public void findFirst_projectSingle() {
-        em.persist(new Department());
+        persist(new Department());
 
         assertTrue(dao.findFirst(allDepartmentsOrdered(), Project.id()).isDefined());
     }
@@ -87,8 +89,7 @@ public class ProjectionsTest extends QueryTestBase {
 
     @Test
     public void findFirst_projectMultiple() {
-        em.persist(new Department());
-        em.persist(new Department());
+        persist(new Department(), new Department());
 
         assertTrue(dao.findFirst(allDepartmentsOrdered(), Project.id()).isDefined());
     }
@@ -97,19 +98,17 @@ public class ProjectionsTest extends QueryTestBase {
     public void findFirst_project_ordered() {
         Department dep1 = new Department("a");
         Department dep2 = new Department("b");
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
-        assertEquals(dep1.getId(), dao.findFirst(query.all(Department.class), Project.id(), Order.by(Department_.name)).get());
-        assertEquals(dep2.getId(), dao.findFirst(query.all(Department.class), Project.id(), Order.by(Department_.name).desc).get());
+        assertEquals(dep1.getId(), dao.findFirst(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryName)).get());
+        assertEquals(dep2.getId(), dao.findFirst(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryName).desc).get());
     }
 
     @Test
     public void getList_projection() {
         Department dep1 = new Department();
         Department dep2 = new Department();
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
         assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(dao.getMany(query.all(Department.class), Project.id())));
     }
@@ -118,8 +117,7 @@ public class ProjectionsTest extends QueryTestBase {
     public void getList_pagingWithListAttribute_projection() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
-        em.persist(dep);
-        em.persist(emp);
+        persist(dep, emp);
 
         assertEquals(newList(emp.getId()), dao.getMany(query.related(dep, Department_.employees), Project.id(), Page.of(0, 2)));
     }
@@ -128,30 +126,27 @@ public class ProjectionsTest extends QueryTestBase {
     public void getList_projection_ordered() {
         Department dep1 = new Department("a");
         Department dep2 = new Department("b");
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
-        assertEquals(newList(dep1.getId(), dep2.getId()), dao.getMany(query.all(Department.class), Project.id(), Order.by(Department_.name)));
-        assertEquals(newList(dep2.getId(), dep1.getId()), dao.getMany(query.all(Department.class), Project.id(), Order.by(Department_.name).desc));
+        assertEquals(newList(dep1.getId(), dep2.getId()), dao.getMany(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryName)));
+        assertEquals(newList(dep2.getId(), dep1.getId()), dao.getMany(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryName).desc));
     }
 
     @Test
     public void getList_projection_paged_ordered() {
         Department dep1 = new Department("a");
         Department dep2 = new Department("b");
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
-        assertEquals(newList(dep1.getId()), dao.getMany(query.all(Department.class), Project.id(), Page.FIRST.withSize(1), Order.by(Department_.name)));
-        assertEquals(newList(dep2.getId()), dao.getMany(query.all(Department.class), Project.id(), Page.FIRST.withSize(1), Order.by(Department_.name).desc));
+        assertEquals(newList(dep1.getId()), dao.getMany(query.all(Department.class), Project.id(), Page.FIRST.withSize(1), Order.by(Department_.mandatoryName)));
+        assertEquals(newList(dep2.getId()), dao.getMany(query.all(Department.class), Project.id(), Page.FIRST.withSize(1), Order.by(Department_.mandatoryName).desc));
     }
     
     @Test
     public void related_query() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
-        em.persist(dep);
-        em.persist(emp);
+        persist(dep, emp);
 
         assertEquals(emp.getId(), dao.get(
                 query.related(
@@ -161,6 +156,6 @@ public class ProjectionsTest extends QueryTestBase {
 
     private CriteriaQuery<Department> allDepartmentsOrdered() {
         CriteriaQuery<Department> qOrdered = query.all(Department.class);
-        return qOrdered.orderBy(em.getCriteriaBuilder().asc(qOrdered.getRoots().iterator().next().get("name")));
+        return qOrdered.orderBy(em.getCriteriaBuilder().asc(qOrdered.getRoots().iterator().next().get("mandatoryName")));
     }
 }

@@ -1,12 +1,11 @@
 package fi.solita.utils.query.execution;
 
-import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.headOption;
-import static fi.solita.utils.functional.Functional.isEmpty;
-import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
+import static fi.solita.utils.query.QueryUtils.applyOrder;
+import static fi.solita.utils.query.QueryUtils.checkOrdering;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
 
@@ -17,21 +16,15 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Selection;
-import javax.persistence.metamodel.ListAttribute;
 
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Order;
-import fi.solita.utils.query.Order.Direction;
 import fi.solita.utils.query.Page;
-import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 
@@ -84,8 +77,8 @@ public class JpaCriteriaQueries {
     }
 
     public <T> List<T> getMany(CriteriaQuery<T> query, Page page) {
-        QueryUtils.applyOrder(query, resolveSelection(query), em.getCriteriaBuilder());
-        QueryUtils.checkOrdering(query, page);
+        applyOrder(query, resolveSelection(query), em.getCriteriaBuilder());
+        checkOrdering(query, page);
         return queryExecutor.getMany(query, page);
     }
 
@@ -95,19 +88,5 @@ public class JpaCriteriaQueries {
 
     public <E extends IEntity> List<E> getMany(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering) {
         return queryExecutor.getMany(applyOrder(query, resolveSelectionPath(query), ordering, em.getCriteriaBuilder()), page);
-    }
-
-    public static final <E extends IEntity> CriteriaQuery<E> applyOrder(CriteriaQuery<E> query, final Path<E> selection, Iterable<? extends Order<? super E, ?>> orderings, final CriteriaBuilder cb) {
-        if (!isEmpty(orderings)) {
-            query.orderBy(newList(map(orderings, new Transformer<Order<? super E,?>, javax.persistence.criteria.Order>() {
-                @Override
-                public javax.persistence.criteria.Order transform(Order<? super E, ?> o) {
-                    return o.getDirection() == Direction.ASC ? cb.asc(selection.get(o.getAttribute())) : cb.desc(selection.get(o.getAttribute()));
-                }
-            })));
-        } else if (selection.getModel() instanceof ListAttribute) {
-            QueryUtils.addListAttributeOrdering(query, selection, cb);
-        }
-        return query;
     }
 }

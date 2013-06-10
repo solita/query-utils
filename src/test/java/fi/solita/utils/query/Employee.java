@@ -21,20 +21,23 @@ public class Employee implements IEntity, Identifiable<Employee.ID> {
     private ID id;
 
     @Column(nullable = false)
-    private String name;
+    private String mandatoryName;
 
     @org.hibernate.annotations.Type(type = "fi.solita.utils.query.Money$MoneyType")
-    private Money salary;
+    private Money optionalSalary;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private Department department;
+    private Department mandatoryDepartment;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Municipality municipality;
+    private Municipality optionalMunicipality;
     
     @Embedded
     @Basic(optional = true)
-    private Report report;
+    private Report optionalReport;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Department optionalDepartment;
     
     Employee() {
         // for hibernate
@@ -45,19 +48,19 @@ public class Employee implements IEntity, Identifiable<Employee.ID> {
     }
 
     public Employee(String name, Money salary, Department department) {
-        this.name = name;
-        this.salary = salary;
-        this.department = department;
+        this.mandatoryName = name;
+        this.optionalSalary = salary;
+        this.mandatoryDepartment = department;
     }
 
     public Employee(String name, Department department, Municipality municipality) {
         this(name, department);
-        this.municipality = municipality;
+        this.optionalMunicipality = municipality;
     }
     
     public Employee(String name, Department department, Report report) {
         this(name, department);
-        this.report = report;
+        this.optionalReport = report;
     }
 
     @Override
@@ -74,10 +77,20 @@ public class Employee implements IEntity, Identifiable<Employee.ID> {
     }
 
     public String getName() {
-        return name;
+        return mandatoryName;
     }
 
-    public Option<Money> getSalary() {
-        return Option.of(salary);
+    public Option<Money> getOptionalSalary() {
+        return Option.of(optionalSalary);
+    }
+    
+    public Employee setOptionalSalary(Money optionalSalary) {
+        this.optionalSalary = optionalSalary;
+        return this;
+    }
+    
+    public Employee setOptionalDepartment(Department optionalDepartment) {
+        this.optionalDepartment = optionalDepartment;
+        return this;
     }
 }

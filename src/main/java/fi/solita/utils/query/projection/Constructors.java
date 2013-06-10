@@ -8,15 +8,39 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.PluralAttribute;
+import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple;
+import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
+import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.codegen.ConstructorMeta_;
 
-class Constructors {
+public class Constructors {
+    
+    static <E extends IEntity & Identifiable<?>> ConstructorMeta_<E,Id<E>,Id<E>> id() {
+        return new IdProjection<E>();
+    }
+
+    static <E extends IEntity, T> ConstructorMeta_<E,T,T> value(SingularAttribute<? super E, T> attribute) {
+        return new ValueAttributeProjection<E,T>(attribute);
+    }
+
+    static <E extends IEntity, T> ConstructorMeta_<E,T,T> value(PluralAttribute<? super E, T, ?> attribute) {
+        return new ValueAttributeProjection<E,T>(attribute);
+    }
+
+    static <E extends IEntity, LEFT, RIGHT> ConstructorMeta_<E,Pair<LEFT,RIGHT>,Tuple2<LEFT,RIGHT>> pair(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
+        return new PairProjection<E,LEFT,RIGHT>(left, right);
+    }
+    
+    static <E extends IEntity, T extends Tuple> ConstructorMeta_<E,T,T> tuple(Attribute<? super E,?>... attributes) {
+        return new TupleProjection<E,T>(attributes);
+    }
 
     static final class IdProjection<E extends IEntity> extends ConstructorMeta_.F1<E,Id<E>, Id<E>> {
         @Override
@@ -41,7 +65,7 @@ class Constructors {
         }
     }
     
-    static final class PairProjection<E extends IEntity,LEFT,RIGHT> extends ConstructorMeta_.F2<E,LEFT,RIGHT,Pair<LEFT,RIGHT>> {
+    private static final class PairProjection<E extends IEntity,LEFT,RIGHT> extends ConstructorMeta_.F2<E,LEFT,RIGHT,Pair<LEFT,RIGHT>> {
         private final Attribute<? super E, LEFT> left;
         private final Attribute<? super E, RIGHT> right;
 
@@ -76,7 +100,7 @@ class Constructors {
         }
     }
     
-    static final class TupleProjection<E extends IEntity, T extends Tuple> implements ConstructorMeta_<E,T,T> {
+    private static final class TupleProjection<E extends IEntity, T extends Tuple> implements ConstructorMeta_<E,T,T> {
         private final List<Attribute<?, ?>> attributes;
 
         public TupleProjection(Attribute<?, ?>... attributes) {
@@ -110,15 +134,11 @@ class Constructors {
         }
     }
     
-    static final class ValueAttributeProjection<E extends IEntity,R> extends ConstructorMeta_.F1<E,R,R> {
+    private static final class ValueAttributeProjection<E extends IEntity,R> extends ConstructorMeta_.F1<E,R,R> {
         private final Attribute<? super E,R> attribute;
 
         public ValueAttributeProjection(Attribute<? super E,R> attribute) {
             this.attribute = attribute;
-        }
-
-        public Attribute<?,R> getAttribute() {
-            return attribute;
         }
 
         @Override

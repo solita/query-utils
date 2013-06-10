@@ -12,8 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import fi.solita.utils.query.IEntity;
-import fi.solita.utils.query.backend.Type;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
@@ -25,6 +23,8 @@ import fi.solita.utils.functional.Tuple6;
 import fi.solita.utils.functional.Tuple7;
 import fi.solita.utils.functional.Tuple8;
 import fi.solita.utils.functional.Tuple9;
+import fi.solita.utils.query.IEntity;
+import fi.solita.utils.query.backend.Type;
 
 public abstract class NativeQuery<T> {
 

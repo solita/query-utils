@@ -29,8 +29,7 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
     public void single() {
         Department dep1 = new Department();
         Department dep2 = new Department();
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
         assertEquals(dep1.getId(), dao.get(query.single(dep1.getId())).getId());
         assertEquals(dep2.getId(), dao.get(query.single(dep2.getId())).getId());
@@ -42,8 +41,7 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
     public void all() {
         Department dep1 = new Department();
         Department dep2 = new Department();
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
         assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getMany(query.all(Department.class)), Department__.getId)));
     }
@@ -52,8 +50,7 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
     public void ofIds() {
         Department dep1 = new Department();
         Department dep2 = new Department();
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
         assertEquals("find by single id", dep1.getId(), dao.get(query.ofIds(newList(dep1.getId()), Department.class)).getId());
         assertEquals("find by multiple ids", newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getMany(query.ofIds(newList(dep1.getId(), dep2.getId()), Department.class)), Department__.getId)));
@@ -67,8 +64,8 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
     @Test
     public void cast() {
         assertEquals(Department_.employees, Cast.cast(Department_.employees));
-        assertEquals(Employee_.department, Cast.cast(Employee_.department));
-        assertEquals(Employee_.department, Cast.castSuper(Employee_.department));
+        assertEquals(Employee_.mandatoryDepartment, Cast.cast(Employee_.mandatoryDepartment));
+        assertEquals(Employee_.mandatoryDepartment, Cast.castSuper(Employee_.mandatoryDepartment));
     }
 
     @Test
@@ -76,41 +73,38 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
         Department dep = new Department();
         Municipality mun = new Municipality();
         Employee emp = new Employee("", dep, mun);
-        em.persist(dep);
-        em.persist(mun);
-        em.persist(emp);
+        persist(dep, mun, emp);
 
-        assertEquals("relation toOne", dep.getId(), dao.get(query.related(emp, Employee_.department)).getId());
+        assertEquals("relation toOne", dep.getId(), dao.get(query.related(emp, Employee_.mandatoryDepartment)).getId());
         assertEquals("relation toMany", emp.getId(), dao.get(query.related(dep, Department_.employees)).getId());
-        assertEquals("relation toMany toOne", mun.getId(), dao.get(query.related(dep, Department_.employees, Employee_.municipality)).getId());
+        assertEquals("relation toMany toOne", mun.getId(), dao.get(query.related(dep, Department_.employees, Employee_.optionalMunicipality)).getId());
     }
     
     @Test
     public void relatedEmbeddable() {
         Department dep = new Department();
         Employee emp = new Employee("", dep, new Report(42));
-        em.persist(dep);
-        em.persist(emp);
+        persist(dep, emp);
 
-        assertEquals(42, dao.get(query.related(emp, Employee_.report)).getYear());
+        assertEquals((Integer)42, dao.get(query.related(emp, Employee_.optionalReport)).getYear());
     }
     
     @Test
     @Ignore("Hibernate (4.0.0) generated an invalid query")
     public void relatedEmbeddableSet() {
         Municipality mun = new Municipality(newSet(new Report(42)), false);
-        em.persist(mun);
+        persist(mun);
 
-        assertEquals(42, dao.get(query.related(mun, Municipality_.reports)).getYear());
+        assertEquals((Integer)42, dao.get(query.related(mun, Municipality_.reports)).getYear());
     }
     
     @Test
     @Ignore("Hibernate (4.0.0) generated an invalid query")
     public void relatedEmbeddableList() {
         Department dep = new Department("", newList(new Report(42)));
-        em.persist(dep);
+        persist(dep);
 
-        assertEquals(42, dao.get(query.related(dep, Department_.reports)).getYear());
+        assertEquals((Integer)42, dao.get(query.related(dep, Department_.reports)).getYear());
     }
 
     @Test
@@ -118,14 +112,12 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
         Department dep = new Department();
         Municipality mun = new Municipality();
         Employee emp = new Employee("", dep, mun);
-        em.persist(dep);
-        em.persist(mun);
-        em.persist(emp);
+        persist(dep, mun, emp);
 
         assertEquals(mun.getId(), dao.get(
             query.related(dep,
                 Department_.employees,
-                Employee_.municipality)).getId());
+                Employee_.optionalMunicipality)).getId());
 
         assertEquals(emp.getId(), dao.get(
             query.related(dep,
@@ -137,15 +129,13 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
         Department dep = new Department();
         Municipality mun = new Municipality();
         Employee emp = new Employee("", dep, mun);
-        em.persist(dep);
-        em.persist(mun);
-        em.persist(emp);
+        persist(dep, mun, emp);
 
         assertEquals(mun.getId(), dao.get(
                 query.related(
                         query.single(dep.getId()),
                     Department_.employees,
-                    Employee_.municipality)).getId());
+                    Employee_.optionalMunicipality)).getId());
 
         assertEquals(emp.getId(), dao.get(
             query.related(

@@ -11,7 +11,7 @@ import javax.persistence.metamodel.PluralAttribute;
 
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.NotDistinctable;
-import fi.solita.utils.query.attributes.LiteralAttribute;
+import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.attributes.RelationAttribute;
 import fi.solita.utils.query.codegen.ConstructorMeta_;
 
@@ -22,8 +22,8 @@ public class ProjectionUtil {
     }
     
     static boolean shouldPerformAdditionalQuery(Attribute<?, ?> param) {
-        return unwrap(param, RelationAttribute.class).isDefined() ||
-               (unwrap(param, PluralAttribute.class).isDefined() && !unwrap(param, LiteralAttribute.class).isDefined());
+        return unwrap(RelationAttribute.class, param).isDefined() ||
+               (unwrap(PluralAttribute.class, param).isDefined() && !unwrap(PseudoAttribute.class, param).isDefined());
     }
 
     static boolean isId(Class<?> clazz) {
@@ -36,7 +36,8 @@ public class ProjectionUtil {
     }
 
     static boolean isDistinctable(ConstructorMeta_<?, ?, ?> constructor_, int columnIndex) {
-        return Set.class.isAssignableFrom(constructor_.getConstructorParameterTypes().get(columnIndex)) && !NotDistinctable.class.isAssignableFrom(((Bindable<?>)constructor_.getParameters().get(columnIndex)).getBindableJavaType());
+        return Set.class.isAssignableFrom(constructor_.getConstructorParameterTypes().get(columnIndex)) &&
+               !NotDistinctable.class.isAssignableFrom(((Bindable<?>)constructor_.getParameters().get(columnIndex)).getBindableJavaType());
     }
 
 }

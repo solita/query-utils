@@ -9,24 +9,25 @@ import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.attributes.OptionalAttribute;
+import fi.solita.utils.query.attributes.PseudoAttribute;
 
 public class Cast {
 
-    public static <E, T> SingularAttribute<E, Option<T>> optional(SingularAttribute<E, T> attribute) throws QueryUtils.RequiredAttributeMustNotHaveOptionTypeException {
-        if (!attribute.isOptional()) {
+    public static <E, T> SingularAttribute<E, Option<T>> optional(SingularAttribute<E, T> attribute) throws IllegalArgumentException, QueryUtils.RequiredAttributeMustNotHaveOptionTypeException {
+        if (attribute instanceof PseudoAttribute) {
+            throw new IllegalArgumentException("No reason to wrap a PseudoAttribute. Right?");
+        }
+        if (QueryUtils.isRequiredByMetamodel(attribute)) {
             throw new QueryUtils.RequiredAttributeMustNotHaveOptionTypeException(attribute);
         }
-        return new OptionalAttribute<E,T>(attribute);
+        return OptionalAttribute.Constructors.optional(attribute);
     }
 
-    public static <E, T> SingularAttribute<E, Option<T>> optionalSubtype(SingularAttribute<? extends E, T> attribute) {
-        return new OptionalAttribute<E,T>(attribute) {
-            @Override
-            public boolean isOptional() {
-                // always consider the field optional since it's part of a subtype
-                return true;
-            }
-        };
+    public static <E, T> SingularAttribute<E, Option<T>> optionalSubtype(SingularAttribute<? extends E, T> attribute) throws IllegalArgumentException {
+        if (attribute instanceof PseudoAttribute) {
+            throw new IllegalArgumentException("No reason to wrap a PseudoAttribute. Right?");
+        }
+        return OptionalAttribute.Constructors.optional(attribute);
     }
 
     @SuppressWarnings("unchecked")
@@ -48,5 +49,4 @@ public class Cast {
     public static <E extends IEntity & Identifiable<?>, T extends IEntity & Identifiable<?>> ListAttribute<E, T> cast(ListAttribute<? super E, ? super T> attribute) {
         return (ListAttribute<E, T>) attribute;
     }
-
 }

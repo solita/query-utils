@@ -13,11 +13,11 @@ public class Report {
         // for hibernate
     }
     
-    public Report(int year) {
+    public Report(Integer year) {
         this.year = year;
     }
     
-    public int getYear() {
+    public Integer getYear() {
         return year;
     }
 

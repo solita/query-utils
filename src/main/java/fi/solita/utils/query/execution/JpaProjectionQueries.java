@@ -6,8 +6,7 @@ import static fi.solita.utils.functional.Functional.headOption;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
-import static fi.solita.utils.query.QueryUtils.resolveSelection;
-import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
+import static fi.solita.utils.query.QueryUtils.*;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -79,7 +78,7 @@ public class JpaProjectionQueries {
     }
 
     public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page) throws NoOrderingSpecifiedException {
-        QueryUtils.applyOrder(query, resolveSelectionPath(query), em.getCriteriaBuilder());
+        QueryUtils.applyOrder(query, resolveSelection(query), em.getCriteriaBuilder());
         QueryUtils.checkOrdering(query, page);
         List<Order<? super E,?>> noOrdering = Collections.emptyList();
         return getMany(query, constructor, page, noOrdering);
@@ -95,7 +94,7 @@ public class JpaProjectionQueries {
         From<?,E> selection = resolveSelection(query, q);
 
         @SuppressWarnings("unchecked")
-        CriteriaQuery<Object> ordered = (CriteriaQuery<Object>)(Object)JpaCriteriaQueries.applyOrder((CriteriaQuery<E>)(Object)q, selection, ordering, em.getCriteriaBuilder());
+        CriteriaQuery<Object> ordered = (CriteriaQuery<Object>)(Object)applyOrder((CriteriaQuery<E>)(Object)q, selection, ordering, em.getCriteriaBuilder());
 
         q.multiselect(projectionSupport.prepareProjectingQuery(constructor, selection));
         

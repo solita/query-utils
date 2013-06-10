@@ -6,9 +6,7 @@ import javax.persistence.PersistenceContext;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.query.Employee;
 import fi.solita.utils.query.Employee_;
-import fi.solita.utils.query.Municipality;
 import fi.solita.utils.query.Municipality_;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.QueryUtils;
@@ -28,42 +26,52 @@ public class CastTest extends QueryTestBase {
     private JpaProjectionQueries dao;
 
     @Test(expected = QueryUtils.OptionalAttributeNeedOptionTypeException.class)
-    public void get_fails_without_manual_option_projection() {
-        dao.get(query.all(Employee.class), Project.value(Employee_.salary));
-    }
-    
-    @Test(expected = QueryUtils.OptionalAttributeNeedOptionTypeException.class)
-    public void getMany_fails_without_manual_option_projection() {
-        dao.getMany(query.all(Employee.class), Project.value(Employee_.salary));
-    }
-    
-    @Test(expected = QueryUtils.OptionalAttributeNeedOptionTypeException.class)
-    public void find_fails_without_manual_option_projection() {
-        dao.find(query.all(Employee.class), Project.value(Employee_.salary));
+    public void Projectvalue_needs_optional() {
+        Project.value(Employee_.optionalSalary);
     }
 
     @Test(expected = QueryUtils.RequiredAttributeMustNotHaveOptionTypeException.class)
-    public void get_fails_with_manual_option_projection_for_mandatory_attribute() {
-        dao.get(query.all(Employee.class), Project.value(Cast.optional(Employee_.name)));
-    }
-    
-    @Test(expected = QueryUtils.RequiredAttributeMustNotHaveOptionTypeException.class)
-    public void getMany_fails_with_manual_option_projection_for_mandatory_attribute() {
-        dao.getMany(query.all(Employee.class), Project.value(Cast.optional(Employee_.name)));
-    }
-    
-    @Test(expected = QueryUtils.RequiredAttributeMustNotHaveOptionTypeException.class)
-    public void find_fails_with_manual_option_projection_for_mandatory_attribute() {
-        dao.find(query.all(Employee.class), Project.value(Cast.optional(Employee_.name)));
+    public void Projectvalue_fails_with_optional_for_mandatory_attribute() {
+        Project.value(Cast.optional(Employee_.mandatoryName));
     }
     
     @Test(expected = QueryUtils.OptionalAttributeNeedOptionTypeException.class)
-    public void embeddable_fails_without_manual_option_projection() {
-        dao.get(query.all(Employee.class), Project.value(Employee_.report));
+    public void Projectvalue_embedded_needs_optional() {
+        Project.value(Employee_.optionalReport);
     }
     
     @Test(expected = QueryUtils.RequiredAttributeMustNotHaveOptionTypeException.class)
-    public void embeddable_fails_with_manual_option_projection_for_mandatory_attribute() {
-        dao.get(query.all(Municipality.class), Project.value(Cast.optional(Municipality_.report)));
+    public void Projectvalue_embedded_fails_with_optional_for_mandatory_attribute() {
+        Project.value(Cast.optional(Municipality_.mandatoryReport));
+    }
+    
+    @Test(expected = QueryUtils.OptionalAttributeNeedOptionTypeException.class)
+    public void Projecttuple_needs_optional() {
+        Project.tuple(Employee_.optionalSalary);
+    }
+
+    @Test(expected = QueryUtils.RequiredAttributeMustNotHaveOptionTypeException.class)
+    public void Projecttuple_fails_with_optional_for_mandatory_attribute() {
+        Project.tuple(Cast.optional(Employee_.mandatoryName));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void cannotWrapLiteralAttribute() {
+         Cast.optional(Select.literal(42));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void cannotWrapLiteralAttribute_subtype() {
+         Cast.optionalSubtype(Select.literal(42));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void cannotWrapSelfAttribute() {
+         Cast.optional(Select.self());
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void cannotWrapSelfAttribute_subtype() {
+         Cast.optionalSubtype(Select.self());
     }
 }

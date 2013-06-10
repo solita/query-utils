@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.Attribute;
@@ -100,7 +101,7 @@ public class JpaCriteriaQuery {
         query.where(em.getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em)), entity.getId()));
         From<?, ?> join = root;
         for (Attribute<?, ?> attr : attributes) {
-            join = QueryUtils.join(join, attr);
+            join = QueryUtils.join(join, attr, JoinType.INNER);
         }
 
         @SuppressWarnings("unchecked")
@@ -130,7 +131,7 @@ public class JpaCriteriaQuery {
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
         From<?,?> join = resolveSelection(query, q);
         for (Attribute<?, ?> attr : attributes) {
-            join = QueryUtils.join(join, attr);
+            join = QueryUtils.join(join, attr, JoinType.INNER);
         }
 
         @SuppressWarnings("unchecked")

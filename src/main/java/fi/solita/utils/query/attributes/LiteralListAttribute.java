@@ -2,17 +2,15 @@ package fi.solita.utils.query.attributes;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
 import javax.persistence.metamodel.ListAttribute;
 
 
-public final class LiteralListAttribute<X, Y> extends PluralAttributeProxy<X, List<Y>, Y> implements ListAttribute<X, Y>, LiteralAttribute<X,List<Y>> {
+class LiteralListAttribute<X, Y> extends PluralAttributeProxy<X, List<Y>, Y> implements ListAttribute<X, Y>, PseudoAttribute {
 
     private final List<Y> value;
-
-    @Override
-    public List<Y> getValue() {
-        return value;
-    }
 
     public LiteralListAttribute(List<Y> value) {
         super(null);
@@ -24,4 +22,18 @@ public final class LiteralListAttribute<X, Y> extends PluralAttributeProxy<X, Li
     public Class<List<Y>> getJavaType() {
         return (Class<List<Y>>) value.getClass();
     }
+
+    @Override
+    public Expression<?> getSelectionForQuery(EntityManager em, Path<?> currentSelection) {
+        return em.getCriteriaBuilder().literal(PseudoAttribute.QUERY_PLACEHOLDER);
+    }
+
+    @Override
+    public Object getValueToReplaceResult(Object resultFromDb) {
+        if (!PseudoAttribute.QUERY_PLACEHOLDER.equals(resultFromDb)) {
+            throw new IllegalStateException("Literal attribute placeholder expected, but was: " + resultFromDb);
+        }
+        return value;
+    }
+
 }

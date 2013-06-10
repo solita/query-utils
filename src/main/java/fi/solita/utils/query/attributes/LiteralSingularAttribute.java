@@ -1,19 +1,11 @@
 package fi.solita.utils.query.attributes;
 
-/**
- * Pseudo attribute to allow user to supply projections with literal values
- * that don't go through the database.
- *
- * @author Jyri-Matti Lähteenmäki / Solita Oy
- *
- */
-public final class LiteralSingularAttribute<X, T> extends SingularAttributeProxy<X, T> implements LiteralAttribute<X,T> {
-    private final T value;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
 
-    @Override
-    public T getValue() {
-        return value;
-    }
+class LiteralSingularAttribute<X, T> extends SingularAttributeProxy<X, T> implements PseudoAttribute {
+    private final T value;
 
     public LiteralSingularAttribute(T value) {
         super(null);
@@ -24,5 +16,18 @@ public final class LiteralSingularAttribute<X, T> extends SingularAttributeProxy
     @Override
     public Class<T> getJavaType() {
         return (Class<T>) value.getClass();
+    }
+    
+    @Override
+    public Expression<?> getSelectionForQuery(EntityManager em, Path<?> currentSelection) {
+        return em.getCriteriaBuilder().literal(PseudoAttribute.QUERY_PLACEHOLDER);
+    }
+    
+    @Override
+    public Object getValueToReplaceResult(Object resultFromDb) {
+        if (!PseudoAttribute.QUERY_PLACEHOLDER.equals(resultFromDb)) {
+            throw new IllegalStateException("Literal attribute placeholder expected, but was: " + resultFromDb);
+        }
+        return value;
     }
 }

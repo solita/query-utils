@@ -43,8 +43,7 @@ public class QLQueriesTest extends QueryTestBase {
 
     @Test
     public void get_hql_multiple() {
-        em.persist(new Department());
-        em.persist(new Department());
+        persist(new Department(), new Department());
 
         QLQuery<Department> q = QLQuery.<Department>of("from Department");
         try {
@@ -58,7 +57,7 @@ public class QLQueriesTest extends QueryTestBase {
     @Test
     public void find_hql_single() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         assertEquals(dep.getId(), dao.find(QLQuery.<Department>of("from Department")).get().getId());
     }
@@ -70,8 +69,7 @@ public class QLQueriesTest extends QueryTestBase {
 
     @Test
     public void find_hql_multiple() {
-        em.persist(new Department());
-        em.persist(new Department());
+        persist(new Department(), new Department());
 
         QLQuery<Department> q = QLQuery.<Department>of("from Department");
         try {
@@ -84,7 +82,7 @@ public class QLQueriesTest extends QueryTestBase {
 
     @Test
     public void findFirst_hql() {
-        em.persist(new Department());
+        persist(new Department());
 
         assertTrue(dao.findFirst(QLQuery.<Department>of("from Department")).isDefined());
     }
@@ -96,8 +94,7 @@ public class QLQueriesTest extends QueryTestBase {
 
     @Test
     public void findFirst_hql_multiple() {
-        em.persist(new Department());
-        em.persist(new Department());
+        persist(new Department(), new Department());
 
         assertTrue(dao.findFirst(QLQuery.<Department>of("from Department")).isDefined());
     }
@@ -106,8 +103,7 @@ public class QLQueriesTest extends QueryTestBase {
     public void getList_hql() {
         Department dep1 = new Department();
         Department dep2 = new Department();
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
         assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(dao.getMany(QLQuery.<Department.ID>of("select id from Department"))));
     }
@@ -116,8 +112,7 @@ public class QLQueriesTest extends QueryTestBase {
     public void getList_hql_paging() {
         Department dep1 = new Department();
         Department dep2 = new Department();
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
         assertEquals(newList(dep1.getId()), newList(map(dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1)), Department__.getId)));
         assertEquals(newList(dep2.getId()), newList(map(dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1).nextPage()), Department__.getId)));

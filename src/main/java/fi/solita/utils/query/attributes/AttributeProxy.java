@@ -15,29 +15,26 @@ import javax.persistence.metamodel.Type;
 
 import fi.solita.utils.functional.Option;
 
-/**
- * Proxy classes for different kinds of Attributes
- *
- */
-public abstract class AttributeProxy<X,Y,T extends Attribute<X, Y>> implements Attribute<X, Y>, Serializable {
-
+public abstract class AttributeProxy {
     @SuppressWarnings("unchecked")
-    public static <T> Option<T> unwrap(Attribute<?,?> attribute, Class<T> type) {
+    public static <T> Option<T> unwrap(Class<T> type, Attribute<?,?> attribute) {
         if (type.isInstance(attribute)) {
             return Some((T)attribute);
         }
-        if (attribute instanceof AttributeProxy) {
-            if (((AttributeProxy<?,?,?>) attribute).proxyTarget == null) {
+        if (attribute instanceof AbstractAttributeProxy) {
+            if (((AbstractAttributeProxy<?,?,?>) attribute).proxyTarget == null) {
                 return None();
             }
-            return unwrap(((AttributeProxy<?,?,?>) attribute).proxyTarget, type);
+            return unwrap(type, ((AbstractAttributeProxy<?,?,?>) attribute).proxyTarget);
         }
         return None();
     }
+}
 
+abstract class AbstractAttributeProxy<X,Y,T extends Attribute<X, Y>> implements Attribute<X, Y>, Serializable {
     protected final T proxyTarget;
 
-    AttributeProxy(T proxyTarget) {
+    AbstractAttributeProxy(T proxyTarget) {
         this.proxyTarget = proxyTarget;
     }
 
@@ -75,7 +72,22 @@ public abstract class AttributeProxy<X,Y,T extends Attribute<X, Y>> implements A
     public boolean isCollection() {
         return proxyTarget.isCollection();
     }
+}
 
+abstract class BindableAttributeProxy<X,Y,R,T extends Attribute<X, Y> & Bindable<R>> extends AbstractAttributeProxy<X,Y,T> implements Bindable<R> {
+    BindableAttributeProxy(T proxyTarget) {
+        super(proxyTarget);
+    }
+
+    @Override
+    public BindableType getBindableType() {
+        return proxyTarget.getBindableType();
+    }
+
+    @Override
+    public Class<R> getBindableJavaType() {
+        return proxyTarget.getBindableJavaType();
+    }
 }
 
 
@@ -104,6 +116,11 @@ abstract class SingularAttributeProxy<X,Y> extends BindableAttributeProxy<X,Y,Y,
     public Type<Y> getType() {
         return proxyTarget.getType();
     }
+    
+    @Override
+    public boolean isCollection() {
+        return false;
+    }
 
 }
 
@@ -123,22 +140,8 @@ abstract class PluralAttributeProxy<X,C,Y> extends BindableAttributeProxy<X,C,Y,
         return proxyTarget.getElementType();
     }
 
-}
-
-abstract class BindableAttributeProxy<X,Y,R,T extends Attribute<X, Y> & Bindable<R>> extends AttributeProxy<X,Y,T> implements Bindable<R> {
-
-    BindableAttributeProxy(T proxyTarget) {
-        super(proxyTarget);
-    }
-
     @Override
-    public BindableType getBindableType() {
-        return proxyTarget.getBindableType();
-    }
-
-    @Override
-    public Class<R> getBindableJavaType() {
-        return proxyTarget.getBindableJavaType();
+    public boolean isCollection() {
+        return true;
     }
 }
-

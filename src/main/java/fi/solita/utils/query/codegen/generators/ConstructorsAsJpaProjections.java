@@ -101,18 +101,15 @@ public class ConstructorsAsJpaProjections extends Function3<ProcessingEnvironmen
                         if (isEntity || isId) {
                             secondTypeParam = "? extends " + ENTITY_REP_CLASS;
                         } else {
-                            secondTypeParam = elementType;
+                            secondTypeParam = elementType.startsWith("?") ? elementType : "? extends " + elementType;
                         }
                         if (isOption) {
-                            if (isEntity || isId) {
-                                secondTypeParam = "? extends " + Option.class.getName() + "<" + secondTypeParam + ">";
-                            } else {
-                                secondTypeParam = Option.class.getName() + "<" + secondTypeParam + ">";
-                            }
+                            secondTypeParam = "? extends " + Option.class.getName() + "<" + secondTypeParam + ">";
                         }
                     } else {
                         attributeClass = SingularAttribute.class;
-                        secondTypeParam = qualifiedName.andThen(boxed).apply(argument);
+                        String type = qualifiedName.andThen(boxed).apply(argument);
+                        secondTypeParam = "?".equals(type) ? type : "? extends " + type;
                     }
                 }
 

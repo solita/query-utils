@@ -5,7 +5,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.codegen.ConstructorMeta_;
 
-public final class RelationSingularAttribute<E extends IEntity, R> extends SingularAttributeProxy<E, R> implements RelationAttribute<E,R,R> {
+class RelationSingularAttribute<E extends IEntity, R> extends SingularAttributeProxy<E, R> implements RelationAttribute {
     private final ConstructorMeta_<? extends IEntity, R, ?> constructor;
 
     @SuppressWarnings("unchecked")

@@ -20,16 +20,28 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
     private ID id;
 
     @Column(nullable = false)
-    private String name;
+    private String mandatoryName;
 
     @Column(nullable = false)
-    private int number;
+    private int mandatoryNumber;
+    
+    @org.hibernate.annotations.Type(type = "fi.solita.utils.query.Money$MoneyType")
+    private Money optionalBudget;
+    
+    @ManyToOne 
+    private Employee optionalManager;
+    
+    @ManyToOne
+    private Municipality optionalMunicipality;
+    
+    @ManyToOne(optional = false) 
+    private Department mandatorySelfReference;
     
     @ElementCollection
     @OrderColumn(name = "index")
     private List<Integer> numbers;
 
-    @OneToMany(mappedBy = "department")
+    @OneToMany(mappedBy = "mandatoryDepartment")
     @OrderColumn(name = "index")
     private List<Employee> employees;
 
@@ -37,17 +49,51 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
     @OrderColumn(name = "index")
     private List<Report> reports;
     
+    @Embedded
+    @Basic(optional = false)
+    private Report mandatoryReport;
+    
+    @Embedded
+    @AttributeOverride(name="year", column = @Column(name = "year2"))
+    private Report optionalReport;
+    
     public Department() {
         this("");
     }
 
-    public Department(String name) {
-        this(name, 0);
+    public Department(String mandatoryName) {
+        this(mandatoryName, 0);
+    }
+    
+    public Department(Municipality municipality) {
+        this();
+        this.optionalMunicipality = municipality;
+    }
+    
+    public Department(Money budget) {
+        this("");
+        this.optionalBudget = budget;
+    }
+    
+    public Department(Report report) {
+        this("", 0, report);
+        this.optionalReport = report;
+    }
+    
+    public Department(String mandatoryName, Employee manager) {
+        this(mandatoryName);
+        this.optionalManager = manager;
+    }
+    
+    public Department(String mandatoryName, int number) {
+        this(mandatoryName, number, new Report(0));
     }
 
-    public Department(String name, int number) {
-        this.name = name;
-        this.number = number;
+    public Department(String mandatoryName, int number, Report report) {
+        this.mandatoryName = mandatoryName;
+        this.mandatoryNumber = number;
+        this.mandatoryReport = report;
+        this.mandatorySelfReference = this;
     }
     
     public Department(List<Integer> numbers) {
@@ -55,8 +101,8 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
         this.numbers = numbers;
     }
     
-    public Department(String name, List<Report> reports) {
-        this(name, 0);
+    public Department(String mandatoryName, List<Report> reports) {
+        this(mandatoryName, 0);
         this.reports = reports;
     }
 
@@ -73,11 +119,15 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getMandatoryName() {
+        return mandatoryName;
     }
 
     public int getNumber() {
-        return number;
+        return mandatoryNumber;
+    }
+    
+    public Money getBudget() {
+        return optionalBudget;
     }
 }

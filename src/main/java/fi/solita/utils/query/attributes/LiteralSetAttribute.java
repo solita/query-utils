@@ -2,17 +2,15 @@ package fi.solita.utils.query.attributes;
 
 import java.util.Set;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
 import javax.persistence.metamodel.SetAttribute;
 
 
-public final class LiteralSetAttribute<X, Y> extends PluralAttributeProxy<X, Set<Y>, Y> implements SetAttribute<X, Y>, LiteralAttribute<X,Set<Y>> {
+class LiteralSetAttribute<X, Y> extends PluralAttributeProxy<X, Set<Y>, Y> implements SetAttribute<X, Y>, PseudoAttribute {
 
     private final Set<Y> value;
-
-    @Override
-    public Set<Y> getValue() {
-        return value;
-    }
 
     public LiteralSetAttribute(Set<Y> value) {
         super(null);
@@ -23,5 +21,18 @@ public final class LiteralSetAttribute<X, Y> extends PluralAttributeProxy<X, Set
     @Override
     public Class<Set<Y>> getJavaType() {
         return (Class<Set<Y>>) value.getClass();
+    }
+
+    @Override
+    public Expression<?> getSelectionForQuery(EntityManager em, Path<?> currentSelection) {
+        return em.getCriteriaBuilder().literal(PseudoAttribute.QUERY_PLACEHOLDER);
+    }
+    
+    @Override
+    public Object getValueToReplaceResult(Object resultFromDb) {
+        if (!PseudoAttribute.QUERY_PLACEHOLDER.equals(resultFromDb)) {
+            throw new IllegalStateException("Literal attribute placeholder expected, but was: " + resultFromDb);
+        }
+        return value;
     }
 }

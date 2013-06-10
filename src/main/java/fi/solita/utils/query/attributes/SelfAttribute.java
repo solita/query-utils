@@ -1,15 +1,13 @@
 package fi.solita.utils.query.attributes;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
+
 import fi.solita.utils.query.IEntity;
 
 
-/**
- * Pseudo attribute to select the entity self to a projection
- *
- * @author Jyri-Matti Lähteenmäki / Solita Oy
- *
- */
-public final class SelfAttribute<X, T> extends SingularAttributeProxy<X, T> {
+class SelfAttribute<X, T> extends SingularAttributeProxy<X, T> implements PseudoAttribute {
 
     public SelfAttribute() {
         super(null);
@@ -20,5 +18,15 @@ public final class SelfAttribute<X, T> extends SingularAttributeProxy<X, T> {
     public Class<T> getJavaType() {
         // a bit of a hackish way...
         return (Class<T>) IEntity.class;
+    }
+
+    @Override
+    public Expression<?> getSelectionForQuery(EntityManager em, Path<?> currentSelection) {
+        return currentSelection;
+    }
+
+    @Override
+    public Object getValueToReplaceResult(Object resultFromDb) {
+        return resultFromDb;
     }
 }

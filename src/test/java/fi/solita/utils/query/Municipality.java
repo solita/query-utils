@@ -4,7 +4,17 @@ import static fi.solita.utils.functional.Collections.newSet;
 
 import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.Basic;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -23,8 +33,10 @@ public class Municipality implements IEntity, Identifiable<Municipality.ID> {
     
     @ElementCollection
     private Set<Integer> postalCodes = newSet();
+    
+    private String optionalArea;
 
-    @OneToMany(mappedBy = "municipality")
+    @OneToMany(mappedBy = "optionalMunicipality")
     private Set<Employee> employees;
     
     @ElementCollection
@@ -32,14 +44,23 @@ public class Municipality implements IEntity, Identifiable<Municipality.ID> {
     
     @Embedded
     @Basic(optional = false)
-    private Report report;
+    private Report mandatoryReport;
+    
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private Municipality mandatorySelfReference;
 
     public Municipality() {
         this(new Report(123));
     }
     
+    public Municipality(String area) {
+        this(new Report(123));
+        this.optionalArea = area;
+    }
+    
     public Municipality(Report report) {
-        this.report = report;
+        this.mandatoryReport = report;
+        this.mandatorySelfReference = this;
     }
     
     public Municipality(Set<Integer> postalCodes) {
@@ -65,4 +86,7 @@ public class Municipality implements IEntity, Identifiable<Municipality.ID> {
         this.id = id;
     }
 
+    public String getOptionalArea() {
+        return optionalArea;
+    }
 }

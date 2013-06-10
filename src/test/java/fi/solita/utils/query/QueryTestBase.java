@@ -17,6 +17,12 @@ public abstract class QueryTestBase {
 
     @PersistenceContext
     protected EntityManager em;
+    
+    protected void persist(IEntity... entities) {
+        for (IEntity e: entities) {
+            em.persist(e);
+        }
+    }
 
     @Before
     public void resetDatabase() {

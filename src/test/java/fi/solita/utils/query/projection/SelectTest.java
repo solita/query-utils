@@ -9,9 +9,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,9 +21,6 @@ import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
 public class SelectTest extends QueryTestBase {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Autowired
     private JpaCriteriaQuery query;
 
@@ -36,7 +30,7 @@ public class SelectTest extends QueryTestBase {
     @Test
     public void literal_value() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         int value = dao.get(query.all(Department.class), Project.value(Select.literal(42)));
         assertEquals(42, value);
@@ -45,7 +39,7 @@ public class SelectTest extends QueryTestBase {
     @Test
     public void literal_set() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         Set<Integer> value = dao.get(query.all(Department.class), Project.value(Select.literal(newSet(42))));
         assertEquals(newSet(42), value);
@@ -54,7 +48,7 @@ public class SelectTest extends QueryTestBase {
     @Test
     public void literal_list() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         List<Integer> value = dao.get(query.all(Department.class), Project.value(Select.literal(newList(42))));
         assertEquals(newList(42), value);
@@ -63,12 +57,12 @@ public class SelectTest extends QueryTestBase {
     @Test
     public void self() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         Collection<Pair<Department, String>> list = dao.getMany(
                 query.all(Department.class),
                     Project.pair(Select.<Department>self(),
-                                 Department_.name));
+                                 Department_.mandatoryName));
 
         assertEquals(dep.getId(), head(list)._1.getId());
     }

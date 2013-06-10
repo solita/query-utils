@@ -33,7 +33,7 @@ public class NativeQueriesTest extends QueryTestBase {
     @Test
     public void get_sql_single() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         assertEquals(dep.getId(), dao.get(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).getId());
     }
@@ -51,8 +51,7 @@ public class NativeQueriesTest extends QueryTestBase {
 
     @Test
     public void get_sql_multiple() {
-        em.persist(new Department());
-        em.persist(new Department());
+        persist(new Department(), new Department());
 
         NativeQuery<Department> q = NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class));
         try {
@@ -66,7 +65,7 @@ public class NativeQueriesTest extends QueryTestBase {
     @Test
     public void find_sql_single() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         assertEquals(dep.getId(), dao.find(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).get().getId());
     }
@@ -78,8 +77,7 @@ public class NativeQueriesTest extends QueryTestBase {
 
     @Test
     public void find_sql_multiple() {
-        em.persist(new Department());
-        em.persist(new Department());
+        persist(new Department(), new Department());
 
         NativeQuerySingleEntity<Department> q = NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class));
         try {
@@ -92,7 +90,7 @@ public class NativeQueriesTest extends QueryTestBase {
 
     @Test
     public void findFirst_sql() {
-        em.persist(new Department());
+        persist(new Department());
 
         assertTrue(dao.findFirst(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).isDefined());
     }
@@ -104,8 +102,7 @@ public class NativeQueriesTest extends QueryTestBase {
 
     @Test
     public void findFirst_sql_multiple() {
-        em.persist(new Department());
-        em.persist(new Department());
+        persist(new Department(), new Department());
 
         assertTrue(dao.findFirst(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).isDefined());
     }
@@ -114,8 +111,7 @@ public class NativeQueriesTest extends QueryTestBase {
     public void getList_sql() {
         Department dep1 = new Department();
         Department dep2 = new Department();
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
         assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getMany(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))), Department__.getId)));
     }
@@ -124,8 +120,7 @@ public class NativeQueriesTest extends QueryTestBase {
     public void getList_sql_paging() {
         Department dep1 = new Department();
         Department dep2 = new Department();
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
         assertEquals(newList(dep1.getId()), newList(map(dao.getMany(NativeQuery.of("select * from Department order by id").returns(typeProvider.type(Department.class)), Page.FIRST.withSize(1)), Department__.getId)));
         assertEquals(newList(dep2.getId()), newList(map(dao.getMany(NativeQuery.of("select * from Department order by id").returns(typeProvider.type(Department.class)), Page.FIRST.withSize(1).nextPage()), Department__.getId)));
@@ -134,7 +129,7 @@ public class NativeQueriesTest extends QueryTestBase {
     @Test
     public void get_sql() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
         em.flush();
 
         NativeQuery<Department.ID> q = NativeQuery.of("select id as eka from Department")
@@ -145,7 +140,7 @@ public class NativeQueriesTest extends QueryTestBase {
     @Test
     public void get_sql_entity() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         NativeQuery<Department> q = NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class));
         assertEquals(dep.getId(), dao.get(q).getId());
@@ -154,7 +149,7 @@ public class NativeQueriesTest extends QueryTestBase {
     @Test
     public void get_sql_pair() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
         em.flush();
 
         NativeQuery<Pair<Department.ID, Department.ID>> q = NativeQuery.of("select id as eka, id as toka from Department")
@@ -166,7 +161,7 @@ public class NativeQueriesTest extends QueryTestBase {
     @Test
     public void get_sql_array_multiple() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
         em.flush();
 
         NativeQuery<Tuple3<Department.ID, Department.ID, Department.ID>> q = NativeQuery.of("select id as eka, id as toka, id as kolmas from Department")

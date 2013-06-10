@@ -11,9 +11,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Set;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceContext;
 
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
@@ -36,9 +34,6 @@ import fi.solita.utils.query.generation.Restrict;
 
 public class JpaBasicQueriesTest extends QueryTestBase {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Autowired
     private JpaBasicQueries dao;
 
@@ -57,7 +52,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     @Test
     public void isManaged() {
         Department dep1 = new Department();
-        em.persist(dep1);
+        persist(dep1);
         Department dep2 = new Department();
 
         assertTrue(dao.isManaged(dao.get(dep1.getId())));
@@ -67,7 +62,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     @Test
     public void remove() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         assertTrue(dao.find(dep.getId()).isDefined());
         dao.remove(dep.getId());
@@ -78,8 +73,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     public void removeAll() {
         Department dep1 = new Department();
         Department dep2 = new Department();
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
 
         dao.removeAll(query.single(dep1.getId()));
         em.flush();
@@ -92,7 +86,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     @Test
     public void get() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
         em.flush();
         em.clear();
 
@@ -105,7 +99,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     @Test
     public void getProxy() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
         em.flush();
         em.clear();
 
@@ -119,8 +113,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     public void getProxyList() {
         Department dep1 = new Department();
         Department dep2 = new Department();
-        em.persist(dep1);
-        em.persist(dep2);
+        persist(dep1, dep2);
         em.flush();
         em.clear();
 
@@ -136,7 +129,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     @Test
     public void getProxyIfDefined() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
         em.flush();
         em.clear();
 
@@ -148,14 +141,13 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     public void getProxyFromEntity() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
-        em.persist(dep);
-        em.persist(emp);
+        persist(dep, emp);
         em.flush();
         em.clear();
 
         Employee v = dao.get(emp.getId());
         long fetched = em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount();
-        Department proxy = dao.getProxy(v, Employee_.department);
+        Department proxy = dao.getProxy(v, Employee_.mandatoryDepartment);
         assertEquals(fetched, em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount());
         assertFalse(Hibernate.isInitialized(proxy));
     }
@@ -164,14 +156,13 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     public void getProxyFromEntity_none() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
-        em.persist(dep);
-        em.persist(emp);
+        persist(dep, emp);
         em.flush();
         em.clear();
 
         Employee v = dao.get(emp.getId());
         long fetched = em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount();
-        Option<Municipality> proxy = dao.getProxy(v, Cast.optional(Employee_.municipality));
+        Option<Municipality> proxy = dao.getProxy(v, Cast.optional(Employee_.optionalMunicipality));
         assertEquals(fetched, em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount());
         assertEquals(None(), proxy);
     }
@@ -180,15 +171,13 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         Department dep = new Department();
         Municipality mun = new Municipality();
         Employee emp = new Employee("", dep, mun);
-        em.persist(dep);
-        em.persist(mun);
-        em.persist(emp);
+        persist(dep, mun, emp);
         em.flush();
         em.clear();
 
         Employee v = dao.get(emp.getId());
         long fetched = em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount();
-        Option<Municipality> proxy = dao.getProxy(v, Cast.optional(Employee_.municipality));
+        Option<Municipality> proxy = dao.getProxy(v, Cast.optional(Employee_.optionalMunicipality));
         assertEquals(fetched, em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount());
         assertFalse(Hibernate.isInitialized(proxy.get()));
     }
@@ -197,46 +186,43 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     public void getProxyFromEntity_failsIfMissingOptional() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
-        em.persist(dep);
-        em.persist(emp);
+        persist(dep, emp);
         em.flush();
         em.clear();
 
         Employee v = dao.get(emp.getId());
-        dao.getProxy(v, Employee_.municipality);
+        dao.getProxy(v, Employee_.optionalMunicipality);
     }
     
     @Test(expected = RequiredAttributeMustNotHaveOptionTypeException.class)
     public void getProxyFromEntity_failsIfAdditionalOptional() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
-        em.persist(dep);
-        em.persist(emp);
+        persist(dep, emp);
         em.flush();
         em.clear();
 
         Employee v = dao.get(emp.getId());
-        dao.getProxy(v, Cast.optional(Employee_.department));
+        dao.getProxy(v, Cast.optional(Employee_.mandatoryDepartment));
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void getProxyFromProxyFails() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
-        em.persist(dep);
-        em.persist(emp);
+        persist(dep, emp);
         em.flush();
         em.clear();
 
         Employee v = dao.getProxy(emp.getId());
         assertFalse(Hibernate.isInitialized(v));
-        dao.getProxy(v, Employee_.department);
+        dao.getProxy(v, Employee_.mandatoryDepartment);
     }
 
     @Test
     public void find() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
 
         assertEquals(dep.getId(), dao.find(dep.getId()).get().getId());
         em.remove(dao.get(dep.getId()));
@@ -246,7 +232,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     @Test
     public void getIfDefined() {
         Department dep = new Department();
-        em.persist(dep);
+        persist(dep);
         Id<Department> id = dep.getId();
 
         Option<Id<Department>> noneId = None();

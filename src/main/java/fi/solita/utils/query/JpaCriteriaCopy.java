@@ -18,6 +18,7 @@ import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
+import static fi.solita.utils.query.QueryUtils.*;
 
 public abstract class JpaCriteriaCopy {
 
@@ -50,11 +51,11 @@ public abstract class JpaCriteriaCopy {
             if (selection.isCompoundSelection()) {
                 for (Selection<?> s: selection.getCompoundSelectionItems()) {
                     if (s instanceof Path<?> && ((Path<?>)s).getModel() instanceof ListAttribute) {
-                        QueryUtils.addListAttributeOrdering(to, (Expression<?>) s, cb);
+                        addListAttributeOrdering(to, (Expression<?>) s, resolveOrderColumn((ListAttribute<?,?>)((Path<?>)s).getModel()), cb);
                     }
                 }
             } else if (selection instanceof Path<?> && ((Path<?>)selection).getModel() instanceof ListAttribute) {
-                QueryUtils.addListAttributeOrdering(to, (Expression<?>) selection, cb);
+                addListAttributeOrdering(to, (Expression<?>) selection, resolveOrderColumn((ListAttribute<?,?>)((Path<?>)selection).getModel()), cb);
             }
         }
     }

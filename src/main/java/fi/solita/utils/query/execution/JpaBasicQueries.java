@@ -2,8 +2,9 @@ package fi.solita.utils.query.execution;
 
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
+import static fi.solita.utils.functional.Option.Some;
+import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
-import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -21,7 +22,6 @@ import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.JpaCriteriaCopy;
-import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.Removable;
 import fi.solita.utils.query.attributes.AttributeProxy;
 import fi.solita.utils.query.attributes.OptionalAttribute;
@@ -56,14 +56,14 @@ public class JpaBasicQueries {
     public <E extends IEntity & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
         CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
-        From<?,E> selection = (From<?, E>) resolveSelection(query, q);
+        From<?,E> selection = resolveSelection(query, q);
 
-        q.multiselect(projectionSupport.prepareProjectingQuery(Project.<E>id(), selection));
+        q.multiselect(projectionSupport.prepareProjectingQuery(Project.id(), selection));
         List<Object> results = em.createQuery(q).getResultList();
 
         Collection<Id<E>> idList = projectionSupport.finalizeProjectingQuery(Project.<E>id(), map(results, ProjectionUtil_.objectToObjectList));
         if (!idList.isEmpty()) {
-            em.createQuery("delete from " + resolveSelectionPath(query).getJavaType().getName() + " e where e.id in(:idList)").setParameter("idList", idList).executeUpdate();
+            em.createQuery("delete from " + resolveSelection(query).getJavaType().getName() + " e where e.id in(:idList)").setParameter("idList", idList).executeUpdate();
         }
     }
 
@@ -89,7 +89,7 @@ public class JpaBasicQueries {
      */
     @SuppressWarnings("unchecked")
     public <E extends IEntity & Identifiable<? extends Id<? super E>>, T> T getProxy(E entity, SingularAttribute<? super E, T> relation) {
-        QueryUtils.checkOptionalAttributes(relation);
+        checkOptionalAttributes(relation);
         
         Field field = (Field)relation.getJavaMember();
         field.setAccessible(true);
@@ -99,7 +99,7 @@ public class JpaBasicQueries {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        if (AttributeProxy.unwrap(relation, OptionalAttribute.class).isDefined()) {
+        if (AttributeProxy.unwrap(OptionalAttribute.class, relation).isDefined()) {
             return (T) Option.of(ret);
         } else {
             if (ret == null) {
@@ -111,14 +111,14 @@ public class JpaBasicQueries {
 
     public <E extends IEntity> Option<E> getIfDefined(Option<? extends Id<E>> idOption) {
         for (Id<E> id: idOption) {
-            return Option.Some(get(id));
+            return Some(get(id));
         }
         return None();
     }
 
     public <E extends IEntity> Option<E> getProxyIfDefined(Option<? extends Id<E>> idOption) {
         for (Id<E> id: idOption) {
-            return Option.Some(getProxy(id));
+            return Some(getProxy(id));
         }
         return None();
     }

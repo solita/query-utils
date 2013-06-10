@@ -7,7 +7,7 @@ import javax.persistence.metamodel.SetAttribute;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.codegen.ConstructorMeta_;
 
-public final class RelationSetAttribute<E extends IEntity, R> extends PluralAttributeProxy<E, Set<R>, R> implements SetAttribute<E,R>, RelationAttribute<E,Set<R>, R> {
+class RelationSetAttribute<E extends IEntity, R> extends PluralAttributeProxy<E, Set<R>, R> implements SetAttribute<E,R>, RelationAttribute {
     private final ConstructorMeta_<? extends IEntity, R, ?> constructor;
 
     @SuppressWarnings("unchecked")
