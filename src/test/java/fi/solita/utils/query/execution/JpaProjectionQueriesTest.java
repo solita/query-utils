@@ -4,10 +4,14 @@ import static fi.solita.utils.functional.Collections.emptyList;
 import static fi.solita.utils.functional.Collections.emptySet;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
+import static fi.solita.utils.functional.Functional.head;
+import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.query.projection.Select.literal;
 import static org.junit.Assert.assertEquals;
+
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -40,6 +44,7 @@ import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Money;
 import fi.solita.utils.query.Municipality;
 import fi.solita.utils.query.Municipality_;
+import fi.solita.utils.query.Order;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.Report;
 import fi.solita.utils.query.generation.Cast;
@@ -413,6 +418,23 @@ public class JpaProjectionQueriesTest extends QueryTestBase {
 
         Dto dto = dao.get(query.all(Department.class), Dto_.c4(literal(LIST_OF_EMBEDDABLES._), Department_.reports));
         assertEquals(emptyList(), dto.value);
+        
+        assertEquals(2, getQueryCount() - queryCount);
+    }
+    
+    @Test
+    public void get_dto_many_set_some_multiple() {
+        Municipality mun1 = new Municipality();
+        Municipality mun2 = new Municipality();
+        Department dep = new Department();
+        Employee emp1 = new Employee("", dep, mun1);
+        Employee emp2 = new Employee("", dep, mun1);
+        persist(dep, mun1, mun2, emp1, emp2);
+        long queryCount = getQueryCount();
+
+        List<Dto> dtos = dao.getMany(query.all(Municipality.class), Dto_.c13(literal(SET_OF_ENTITIES._), Municipality_.employees), Order.by(Municipality_.id));
+        assertEquals(newSet(emp1, emp2), head(dtos).value);
+        assertEquals(emptySet(), last(dtos).value);
         
         assertEquals(2, getQueryCount() - queryCount);
     }

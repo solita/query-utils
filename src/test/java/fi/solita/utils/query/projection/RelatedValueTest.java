@@ -5,6 +5,7 @@ import static fi.solita.utils.functional.Collections.emptySet;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.head;
+import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.functional.Functional.tail;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
@@ -48,7 +49,7 @@ import fi.solita.utils.query.execution.JpaProjectionQueries;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
-public class RelatedTest extends QueryTestBase {
+public class RelatedValueTest extends QueryTestBase {
 
     @Autowired
     private JpaCriteriaQuery query;
@@ -63,10 +64,10 @@ public class RelatedTest extends QueryTestBase {
         persist(dep, emp);
         long queryCount = getQueryCount();
 
-        Dto dto = dao.get(query.all(Employee.class), Dto_.c3(literal(ID._), Related.projection(Employee_.mandatoryDepartment, Project.id())));
+        Dto dto = dao.get(query.all(Employee.class), Dto_.c3(literal(ID._), Related.value(Employee_.mandatoryDepartment, Department_.id)));
         assertEquals(dep.getId(), dto.value);
         
-        assertEquals(2, getQueryCount() - queryCount);
+        assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
@@ -841,5 +842,24 @@ public class RelatedTest extends QueryTestBase {
         
         assertEquals(2, getQueryCount() - queryCount);
     }
+    
+    @Test
+    public void getRelatedValue_many_set_some_multiple() {
+        Municipality mun1 = new Municipality();
+        Municipality mun2 = new Municipality();
+        Department dep1 = new Department(mun1);
+        Department dep2 = new Department(mun2);
+        Department dep3 = new Department();
+        Employee emp1 = new Employee("", dep1, mun1);
+        Employee emp2 = new Employee("", dep1, mun1);
+        persist(dep1, dep2, dep3, mun1, mun2, emp1, emp2);
+        long queryCount = getQueryCount();
 
+        List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.c13(literal(SET_OF_ENTITIES._), Related.value(Department_.optionalMunicipality, Municipality_.employees)), Order.by(Department_.id));
+        assertEquals(newSet(emp1, emp2), head(dtos).value);
+        assertEquals(emptySet(), head(tail(dtos)).value);
+        assertEquals(emptySet(), last(dtos).value);
+        
+        assertEquals(2, getQueryCount() - queryCount);
+    }
 }

@@ -44,7 +44,7 @@ import fi.solita.utils.query.Order.Direction;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
-import fi.solita.utils.query.attributes.RelationAttribute;
+import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 
 public abstract class QueryUtils {
     
@@ -228,8 +228,8 @@ public abstract class QueryUtils {
             ret = param.isCollection();
         }
         
-        if (param instanceof RelationAttribute && param instanceof SingularAttribute) {
-            ret &= forAll(((RelationAttribute)param).getConstructor().getParameters(), QueryUtils_.isRequiredByMetamodel);
+        if (param instanceof AdditionalQueryPerformingAttribute && param instanceof SingularAttribute) {
+            ret &= forAll(((AdditionalQueryPerformingAttribute)param).getConstructor().getParameters(), QueryUtils_.isRequiredByMetamodel);
         }
         
         return ret;
@@ -242,8 +242,8 @@ public abstract class QueryUtils {
         
         boolean ret = !unwrap(OptionalAttribute.class, param).isDefined();
         
-        if (param instanceof RelationAttribute && param instanceof SingularAttribute) {
-            ret &= forAll(((RelationAttribute)param).getConstructor().getParameters(), QueryUtils_.isRequiredByQueryAttribute);
+        if (param instanceof AdditionalQueryPerformingAttribute && param instanceof SingularAttribute) {
+            ret &= forAll(((AdditionalQueryPerformingAttribute)param).getConstructor().getParameters(), QueryUtils_.isRequiredByQueryAttribute);
         }
         
         return ret;

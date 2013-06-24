@@ -4,10 +4,10 @@ import java.util.List;
 
 import javax.persistence.*;
 
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.*;
 
-@Entity
-@Access(AccessType.FIELD)
+@javax.persistence.Entity
+@Access(javax.persistence.AccessType.FIELD)
 public class Department implements IEntity, Identifiable<Department.ID>, Removable {
 
     @Embeddable
@@ -110,7 +110,7 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
     @javax.persistence.Id
     @GeneratedValue(generator = "IdGenerator")
     @GenericGenerator(name = "IdGenerator", strategy = "fi.solita.utils.query.IdGenerator")
-    @Access(AccessType.PROPERTY)
+    @Access(javax.persistence.AccessType.PROPERTY)
     public ID getId() {
         return id;
     }

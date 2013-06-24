@@ -10,11 +10,15 @@ import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.zip;
 
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.SingularAttribute;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple;
@@ -26,6 +30,8 @@ import fi.solita.utils.query.codegen.ConstructorMeta_;
 import static fi.solita.utils.query.projection.ProjectionResultUtil_.*;
 
 class ProjectionResultUtil {
+    
+    private static final Logger logger = LoggerFactory.getLogger(ProjectionResultUtil.class);
     
     public static final class NullValueButNonOptionConstructorArgumentException extends RuntimeException {
         private final Class<?> argumentType;
@@ -45,81 +51,113 @@ class ProjectionResultUtil {
     }
     
     static Object postProcessValue(Attribute<?, ?> attr, Object resultFromDb) {
+        logger.debug("postProcessValue({},{})", attr, resultFromDb);
         if (attr == null) {
-            // null is used as a placeholder in SelfAttribute an Constructors.IdProjection... Yeah, should use something else...
+            logger.debug("Skipping processing since attr was null");
+            // null is used as a placeholder in SelfAttribute and Constructors.IdProjection... Yeah, should use something else...
             return resultFromDb;
         }
-        return transformPseudoResultToActualValue.ap(attr).andThen(
+        Object ret = transformPseudoResultToActualValue.ap(attr).andThen(
                wrapNullsToOptionsWhereAppropriate.ap(attr)).andThen(
                convertNullsToEmbeddableWhereRequired.ap(attr))
                .apply(resultFromDb);
+        logger.debug("postProcessValue -> {}", ret);
+        return ret;
     }
     
-    static Iterable<Object> postProcessRow(ConstructorMeta_<?, ?, ?> constructor_, Iterable<Object> row) {
-        return map(zip(constructor_.getParameters(), row), postProcessValue);
+    static Iterable<Object> postProcessRow(List<Attribute<?,?>> projectionParameters, Iterable<Object> row) {
+        logger.debug("postProcessRow({},{})", projectionParameters, row);
+        Iterable<Object> ret = map(zip(projectionParameters, row), postProcessValue);
+        logger.debug("postProcessRow -> {}", ret);
+        return ret;
     }
 
-    static <R> Iterable<R> transformAllRows(ConstructorMeta_<?, R, ?> constructor_, Iterable<Iterable<Object>> rows) {
-        return map(rows, ProjectionResultUtil_.<R>transformRow().ap(constructor_));
+    static <R> Iterable<R> transformAllRows(ConstructorMeta_<?, R, ?> projection, Iterable<Iterable<Object>> rows) {
+        logger.debug("transformAllRows({},{})", projection, rows);
+        Iterable<R> ret = map(rows, ProjectionResultUtil_.<R>transformRow().ap(projection));
+        logger.debug("transformAllRows -> {}", ret);
+        return ret;
     }
     
-    static <T> T transformRow(ConstructorMeta_<?,T,?> constructor_, Iterable<Object> row) {
-        row = postProcessRow(constructor_, row);
+    static <T> T transformRow(ConstructorMeta_<?,T,?> projection, Iterable<Object> row) {
+        logger.debug("transformRow({},{})", projection, row);
+        row = postProcessRow(projection.getParameters(), row);
         // at this point there should be no nulls...
         for (Tuple2<Object, Integer> result: zip(row, range(0))) {
             if (result._1 == null) {
-                throw new ProjectionResultUtil.NullValueButNonOptionConstructorArgumentException(constructor_.getClass(), constructor_.getConstructorParameterTypes().get(result._2), result._2);
+                throw new ProjectionResultUtil.NullValueButNonOptionConstructorArgumentException(projection.getClass(), projection.getConstructorParameterTypes().get(result._2), result._2);
             }
         }
 
         @SuppressWarnings("unchecked")
-        T instance = ((ConstructorMeta_<?,T,Object>)constructor_).apply(size(row) == 1 ? head(row) : Tuple.of(newArray(Object.class, row)));
-        return instance;
+        T ret = ((ConstructorMeta_<?,T,Object>)projection).apply(size(row) == 1 ? head(row) : Tuple.of(newArray(Object.class, row)));
+        logger.debug("transformRow -> {}", ret);
+        return ret;
     }
     
     static Object postProcessResult(Class<?> constructorParameterType, Attribute<?, ?> attr, List<Object> val) {
-        Object v;
+        logger.debug("postProcessResult({},{},{})", new Object[] {constructorParameterType, attr, val});
+        Object ret;
         if (attr instanceof SingularAttribute) {
             if (!isRequiredByQueryAttribute(attr) && val.isEmpty()) {
-                v = null;
+                logger.debug("Optional SingularAttribute and empty resultList, returning null to be later replaced by None()");
+                ret = null;
             } else {
                 if (val.size() != 1) {
                     throw new IllegalArgumentException("Collection expected to be of size " + 1 + " but was: " + val);
                 }
-                v = head(val);
+                ret = head(val);
             }
         } else {
             if (List.class.isAssignableFrom(constructorParameterType)) {
-                v = newList(val);
+                logger.debug("Constructor expecting a List: {}", constructorParameterType.getName());
+                ret = newList(val);
             } else if (SortedSet.class.isAssignableFrom(constructorParameterType)) {
-                v = new TreeSet<Object>(val);
+                logger.debug("Constructor expecting a SortedSet: {}", constructorParameterType.getName());
+                ret = new TreeSet<Object>(val);
+            } else if (Set.class.isAssignableFrom(constructorParameterType)) {
+                logger.debug("Constructor expecting a Set: {}", constructorParameterType.getName());
+                ret = newSet(val);
             } else {
-                v = newSet(val);
+                throw new UnsupportedOperationException("Not implemented: " + constructorParameterType);
             }
         }
-        return v;
+        logger.debug("postProcessResult -> {}", ret);
+        return ret;
     }
 
     static Object transformPseudoResultToActualValue(Attribute<?,?> attribute, Object resultFromDb) {
+        logger.debug("transformPseudoResultToActualValue({},{})", attribute, resultFromDb);
+        Object ret = resultFromDb;
         for (PseudoAttribute pseudo: unwrap(PseudoAttribute.class, attribute)) {
-            return pseudo.getValueToReplaceResult(resultFromDb);
+            logger.info("Replacing pseudo placeholder with actual value");
+            ret = pseudo.getValueToReplaceResult(resultFromDb);
         }
-        return resultFromDb;
+        logger.debug("transformPseudoResultToActualValue -> {}", ret);
+        return ret;
     }
 
     /** Wraps values to Some and nulls to None for optional parameters, leave others as is */
     static Object wrapNullsToOptionsWhereAppropriate(Attribute<?,?> attribute, Object resultFromDb) {
-        return isRequiredByQueryAttribute(attribute) || resultFromDb instanceof Option ? resultFromDb : Option.of(resultFromDb);
+        logger.debug("wrapNullsToOptionsWhereAppropriate({},{})", attribute, resultFromDb);
+        Object ret = isRequiredByQueryAttribute(attribute) || resultFromDb instanceof Option ? resultFromDb : Option.of(resultFromDb);
+        logger.debug("wrapNullsToOptionsWhereAppropriate -> {}", ret);
+        return ret;
     }
     
     /** Hibernate cannot handle embeddables with all-null values correctly, since it doesn't separate a missing embeddable and an existing all-null embeddable.
      *  So we instantiate the empty embeddable if the result has been left null but the attribute is required */
     static Object convertNullsToEmbeddableWhereRequired(Attribute<?,?> attribute, Object resultFromDb) {
+        logger.debug("convertNullsToEmbeddableWhereRequired({},{})", attribute, resultFromDb);
+        Object ret = resultFromDb;
         Option<? extends Attribute<?, ?>> embeddable = EmbeddableUtil.unwrapEmbeddableAttribute(attribute);
         if (embeddable.isDefined() && resultFromDb == null && isRequiredByMetamodel(attribute)) {
-            return EmbeddableUtil.instantiate(embeddable.get().getJavaType());
+            Class<?> clazz = embeddable.get().getJavaType();
+            logger.info("Instantiating an empty Embeddable {} in place of a null result", clazz);
+            ret = EmbeddableUtil.instantiate(clazz);
         }
-        return resultFromDb;
+        logger.debug("convertNullsToEmbeddableWhereRequired -> {}", ret);
+        return ret;
     }
     
 }

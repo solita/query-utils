@@ -2,13 +2,13 @@ package fi.solita.utils.query;
 
 import javax.persistence.*;
 
-import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.*;
 
 import fi.solita.utils.functional.*;
 
 
-@Entity
-@Access(AccessType.FIELD)
+@javax.persistence.Entity
+@Access(javax.persistence.AccessType.FIELD)
 public class Employee implements IEntity, Identifiable<Employee.ID> {
 
     @Embeddable
@@ -67,7 +67,7 @@ public class Employee implements IEntity, Identifiable<Employee.ID> {
     @javax.persistence.Id
     @GeneratedValue(generator = "IdGenerator")
     @GenericGenerator(name = "IdGenerator", strategy = "fi.solita.utils.query.IdGenerator")
-    @Access(AccessType.PROPERTY)
+    @Access(javax.persistence.AccessType.PROPERTY)
     public ID getId() {
         return id;
     }

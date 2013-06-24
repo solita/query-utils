@@ -1,16 +1,13 @@
 package fi.solita.utils.query.projection;
 
 
-import java.util.List;
-import java.util.Set;
-
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.attributes.JoiningAttribute;
-import fi.solita.utils.query.attributes.RelationAttribute;
+import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.codegen.ConstructorMeta_;
 
 public abstract class Related {
@@ -100,35 +97,18 @@ public abstract class Related {
     
     
     
-    public static <E extends IEntity, E2 extends IEntity, R> SingularAttribute<E, R>
-    projection(SingularAttribute<? super E, ? super E2> relation, ConstructorMeta_<? super E2, R, ?> constructor) {
-        return RelationAttribute.Constructors.relation(relation, constructor);
+    public static <E extends IEntity, E2 extends IEntity, R>
+    SingularAttribute<E, R> projection(SingularAttribute<? super E, E2> relation, ConstructorMeta_<? super E2, R, ?> constructor) {
+        return AdditionalQueryPerformingAttribute.Constructors.relation(relation, constructor);
     }
 
-    public static <E extends IEntity, E2 extends IEntity, R> SetAttribute<E, R>
-    projection(SetAttribute<? super E, ? super E2> relation, ConstructorMeta_<? super E2, R, ?> constructor) {
-        return RelationAttribute.Constructors.relation(relation, constructor);
+    public static <E extends IEntity, E2 extends IEntity, R>
+    SetAttribute<E, R> projection(SetAttribute<? super E, E2> relation, ConstructorMeta_<? super E2, R, ?> constructor) {
+        return AdditionalQueryPerformingAttribute.Constructors.relation(relation, constructor);
     }
     
-    public static <E extends IEntity, E2 extends IEntity, R> ListAttribute<E, R>
-    projection(ListAttribute<? super E, ? super E2> relation, ConstructorMeta_<? super E2, R, ?> constructor) {
-        return RelationAttribute.Constructors.relation(relation, constructor);
-    }
-    
-    
-    
-    public static <E extends IEntity, E2 extends IEntity, E3 extends IEntity, R> SetAttribute<E, R>
-    projection(SetAttribute<? super E, ? super E2> relation1, SingularAttribute<? super E2, ? super E3> relation2, ConstructorMeta_<? super E3, R, ?> constructor) {
-        return projection(relation1, Constructors.value(projection(relation2, constructor)));
-    }
-
-    public static <E extends IEntity, E2 extends IEntity, E3 extends IEntity, R> SetAttribute<E, Set<R>>
-    projection(SetAttribute<? super E, ? super E2> relation1, SetAttribute<? super E2, ? super E3> relation2, ConstructorMeta_<? super E3, R, ?> constructor) {
-        return projection(relation1, Constructors.value(projection(relation2, constructor)));
-    }
-
-    public static <E extends IEntity, E2 extends IEntity, E3 extends IEntity, R> SetAttribute<E, List<R>>
-    projection(SetAttribute<? super E, ? super E2> relation1, ListAttribute<? super E2, ? super E3> relation2, ConstructorMeta_<? super E3, R, ?> constructor) {
-        return projection(relation1, Constructors.value(projection(relation2, constructor)));
+    public static <E extends IEntity, E2 extends IEntity, R>
+    ListAttribute<E, R> projection(ListAttribute<? super E, E2> relation, ConstructorMeta_<? super E2, R, ?> constructor) {
+        return AdditionalQueryPerformingAttribute.Constructors.relation(relation, constructor);
     }
 }

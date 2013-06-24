@@ -8,7 +8,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.codegen.ConstructorMeta_;
 
-public interface RelationAttribute {
+public interface AdditionalQueryPerformingAttribute {
     ConstructorMeta_<?, ?, ?> getConstructor();
     
     /**

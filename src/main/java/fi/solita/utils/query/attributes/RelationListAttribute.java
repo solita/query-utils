@@ -7,7 +7,7 @@ import javax.persistence.metamodel.ListAttribute;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.codegen.ConstructorMeta_;
 
-class RelationListAttribute<E extends IEntity, R> extends PluralAttributeProxy<E, List<R>, R> implements ListAttribute<E,R>, RelationAttribute {
+class RelationListAttribute<E extends IEntity, R> extends PluralAttributeProxy<E, List<R>, R> implements ListAttribute<E,R>, AdditionalQueryPerformingAttribute {
     private final ConstructorMeta_<? extends IEntity, R, ?> constructor;
 
     @SuppressWarnings("unchecked")

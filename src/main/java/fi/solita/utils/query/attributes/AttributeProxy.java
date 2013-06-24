@@ -72,6 +72,11 @@ abstract class AbstractAttributeProxy<X,Y,T extends Attribute<X, Y>> implements 
     public boolean isCollection() {
         return proxyTarget.isCollection();
     }
+    
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" + (proxyTarget == null ? "?" : getDeclaringType().getJavaType().getSimpleName() + "." + getName()) + ")";
+    }
 }
 
 abstract class BindableAttributeProxy<X,Y,R,T extends Attribute<X, Y> & Bindable<R>> extends AbstractAttributeProxy<X,Y,T> implements Bindable<R> {

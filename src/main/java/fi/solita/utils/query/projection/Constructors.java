@@ -63,6 +63,11 @@ public class Constructors {
         public Id<E> apply(Id<E> t) {
             return t;
         }
+        
+        @Override
+        public String toString() {
+            return Helper.className.apply(getClass()) + "()";
+        }
     }
     
     private static final class PairProjection<E extends IEntity,LEFT,RIGHT> extends ConstructorMeta_.F2<E,LEFT,RIGHT,Pair<LEFT,RIGHT>> {
@@ -131,6 +136,12 @@ public class Constructors {
         @Override
         public Constructor<T> getMember() {
             throw new UnsupportedOperationException("Shouldn't be here");
+        }
+        
+
+        @Override
+        public String toString() {
+            return ConstructorMeta_.Helper.toString(this);
         }
     }
     
