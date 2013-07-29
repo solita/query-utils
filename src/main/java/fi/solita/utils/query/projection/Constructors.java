@@ -22,6 +22,9 @@ import fi.solita.utils.query.codegen.ConstructorMeta_;
 
 public class Constructors {
     
+    public static interface TransparentProjection {
+    }
+    
     static <E extends IEntity & Identifiable<?>> ConstructorMeta_<E,Id<E>,Id<E>> id() {
         return new IdProjection<E>();
     }
@@ -145,7 +148,7 @@ public class Constructors {
         }
     }
     
-    private static final class ValueAttributeProjection<E extends IEntity,R> extends ConstructorMeta_.F1<E,R,R> {
+    private static final class ValueAttributeProjection<E extends IEntity,R> extends ConstructorMeta_.F1<E,R,R> implements TransparentProjection {
         private final Attribute<? super E,R> attribute;
 
         public ValueAttributeProjection(Attribute<? super E,R> attribute) {

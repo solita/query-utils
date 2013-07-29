@@ -125,7 +125,12 @@ public class QueryUtilsTest extends QueryTestBase {
         assertTrue("list",        isRequiredByMetamodel(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.employees))));
         
         assertFalse("set",        isRequiredByMetamodel(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.employees))));
-        assertFalse("list",       isRequiredByMetamodel(Related.projection(Employee_.optionalDepartment, Project.value(Department_.employees)))); 
+        assertFalse("list",       isRequiredByMetamodel(Related.projection(Employee_.optionalDepartment, Project.value(Department_.employees))));
+        
+        // Project.value is special, in a sense that it "disappears" and the optionality from underneath propagates upwards.
+        // In every other case (pair, tuple, class...) the value is always required by metamodel.
+        assertTrue("non-value1",       isRequiredByMetamodel(Related.projection(Employee_.mandatoryDepartment, Project.pair(Cast.optional(Department_.optionalBudget), Cast.optional(Department_.optionalBudget)))));
+        assertTrue("non-value2",       isRequiredByMetamodel(Related.projection(Employee_.mandatoryDepartment, Project.pair(Department_.mandatoryName, Cast.optional(Department_.optionalBudget)))));
     }
     
     @Test
