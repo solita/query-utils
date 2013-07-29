@@ -1,13 +1,19 @@
 package fi.solita.utils.query.projection;
 
 import static fi.solita.utils.functional.Collections.newArray;
-import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.range;
 import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.zip;
+import static fi.solita.utils.query.QueryUtils.isRequiredByMetamodel;
+import static fi.solita.utils.query.QueryUtils.isRequiredByQueryAttribute;
+import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
+import static fi.solita.utils.query.projection.ProjectionResultUtil_.convertNullsToEmbeddableWhereRequired;
+import static fi.solita.utils.query.projection.ProjectionResultUtil_.postProcessValue;
+import static fi.solita.utils.query.projection.ProjectionResultUtil_.transformPseudoResultToActualValue;
+import static fi.solita.utils.query.projection.ProjectionResultUtil_.wrapNullsToOptionsWhereAppropriate;
 
 import java.util.List;
 import java.util.Set;
@@ -15,6 +21,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.slf4j.Logger;
@@ -23,11 +30,8 @@ import org.slf4j.LoggerFactory;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple2;
-import static fi.solita.utils.query.QueryUtils.*;
-import static fi.solita.utils.query.attributes.AttributeProxy.*;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.codegen.ConstructorMeta_;
-import static fi.solita.utils.query.projection.ProjectionResultUtil_.*;
 
 class ProjectionResultUtil {
     
@@ -109,13 +113,13 @@ class ProjectionResultUtil {
                 ret = head(val);
             }
         } else {
-            if (List.class.isAssignableFrom(constructorParameterType)) {
-                logger.debug("Constructor expecting a List: {}", constructorParameterType.getName());
-                ret = newList(val);
-            } else if (SortedSet.class.isAssignableFrom(constructorParameterType)) {
+            if (constructorParameterType.isAssignableFrom(List.class) && attr instanceof ListAttribute) {
+                logger.debug("ListAttribute, or a Constructor expecting a List: {}", constructorParameterType.getName());
+                ret = val;
+            } else if (constructorParameterType.equals(SortedSet.class)) {
                 logger.debug("Constructor expecting a SortedSet: {}", constructorParameterType.getName());
                 ret = new TreeSet<Object>(val);
-            } else if (Set.class.isAssignableFrom(constructorParameterType)) {
+            } else if (constructorParameterType.isAssignableFrom(Set.class)) {
                 logger.debug("Constructor expecting a Set: {}", constructorParameterType.getName());
                 ret = newSet(val);
             } else {
