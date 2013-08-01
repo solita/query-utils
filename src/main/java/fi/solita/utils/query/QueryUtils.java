@@ -167,11 +167,11 @@ public abstract class QueryUtils {
         return query;
     }
 
-    public static final <T> javax.persistence.criteria.Predicate inExpr(Path<? super T> path, Iterable<T> values, CriteriaBuilder cb) {
+    public static final javax.persistence.criteria.Predicate inExpr(Path<?> path, Iterable<?> values, CriteriaBuilder cb) {
         javax.persistence.criteria.Predicate pred = cb.disjunction();
         // oracle fails if more than 1000 parameters
-        List<List<T>> groups = newList(grouped(values, 1000));
-        for (List<T> g: groups) {
+        List<? extends List<?>> groups = newList(grouped(values, 1000));
+        for (List<?> g: groups) {
             pred = cb.or(pred, path.in(newList(g)));
         }
         return pred;

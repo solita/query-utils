@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fi.solita.utils.query.Department;
-import fi.solita.utils.query.Department__;
+import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.generation.QLQuery;
@@ -114,8 +114,8 @@ public class QLQueriesTest extends QueryTestBase {
         Department dep2 = new Department();
         persist(dep1, dep2);
 
-        assertEquals(newList(dep1.getId()), newList(map(dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1)), Department__.getId)));
-        assertEquals(newList(dep2.getId()), newList(map(dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1).nextPage()), Department__.getId)));
+        assertEquals(newList(dep1.getId()), newList(map(dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1)), Department_.getId)));
+        assertEquals(newList(dep2.getId()), newList(map(dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1).nextPage()), Department_.getId)));
     }
 
 }

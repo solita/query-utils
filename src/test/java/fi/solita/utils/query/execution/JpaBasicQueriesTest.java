@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Department;
-import fi.solita.utils.query.Department__;
+import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Employee;
 import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Id;
@@ -123,7 +123,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
             assertFalse(Hibernate.isInitialized(proxy));
         }
 
-        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(proxySet, Department__.getId)));
+        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(proxySet, Department_.getId)));
     }
 
     @Test

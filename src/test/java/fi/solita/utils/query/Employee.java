@@ -18,6 +18,7 @@ public class Employee implements IEntity, Identifiable<Employee.ID> {
         }
     }
 
+    @Transient
     private ID id;
 
     @Column(nullable = false)

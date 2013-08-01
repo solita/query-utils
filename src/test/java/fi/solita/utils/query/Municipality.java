@@ -19,6 +19,7 @@ public class Municipality implements IEntity, Identifiable<Municipality.ID> {
         }
     }
 
+    @Transient
     private ID id;
     
     @ElementCollection

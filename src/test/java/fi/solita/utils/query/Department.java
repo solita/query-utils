@@ -17,6 +17,7 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
         }
     }
     
+    @Transient
     private ID id;
 
     @Column(nullable = false)

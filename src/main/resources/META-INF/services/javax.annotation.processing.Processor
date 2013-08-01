@@ -1,1 +1,2 @@
-fi.solita.utils.query.codegen.MetadataProcessor
+fi.solita.utils.query.codegen.JpaMetamodelProcessor
+fi.solita.utils.query.codegen.JpaConstructorProcessor

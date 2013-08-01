@@ -39,9 +39,8 @@
                         <inherited>false</inherited>
                         <configuration>
                             <includes>
-                                <include>fi/solita/utils/query/codegen/**.*</include>
+                                <include>fi/solita/utils/query/codegen/**/*</include>
                             </includes>
-                            <proc>none</proc>
                         </configuration>
                     </execution>
                 </executions>
@@ -49,10 +48,46 @@
                     <source>1.6</source>
                     <target>1.6</target>
                     <encoding>UTF-8</encoding>
-                    <annotationProcessors>
-                        <annotationProcessor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</annotationProcessor>
-                        <annotationProcessor>fi.solita.utils.query.codegen.MetadataProcessor</annotationProcessor>
-                    </annotationProcessors>
+                    <proc>none</proc>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>2.2.4</version>
+                <executions>
+                    <execution>
+                        <id>process</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <inherited>false</inherited>
+                    </execution>
+                    <execution>
+                        <id>process-test</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>process-test</goal>
+                        </goals>
+                        <inherited>false</inherited>
+                    </execution>
+                </executions>
+                <configuration>
+                    <compilerArguments>-source 1.6 -target 1.6</compilerArguments>
+                    <encoding>UTF-8</encoding>
+                    <optionMap>
+                        <CommonMetadataProcessor.excludesRegex>fi.solita.utils.query.(Department|Employee|PartTimeEmployee|Municipality|Report|Dto)</CommonMetadataProcessor.excludesRegex>
+                        <JpaMetamodelProcessor.includesRegex>fi.solita.utils.query.(Department|Employee|PartTimeEmployee|Municipality|Report)</JpaMetamodelProcessor.includesRegex>
+                        <JpaMetamodelProcessor.extendClassNamePattern>fi.solita.utils.query.(Department|Employee|PartTimeEmployee|Municipality|Report)</JpaMetamodelProcessor.extendClassNamePattern>
+                        <JpaMetamodelProcessor.onlyPublicMembers>true</JpaMetamodelProcessor.onlyPublicMembers>
+                        <JpaConstructorProcessor.includesRegex>fi.solita.utils.query.Dto</JpaConstructorProcessor.includesRegex>
+                    </optionMap>
+                    <processors>
+                        <processor>fi.solita.utils.codegen.CommonMetadataProcessor</processor>
+                        <processor>fi.solita.utils.query.codegen.JpaMetamodelProcessor</processor>
+                        <processor>fi.solita.utils.query.codegen.JpaConstructorProcessor</processor>
+                    </processors>
                 </configuration>
             </plugin>
             <plugin>
@@ -92,13 +127,6 @@
             <version>4.0.0.Final</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
-            <version>1.2.0.Final</version>
-            <scope>provided</scope>
-        </dependency>
-        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

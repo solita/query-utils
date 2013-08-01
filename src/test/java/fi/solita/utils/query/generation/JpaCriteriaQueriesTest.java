@@ -43,7 +43,7 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
         Department dep2 = new Department();
         persist(dep1, dep2);
 
-        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getMany(query.all(Department.class)), Department__.getId)));
+        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getMany(query.all(Department.class)), Department_.getId)));
     }
 
     @Test
@@ -53,7 +53,7 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
         persist(dep1, dep2);
 
         assertEquals("find by single id", dep1.getId(), dao.get(query.ofIds(newList(dep1.getId()), Department.class)).getId());
-        assertEquals("find by multiple ids", newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getMany(query.ofIds(newList(dep1.getId(), dep2.getId()), Department.class)), Department__.getId)));
+        assertEquals("find by multiple ids", newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getMany(query.ofIds(newList(dep1.getId(), dep2.getId()), Department.class)), Department_.getId)));
     }
 
     @Test(expected = NoResultException.class)

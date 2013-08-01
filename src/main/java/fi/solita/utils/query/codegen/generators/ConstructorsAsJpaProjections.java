@@ -13,6 +13,7 @@ import static fi.solita.utils.codegen.generators.Content.EmptyLine;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
+import static fi.solita.utils.functional.Functional.filter;
 import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.mkString;
@@ -30,46 +31,64 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import fi.solita.utils.codegen.CommonMetadataProcessor;
 import fi.solita.utils.codegen.generators.ConstructorsAsFunctions;
+import fi.solita.utils.codegen.generators.Generator;
+import fi.solita.utils.codegen.generators.GeneratorOptions;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Function1;
-import fi.solita.utils.functional.Function3;
+import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Option;
+import fi.solita.utils.functional.Predicate;
 import fi.solita.utils.functional.Transformers;
 import fi.solita.utils.query.codegen.ConstructorMeta_;
 
-public class ConstructorsAsJpaProjections extends Function3<ProcessingEnvironment, CommonMetadataProcessor.GeneratorOptions, TypeElement, Iterable<String>> {
+public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaProjections.Options> {
 
+    public static interface Options extends GeneratorOptions {
+        boolean onlyPublicMembers();
+    }
+    
     private static final String ENTITY_BASE_CLASS = "fi.solita.utils.query.IEntity";
     private static final String ENTITY_REP_CLASS = "fi.solita.utils.query.EntityRepresentation";
     private static final String ID_CLASS = "fi.solita.utils.query.Id";
 
-    public static Function1<ProcessingEnvironment, Function1<CommonMetadataProcessor.GeneratorOptions, Function1<TypeElement, Iterable<String>>>> instance = new ConstructorsAsJpaProjections().curried();
+    public static final ConstructorsAsJpaProjections instance = new ConstructorsAsJpaProjections();
 
     @Override
-    public Iterable<String> apply(ProcessingEnvironment processingEnv, CommonMetadataProcessor.GeneratorOptions options, TypeElement source) {
+    public Iterable<String> apply(ProcessingEnvironment processingEnv, ConstructorsAsJpaProjections.Options options, TypeElement source) {
         if (source.getModifiers().contains(Modifier.ABSTRACT)) {
             return newList();
         }
+        
+        Iterable<ExecutableElement> elements = element2Constructors.apply(source);
+        if (options.onlyPublicMembers()) {
+            elements = filter(elements, new Predicate<Element>() {
+              @Override
+              public boolean accept(Element candidate) {
+                  return candidate.getModifiers().contains(Modifier.PUBLIC);
+              }
+            });
+        }
 
-        Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = constructorGen.curried().apply(processingEnv).apply(options);
-        return flatMap(zipWithIndex(element2Constructors.apply(source)), singleElementTransformer);
+        Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = constructorGen.ap(processingEnv);
+        return flatMap(zipWithIndex(elements), singleElementTransformer);
     }
 
-    public static Function3<ProcessingEnvironment, CommonMetadataProcessor.GeneratorOptions, Map.Entry<Integer, ExecutableElement>, Iterable<String>> constructorGen = new Function3<ProcessingEnvironment, CommonMetadataProcessor.GeneratorOptions, Map.Entry<Integer, ExecutableElement>, Iterable<String>>() {
+    public static Function2<ProcessingEnvironment, Map.Entry<Integer, ExecutableElement>, Iterable<String>> constructorGen = new Function2<ProcessingEnvironment, Map.Entry<Integer, ExecutableElement>, Iterable<String>>() {
         @Override
-        public Iterable<String> apply(ProcessingEnvironment processingEnv, CommonMetadataProcessor.GeneratorOptions generatorOption, Map.Entry<Integer, ExecutableElement> entry) {
+        public Iterable<String> apply(ProcessingEnvironment processingEnv, Map.Entry<Integer, ExecutableElement> entry) {
             ExecutableElement constructor = entry.getValue();
             TypeElement enclosingElement = (TypeElement) constructor.getEnclosingElement();
             int index = entry.getKey();
@@ -82,14 +101,15 @@ public class ConstructorsAsJpaProjections extends Function3<ProcessingEnvironmen
 
                 Class<?> attributeClass;
                 String secondTypeParam;
-                if (isSubtype(argument, ID_CLASS, processingEnv)) {
+                TypeMirror argumentType = argument.asType();
+                if (isSubtype(argumentType, ID_CLASS, processingEnv)) {
                     attributeClass = SingularAttribute.class;
                     secondTypeParam = "? extends " + ENTITY_REP_CLASS;
                 } else {
-                    boolean isEntity = isSubtype(argument, ENTITY_BASE_CLASS, processingEnv);
-                    boolean isOption = isSubtype(argument, Option.class, processingEnv);
-                    boolean isList = isSubtype(argument, List.class, processingEnv);
-                    boolean isSet = isSubtype(argument, Set.class, processingEnv);
+                    boolean isEntity = isSubtype(argumentType, ENTITY_BASE_CLASS, processingEnv);
+                    boolean isOption = isSubtype(argumentType, Option.class, processingEnv);
+                    boolean isList = isSubtype(argumentType, List.class, processingEnv);
+                    boolean isSet = isSubtype(argumentType, Set.class, processingEnv);
 
                     if (isSet || isList || isOption) {
                         attributeClass = isSet ? SetAttribute.class : isList ? ListAttribute.class : SingularAttribute.class;
@@ -142,7 +162,6 @@ public class ConstructorsAsJpaProjections extends Function3<ProcessingEnvironmen
                 "    return c.getMember();",
                 "}",
                 "",
-                "@SuppressWarnings(\"unchecked\")",
                 "public java.util.List<" + Attribute.class.getName() + "<?, ?>> getParameters() {",
                 "    return java.util.Arrays.<" + Attribute.class.getName() + "<?, ?>>asList(" + mkString(", ", attributeNames) + ");",
                 "}",
