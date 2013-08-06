@@ -2,6 +2,7 @@ package fi.solita.utils.query.execution;
 
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Functional.sequence;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;

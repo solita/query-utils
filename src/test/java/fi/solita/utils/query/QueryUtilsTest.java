@@ -1,6 +1,13 @@
 package fi.solita.utils.query;
 
-import static org.junit.Assert.*;
+import static fi.solita.utils.functional.Collections.newList;
+import static fi.solita.utils.functional.Collections.newSet;
+import static fi.solita.utils.query.QueryUtils.isRequiredByMetamodel;
+import static fi.solita.utils.query.QueryUtils.isRequiredByQueryAttribute;
+import static fi.solita.utils.query.QueryUtils_.isRequiredByMetamodel;
+import static fi.solita.utils.query.QueryUtils_.isRequiredByQueryAttribute;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -9,19 +16,15 @@ import javax.persistence.metamodel.Attribute;
 import org.junit.Test;
 
 import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Function1;
+import fi.solita.utils.functional.Predicate;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.projection.Project;
 import fi.solita.utils.query.projection.Related;
 import fi.solita.utils.query.projection.Select;
-import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Collections.newSet;
-import static fi.solita.utils.query.QueryUtils.*;
-import static fi.solita.utils.query.QueryUtils_.*;
 
 public class QueryUtilsTest extends QueryTestBase {
     
-    static final List<Function1<Attribute<?,?>,Boolean>> bothFunctions = newList(isRequiredByMetamodel, isRequiredByQueryAttribute);
+    static final List<? extends Predicate<Attribute<?,?>>> bothFunctions = newList(isRequiredByMetamodel, isRequiredByQueryAttribute);
 
     @Test
     public void selfAttributeAndLiteralAttributesAreAlwaysRequired() throws Exception {

@@ -5,6 +5,7 @@ import static fi.solita.utils.codegen.Helpers.containedType;
 import static fi.solita.utils.codegen.Helpers.element2Constructors;
 import static fi.solita.utils.codegen.Helpers.elementGenericQualifiedName;
 import static fi.solita.utils.codegen.Helpers.isSubtype;
+import static fi.solita.utils.codegen.Helpers.publicElement;
 import static fi.solita.utils.codegen.Helpers.qualifiedName;
 import static fi.solita.utils.codegen.Helpers.relevantTypeParams;
 import static fi.solita.utils.codegen.Helpers.resolveVisibility;
@@ -31,7 +32,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -45,19 +45,20 @@ import javax.persistence.metamodel.SingularAttribute;
 import fi.solita.utils.codegen.generators.ConstructorsAsFunctions;
 import fi.solita.utils.codegen.generators.Generator;
 import fi.solita.utils.codegen.generators.GeneratorOptions;
+import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Function1;
-import fi.solita.utils.functional.Function2;
+import fi.solita.utils.functional.Function3;
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.functional.Predicate;
 import fi.solita.utils.functional.Transformers;
-import fi.solita.utils.query.codegen.ConstructorMeta_;
 
 public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaProjections.Options> {
 
     public static interface Options extends GeneratorOptions {
         boolean onlyPublicMembers();
+        @SuppressWarnings("rawtypes")
+        Class<? extends Apply> getClassForJpaConstructors(int argCount);
     }
     
     private static final String ENTITY_BASE_CLASS = "fi.solita.utils.query.IEntity";
@@ -74,21 +75,16 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
         
         Iterable<ExecutableElement> elements = element2Constructors.apply(source);
         if (options.onlyPublicMembers()) {
-            elements = filter(elements, new Predicate<Element>() {
-              @Override
-              public boolean accept(Element candidate) {
-                  return candidate.getModifiers().contains(Modifier.PUBLIC);
-              }
-            });
+            elements = filter(elements, publicElement);
         }
 
-        Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = constructorGen.ap(processingEnv);
+        Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = constructorGen.ap(processingEnv, options);
         return flatMap(zipWithIndex(elements), singleElementTransformer);
     }
 
-    public static Function2<ProcessingEnvironment, Map.Entry<Integer, ExecutableElement>, Iterable<String>> constructorGen = new Function2<ProcessingEnvironment, Map.Entry<Integer, ExecutableElement>, Iterable<String>>() {
+    public static Function3<ProcessingEnvironment, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>> constructorGen = new Function3<ProcessingEnvironment, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>>() {
         @Override
-        public Iterable<String> apply(ProcessingEnvironment processingEnv, Map.Entry<Integer, ExecutableElement> entry) {
+        public Iterable<String> apply(ProcessingEnvironment processingEnv, ConstructorsAsJpaProjections.Options options, Map.Entry<Integer, ExecutableElement> entry) {
             ExecutableElement constructor = entry.getValue();
             TypeElement enclosingElement = (TypeElement) constructor.getEnclosingElement();
             int index = entry.getKey();
@@ -145,7 +141,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             Iterable<String> relevantTypeParams = map(relevantTypeParams(constructor), typeParameter2String);
             
             String delegateMetaConstructor = "$" + (index == 0 ? "" : index) + (ConstructorsAsFunctions.needsToBeFunction(constructor) ? "()" : "");
-            String constructorClass = getClassForConstructors(argCount).getName().replace('$', '.');
+            String constructorClass = options.getClassForJpaConstructors(argCount).getName().replace('$', '.');
 
             String fundef = constructorClass + "<" + mkString(",", cons("OWNER", argumentTypes)) + "," + returnType + ">";
             String declaration = resolveVisibility(constructor) + " static final <" + mkString(",", cons("OWNER", relevantTypeParams)) + "> " + fundef + " c" + (index+1);
@@ -183,12 +179,4 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             return res;
         }
     };
-
-    private static Class<?> getClassForConstructors(int argCount) {
-        try {
-            return Class.forName(ConstructorMeta_.class.getName() + "$F" + argCount);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

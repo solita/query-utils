@@ -36,9 +36,10 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
     
     @Override
     public ExtendedGeneratorOptions generatorOptions() {
+        final boolean onlyPublicMembers = JpaMetamodelProcessor.this.onlyPublicMembers();
         return new ExtendedGeneratorOptions() {
             public boolean onlyPublicMembers() {
-                return JpaMetamodelProcessor.this.onlyPublicMembers();
+                return onlyPublicMembers;
             }
         };
     }
