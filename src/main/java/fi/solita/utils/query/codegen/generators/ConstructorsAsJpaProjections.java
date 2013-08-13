@@ -36,7 +36,11 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.WildcardType;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
@@ -52,6 +56,9 @@ import fi.solita.utils.functional.Function1;
 import fi.solita.utils.functional.Function3;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Transformers;
+import fi.solita.utils.query.EntityRepresentation;
+import fi.solita.utils.query.IEntity;
+import fi.solita.utils.query.Id;
 
 public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaProjections.Options> {
 
@@ -61,10 +68,6 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
         Class<? extends Apply> getClassForJpaConstructors(int argCount);
     }
     
-    private static final String ENTITY_BASE_CLASS = "fi.solita.utils.query.IEntity";
-    private static final String ENTITY_REP_CLASS = "fi.solita.utils.query.EntityRepresentation";
-    private static final String ID_CLASS = "fi.solita.utils.query.Id";
-
     public static final ConstructorsAsJpaProjections instance = new ConstructorsAsJpaProjections();
 
     @Override
@@ -94,29 +97,33 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             for (Map.Entry<Integer, ? extends VariableElement> e: zipWithIndex(constructor.getParameters())) {
                 int paramIndex = e.getKey();
                 VariableElement argument = e.getValue();
-
                 Class<?> attributeClass;
                 String secondTypeParam;
                 TypeMirror argumentType = argument.asType();
-                if (isSubtype(argumentType, ID_CLASS, processingEnv)) {
+                if (isSubtype(argumentType, Id.class, processingEnv)) {
                     attributeClass = SingularAttribute.class;
-                    secondTypeParam = "? extends " + ENTITY_REP_CLASS;
+                    secondTypeParam = "? extends " + EntityRepresentation.class.getName();
                 } else {
-                    boolean isEntity = isSubtype(argumentType, ENTITY_BASE_CLASS, processingEnv);
+                    Elements elements = processingEnv.getElementUtils();
+                    Types types = processingEnv.getTypeUtils();
+                    
+                    boolean isEntity = isSubtype(argumentType, IEntity.class, processingEnv);
                     boolean isOption = isSubtype(argumentType, Option.class, processingEnv);
                     boolean isList = isSubtype(argumentType, List.class, processingEnv);
                     boolean isSet = isSubtype(argumentType, Set.class, processingEnv);
 
                     if (isSet || isList || isOption) {
                         attributeClass = isSet ? SetAttribute.class : isList ? ListAttribute.class : SingularAttribute.class;
-                        String elementType = containedType(argument, processingEnv.getElementUtils());
-                        boolean isId = elementType.startsWith(ID_CLASS);
+                        TypeElement wrapperType = isSet ? elements.getTypeElement(Set.class.getName()) : isList ? elements.getTypeElement(List.class.getName()) : elements.getTypeElement(Option.class.getName());
+                        
+                        boolean isId = isId(argument, elements, types, wrapperType);
                         if (isId) {
                             idIndexes.add(paramIndex);
                         }
                         if (isEntity || isId) {
-                            secondTypeParam = "? extends " + ENTITY_REP_CLASS;
+                            secondTypeParam = "? extends " + EntityRepresentation.class.getName();
                         } else {
+                            String elementType = containedType(argument, elements);
                             secondTypeParam = elementType.startsWith("?") ? elementType : "? extends " + elementType;
                         }
                         if (isOption) {
@@ -179,4 +186,24 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             return res;
         }
     };
+    
+    private static final boolean isId(VariableElement argument, Elements elements, Types types, TypeElement wrapperType) {
+        TypeMirror innerInnerType;
+        String innerTypeName = containedType(argument, elements);
+        if (innerTypeName.replaceFirst("<.*", "").equals(Id.class.getName())) {
+            String innerInnerTypeName = containedType(innerTypeName, elements).replaceAll("<.*", "");
+            if (innerInnerTypeName.equals("?")) {
+                innerInnerType = types.getWildcardType(null, null);
+            } else {
+                innerInnerType = elements.getTypeElement(innerInnerTypeName).asType();
+            }
+        } else {
+            innerInnerType = types.getWildcardType(null, null);
+        }
+        TypeMirror idType = types.getDeclaredType(elements.getTypeElement(Id.class.getName()), innerInnerType);
+        
+        WildcardType wildInnerType = types.getWildcardType(idType, null);
+        DeclaredType wholeType = types.getDeclaredType(wrapperType, wildInnerType);
+        return types.isAssignable(argument.asType(), wholeType);
+    }
 }

@@ -77,11 +77,11 @@
                     <compilerArguments>-source 1.6 -target 1.6</compilerArguments>
                     <encoding>UTF-8</encoding>
                     <optionMap>
-                        <CommonMetadataProcessor.excludesRegex>fi.solita.utils.query.(Department|Employee|PartTimeEmployee|Municipality|Report|Dto)</CommonMetadataProcessor.excludesRegex>
+                        <CommonMetadataProcessor.excludesRegex>fi.solita.utils.query.(Department|Employee|PartTimeEmployee|Municipality|Report|.*Dto)</CommonMetadataProcessor.excludesRegex>
                         <JpaMetamodelProcessor.includesRegex>fi.solita.utils.query.(Department|Employee|PartTimeEmployee|Municipality|Report)</JpaMetamodelProcessor.includesRegex>
                         <JpaMetamodelProcessor.extendClassNamePattern>fi.solita.utils.query.(Department|Employee|PartTimeEmployee|Municipality|Report)</JpaMetamodelProcessor.extendClassNamePattern>
                         <JpaMetamodelProcessor.onlyPublicMembers>true</JpaMetamodelProcessor.onlyPublicMembers>
-                        <JpaConstructorProcessor.includesRegex>fi.solita.utils.query.Dto</JpaConstructorProcessor.includesRegex>
+                        <JpaConstructorProcessor.includesRegex>fi.solita.utils.query..*Dto</JpaConstructorProcessor.includesRegex>
                     </optionMap>
                     <processors>
                         <processor>fi.solita.utils.codegen.CommonMetadataProcessor</processor>

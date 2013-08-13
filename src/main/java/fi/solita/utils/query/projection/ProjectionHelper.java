@@ -11,7 +11,6 @@ import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.isEmpty;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.range;
-import static fi.solita.utils.functional.Functional.sequence;
 import static fi.solita.utils.functional.Functional.transpose;
 import static fi.solita.utils.functional.Functional.zip;
 import static fi.solita.utils.query.QueryUtils.addListAttributeOrdering;
