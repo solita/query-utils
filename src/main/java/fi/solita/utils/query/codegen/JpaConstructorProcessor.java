@@ -19,6 +19,7 @@ import fi.solita.utils.query.codegen.generators.ConstructorsAsJpaProjections;
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedOptions({"JpaConstructorProcessor." + CommonMetadataProcessor.Options.enabled,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.generatedClassNamePattern,
+                   "JpaConstructorProcessor." + CommonMetadataProcessor.Options.generatedPackagePattern,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.includesRegex,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.excludesRegex,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.onlyPublicMembers,

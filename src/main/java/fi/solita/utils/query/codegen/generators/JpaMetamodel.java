@@ -4,7 +4,6 @@ import static fi.solita.utils.codegen.Helpers.boxed;
 import static fi.solita.utils.codegen.Helpers.containedType;
 import static fi.solita.utils.codegen.Helpers.element2Fields;
 import static fi.solita.utils.codegen.Helpers.element2Methods;
-import static fi.solita.utils.codegen.Helpers.isSubtype;
 import static fi.solita.utils.codegen.Helpers.simpleName;
 import static fi.solita.utils.codegen.Helpers.typeMirror2GenericQualifiedName;
 import static fi.solita.utils.codegen.Helpers.typeParameter2String;
@@ -40,6 +39,7 @@ import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
+import fi.solita.utils.codegen.Helpers;
 import fi.solita.utils.codegen.generators.Generator;
 import fi.solita.utils.codegen.generators.GeneratorOptions;
 import fi.solita.utils.functional.Function2;
@@ -97,7 +97,7 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
             }
         }));
         
-        return flatMap(zipWithIndex(concat(fields, methods)), singleElementHandler.ap(processingEnv));
+        return flatMap(zipWithIndex(concat(fields, methods)), singleElementHandler.ap(new Helpers.EnvDependent(processingEnv)));
     }
 
     private AccessType resolveAccessTypeFromId(TypeElement source) {
@@ -114,17 +114,17 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
         return propertyName;
     }
 
-    public static Function2<ProcessingEnvironment, Map.Entry<Integer, ? extends Element>, Iterable<String>> singleElementHandler = new Function2<ProcessingEnvironment, Map.Entry<Integer, ? extends Element>, Iterable<String>>() {
+    public static Function2<Helpers.EnvDependent, Map.Entry<Integer, ? extends Element>, Iterable<String>> singleElementHandler = new Function2<Helpers.EnvDependent, Map.Entry<Integer, ? extends Element>, Iterable<String>>() {
         @Override
-        public Iterable<String> apply(ProcessingEnvironment processingEnv, Map.Entry<Integer, ? extends Element> entry) {
+        public Iterable<String> apply(Helpers.EnvDependent helper, Map.Entry<Integer, ? extends Element> entry) {
             Element member = entry.getValue();
             TypeElement enclosingElement = (TypeElement) member.getEnclosingElement();
             TypeMirror returnType = member instanceof ExecutableElement ? ((ExecutableElement)member).getReturnType() : member.asType();
             
-            boolean isSet = isSubtype(returnType, Set.class, processingEnv);
-            boolean isList = isSubtype(returnType, List.class, processingEnv);
-            boolean isMap = isSubtype(returnType, Map.class, processingEnv);
-            boolean isCollection = isSubtype(returnType, Collection.class, processingEnv);
+            boolean isSet = helper.isSubtype(returnType, Set.class);
+            boolean isList = helper.isSubtype(returnType, List.class);
+            boolean isMap = helper.isSubtype(returnType, Map.class);
+            boolean isCollection = helper.isSubtype(returnType, Collection.class);
 
             String attributeName = member.getSimpleName().toString();
             if (member instanceof ExecutableElement) {
@@ -145,7 +145,7 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
             });
             
             String ownerType = typeMirror2GenericQualifiedName.apply(enclosingElement.asType());
-            String attributeType = isCollection ? containedType(member, processingEnv.getElementUtils()) : typeMirror2GenericQualifiedName.andThen(boxed).apply(returnType);
+            String attributeType = isCollection ? containedType(member) : typeMirror2GenericQualifiedName.andThen(boxed).apply(returnType);
             
             String typeSignature = "<" + ownerType + "," + attributeType + ">";
             for (Pair<String, String> param: classTypeParameters) {

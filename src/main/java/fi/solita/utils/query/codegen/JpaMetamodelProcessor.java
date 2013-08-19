@@ -20,6 +20,7 @@ import fi.solita.utils.query.codegen.generators.JpaMetamodel;
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedOptions({"JpaMetamodelProcessor." + CommonMetadataProcessor.Options.enabled,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.generatedClassNamePattern,
+                   "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.generatedPackagePattern,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.includesRegex,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.excludesRegex,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.onlyPublicMembers,

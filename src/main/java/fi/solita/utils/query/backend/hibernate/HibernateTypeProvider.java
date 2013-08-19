@@ -7,7 +7,6 @@ import static fi.solita.utils.functional.Functional.find;
 import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.Functional.groupBy;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Predicates.equalTo;
 
 import java.io.Serializable;
 import java.util.List;
@@ -24,6 +23,7 @@ import org.hibernate.usertype.UserType;
 
 import fi.solita.utils.functional.Functional_;
 import fi.solita.utils.functional.Pair;
+import fi.solita.utils.functional.Predicate;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.backend.Type;
 import fi.solita.utils.query.backend.TypeProvider;
@@ -49,7 +49,12 @@ public class HibernateTypeProvider implements TypeProvider {
             Map<String, List<org.hibernate.type.Type>> allPropertyTypesByName     = groupBy(flatMap(allClassMetadata, HibernateTypeProvider_.classMetadata2propertyTypes), HibernateTypeProvider_.type2Name);
             Iterable<org.hibernate.type.Type>          allDifferentPropertyTypes  = map(allPropertyTypesByName.values(), Functional_.<org.hibernate.type.Type>head1());
             Iterable<List<org.hibernate.type.Type>>    typesByReturnedClass       = groupBy(allDifferentPropertyTypes, HibernateTypeProvider_.type2ReturnedClass).values();
-            Iterable<List<org.hibernate.type.Type>>    typesUniqueByReturnedClass = filter(typesByReturnedClass, Functional_.size.andThen(equalTo(1)));
+            Iterable<List<org.hibernate.type.Type>>    typesUniqueByReturnedClass = filter(typesByReturnedClass, Functional_.size.andThen(new Predicate<Integer>() {
+                @Override
+                public boolean accept(Integer candidate) {
+                    return candidate == 1;
+                }
+            }));
             typesByUniqueReturnedClassCache = newMap(map(typesUniqueByReturnedClass, Functional_.<org.hibernate.type.Type>head1().andThen(HibernateTypeProvider_.type2ReturnedClassAndNamePair)));
         }
         return typesByUniqueReturnedClassCache;

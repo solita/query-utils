@@ -4,12 +4,13 @@ import static fi.solita.utils.codegen.Helpers.boxed;
 import static fi.solita.utils.codegen.Helpers.containedType;
 import static fi.solita.utils.codegen.Helpers.element2Constructors;
 import static fi.solita.utils.codegen.Helpers.elementGenericQualifiedName;
-import static fi.solita.utils.codegen.Helpers.isSubtype;
 import static fi.solita.utils.codegen.Helpers.publicElement;
 import static fi.solita.utils.codegen.Helpers.qualifiedName;
 import static fi.solita.utils.codegen.Helpers.relevantTypeParams;
 import static fi.solita.utils.codegen.Helpers.resolveVisibility;
+import static fi.solita.utils.codegen.Helpers.toString;
 import static fi.solita.utils.codegen.Helpers.typeParameter2String;
+import static fi.solita.utils.codegen.Helpers.joinWithSpace;
 import static fi.solita.utils.codegen.generators.Content.EmptyLine;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.concat;
@@ -22,7 +23,6 @@ import static fi.solita.utils.functional.Functional.range;
 import static fi.solita.utils.functional.Functional.zip;
 import static fi.solita.utils.functional.Functional.zipWithIndex;
 import static fi.solita.utils.functional.Option.Some;
-import static fi.solita.utils.functional.Transformers.mkString;
 import static fi.solita.utils.functional.Transformers.prepend;
 
 import java.lang.reflect.Constructor;
@@ -46,6 +46,7 @@ import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
+import fi.solita.utils.codegen.Helpers;
 import fi.solita.utils.codegen.generators.ConstructorsAsFunctions;
 import fi.solita.utils.codegen.generators.Generator;
 import fi.solita.utils.codegen.generators.GeneratorOptions;
@@ -55,7 +56,6 @@ import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Function1;
 import fi.solita.utils.functional.Function3;
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.functional.Transformers;
 import fi.solita.utils.query.EntityRepresentation;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
@@ -81,13 +81,13 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             elements = filter(elements, publicElement);
         }
 
-        Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = constructorGen.ap(processingEnv, options);
+        Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = constructorGen.ap(new Helpers.EnvDependent(processingEnv), options);
         return flatMap(zipWithIndex(elements), singleElementTransformer);
     }
 
-    public static Function3<ProcessingEnvironment, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>> constructorGen = new Function3<ProcessingEnvironment, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>>() {
+    public static Function3<Helpers.EnvDependent, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>> constructorGen = new Function3<Helpers.EnvDependent, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>>() {
         @Override
-        public Iterable<String> apply(ProcessingEnvironment processingEnv, ConstructorsAsJpaProjections.Options options, Map.Entry<Integer, ExecutableElement> entry) {
+        public Iterable<String> apply(Helpers.EnvDependent helper, ConstructorsAsJpaProjections.Options options, Map.Entry<Integer, ExecutableElement> entry) {
             ExecutableElement constructor = entry.getValue();
             TypeElement enclosingElement = (TypeElement) constructor.getEnclosingElement();
             int index = entry.getKey();
@@ -100,17 +100,17 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                 Class<?> attributeClass;
                 String secondTypeParam;
                 TypeMirror argumentType = argument.asType();
-                if (isSubtype(argumentType, Id.class, processingEnv)) {
+                if (helper.isSubtype(argumentType, Id.class)) {
                     attributeClass = SingularAttribute.class;
                     secondTypeParam = "? extends " + EntityRepresentation.class.getName();
                 } else {
-                    Elements elements = processingEnv.getElementUtils();
-                    Types types = processingEnv.getTypeUtils();
+                    Elements elements = helper.elementUtils;
+                    Types types = helper.typeUtils;
                     
-                    boolean isEntity = isSubtype(argumentType, IEntity.class, processingEnv);
-                    boolean isOption = isSubtype(argumentType, Option.class, processingEnv);
-                    boolean isList = isSubtype(argumentType, List.class, processingEnv);
-                    boolean isSet = isSubtype(argumentType, Set.class, processingEnv);
+                    boolean isEntity = helper.isSubtype(argumentType, IEntity.class);
+                    boolean isOption = helper.isSubtype(argumentType, Option.class);
+                    boolean isList = helper.isSubtype(argumentType, List.class);
+                    boolean isSet = helper.isSubtype(argumentType, Set.class);
 
                     if (isSet || isList || isOption) {
                         attributeClass = isSet ? SetAttribute.class : isList ? ListAttribute.class : SingularAttribute.class;
@@ -123,7 +123,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                         if (isEntity || isId) {
                             secondTypeParam = "? extends " + EntityRepresentation.class.getName();
                         } else {
-                            String elementType = containedType(argument, elements);
+                            String elementType = containedType(argument);
                             secondTypeParam = elementType.startsWith("?") ? elementType : "? extends " + elementType;
                         }
                         if (isOption) {
@@ -143,11 +143,12 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             String returnType = elementGenericQualifiedName(enclosingElement);
 
             List<String> argumentTypes = newList(map(constructor.getParameters(), qualifiedName.andThen(boxed)));
-            List<String> argumentNames = argCount == 0 ? Collections.<String>newList() : newList(map(range(1, argCount), Transformers.toString.andThen(prepend("$p"))));
-            List<String> attributeNames = argCount == 0 ? Collections.<String>newList() : newList(map(range(1, argCount), Transformers.toString.andThen(prepend("$a"))));
-            Iterable<String> relevantTypeParams = map(relevantTypeParams(constructor), typeParameter2String);
+            List<String> argumentNames = argCount == 0 ? Collections.<String>newList() : newList(map(range(1, argCount), toString.andThen(prepend("$p"))));
+            List<String> attributeNames = argCount == 0 ? Collections.<String>newList() : newList(map(range(1, argCount), toString.andThen(prepend("$a"))));
+            List<String> relevantTypeParams = newList(map(relevantTypeParams(constructor), typeParameter2String));
             
-            String delegateMetaConstructor = "$" + (index == 0 ? "" : index) + (ConstructorsAsFunctions.needsToBeFunction(constructor) ? "()" : "");
+            boolean needsToBeFunction = !relevantTypeParams.isEmpty();
+            String delegateMetaConstructor = "$" + (index == 0 ? "" : index) + (needsToBeFunction ? "()" : "");
             String constructorClass = options.getClassForJpaConstructors(argCount).getName().replace('$', '.');
 
             String fundef = constructorClass + "<" + mkString(",", cons("OWNER", argumentTypes)) + "," + returnType + ">";
@@ -155,7 +156,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
 
             Iterable<String> body = newList(
                 "@Override",
-                "public " + returnType + " apply(" + mkString(", ", map(zip(argumentTypes, argumentNames), mkString(" "))) + ") {",
+                "public " + returnType + " apply(" + mkString(", ", map(zip(argumentTypes, argumentNames), joinWithSpace)) + ") {",
                 "    " + Function0.class.getPackage().getName() + ".Function" + argCount + "<" + mkString(",", concat(argumentTypes, newList(returnType))) + "> c = " + delegateMetaConstructor + ";",
                 "    return c.apply(" + mkString(", ", argumentNames) + ");",
                 "}",
@@ -170,13 +171,13 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                 "}",
                 "",
                 "public java.util.List<Integer> getIndexesOfIdWrappingParameters() {",
-                "    return java.util.Arrays.<Integer>asList(" + mkString(", ", map(idIndexes, Transformers.toString)) + ");",
+                "    return java.util.Arrays.<Integer>asList(" + mkString(", ", map(idIndexes, toString)) + ");",
                 "}"
             );
 
             @SuppressWarnings("unchecked")
             Iterable<String> res = concat(
-                Some(declaration + "(" + mkString(", ", map(zip(map(attributeTypes, prepend("final ")), attributeNames), mkString(" "))) + ") {"),
+                Some(declaration + "(" + mkString(", ", map(zip(map(attributeTypes, prepend("final ")), attributeNames), joinWithSpace)) + ") {"),
                 Some("    return new " + fundef + "() {"),
                 map(body, prepend("        ")),
                 Some("    };"),
@@ -189,9 +190,9 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
     
     private static final boolean isId(VariableElement argument, Elements elements, Types types, TypeElement wrapperType) {
         TypeMirror innerInnerType;
-        String innerTypeName = containedType(argument, elements);
+        String innerTypeName = containedType(argument);
         if (innerTypeName.replaceFirst("<.*", "").equals(Id.class.getName())) {
-            String innerInnerTypeName = containedType(innerTypeName, elements).replaceAll("<.*", "");
+            String innerInnerTypeName = containedType(innerTypeName).replaceAll("<.*", "");
             if (innerInnerTypeName.equals("?")) {
                 innerInnerType = types.getWildcardType(null, null);
             } else {
