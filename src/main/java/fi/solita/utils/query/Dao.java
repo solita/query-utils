@@ -2,10 +2,14 @@ package fi.solita.utils.query;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.metamodel.CollectionAttribute;
+import javax.persistence.metamodel.ListAttribute;
+import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Apply;
@@ -40,7 +44,7 @@ public class Dao {
         this.qlQueries = qlQueries;
     }
 
-    public <ID extends Id<?>, E extends IEntity & Identifiable<ID>> ID persist(E entity) {
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>> Id<E> persist(E entity) {
         return jpaBasicQueries.persist(entity);
     }
 
@@ -67,9 +71,21 @@ public class Dao {
     public <E extends IEntity> Option<E> find(Id<E> id) {
         return jpaBasicQueries.find(id);
     }
-
+    
     public <E extends IEntity & Identifiable<? extends Id<? super E>>, T> T getProxy(E entity, SingularAttribute<? super E, T> relation) {
         return jpaBasicQueries.getProxy(entity, relation);
+    }
+    
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Set<T> getProxies(E entity, SetAttribute<? super E, T> relation) {
+        return jpaBasicQueries.getProxies(entity, relation);
+    }
+    
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Collection<T> getProxies(E entity, CollectionAttribute<? super E, T> relation) {
+        return jpaBasicQueries.getProxies(entity, relation);
+    }
+    
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> List<T> getProxies(E entity, ListAttribute<? super E, T> relation) {
+        return jpaBasicQueries.getProxies(entity, relation);
     }
 
     public <E extends IEntity> Option<E> getIfDefined(Option<? extends Id<E>> idOption) {

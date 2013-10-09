@@ -1,19 +1,16 @@
 package fi.solita.utils.query;
 
-import static org.junit.Assert.*;
-
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
+import static fi.solita.utils.functional.Option.Some;
 
 import org.junit.Test;
 
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.query.FooDto_;
-import fi.solita.utils.query.generation.Cast;
+import fi.solita.utils.query._.A;
+import fi.solita.utils.query._.B;
+import fi.solita.utils.query._.C;
+import fi.solita.utils.query._.D;
+import fi.solita.utils.query._.E;
 import fi.solita.utils.query.projection.Select;
-import static fi.solita.utils.functional.Option.Some;
-import static fi.solita.utils.query._.*;
 
 class Foo implements IEntity {
 }

@@ -1,5 +1,7 @@
 package fi.solita.utils.query.execution;
 
+import static fi.solita.utils.functional.Collections.newList;
+import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
@@ -9,19 +11,31 @@ import static fi.solita.utils.query.QueryUtils.resolveSelection;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.CollectionAttribute;
+import javax.persistence.metamodel.ListAttribute;
+import javax.persistence.metamodel.PluralAttribute;
+import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
+
+import org.hibernate.proxy.HibernateProxyHelper;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.JpaCriteriaCopy;
+import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.Removable;
 import fi.solita.utils.query.attributes.AttributeProxy;
 import fi.solita.utils.query.attributes.OptionalAttribute;
@@ -40,9 +54,10 @@ public class JpaBasicQueries {
         this.projectionSupport = projectionSupport;
     }
 
-    public <ID extends Id<?>, E extends IEntity & Identifiable<ID>> ID persist(E entity) {
+    @SuppressWarnings("unchecked")
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>> Id<E> persist(E entity) {
         em.persist(entity);
-        return entity.getId();
+        return (Id<E>) entity.getId();
     }
 
     public boolean isManaged(IEntity entity) {
@@ -107,6 +122,29 @@ public class JpaBasicQueries {
             }
             return (T) ret;
         }
+    }
+    
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Set<T> getProxies(E entity, SetAttribute<? super E, T> relation) {
+        return newSet(getProxiesIt(entity, relation));
+    }
+    
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> List<T> getProxies(E entity, ListAttribute<? super E, T> relation) {
+        return newList(getProxiesIt(entity, relation));
+    }
+    
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Collection<T> getProxies(E entity, CollectionAttribute<? super E, T> relation) {
+        return newList(getProxiesIt(entity, relation));
+    }
+    
+    @SuppressWarnings("unchecked")
+    private <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity, C extends Collection<T>> Iterable<T> getProxiesIt(E entity, PluralAttribute<? super E, C, T> relation) {
+        SingularAttribute<T, Id<T>> id = QueryUtils.id(relation.getBindableJavaType(), em);
+        CriteriaQuery<Id<T>> query = em.getCriteriaBuilder().createQuery(id.getBindableJavaType());
+        Root<E> root = query.from(HibernateProxyHelper.getClassWithoutInitializingProxy(entity));
+        query.where(em.getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em)), entity.getId()));
+        query.select(((Join<?,T>)QueryUtils.join((Root<?>)root, (Attribute<?,?>)relation, JoinType.INNER)).get(id));
+        
+        return map(em.createQuery(query).getResultList(), JpaBasicQueries_.<T>getProxy().ap(this));
     }
 
     public <E extends IEntity> Option<E> getIfDefined(Option<? extends Id<E>> idOption) {

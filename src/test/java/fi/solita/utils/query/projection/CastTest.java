@@ -30,8 +30,7 @@ public class CastTest extends QueryTestBase {
         Project.value(Employee_.optionalSalary);
     }
 
-    @Test(expected = QueryUtils.RequiredAttributeMustNotHaveOptionTypeException.class)
-    public void Projectvalue_fails_with_optional_for_mandatory_attribute() {
+    public void Projectvalue_succeeds_with_optional_for_mandatory_attribute() {
         Project.value(Cast.optional(Employee_.mandatoryName));
     }
     
@@ -40,8 +39,7 @@ public class CastTest extends QueryTestBase {
         Project.value(Employee_.optionalReport);
     }
     
-    @Test(expected = QueryUtils.RequiredAttributeMustNotHaveOptionTypeException.class)
-    public void Projectvalue_embedded_fails_with_optional_for_mandatory_attribute() {
+    public void Projectvalue_embedded_succeeds_with_optional_for_mandatory_attribute() {
         Project.value(Cast.optional(Municipality_.mandatoryReport));
     }
     
@@ -50,8 +48,7 @@ public class CastTest extends QueryTestBase {
         Project.tuple(Employee_.optionalSalary);
     }
 
-    @Test(expected = QueryUtils.RequiredAttributeMustNotHaveOptionTypeException.class)
-    public void Projecttuple_fails_with_optional_for_mandatory_attribute() {
+    public void Projecttuple_succeeds_with_optional_for_mandatory_attribute() {
         Project.tuple(Cast.optional(Employee_.mandatoryName));
     }
     

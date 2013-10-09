@@ -1,6 +1,7 @@
 package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.newArray;
+import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.map;
 
 import java.util.Collection;
@@ -16,6 +17,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.proxy.HibernateProxy;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
@@ -37,7 +39,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @Override
     public <T> T get(CriteriaQuery<T> query) {
         JpaCriteriaCopy.createMissingAliases(query);
-        return em.createQuery(query).getSingleResult();
+        return replaceProxy(em.createQuery(query).getSingleResult());
     }
 
     @Override
@@ -53,7 +55,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
             q.setMaxResults(page.getMaxResults());
         }
         try {
-            return q.getResultList();
+            return newList(map(q.getResultList(), HibernateQueryExecutor_.<T>replaceProxy()));
         } finally {
             if (page != Page.NoPaging) {
                 q.setFirstResult(originalFirstResult);
@@ -74,7 +76,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
-        return Option.of((T)q.uniqueResult());
+        return Option.of(replaceProxy((T)q.uniqueResult()));
     }
 
     @SuppressWarnings("unchecked")
@@ -84,7 +86,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
-        return applyPaging(q, page).list();
+        return newList(map(applyPaging(q, page).list(), HibernateQueryExecutor_.replaceProxy()));
     }
 
     @SuppressWarnings("unchecked")
@@ -92,7 +94,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     public <T> Option<T> find(QLQuery<T> query) {
         Query q = em.unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
-        return Option.of((T)q.uniqueResult());
+        return Option.of(replaceProxy((T)q.uniqueResult()));
     }
 
     @SuppressWarnings("unchecked")
@@ -100,10 +102,18 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     public <T> List<T> getMany(QLQuery<T> query, Page page) {
         Query q = em.unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
-        return applyPaging(q, page).list();
+        return newList(map(applyPaging(q, page).list(), HibernateQueryExecutor_.replaceProxy()));
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static final <T> T replaceProxy(T entityOrProxy) {
+        if (entityOrProxy instanceof HibernateProxy) {
+            return (T) ((HibernateProxy)entityOrProxy).getHibernateLazyInitializer().getImplementation();
+        }
+        return entityOrProxy;
     }
 
-    private static SQLQuery bindReturnValues(SQLQuery q, List<Pair<String, Option<Type<?>>>> retvals) {
+    private static final SQLQuery bindReturnValues(SQLQuery q, List<Pair<String, Option<Type<?>>>> retvals) {
         for (Entry<String, Option<Type<?>>> param: retvals) {
             if (param.getValue().isDefined()) {
                 org.hibernate.type.Type t = ((HibernateTypeProvider.HibernateType<?>)param.getValue().get()).type;
@@ -121,7 +131,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return q;
     }
 
-    private static SQLQuery bindTransformer(SQLQuery q, NativeQuery<?> query) {
+    private static final SQLQuery bindTransformer(SQLQuery q, NativeQuery<?> query) {
         String[] retvals = newArray(String.class, map(query.retvals, Tuple_._1_.<String>get_1()));
         if (query instanceof NativeQuery.NativeQueryPair) {
             q.setResultTransformer(TupleResultTransformers.Tuple2(retvals));
@@ -146,7 +156,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return q;
     }
 
-    private static <T extends Query> T bindParams(T q, Map<String, Pair<?, Option<Type<?>>>> params) {
+    private static final <T extends Query> T bindParams(T q, Map<String, Pair<?, Option<Type<?>>>> params) {
         for (Entry<String, Pair<?, Option<Type<?>>>> param: params.entrySet()) {
             if (param.getValue()._1 instanceof Collection) {
                 if (param.getValue()._2.isDefined()) {
@@ -165,7 +175,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return q;
     }
 
-    private static Query applyPaging(Query q, Page page) {
+    private static final Query applyPaging(Query q, Page page) {
         if (page != Page.NoPaging) {
             q.setFirstResult(page.getFirstResult())
              .setMaxResults(page.getMaxResults());

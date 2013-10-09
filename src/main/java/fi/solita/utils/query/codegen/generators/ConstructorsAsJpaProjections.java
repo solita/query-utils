@@ -4,14 +4,21 @@ import static fi.solita.utils.codegen.Helpers.boxed;
 import static fi.solita.utils.codegen.Helpers.containedType;
 import static fi.solita.utils.codegen.Helpers.element2Constructors;
 import static fi.solita.utils.codegen.Helpers.elementGenericQualifiedName;
+import static fi.solita.utils.codegen.Helpers.importType;
+import static fi.solita.utils.codegen.Helpers.importTypes;
+import static fi.solita.utils.codegen.Helpers.isPrivate;
+import static fi.solita.utils.codegen.Helpers.joinWithSpace;
+import static fi.solita.utils.codegen.Helpers.padding;
+import static fi.solita.utils.codegen.Helpers.parameterTypesAsClasses;
 import static fi.solita.utils.codegen.Helpers.publicElement;
 import static fi.solita.utils.codegen.Helpers.qualifiedName;
 import static fi.solita.utils.codegen.Helpers.relevantTypeParams;
 import static fi.solita.utils.codegen.Helpers.resolveVisibility;
 import static fi.solita.utils.codegen.Helpers.toString;
 import static fi.solita.utils.codegen.Helpers.typeParameter2String;
-import static fi.solita.utils.codegen.Helpers.joinWithSpace;
 import static fi.solita.utils.codegen.generators.Content.EmptyLine;
+import static fi.solita.utils.codegen.generators.Content.catchBlock;
+import static fi.solita.utils.codegen.generators.Content.reflectionInvokationArgs;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
@@ -25,7 +32,7 @@ import static fi.solita.utils.functional.Functional.zipWithIndex;
 import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.functional.Transformers.prepend;
 
-import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,6 +42,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -47,12 +55,11 @@ import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.codegen.Helpers;
-import fi.solita.utils.codegen.generators.ConstructorsAsFunctions;
+import fi.solita.utils.codegen.Helpers_;
 import fi.solita.utils.codegen.generators.Generator;
 import fi.solita.utils.codegen.generators.GeneratorOptions;
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Collections;
-import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Function1;
 import fi.solita.utils.functional.Function3;
 import fi.solita.utils.functional.Option;
@@ -90,6 +97,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
         public Iterable<String> apply(Helpers.EnvDependent helper, ConstructorsAsJpaProjections.Options options, Map.Entry<Integer, ExecutableElement> entry) {
             ExecutableElement constructor = entry.getValue();
             TypeElement enclosingElement = (TypeElement) constructor.getEnclosingElement();
+            String enclosingElementQualifiedName = qualifiedName.apply(enclosingElement);
             int index = entry.getKey();
 
             List<String> attributeTypes = newList();
@@ -102,7 +110,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                 TypeMirror argumentType = argument.asType();
                 if (helper.isSubtype(argumentType, Id.class)) {
                     attributeClass = SingularAttribute.class;
-                    secondTypeParam = "? extends " + EntityRepresentation.class.getName();
+                    secondTypeParam = "? extends " + importType(EntityRepresentation.class);
                 } else {
                     Elements elements = helper.elementUtils;
                     Types types = helper.typeUtils;
@@ -121,70 +129,89 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                             idIndexes.add(paramIndex);
                         }
                         if (isEntity || isId) {
-                            secondTypeParam = "? extends " + EntityRepresentation.class.getName();
+                            secondTypeParam = "? extends " + importType(EntityRepresentation.class);
                         } else {
                             String elementType = containedType(argument);
                             secondTypeParam = elementType.startsWith("?") ? elementType : "? extends " + elementType;
                         }
                         if (isOption) {
-                            secondTypeParam = "? extends " + Option.class.getName() + "<" + secondTypeParam + ">";
+                            secondTypeParam = "? extends " + importType(Option.class) + "<" + secondTypeParam + ">";
                         }
                     } else {
                         attributeClass = SingularAttribute.class;
-                        String type = qualifiedName.andThen(boxed).apply(argument);
+                        String type = importTypes(qualifiedName.andThen(boxed).apply(argument));
                         secondTypeParam = "?".equals(type) ? type : "? extends " + type;
                     }
                 }
 
-                attributeTypes.add(attributeClass.getName() + "<? super OWNER, " + secondTypeParam + ">");
+                attributeTypes.add(importType(attributeClass) + "<? super OWNER, " + secondTypeParam + ">");
             }
 
             int argCount = constructor.getParameters().size();
-            String returnType = elementGenericQualifiedName(enclosingElement);
+            String returnTypeImported = importTypes(elementGenericQualifiedName(enclosingElement));
 
-            List<String> argumentTypes = newList(map(constructor.getParameters(), qualifiedName.andThen(boxed)));
+            List<String> argumentTypes = newList(map(constructor.getParameters(), qualifiedName.andThen(boxed).andThen(Helpers_.importTypes)));
             List<String> argumentNames = argCount == 0 ? Collections.<String>newList() : newList(map(range(1, argCount), toString.andThen(prepend("$p"))));
             List<String> attributeNames = argCount == 0 ? Collections.<String>newList() : newList(map(range(1, argCount), toString.andThen(prepend("$a"))));
-            List<String> relevantTypeParams = newList(map(relevantTypeParams(constructor), typeParameter2String));
+            List<? extends TypeParameterElement> relevantTypeParamsForConstructor = newList(relevantTypeParams(constructor));
+            List<String> relevantTypeParams = newList(map(relevantTypeParamsForConstructor, typeParameter2String));
             
-            boolean needsToBeFunction = !relevantTypeParams.isEmpty();
-            String delegateMetaConstructor = "$" + (index == 0 ? "" : index) + (needsToBeFunction ? "()" : "");
+            boolean isPrivate = isPrivate(constructor);
+            boolean throwsChecked = helper.throwsCheckedExceptions(constructor);
             String constructorClass = options.getClassForJpaConstructors(argCount).getName().replace('$', '.');
 
-            String fundef = constructorClass + "<" + mkString(",", cons("OWNER", argumentTypes)) + "," + returnType + ">";
+            String fundef = importTypes(constructorClass) + "<" + mkString(",", cons("OWNER", argumentTypes)) + "," + returnTypeImported + ">";
             String declaration = resolveVisibility(constructor) + " static final <" + mkString(",", cons("OWNER", relevantTypeParams)) + "> " + fundef + " c" + (index+1);
 
-            Iterable<String> body = newList(
-                "@Override",
-                "public " + returnType + " apply(" + mkString(", ", map(zip(argumentTypes, argumentNames), joinWithSpace)) + ") {",
-                "    " + Function0.class.getPackage().getName() + ".Function" + argCount + "<" + mkString(",", concat(argumentTypes, newList(returnType))) + "> c = " + delegateMetaConstructor + ";",
-                "    return c.apply(" + mkString(", ", argumentNames) + ");",
-                "}",
-                "",
-                "public " + Constructor.class.getName() + "<" + returnType + "> getMember() {",
-                "    " + fi.solita.utils.codegen.ConstructorMeta_.class.getName() + "<?," + returnType + "> c = " + delegateMetaConstructor + ";",
-                "    return c.getMember();",
-                "}",
-                "",
-                "public java.util.List<" + Attribute.class.getName() + "<?, ?>> getParameters() {",
-                "    return java.util.Arrays.<" + Attribute.class.getName() + "<?, ?>>asList(" + mkString(", ", attributeNames) + ");",
-                "}",
-                "",
-                "public java.util.List<Integer> getIndexesOfIdWrappingParameters() {",
-                "    return java.util.Arrays.<Integer>asList(" + mkString(", ", map(idIndexes, toString)) + ");",
+            Iterable<String> tryBlock = isPrivate 
+                    ? Some("return (" + returnTypeImported + ")getMember().newInstance(" + mkString(", ", argumentNames) + ");")
+                    : Some("return new " + returnTypeImported + "(" + mkString(", ", argumentNames) + ");");
+            
+            Iterable<String> tryCatchBlock = isPrivate || throwsChecked
+                ? concat(
+                    Some("try {"),
+                    map(tryBlock, padding),
+                    catchBlock,
+                    Some("}"))
+                : tryBlock;
+                    
+            Iterable<String> applyBlock = concat(
+                Some("@Override"),
+                Some("public " + returnTypeImported + " apply(" + mkString(", ", map(zip(argumentTypes, argumentNames), joinWithSpace)) + ") {"),
+                map(tryCatchBlock, padding),
+                Some("}")
+            );
+            
+            Iterable<String> getParametersBlock = newList(
+                "public " + importType(List.class) + "<" + importType(Attribute.class) + "<?, ?>> getParameters() {",
+                padding.apply("return " + importType(Arrays.class) + ".<" + importType(Attribute.class) + "<?, ?>>asList(" + mkString(", ", attributeNames) + ");"),
                 "}"
             );
-
+            Iterable<String> getIndexesOfIdWrappingParametersBlock = newList(
+                "public " + importType(List.class) + "<Integer> getIndexesOfIdWrappingParameters() {",
+                padding.apply("return " + importType(Arrays.class) + ".<Integer>asList(" + mkString(", ", map(idIndexes, toString)) + ");"),
+                "}"
+            );
+            
             @SuppressWarnings("unchecked")
-            Iterable<String> res = concat(
+            Iterable<String> body = concat(
+                applyBlock,
+                EmptyLine,
+                getParametersBlock,
+                EmptyLine,
+                getIndexesOfIdWrappingParametersBlock
+            );
+
+            return concat(
                 Some(declaration + "(" + mkString(", ", map(zip(map(attributeTypes, prepend("final ")), attributeNames), joinWithSpace)) + ") {"),
-                Some("    return new " + fundef + "() {"),
-                map(body, prepend("        ")),
-                Some("    };"),
+                map(concat(
+                    Some("return new " + fundef + "(" + mkString(", ", cons(importTypes(enclosingElementQualifiedName) + ".class", reflectionInvokationArgs(parameterTypesAsClasses(constructor, relevantTypeParamsForConstructor)))) + ") {"),
+                    map(body, padding),
+                    Some("};")
+                ), padding),
                 Some("}"),
                 EmptyLine
             );
-            return res;
         }
     };
     

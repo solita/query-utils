@@ -46,6 +46,10 @@ public class Constructors {
     }
 
     static final class IdProjection<E extends IEntity> extends ConstructorMeta_.F1<E,Id<E>, Id<E>> {
+        public IdProjection() {
+            super(null, null);
+        }
+
         @Override
         public List<Attribute<?, ?>> getParameters() {
             // There is actually one attribute, we just don't know the instance here...
@@ -78,6 +82,7 @@ public class Constructors {
         private final Attribute<? super E, RIGHT> right;
 
         public PairProjection(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
+            super(null, null);
             this.left = left;
             this.right = right;
         }
@@ -152,6 +157,7 @@ public class Constructors {
         private final Attribute<? super E,R> attribute;
 
         public ValueAttributeProjection(Attribute<? super E,R> attribute) {
+            super(null, null);
             this.attribute = attribute;
         }
 

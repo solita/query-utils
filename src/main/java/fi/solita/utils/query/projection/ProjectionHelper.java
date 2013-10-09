@@ -98,7 +98,7 @@ public class ProjectionHelper {
     public <R> List<R> finalizeProjectingQuery(ConstructorMeta_<?,R,?> projection, Iterable<? extends Iterable<Object>> rows) {
         logger.info("finalizeProjectingQuery({},{})", projection, rows);
         Iterable<Iterable<Object>> columns = transpose(rows);
-        columns = newList(map(zip(range(0), projection.getParameters(), columns), performAdditionalQueriesForPlaceholderValues.apply(this).ap(projection)));
+        columns = newList(map(zip(range(0), projection.getParameters(), columns), performAdditionalQueriesForPlaceholderValues.ap(this).ap(projection)));
         List<R> ret = newList(transformAllRows(projection, transpose(columns)));
         logger.debug("finalizeProjectingQuery -> {}", ret);
         return ret;
@@ -193,8 +193,8 @@ public class ProjectionHelper {
         List<Object[]> results = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds);
         
         @SuppressWarnings("unchecked")
-        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(results, Functional_.head());
-        Iterable<Iterable<Object>> actualResultRows = map(results, Functional_.tail());
+        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(results, Functional_.head1());
+        Iterable<Iterable<Object>> actualResultRows = map(results, Functional_.tail1());
 
         Iterable<? extends Object> result;
         if (isCollectionOfEmbeddables(target)) {
@@ -207,10 +207,10 @@ public class ProjectionHelper {
                 logger.info("Target is AdditionalQueryPerformingAttribute. Finalizing: {}", target);
                 result = finalizeProjectingQuery(rel.get().getConstructor(), actualResultRows);
             } else {
-                if (!isEmpty(flatMap(actualResultRows, Functional_.tail1()))) {
+                if (!isEmpty(flatMap(actualResultRows, Functional_.tail()))) {
                     throw new RuntimeException("whoops");
                 }
-                result = map(actualResultRows, Functional_.head1().andThen(ProjectionResultUtil_.postProcessValue.ap(target)));
+                result = map(actualResultRows, Functional_.head().andThen(ProjectionResultUtil_.postProcessValue.ap(target)));
             }
         }
         

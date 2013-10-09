@@ -1,16 +1,14 @@
 package fi.solita.utils.query.execution;
 
+import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Functional.sequence;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.util.Set;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -26,9 +24,9 @@ import fi.solita.utils.query.Employee;
 import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Municipality;
+import fi.solita.utils.query.Municipality_;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.QueryUtils.OptionalAttributeNeedOptionTypeException;
-import fi.solita.utils.query.QueryUtils.RequiredAttributeMustNotHaveOptionTypeException;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 import fi.solita.utils.query.generation.Restrict;
@@ -111,23 +109,6 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     }
 
     @Test
-    public void getProxyList() {
-        Department dep1 = new Department();
-        Department dep2 = new Department();
-        persist(dep1, dep2);
-        em.flush();
-        em.clear();
-
-        Set<Department> proxySet = newSet(map(newSet(dep1.getId(), dep2.getId()), JpaBasicQueries_.<Department>getProxy().apply(dao)));
-        for (Department proxy: proxySet) {
-            assertFalse(proxy.getClass().equals(Department.class));
-            assertFalse(Hibernate.isInitialized(proxy));
-        }
-
-        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(proxySet, Department_.getId)));
-    }
-
-    @Test
     public void getProxyIfDefined() {
         Department dep = new Department();
         persist(dep);
@@ -195,8 +176,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         dao.getProxy(v, Employee_.optionalMunicipality);
     }
     
-    @Test(expected = RequiredAttributeMustNotHaveOptionTypeException.class)
-    public void getProxyFromEntity_failsIfAdditionalOptional() {
+    public void getProxyFromEntity_succeedsIfAdditionalOptional() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
         persist(dep, emp);
@@ -205,6 +185,47 @@ public class JpaBasicQueriesTest extends QueryTestBase {
 
         Employee v = dao.get(emp.getId());
         dao.getProxy(v, Cast.optional(Employee_.mandatoryDepartment));
+    }
+    
+    @Test
+    public void getProxies_List() {
+        Department dep = new Department();
+        Employee emp = new Employee("a", dep);
+        Employee emp2 = new Employee("b", dep);
+        persist(dep, emp, emp2);
+        em.flush();
+        em.clear();
+
+        Department v = dao.get(dep.getId());
+        assertEquals(newList(emp.getId(), emp2.getId()), newList(map(dao.getProxies(v, Department_.employees), Employee_.getId)));
+    }
+    
+    @Test
+    public void getProxies_Set() {
+        Municipality mun = new Municipality();
+        Department dep = new Department();
+        Employee emp = new Employee("a", dep, mun);
+        Employee emp2 = new Employee("b", dep, mun);
+        persist(mun, dep, emp, emp2);
+        em.flush();
+        em.clear();
+
+        Municipality v = dao.get(mun.getId());
+        assertEquals(newSet(emp.getId(), emp2.getId()), newSet(map(dao.getProxies(v, Municipality_.employees), Employee_.getId)));
+    }
+    
+    @Test
+    public void getProxiesFromProxy() {
+        Municipality mun = new Municipality();
+        Department dep = new Department();
+        Employee emp = new Employee("a", dep, mun);
+        Employee emp2 = new Employee("b", dep, mun);
+        persist(mun, dep, emp, emp2);
+        em.flush();
+        em.clear();
+
+        Municipality v = dao.getProxy(mun.getId());
+        assertEquals(newSet(emp.getId(), emp2.getId()), newSet(map(dao.getProxies(v, Municipality_.employees), Employee_.getId)));
     }
     
     @Test(expected = IllegalArgumentException.class)

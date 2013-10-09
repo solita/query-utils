@@ -17,9 +17,10 @@ public class Cast {
         if (attribute instanceof PseudoAttribute) {
             throw new IllegalArgumentException("No reason to wrap a PseudoAttribute. Right?");
         }
-        if (QueryUtils.isRequiredByMetamodel(attribute)) {
+        /* not checking this here allows a use case with subtyping. Any drawbacks in addition to allowing user to wrap values to Option by accident? 
+          if (QueryUtils.isRequiredByMetamodel(attribute)) {
             throw new QueryUtils.RequiredAttributeMustNotHaveOptionTypeException(attribute);
-        }
+        }*/
         return OptionalAttribute.Constructors.optional(attribute);
     }
 
