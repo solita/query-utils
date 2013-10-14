@@ -103,7 +103,7 @@ public abstract class TupleResultTransformers implements ResultTransformer {
             @Override
             public Object transformTuple(Object[] tuple, String[] aliases) {
                 Map<String, Object> m = newMap(zip(aliases, tuple));
-                return Tuple.of(m.get(a[0]), m.get(a[1]), m.get(a[2]), m.get(a[3]), m.get(a[5]), m.get(a[6]), m.get(a[7]), m.get(a[8]), m.get(a[9]));
+                return Tuple.of(m.get(a[0]), m.get(a[1]), m.get(a[2]), m.get(a[3]), m.get(a[4]), m.get(a[5]), m.get(a[6]), m.get(a[7]), m.get(a[8]), m.get(a[9]));
             }
         };
     }

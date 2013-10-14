@@ -47,7 +47,7 @@ public class Constructors {
 
     static final class IdProjection<E extends IEntity> extends ConstructorMeta_.F1<E,Id<E>, Id<E>> {
         public IdProjection() {
-            super(null, null);
+            super(null, (Class<?>[])null);
         }
 
         @Override
@@ -82,7 +82,7 @@ public class Constructors {
         private final Attribute<? super E, RIGHT> right;
 
         public PairProjection(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
-            super(null, null);
+            super(null, (Class<?>[])null);
             this.left = left;
             this.right = right;
         }
@@ -157,7 +157,7 @@ public class Constructors {
         private final Attribute<? super E,R> attribute;
 
         public ValueAttributeProjection(Attribute<? super E,R> attribute) {
-            super(null, null);
+            super(null, (Class<?>[])null);
             this.attribute = attribute;
         }
 
