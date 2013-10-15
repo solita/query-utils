@@ -133,26 +133,13 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
 
     private static final SQLQuery bindTransformer(SQLQuery q, NativeQuery<?> query) {
         String[] retvals = newArray(String.class, map(query.retvals, Tuple_._1_.<String>get_1()));
-        if (query instanceof NativeQuery.NativeQueryPair) {
-            q.setResultTransformer(TupleResultTransformers.Tuple2(retvals));
-        } else if (query instanceof NativeQuery.NativeQueryT3) {
-            q.setResultTransformer(TupleResultTransformers.Tuple3(retvals));
-        } else if (query instanceof NativeQuery.NativeQueryT4) {
-            q.setResultTransformer(TupleResultTransformers.Tuple4(retvals));
-        } else if (query instanceof NativeQuery.NativeQueryT5) {
-            q.setResultTransformer(TupleResultTransformers.Tuple5(retvals));
-        } else if (query instanceof NativeQuery.NativeQueryT6) {
-            q.setResultTransformer(TupleResultTransformers.Tuple6(retvals));
-        } else if (query instanceof NativeQuery.NativeQueryT7) {
-            q.setResultTransformer(TupleResultTransformers.Tuple7(retvals));
-        } else if (query instanceof NativeQuery.NativeQueryT8) {
-            q.setResultTransformer(TupleResultTransformers.Tuple8(retvals));
-        } else if (query instanceof NativeQuery.NativeQueryT9) {
-            q.setResultTransformer(TupleResultTransformers.Tuple9(retvals));
-        } else if (query instanceof NativeQuery.NativeQueryT10) {
-            q.setResultTransformer(TupleResultTransformers.Tuple10(retvals));
+        if (query instanceof NativeQuery.NativeQuerySingleEntity ||
+            query instanceof NativeQuery.NativeQueryT1 ||
+            query instanceof NativeQuery.NativeQueryVoid) {
+            // no transform neccessary
+        } else {
+            q.setResultTransformer(new TupleResultTransformers(retvals));
         }
-        // TODO:
         return q;
     }
 
