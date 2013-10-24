@@ -14,10 +14,10 @@ import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple;
 
-public final class TupleResultTransformers implements ResultTransformer {
+public final class TupleResultTransformer implements ResultTransformer {
     private final String[] a;
 
-    public TupleResultTransformers(String[] aliases) {
+    public TupleResultTransformer(String[] aliases) {
         this.a = aliases;
     }
     

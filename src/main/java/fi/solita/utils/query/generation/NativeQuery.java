@@ -64,7 +64,11 @@ public abstract class NativeQuery<T> {
         public <E extends IEntity> NativeQuerySingleEntity<E> returns(Type<E> entityType) {
             return new NativeQuerySingleEntity<E>(query, withRetval(ENTITY_RETURN_VALUE, entityType), params);
         }
-
+        
+        public <E extends IEntity> NativeQuerySingleEntity<Option<E>> returnsOptional(Type.Optional<E> entityType) {
+            return new NativeQuerySingleEntity<Option<E>>(query, withRetval(ENTITY_RETURN_VALUE, entityType), params);
+        }
+        
         public NativeQueryT1<Object> returns(String alias) {
             return new NativeQueryT1<Object>(query, withRetval(alias), params);
         }
@@ -79,7 +83,7 @@ public abstract class NativeQuery<T> {
         }
     }
 
-    public static class NativeQuerySingleEntity<T extends IEntity> extends ReturningNativeQuery<T, NativeQuerySingleEntity<T>> {
+    public static class NativeQuerySingleEntity<T> extends ReturningNativeQuery<T, NativeQuerySingleEntity<T>> {
         public NativeQuerySingleEntity(String query, List<Pair<String, Option<Type<?>>>> retvals, Map<String, Pair<?, Option<Type<?>>>> params) {
             super(query, retvals, params);
         }

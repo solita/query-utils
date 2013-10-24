@@ -15,7 +15,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
-import fi.solita.utils.query.codegen.ConstructorMeta_;
+import fi.solita.utils.query.codegen.MetaJpaConstructor;
 import fi.solita.utils.query.execution.JpaBasicQueries;
 import fi.solita.utils.query.execution.JpaCriteriaQueries;
 import fi.solita.utils.query.execution.JpaProjectionQueries;
@@ -140,35 +140,35 @@ public class Dao {
 
 
 
-    public <E extends IEntity, R> R get(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) throws NoResultException, NonUniqueResultException {
+    public <E extends IEntity, R> R get(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> constructor) throws NoResultException, NonUniqueResultException {
         return jpaProjectionQueries.get(query, constructor);
     }
 
-    public <E extends IEntity, R> Option<R> find(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) throws NonUniqueResultException {
+    public <E extends IEntity, R> Option<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> constructor) throws NonUniqueResultException {
         return jpaProjectionQueries.find(query, constructor);
     }
 
-    public <E extends IEntity,R> Option<R> findFirst(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) {
+    public <E extends IEntity,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> constructor) {
         return jpaProjectionQueries.findFirst(query, constructor);
     }
 
-    public <E extends IEntity,R> Option<R> findFirst(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
+    public <E extends IEntity,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
         return jpaProjectionQueries.findFirst(query, constructor, ordering);
     }
 
-    public <E extends IEntity,R> Collection<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor) {
+    public <E extends IEntity,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> constructor) {
         return jpaProjectionQueries.getMany(query, constructor);
     }
 
-    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page) throws NoOrderingSpecifiedException {
+    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> constructor, Page page) throws NoOrderingSpecifiedException {
         return jpaProjectionQueries.getMany(query, constructor, page);
     }
 
-    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
+    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
         return jpaProjectionQueries.getMany(query, constructor, ordering);
     }
 
-    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, ConstructorMeta_<? super E,R, ?> constructor, Page page, Iterable<? extends Order<? super E,?>> ordering) {
+    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> constructor, Page page, Iterable<? extends Order<? super E,?>> ordering) {
         return jpaProjectionQueries.getMany(query, constructor, page, ordering);
     }
 

@@ -64,7 +64,7 @@ import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
-import fi.solita.utils.query.codegen.ConstructorMeta_;
+import fi.solita.utils.query.codegen.MetaJpaConstructor;
 import fi.solita.utils.query.projection.Constructors.IdProjection;
 
 public class ProjectionHelper {
@@ -74,7 +74,7 @@ public class ProjectionHelper {
     @PersistenceContext
     private EntityManager em;
 
-    public <E> List<Selection<?>> prepareProjectingQuery(ConstructorMeta_<E,?,?> projection, From<?,? extends E> selection) {
+    public <E> List<Selection<?>> prepareProjectingQuery(MetaJpaConstructor<E,?,?> projection, From<?,? extends E> selection) {
         logger.info("prepareProjectingQuery({},{})", projection, selection);
         
         List<Selection<?>> ret;
@@ -95,7 +95,7 @@ public class ProjectionHelper {
         return ret;
     }
     
-    public <R> List<R> finalizeProjectingQuery(ConstructorMeta_<?,R,?> projection, Iterable<? extends Iterable<Object>> rows) {
+    public <R> List<R> finalizeProjectingQuery(MetaJpaConstructor<?,R,?> projection, Iterable<? extends Iterable<Object>> rows) {
         logger.info("finalizeProjectingQuery({},{})", projection, rows);
         Iterable<Iterable<Object>> columns = transpose(rows);
         columns = newList(map(zip(range(0), projection.getParameters(), columns), performAdditionalQueriesForPlaceholderValues.ap(this).ap(projection)));
@@ -154,7 +154,7 @@ public class ProjectionHelper {
     }
 
     @SuppressWarnings("unchecked")
-    Iterable<Object> performAdditionalQueriesForPlaceholderValues(ConstructorMeta_<?,?,?> projection, int index, Attribute<?,?> attr, Iterable<Object> values) {
+    Iterable<Object> performAdditionalQueriesForPlaceholderValues(MetaJpaConstructor<?,?,?> projection, int index, Attribute<?,?> attr, Iterable<Object> values) {
         logger.debug("performAdditionalQueriesForPlaceholderValues({},{},{},{})", new Object[] {projection, index, attr, values});
         
         Iterable<Object> ret = values;
@@ -251,7 +251,7 @@ public class ProjectionHelper {
             query.multiselect(newList(cons(sourceId, breakEmbeddableToParts(em.getMetamodel(), (Bindable<?>)target, relation))));
         } else if (rel.isDefined()) {
             logger.info("Target is AdditionalQueryPerformingAttribute. Preparing.");
-            List<Selection<?>> selections = prepareProjectingQuery((ConstructorMeta_<Object,?,?>)rel.get().getConstructor(), relation);
+            List<Selection<?>> selections = prepareProjectingQuery((MetaJpaConstructor<Object,?,?>)rel.get().getConstructor(), relation);
             if ((isId || isWrapperOfIds) && !Id.class.isAssignableFrom(head(selections).getJavaType())) {
                 logger.info("Constructor expects an Id (or Ids) but the query was not for Ids. Projection to Id.");
                 if (selections.size() != 1) {

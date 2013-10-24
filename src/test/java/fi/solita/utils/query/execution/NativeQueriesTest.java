@@ -3,6 +3,8 @@ package fi.solita.utils.query.execution;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Option.None;
+import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -12,13 +14,17 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
+import fi.solita.utils.query.Money;
+import fi.solita.utils.query.Municipality;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.backend.TypeProvider;
+import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.NativeQuery;
 import fi.solita.utils.query.generation.NativeQuery.NativeQuerySingleEntity;
 
@@ -171,4 +177,49 @@ public class NativeQueriesTest extends QueryTestBase {
         Tuple3<Department.ID, Department.ID, Department.ID> tuple3 = dao.get(q);
         assertArrayEquals(new Object[]{dep.getId(), dep.getId(), dep.getId()}, new Object[]{tuple3._1, tuple3._2, tuple3._3});
     }
+    
+    @Test
+    public void get_sql_optional() {
+        Department dep = new Department(new Money(42));
+        persist(dep);
+        em.flush();
+
+        NativeQuery<Option<Money>> q = NativeQuery.of("select optionalBudget as eka from Department")
+                                  .returns("eka", Cast.optional(typeProvider.type(Money.class)));
+        assertEquals(Some(dep.getBudget()), dao.get(q));
+    }
+    
+    @Test
+    public void get_sql_optional_none() {
+        Department dep = new Department();
+        persist(dep);
+        em.flush();
+
+        NativeQuery<Option<Money>> q = NativeQuery.of("select optionalBudget as eka from Department")
+                                  .returns("eka", Cast.optional(typeProvider.type(Money.class)));
+        assertEquals(None(), dao.get(q));
+    }
+    
+    @Test
+    public void get_sql_optional_entity() {
+        Municipality mun = new Municipality();
+        Department dep = new Department(mun);
+        persist(mun);
+        persist(dep);
+
+        NativeQuery<Option<Municipality>> q = NativeQuery.of("select m.* from Department d left join Municipality m on d.optionalMunicipality_id=m.id")
+                                        .returnsOptional(Cast.optional(typeProvider.type(Municipality.class)));
+        assertEquals(mun.getId(), dao.get(q).get().getId());
+    }
+    
+    /* TODO: this returns 0 rows. Why? Shouldn't it return one null instead?
+    @Test
+    public void get_sql_optional_entity_none() {
+        Department dep = new Department();
+        persist(dep);
+
+        NativeQuery<Option<Municipality>> q = NativeQuery.of("select m.* from Department d left join Municipality m on d.optionalMunicipality_id=m.id")
+                                        .returnsOptional(Cast.optional(typeProvider.type(Municipality.class)));
+        assertEquals(None(), dao.get(q));
+    }*/
 }

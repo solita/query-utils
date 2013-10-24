@@ -18,10 +18,11 @@ import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.transform.ResultTransformer;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
-import fi.solita.utils.functional.Tuple_;
+import fi.solita.utils.functional.Pair_;
 import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
@@ -116,7 +117,11 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     private static final SQLQuery bindReturnValues(SQLQuery q, List<Pair<String, Option<Type<?>>>> retvals) {
         for (Entry<String, Option<Type<?>>> param: retvals) {
             if (param.getValue().isDefined()) {
-                org.hibernate.type.Type t = ((HibernateTypeProvider.HibernateType<?>)param.getValue().get()).type;
+                Type<?> type = param.getValue().get();
+                if (type instanceof Type.Optional) {
+                    type = ((Type.Optional<?>)type).type;
+                }
+                org.hibernate.type.Type t = ((HibernateTypeProvider.HibernateType<?>)type).type;
                 if (NativeQuery.ENTITY_RETURN_VALUE.equals(param.getKey())) {
                     q.addEntity(t.getReturnedClass());
                 } else if (t.isEntityType()) {
@@ -132,13 +137,26 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     }
 
     private static final SQLQuery bindTransformer(SQLQuery q, NativeQuery<?> query) {
-        String[] retvals = newArray(String.class, map(query.retvals, Tuple_._1_.<String>get_1()));
+        String[] retvals = newArray(String.class, map(query.retvals, Pair_.<String>left()));
+        final OptionResultTransformer resultTransformer = new OptionResultTransformer(query.retvals);
         if (query instanceof NativeQuery.NativeQuerySingleEntity ||
             query instanceof NativeQuery.NativeQueryT1 ||
             query instanceof NativeQuery.NativeQueryVoid) {
-            // no transform neccessary
+            q.setResultTransformer(resultTransformer);
         } else {
-            q.setResultTransformer(new TupleResultTransformers(retvals));
+            final TupleResultTransformer tupleResultTransformer = new TupleResultTransformer(retvals);
+            q.setResultTransformer(new ResultTransformer() {
+                @Override
+                public Object transformTuple(Object[] tuple, String[] aliases) {
+                    Object[] ret = (Object[]) resultTransformer.transformTuple(tuple, aliases);
+                    return tupleResultTransformer.transformTuple(ret, aliases);
+                }
+                @SuppressWarnings("rawtypes")
+                @Override
+                public List transformList(List collection) {
+                    return collection;
+                }
+            });
         }
         return q;
     }

@@ -10,6 +10,7 @@ import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
+import fi.solita.utils.query.backend.Type;
 
 public class Cast {
 
@@ -22,6 +23,10 @@ public class Cast {
             throw new QueryUtils.RequiredAttributeMustNotHaveOptionTypeException(attribute);
         }*/
         return OptionalAttribute.Constructors.optional(attribute);
+    }
+    
+    public static <T> Type.Optional<T> optional(Type<T> type) {
+        return new Type.Optional<T>(type);
     }
 
     public static <E, T> SingularAttribute<E, Option<T>> optionalSubtype(SingularAttribute<? extends E, T> attribute) throws IllegalArgumentException {

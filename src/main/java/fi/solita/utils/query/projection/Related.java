@@ -8,7 +8,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
-import fi.solita.utils.query.codegen.ConstructorMeta_;
+import fi.solita.utils.query.codegen.MetaJpaConstructor;
 
 public abstract class Related {
 
@@ -98,17 +98,17 @@ public abstract class Related {
     
     
     public static <E extends IEntity, E2 extends IEntity, R>
-    SingularAttribute<E, R> projection(SingularAttribute<? super E, E2> relation, ConstructorMeta_<? super E2, R, ?> constructor) {
+    SingularAttribute<E, R> projection(SingularAttribute<? super E, E2> relation, MetaJpaConstructor<? super E2, R, ?> constructor) {
         return AdditionalQueryPerformingAttribute.Constructors.relation(relation, constructor);
     }
 
     public static <E extends IEntity, E2 extends IEntity, R>
-    SetAttribute<E, R> projection(SetAttribute<? super E, E2> relation, ConstructorMeta_<? super E2, R, ?> constructor) {
+    SetAttribute<E, R> projection(SetAttribute<? super E, E2> relation, MetaJpaConstructor<? super E2, R, ?> constructor) {
         return AdditionalQueryPerformingAttribute.Constructors.relation(relation, constructor);
     }
     
     public static <E extends IEntity, E2 extends IEntity, R>
-    ListAttribute<E, R> projection(ListAttribute<? super E, E2> relation, ConstructorMeta_<? super E2, R, ?> constructor) {
+    ListAttribute<E, R> projection(ListAttribute<? super E, E2> relation, MetaJpaConstructor<? super E2, R, ?> constructor) {
         return AdditionalQueryPerformingAttribute.Constructors.relation(relation, constructor);
     }
 }

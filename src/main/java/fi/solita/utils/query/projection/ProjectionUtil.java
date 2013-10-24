@@ -25,7 +25,7 @@ import fi.solita.utils.query.NotDistinctable;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
-import fi.solita.utils.query.codegen.ConstructorMeta_;
+import fi.solita.utils.query.codegen.MetaJpaConstructor;
 
 public class ProjectionUtil {
     
@@ -54,14 +54,14 @@ public class ProjectionUtil {
     }
 
     /** whether constructor expects a collections of IDs (instead of a collection of entities) */
-    static boolean isWrapperOfIds(ConstructorMeta_<?, ?, ?> projection, int columnIndex) {
+    static boolean isWrapperOfIds(MetaJpaConstructor<?, ?, ?> projection, int columnIndex) {
         logger.debug("isWrapperOfIds({},{})", projection, columnIndex);
         boolean ret = projection.getIndexesOfIdWrappingParameters().contains(columnIndex);
         logger.debug("isWrapperOfIds -> {}", ret);
         return ret;
     }
 
-    static boolean isDistinctable(ConstructorMeta_<?, ?, ?> projection, int columnIndex) {
+    static boolean isDistinctable(MetaJpaConstructor<?, ?, ?> projection, int columnIndex) {
         logger.debug("isDistinctable({},{})", projection, columnIndex);
         boolean ret = Set.class.isAssignableFrom(projection.getConstructorParameterTypes().get(columnIndex)) &&
                !NotDistinctable.class.isAssignableFrom(((Bindable<?>)projection.getParameters().get(columnIndex)).getBindableJavaType());

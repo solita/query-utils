@@ -31,7 +31,7 @@ import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.attributes.PseudoAttribute;
-import fi.solita.utils.query.codegen.ConstructorMeta_;
+import fi.solita.utils.query.codegen.MetaJpaConstructor;
 
 class ProjectionResultUtil {
     
@@ -76,14 +76,14 @@ class ProjectionResultUtil {
         return ret;
     }
 
-    static <R> Iterable<R> transformAllRows(ConstructorMeta_<?, R, ?> projection, Iterable<Iterable<Object>> rows) {
+    static <R> Iterable<R> transformAllRows(MetaJpaConstructor<?, R, ?> projection, Iterable<Iterable<Object>> rows) {
         logger.debug("transformAllRows({},{})", projection, rows);
         Iterable<R> ret = map(rows, ProjectionResultUtil_.<R>transformRow().ap(projection));
         logger.debug("transformAllRows -> {}", ret);
         return ret;
     }
     
-    static <T> T transformRow(ConstructorMeta_<?,T,?> projection, Iterable<Object> row) {
+    static <T> T transformRow(MetaJpaConstructor<?,T,?> projection, Iterable<Object> row) {
         logger.debug("transformRow({},{})", projection, row);
         row = postProcessRow(projection.getParameters(), row);
         // at this point there should be no nulls...
@@ -94,7 +94,7 @@ class ProjectionResultUtil {
         }
 
         @SuppressWarnings("unchecked")
-        T ret = ((ConstructorMeta_<?,T,Object>)projection).apply(size(row) == 1 ? head(row) : Tuple.of(newArray(Object.class, row)));
+        T ret = ((MetaJpaConstructor<?,T,Object>)projection).apply(size(row) == 1 ? head(row) : Tuple.of(newArray(Object.class, row)));
         logger.debug("transformRow -> {}", ret);
         return ret;
     }

@@ -18,34 +18,34 @@ import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
-import fi.solita.utils.query.codegen.ConstructorMeta_;
+import fi.solita.utils.query.codegen.MetaJpaConstructor;
 
 public class Constructors {
     
     public static interface TransparentProjection {
     }
     
-    static <E extends IEntity & Identifiable<?>> ConstructorMeta_<E,Id<E>,Id<E>> id() {
+    static <E extends IEntity & Identifiable<?>> MetaJpaConstructor<E,Id<E>,Id<E>> id() {
         return new IdProjection<E>();
     }
 
-    static <E extends IEntity, T> ConstructorMeta_<E,T,T> value(SingularAttribute<? super E, T> attribute) {
+    static <E extends IEntity, T> MetaJpaConstructor<E,T,T> value(SingularAttribute<? super E, T> attribute) {
         return new ValueAttributeProjection<E,T>(attribute);
     }
 
-    static <E extends IEntity, T> ConstructorMeta_<E,T,T> value(PluralAttribute<? super E, T, ?> attribute) {
+    static <E extends IEntity, T> MetaJpaConstructor<E,T,T> value(PluralAttribute<? super E, T, ?> attribute) {
         return new ValueAttributeProjection<E,T>(attribute);
     }
 
-    static <E extends IEntity, LEFT, RIGHT> ConstructorMeta_<E,Pair<LEFT,RIGHT>,Tuple2<LEFT,RIGHT>> pair(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
+    static <E extends IEntity, LEFT, RIGHT> MetaJpaConstructor<E,Pair<LEFT,RIGHT>,Tuple2<LEFT,RIGHT>> pair(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
         return new PairProjection<E,LEFT,RIGHT>(left, right);
     }
     
-    static <E extends IEntity, T extends Tuple> ConstructorMeta_<E,T,T> tuple(Attribute<? super E,?>... attributes) {
+    static <E extends IEntity, T extends Tuple> MetaJpaConstructor<E,T,T> tuple(Attribute<? super E,?>... attributes) {
         return new TupleProjection<E,T>(attributes);
     }
 
-    static final class IdProjection<E extends IEntity> extends ConstructorMeta_.F1<E,Id<E>, Id<E>> {
+    static final class IdProjection<E extends IEntity> extends MetaJpaConstructor.C1<E,Id<E>, Id<E>> {
         public IdProjection() {
             super(null, (Class<?>[])null);
         }
@@ -77,7 +77,7 @@ public class Constructors {
         }
     }
     
-    private static final class PairProjection<E extends IEntity,LEFT,RIGHT> extends ConstructorMeta_.F2<E,LEFT,RIGHT,Pair<LEFT,RIGHT>> {
+    private static final class PairProjection<E extends IEntity,LEFT,RIGHT> extends MetaJpaConstructor.C2<E,LEFT,RIGHT,Pair<LEFT,RIGHT>> {
         private final Attribute<? super E, LEFT> left;
         private final Attribute<? super E, RIGHT> right;
 
@@ -113,7 +113,7 @@ public class Constructors {
         }
     }
     
-    private static final class TupleProjection<E extends IEntity, T extends Tuple> implements ConstructorMeta_<E,T,T> {
+    private static final class TupleProjection<E extends IEntity, T extends Tuple> implements MetaJpaConstructor<E,T,T> {
         private final List<Attribute<?, ?>> attributes;
 
         public TupleProjection(Attribute<?, ?>... attributes) {
@@ -149,11 +149,11 @@ public class Constructors {
 
         @Override
         public String toString() {
-            return ConstructorMeta_.Helper.toString(this);
+            return MetaJpaConstructor.Helper.toString(this);
         }
     }
     
-    private static final class ValueAttributeProjection<E extends IEntity,R> extends ConstructorMeta_.F1<E,R,R> implements TransparentProjection {
+    private static final class ValueAttributeProjection<E extends IEntity,R> extends MetaJpaConstructor.C1<E,R,R> implements TransparentProjection {
         private final Attribute<? super E,R> attribute;
 
         public ValueAttributeProjection(Attribute<? super E,R> attribute) {

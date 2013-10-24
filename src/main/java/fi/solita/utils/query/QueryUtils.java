@@ -45,7 +45,7 @@ import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
-import fi.solita.utils.query.codegen.ConstructorMeta_;
+import fi.solita.utils.query.codegen.MetaJpaConstructor;
 import fi.solita.utils.query.projection.Constructors.TransparentProjection;
 
 public abstract class QueryUtils {
@@ -231,7 +231,7 @@ public abstract class QueryUtils {
         }
         
         if (param instanceof AdditionalQueryPerformingAttribute && param instanceof SingularAttribute) {
-            ConstructorMeta_<?,?,?> c = ((AdditionalQueryPerformingAttribute)param).getConstructor();
+            MetaJpaConstructor<?,?,?> c = ((AdditionalQueryPerformingAttribute)param).getConstructor();
             if (c instanceof TransparentProjection) {
                 // optionality of a TransparentProjection propagates
                 ret &= forAll(c.getParameters(), QueryUtils_.isRequiredByMetamodel);
