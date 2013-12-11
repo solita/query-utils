@@ -150,8 +150,8 @@ public class ProjectionsTest extends QueryTestBase {
 
         assertEquals(emp.getId(), dao.get(
                 query.related(
-                        query.single(dep.getId()),
-                        Department_.employees), Project.<Employee>id()));
+                        Department_.employees,
+                        query.single(dep.getId())), Project.<Employee>id()));
     }
 
     private CriteriaQuery<Department> allDepartmentsOrdered() {

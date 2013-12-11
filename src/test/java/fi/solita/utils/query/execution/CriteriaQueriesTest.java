@@ -14,12 +14,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.query.Department;
-import fi.solita.utils.query.Department_;
-import fi.solita.utils.query.Employee;
-import fi.solita.utils.query.Employee_;
-import fi.solita.utils.query.Order;
-import fi.solita.utils.query.Page;
+import fi.solita.utils.query.*;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;

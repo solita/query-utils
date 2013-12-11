@@ -133,13 +133,13 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
 
         assertEquals(mun.getId(), dao.get(
                 query.related(
-                        query.single(dep.getId()),
-                    Department_.employees,
-                    Employee_.optionalMunicipality)).getId());
+                        Department_.employees,
+                    Employee_.optionalMunicipality,
+                    query.single(dep.getId()))).getId());
 
         assertEquals(emp.getId(), dao.get(
             query.related(
-                    query.single(dep.getId()),
-                    Department_.employees)).getId());
+                    Department_.employees,
+                    query.single(dep.getId()))).getId());
     }
 }

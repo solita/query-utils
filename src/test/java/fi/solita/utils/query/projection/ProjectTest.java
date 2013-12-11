@@ -146,6 +146,6 @@ public class ProjectTest extends QueryTestBase {
         Employee emp = new Employee("foo", dep);
         persist(dep, emp);
 
-        assertEquals("foo", dao.get(query.related(query.all(Department.class), Department_.employees), Project.<Employee,String>value(Employee_.mandatoryName)));
+        assertEquals("foo", dao.get(query.related(Department_.employees, query.all(Department.class)), Project.<Employee,String>value(Employee_.mandatoryName)));
     }
 }
