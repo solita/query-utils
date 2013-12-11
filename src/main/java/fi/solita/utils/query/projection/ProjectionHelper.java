@@ -53,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.solita.utils.functional.Collections;
+import fi.solita.utils.functional.FunctionalA_;
 import fi.solita.utils.functional.Functional_;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
@@ -193,8 +194,8 @@ public class ProjectionHelper {
         List<Object[]> results = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds);
         
         @SuppressWarnings("unchecked")
-        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(results, Functional_.head1());
-        Iterable<Iterable<Object>> actualResultRows = map(results, Functional_.tail1());
+        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(results, FunctionalA_.head());
+        Iterable<Iterable<Object>> actualResultRows = map(results, FunctionalA_.tail());
 
         Iterable<? extends Object> result;
         if (isCollectionOfEmbeddables(target)) {
@@ -230,7 +231,7 @@ public class ProjectionHelper {
         logger.info("Inner joining from {} to {}", source, target);
         final Join<SOURCE,Object> relation = (Join<SOURCE, Object>) join(source, target, JoinType.INNER);
         
-        query.where(inExpr(sourceId, sourceIds, em.getCriteriaBuilder()));
+        query.where(inExpr(query, sourceId, sourceIds, em.getCriteriaBuilder()));
 
         if (isDistinctable) {
             logger.info("Query is distinctable.");

@@ -193,7 +193,6 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                 "}"
             );
             
-            @SuppressWarnings("unchecked")
             Iterable<String> body = concat(
                 applyBlock,
                 EmptyLine,

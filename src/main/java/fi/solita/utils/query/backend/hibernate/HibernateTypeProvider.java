@@ -49,7 +49,7 @@ public class HibernateTypeProvider implements TypeProvider {
             Map<String, List<org.hibernate.type.Type>> allPropertyTypesByName     = groupBy(flatMap(allClassMetadata, HibernateTypeProvider_.classMetadata2propertyTypes), HibernateTypeProvider_.type2Name);
             Iterable<org.hibernate.type.Type>          allDifferentPropertyTypes  = map(allPropertyTypesByName.values(), Functional_.<org.hibernate.type.Type>head());
             Iterable<List<org.hibernate.type.Type>>    typesByReturnedClass       = groupBy(allDifferentPropertyTypes, HibernateTypeProvider_.type2ReturnedClass).values();
-            Iterable<List<org.hibernate.type.Type>>    typesUniqueByReturnedClass = filter(typesByReturnedClass, Functional_.size.andThen(Predicates.equalTo(1)));
+            Iterable<List<org.hibernate.type.Type>>    typesUniqueByReturnedClass = filter(typesByReturnedClass, Functional_.size.andThen(Predicates.equalTo(1l)));
             typesByUniqueReturnedClassCache = newMap(map(typesUniqueByReturnedClass, Functional_.<org.hibernate.type.Type>head().andThen(HibernateTypeProvider_.type2ReturnedClassAndNamePair)));
         }
         return typesByUniqueReturnedClassCache;

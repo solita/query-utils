@@ -42,7 +42,7 @@ public class JpaCriteriaQuery {
         if (ids.iterator().hasNext()) {
             Root<E> root = query.from(entityClass);
             Path<Id<E>> idPath = root.get(QueryUtils.id(entityClass, em));
-            query.where(QueryUtils.inExpr(idPath, (Iterable<Id<E>>)ids, em.getCriteriaBuilder()));
+            query.where(QueryUtils.inExpr(query, idPath, (Iterable<Id<E>>)ids, em.getCriteriaBuilder()));
             query.select(root);
             return (CriteriaQuery<E>)(Object)query;
         } else {

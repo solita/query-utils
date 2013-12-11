@@ -109,4 +109,9 @@ public class Money implements Numeric {
             return original;
         }
     }
+
+    @Override
+    public Number toNumber() {
+        return euros;
+    }
 }

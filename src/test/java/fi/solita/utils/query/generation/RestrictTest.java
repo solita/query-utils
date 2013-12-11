@@ -52,15 +52,15 @@ public class RestrictTest extends QueryTestBase {
         persist(dep1, dep2, dep3);
 
         assertEquals("find single matching", dep1.getId(),
-            dao.get(restrict.attributeEquals(Department_.mandatoryName, Some("a"),
+            dao.get(restrict.equals(Department_.mandatoryName, Some("a"),
                         query.all(Department.class))).getId());
         assertEquals("find multiple matching", newSet(dep2.getId(), dep3.getId()), newSet(map(
-            dao.getMany(restrict.attributeEquals(Department_.mandatoryName, Some("b"),
+            dao.getMany(restrict.equals(Department_.mandatoryName, Some("b"),
                         query.all(Department.class))),
                         Department_.getId)));
         assertFalse("find by multiple restrictions",
-            dao.exists(restrict.attributeEquals(Department_.mandatoryName, Some("a"),
-                       restrict.attributeEquals(Department_.mandatoryName, Some("b"),
+            dao.exists(restrict.equals(Department_.mandatoryName, Some("a"),
+                       restrict.equals(Department_.mandatoryName, Some("b"),
                         query.all(Department.class)))));
     }
 
@@ -70,7 +70,7 @@ public class RestrictTest extends QueryTestBase {
         Department dep2 = new Department("b");
         persist(dep1, dep2);
 
-        assertEquals(dep1.getId(), dao.get(restrict.attributeIn(Department_.mandatoryName, newSet("a", "c"),
+        assertEquals(dep1.getId(), dao.get(restrict.in(Department_.mandatoryName, newSet("a", "c"),
                             query.all(Department.class))).getId());
     }
 
@@ -80,7 +80,7 @@ public class RestrictTest extends QueryTestBase {
         Department dep2 = new Department("ba");
         persist(dep1, dep2);
 
-        assertEquals(dep1.getId(), dao.get(restrict.attributeStartsWithIgnoreCase(Department_.mandatoryName, "a",
+        assertEquals(dep1.getId(), dao.get(restrict.startsWithIgnoreCase(Department_.mandatoryName, "a",
                                             query.all(Department.class))).getId());
     }
 
@@ -90,7 +90,7 @@ public class RestrictTest extends QueryTestBase {
         Department dep2 = new Department();
         persist(dep1, dep2);
 
-        assertEquals(dep1.getId(), dao.get(restrict.exclude(dep2.getId(), query.all(Department.class))).getId());
+        assertEquals(dep1.getId(), dao.get(restrict.excluding(dep2.getId(), query.all(Department.class))).getId());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class RestrictTest extends QueryTestBase {
         Department dep3 = new Department();
         persist(dep1, dep2, dep3);
 
-        assertEquals("exclude multiple", dep3.getId(), dao.get(restrict.exclude(newSet(dep1.getId(), dep2.getId()), query.all(Department.class))).getId());
+        assertEquals("exclude multiple", dep3.getId(), dao.get(restrict.excluding(newSet(dep1.getId(), dep2.getId()), query.all(Department.class))).getId());
     }
 
     @Test
@@ -111,8 +111,8 @@ public class RestrictTest extends QueryTestBase {
         persist(dep, emp, ptemp);
 
         assertEquals(newSet(emp.getId(), ptemp.getId()), newSet(map(dao.getMany(query.all(Employee.class)), Employee_.getId)));
-        assertEquals(newSet(emp.getId())               , newSet(map(dao.getMany(restrict.byType(Employee.class, query.all(Employee.class))), Employee_.getId)));
-        assertEquals(newSet(ptemp.getId())             , newSet(map(dao.getMany(restrict.byTypes(Collections.<Class<? extends Employee>>newSet(PartTimeEmployee.class), query.all(Employee.class))), Employee_.getId)));
+        assertEquals(newSet(emp.getId())               , newSet(map(dao.getMany(restrict.typeIs(Employee.class, query.all(Employee.class))), Employee_.getId)));
+        assertEquals(newSet(ptemp.getId())             , newSet(map(dao.getMany(restrict.typeIn(Collections.<Class<? extends Employee>>newSet(PartTimeEmployee.class), query.all(Employee.class))), Employee_.getId)));
     }
 
     @Test
