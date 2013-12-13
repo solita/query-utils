@@ -66,6 +66,11 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
         this(mandatoryName, 0);
     }
     
+    public Department(String name, Municipality municipality) {
+        this(name);
+        this.optionalMunicipality = municipality;
+    }
+    
     public Department(Municipality municipality) {
         this();
         this.optionalMunicipality = municipality;

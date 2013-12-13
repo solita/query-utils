@@ -3,18 +3,27 @@ package fi.solita.utils.query.generation;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
-import static org.junit.Assert.*;
+import static fi.solita.utils.functional.Option.Some;
+import static org.junit.Assert.assertEquals;
 
 import javax.persistence.NoResultException;
+import javax.persistence.criteria.CriteriaQuery;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.query.*;
 import fi.solita.utils.functional.Collections;
+import fi.solita.utils.query.Department;
+import fi.solita.utils.query.Department_;
+import fi.solita.utils.query.Employee;
+import fi.solita.utils.query.Employee_;
+import fi.solita.utils.query.Id;
+import fi.solita.utils.query.Municipality;
+import fi.solita.utils.query.Municipality_;
+import fi.solita.utils.query.QueryTestBase;
+import fi.solita.utils.query.Report;
 import fi.solita.utils.query.execution.JpaCriteriaQueries;
-import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
 
 public class JpaCriteriaQueriesTest extends QueryTestBase {
@@ -24,6 +33,9 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
 
     @Autowired
     private JpaCriteriaQueries dao;
+    
+    @Autowired
+    private Restrict restrict;
 
     @Test
     public void single() {
@@ -141,5 +153,36 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
             query.related(
                     Department_.employees,
                     query.single(dep.getId()))).getId());
+    }
+    
+    @Test
+    public void related_query_restrictions() throws Exception {
+        Department dep = new Department("dep");
+        Municipality mun = new Municipality("mun");
+        Municipality mun2 = new Municipality("mun2");
+        Employee emp = new Employee("emp", dep, mun);
+        Employee emp2 = new Employee("emp2", dep, mun2);
+        Employee emp3 = new Employee("emp", dep);
+        
+        Department dep2 = new Department("dep");
+        Department dep3 = new Department("dep");
+        Employee emp4 = new Employee("emp4", dep3);
+        persist(dep, mun, mun2, emp, emp2, emp3, dep2, dep3, emp4);
+        
+        CriteriaQuery<Municipality> queryWithoutRestrictions = query.related(Employee_.optionalMunicipality,
+            query.related(Department_.employees, 
+                query.all(Department.class)));
+        
+        assertEquals(newSet(mun.getId(), mun2.getId()), newSet(map(Municipality_.getId, dao.getMany(queryWithoutRestrictions))));
+        
+        CriteriaQuery<Municipality> queryWithRestrictions =
+            restrict.equals(Municipality_.optionalArea, Some("mun"),                // drop emp2 since its municipality has wrong area
+                query.related(Employee_.optionalMunicipality,                       // drop emp3 since it has no municipality
+                    restrict.equals(Employee_.mandatoryName, Some("emp"),           // drop dep3 since its employee has wrong name
+                        query.related(Department_.employees,                        // drop (by inner join) dep2 since it has no employees
+                            restrict.equals(Department_.mandatoryName, Some("dep"),
+                                query.all(Department.class))))));                   // start with both departments...
+        
+        assertEquals(mun.getId(), dao.get(queryWithRestrictions).getId());
     }
 }
