@@ -3,10 +3,10 @@ package fi.solita.utils.query.projection;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.head;
-import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Functional.range;
 import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.zip;
+import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.query.QueryUtils.isRequiredByMetamodel;
 import static fi.solita.utils.query.QueryUtils.isRequiredByQueryAttribute;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
@@ -15,13 +15,13 @@ import static fi.solita.utils.query.projection.ProjectionResultUtil_.postProcess
 import static fi.solita.utils.query.projection.ProjectionResultUtil_.transformPseudoResultToActualValue;
 import static fi.solita.utils.query.projection.ProjectionResultUtil_.wrapNullsToOptionsWhereAppropriate;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.slf4j.Logger;
@@ -113,17 +113,24 @@ class ProjectionResultUtil {
                 ret = head(val);
             }
         } else {
-            if (constructorParameterType.isAssignableFrom(List.class) && attr instanceof ListAttribute) {
-                logger.debug("ListAttribute, or a Constructor expecting a List: {}", constructorParameterType.getName());
+            if (constructorParameterType.equals(List.class)) {
+                logger.debug("Constructor expecting a List: {}", constructorParameterType.getName());
                 ret = val;
             } else if (constructorParameterType.equals(SortedSet.class)) {
                 logger.debug("Constructor expecting a SortedSet: {}", constructorParameterType.getName());
                 ret = new TreeSet<Object>(val);
-            } else if (constructorParameterType.isAssignableFrom(Set.class)) {
+            } else if (constructorParameterType.equals(Set.class)) {
                 logger.debug("Constructor expecting a Set: {}", constructorParameterType.getName());
                 ret = newSet(val);
+            } else if (constructorParameterType.equals(Collection.class)) {
+                logger.debug("Constructor expecting a Collection: {}", constructorParameterType.getName());
+                ret = val;
             } else {
-                throw new UnsupportedOperationException("Not implemented: " + constructorParameterType);
+                ret = val;
+            }
+            if (((Collection<?>)ret).size() != val.size()) {
+                logger.warn("size of a Set/SortedSet was different from the size of the originating data! Have you maybe suboptimally implemented equals/compareTo? Enable debug logging for stack trace. Attribute: {}, List: {}, Set: {}", attr, val, ret);
+                logger.debug("size of a Set/SortedSet... stack: ", new Exception());
             }
         }
         logger.debug("postProcessResult -> {}", ret);

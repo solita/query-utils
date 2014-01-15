@@ -9,6 +9,7 @@ import static fi.solita.utils.functional.Option.Some;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -107,9 +108,12 @@ public class TableValueType implements UserType, Serializable {
         if (h instanceof CharSequence) {
             t = "SYS.ODCIVARCHAR2LIST";
             v = (Iterable<Object>)(Object)map(TableValueType_.toString, (Iterable<CharSequence>)values);
+        } else if (h instanceof BigDecimal) {
+            t = "SYS.ODCINUMBERLIST";
+            v = (Iterable<Object>)values;
         } else if (h instanceof Number) {
             t = "SYS.ODCINUMBERLIST";
-            v = (Iterable<Object>) values;
+            v = (Iterable<Object>)(Object)map(TableValueType_.toLong, (Iterable<Number>)values);
         } else if (h instanceof Numeric) {
             t = "SYS.ODCINUMBERLIST";
             v = (Iterable<Object>)(Object)map(Numeric_.toNumber, (Iterable<Numeric>)values);

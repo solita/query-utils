@@ -1,11 +1,13 @@
 package fi.solita.utils.query.attributes;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
+import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
@@ -18,6 +20,10 @@ public interface PseudoAttribute {
     public static class Constructors {
         public static <E, T> SingularAttribute<E, T> literal(T value) {
             return new LiteralSingularAttribute<E, T>(value);
+        }
+        
+        public static <E, T> CollectionAttribute<E, T> literal(Collection<T> value) {
+            return new LiteralCollectionAttribute<E, T>(value);
         }
     
         public static <E, T> SetAttribute<E, T> literal(Set<T> value) {

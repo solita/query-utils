@@ -20,19 +20,20 @@ import static fi.solita.utils.codegen.generators.Content.EmptyLine;
 import static fi.solita.utils.codegen.generators.Content.catchBlock;
 import static fi.solita.utils.codegen.generators.Content.reflectionInvokationArgs;
 import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
-import static fi.solita.utils.functional.Functional.filter;
-import static fi.solita.utils.functional.Functional.flatMap;
-import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.mkString;
-import static fi.solita.utils.functional.Functional.range;
 import static fi.solita.utils.functional.Functional.zip;
 import static fi.solita.utils.functional.Functional.zipWithIndex;
+import static fi.solita.utils.functional.FunctionalA.concat;
+import static fi.solita.utils.functional.FunctionalImpl.filter;
+import static fi.solita.utils.functional.FunctionalImpl.flatMap;
+import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.functional.Transformers.prepend;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,6 +52,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.ListAttribute;
+import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
@@ -106,45 +108,58 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                 int paramIndex = e.getKey();
                 VariableElement argument = e.getValue();
                 Class<?> attributeClass;
-                String secondTypeParam;
+                String otherTypeParams;
                 TypeMirror argumentType = argument.asType();
                 if (helper.isSubtype(argumentType, Id.class)) {
                     attributeClass = SingularAttribute.class;
-                    secondTypeParam = "? extends " + importType(EntityRepresentation.class);
+                    otherTypeParams = "? extends " + importType(EntityRepresentation.class);
                 } else {
                     Elements elements = helper.elementUtils;
                     Types types = helper.typeUtils;
                     
                     boolean isEntity = helper.isSubtype(argumentType, IEntity.class);
-                    boolean isOption = helper.isSubtype(argumentType, Option.class);
+                    boolean isExactlyOption = helper.isSameType(argumentType, Option.class);
                     boolean isList = helper.isSubtype(argumentType, List.class);
                     boolean isSet = helper.isSubtype(argumentType, Set.class);
+                    boolean isExactlyCollection = helper.isSameType(argumentType, Collection.class);
 
-                    if (isSet || isList || isOption) {
-                        attributeClass = isSet ? SetAttribute.class : isList ? ListAttribute.class : SingularAttribute.class;
-                        TypeElement wrapperType = isSet ? elements.getTypeElement(Set.class.getName()) : isList ? elements.getTypeElement(List.class.getName()) : elements.getTypeElement(Option.class.getName());
+                    if (isSet || isList || isExactlyCollection || isExactlyOption) {
+                        attributeClass = isSet ? SetAttribute.class :
+                                         isList ? ListAttribute.class :
+                                         isExactlyCollection ? PluralAttribute.class :
+                                         SingularAttribute.class;
+                        TypeElement wrapperType = isSet ? elements.getTypeElement(Set.class.getName()) :
+                                                  isList ? elements.getTypeElement(List.class.getName()) :
+                                                  isExactlyCollection ? elements.getTypeElement(Collection.class.getName()) :
+                                                  elements.getTypeElement(Option.class.getName());
                         
                         boolean isId = isId(argument, elements, types, wrapperType);
                         if (isId) {
                             idIndexes.add(paramIndex);
                         }
+                        
+                        String elementType = containedType(argument);
                         if (isEntity || isId) {
-                            secondTypeParam = "? extends " + importType(EntityRepresentation.class);
-                        } else {
-                            String elementType = containedType(argument);
-                            secondTypeParam = elementType.startsWith("?") ? elementType : "? extends " + elementType;
+                            elementType = importType(EntityRepresentation.class);
                         }
-                        if (isOption) {
-                            secondTypeParam = "? extends " + importType(Option.class) + "<" + secondTypeParam + ">";
+                        elementType = elementType.startsWith("?") ? elementType : "? extends " + elementType;
+                        
+                        if (isExactlyCollection) {
+                            otherTypeParams = "? extends " + importType(Collection.class) + "<" + elementType +  ">, " + elementType;
+                        } else {
+                            otherTypeParams = elementType;
+                        }
+                        if (isExactlyOption) {
+                            otherTypeParams = "? extends " + importType(Option.class) + "<" + otherTypeParams + ">";
                         }
                     } else {
                         attributeClass = SingularAttribute.class;
                         String type = importTypes(qualifiedName.andThen(boxed).apply(argument));
-                        secondTypeParam = "?".equals(type) ? type : "? extends " + type;
+                        otherTypeParams = "?".equals(type) ? type : "? extends " + type;
                     }
                 }
 
-                attributeTypes.add(importType(attributeClass) + "<? super OWNER, " + secondTypeParam + ">");
+                attributeTypes.add(importType(attributeClass) + "<? super OWNER, " + otherTypeParams + ">");
             }
 
             int argCount = constructor.getParameters().size();

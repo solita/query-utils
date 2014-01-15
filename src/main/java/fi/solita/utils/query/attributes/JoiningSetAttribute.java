@@ -43,7 +43,7 @@ class JoiningSetAttribute<E extends IEntity, R> implements SetAttribute<E,R>, Jo
     
     @Override
     public PersistentAttributeType getPersistentAttributeType() {
-        if (head(attributes) instanceof SetAttribute) {
+        if (head(attributes) instanceof PluralAttribute) {
             return PersistentAttributeType.ONE_TO_MANY;
         }
         return last(attributes).getPersistentAttributeType();

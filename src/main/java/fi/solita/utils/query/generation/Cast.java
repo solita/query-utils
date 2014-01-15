@@ -1,5 +1,6 @@
 package fi.solita.utils.query.generation;
 
+import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
@@ -44,6 +45,11 @@ public class Cast {
     @SuppressWarnings("unchecked")
     public static <E extends IEntity & Identifiable<?>, T extends IEntity> SingularAttribute<E, T> cast(SingularAttribute<? super E, ? super T> attribute) {
         return (SingularAttribute<E, T>) attribute;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <E extends IEntity & Identifiable<?>, T extends IEntity & Identifiable<?>> CollectionAttribute<E, T> cast(CollectionAttribute<? super E, ? super T> attribute) {
+        return (CollectionAttribute<E, T>) attribute;
     }
 
     @SuppressWarnings("unchecked")

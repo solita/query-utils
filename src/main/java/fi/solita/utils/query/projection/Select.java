@@ -1,8 +1,10 @@
 package fi.solita.utils.query.projection;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
@@ -20,6 +22,10 @@ public abstract class Select {
     }
 
     public static <E, T> SingularAttribute<E, T> literal(T value) {
+        return PseudoAttribute.Constructors.literal(value);
+    }
+    
+    public static <E, T> CollectionAttribute<E, T> literal(Collection<T> value) {
         return PseudoAttribute.Constructors.literal(value);
     }
 

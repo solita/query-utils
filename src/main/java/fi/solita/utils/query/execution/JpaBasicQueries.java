@@ -124,15 +124,15 @@ public class JpaBasicQueries {
         }
     }
     
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Collection<T> getProxies(E entity, CollectionAttribute<? super E, T> relation) {
+        return newList(getProxiesIt(entity, relation));
+    }
+    
     public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Set<T> getProxies(E entity, SetAttribute<? super E, T> relation) {
         return newSet(getProxiesIt(entity, relation));
     }
     
     public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> List<T> getProxies(E entity, ListAttribute<? super E, T> relation) {
-        return newList(getProxiesIt(entity, relation));
-    }
-    
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Collection<T> getProxies(E entity, CollectionAttribute<? super E, T> relation) {
         return newList(getProxiesIt(entity, relation));
     }
     

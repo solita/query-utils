@@ -1,6 +1,7 @@
 package fi.solita.utils.query.projection;
 
 
+import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
@@ -25,6 +26,23 @@ public abstract class Related {
     public static <E extends IEntity, E2 extends IEntity, E3 extends IEntity, E4 extends IEntity, R>
     SingularAttribute<E, R> value(SingularAttribute<? super E, E2> a1, SingularAttribute<? super E2, E3> a2, SingularAttribute<? super E3, E4> a3, SingularAttribute<? super E4, R> a4) {
         return JoiningAttribute.Constructors.singular(a1, a2, a3, a4);
+    }
+    
+    
+    
+    public static <E extends IEntity, E2 extends IEntity, R>
+    CollectionAttribute<E, R> value(SingularAttribute<? super E, E2> a1, CollectionAttribute<? super E2, R> a2) {
+        return JoiningAttribute.Constructors.Collection(a1, a2);
+    }
+    
+    public static <E extends IEntity, E2 extends IEntity, E3 extends IEntity, R>
+    CollectionAttribute<E, R> value(SingularAttribute<? super E, E2> a1, SingularAttribute<? super E2, E3> a2, CollectionAttribute<? super E3, R> a3) {
+        return JoiningAttribute.Constructors.Collection(a1, a2, a3);
+    }
+    
+    public static <E extends IEntity, E2 extends IEntity, E3 extends IEntity, E4 extends IEntity, R>
+    CollectionAttribute<E, R> value(SingularAttribute<? super E, E2> a1, SingularAttribute<? super E2, E3> a2, SingularAttribute<? super E3, E4> a3, CollectionAttribute<? super E4, R> a4) {
+        return JoiningAttribute.Constructors.Collection(a1, a2, a3, a4);
     }
     
     
@@ -59,6 +77,23 @@ public abstract class Related {
     public static <E extends IEntity, E2 extends IEntity, E3 extends IEntity, E4 extends IEntity, R>
     ListAttribute<E, R> value(SingularAttribute<? super E, E2> a1, SingularAttribute<? super E2, E3> a2, SingularAttribute<? super E3, E4> a3, ListAttribute<? super E4, R> a4) {
         return JoiningAttribute.Constructors.list(a1, a2, a3, a4);
+    }
+    
+    
+    
+    public static <E extends IEntity, E2 extends IEntity, R>
+    CollectionAttribute<E, R> value(CollectionAttribute<? super E, E2> a1, SingularAttribute<? super E2, R> a2) {
+        return projection(a1, Constructors.value(a2));
+    }
+    
+    public static <E extends IEntity, E2 extends IEntity, E3 extends IEntity, R>
+    CollectionAttribute<E, R> value(CollectionAttribute<? super E, E2> a1, SingularAttribute<? super E2, E3> a2, SingularAttribute<? super E3, R> a3) {
+        return projection(a1, Constructors.value(Related.value(a2, a3)));
+    }
+    
+    public static <E extends IEntity, E2 extends IEntity, E3 extends IEntity, E4 extends IEntity, R>
+    CollectionAttribute<E, R> value(CollectionAttribute<? super E, E2> a1, SingularAttribute<? super E2, E3> a2, SingularAttribute<? super E3, E4> a3, SingularAttribute<? super E4, R> a4) {
+        return projection(a1, Constructors.value(Related.value(a2, a3, a4)));
     }
     
     
@@ -99,6 +134,11 @@ public abstract class Related {
     
     public static <E extends IEntity, E2 extends IEntity, R>
     SingularAttribute<E, R> projection(SingularAttribute<? super E, E2> relation, MetaJpaConstructor<? super E2, R, ?> constructor) {
+        return AdditionalQueryPerformingAttribute.Constructors.relation(relation, constructor);
+    }
+    
+    public static <E extends IEntity, E2 extends IEntity, R>
+    CollectionAttribute<E, R> projection(CollectionAttribute<? super E, E2> relation, MetaJpaConstructor<? super E2, R, ?> constructor) {
         return AdditionalQueryPerformingAttribute.Constructors.relation(relation, constructor);
     }
 

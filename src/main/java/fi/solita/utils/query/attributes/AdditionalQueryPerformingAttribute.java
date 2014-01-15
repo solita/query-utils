@@ -1,6 +1,7 @@
 package fi.solita.utils.query.attributes;
 
 
+import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
@@ -17,6 +18,10 @@ public interface AdditionalQueryPerformingAttribute {
     public static class Constructors {
         public static <E extends IEntity, E2 extends IEntity, R> SingularAttribute<E,R> relation(SingularAttribute<? super E, ? super E2> attribute, MetaJpaConstructor<? super E2, R, ?> constructor) {
             return new RelationSingularAttribute<E,R>(attribute, constructor);
+        }
+        
+        public static <E extends IEntity, E2 extends IEntity, R> CollectionAttribute<E,R> relation(CollectionAttribute<? super E, ? super E2> attribute, MetaJpaConstructor<? super E2, R, ?> constructor) {
+            return new RelationCollectionAttribute<E,R>(attribute, constructor);
         }
         
         public static <E extends IEntity, E2 extends IEntity, R> SetAttribute<E,R> relation(SetAttribute<? super E, ? super E2> attribute, MetaJpaConstructor<? super E2, R, ?> constructor) {

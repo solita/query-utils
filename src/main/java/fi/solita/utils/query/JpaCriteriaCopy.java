@@ -66,6 +66,7 @@ public abstract class JpaCriteriaCopy {
             // Hibernate fails with String-bases api; Join.join(String, JoinType)
             @SuppressWarnings({ "rawtypes", "unchecked" })
             Join<Object, Object> j = attr instanceof SingularAttribute ? to.join((SingularAttribute) join.getAttribute(), join.getJoinType()) :
+                attr instanceof CollectionAttribute ? to.join((CollectionAttribute) join.getAttribute(), join.getJoinType()) :
                 attr instanceof SetAttribute ? to.join((SetAttribute) join.getAttribute(), join.getJoinType()) :
                 attr instanceof ListAttribute ? to.join((ListAttribute) join.getAttribute(), join.getJoinType()) :
                 attr instanceof MapAttribute ? to.join((MapAttribute) join.getAttribute(), join.getJoinType()) :
@@ -96,6 +97,7 @@ public abstract class JpaCriteriaCopy {
             // Hibernate fails with String-bases api; Join.join(String, JoinType)
             @SuppressWarnings({ "rawtypes", "unchecked" })
             Fetch<?, ?> f = attr instanceof SingularAttribute ? to.fetch((SingularAttribute) fetch.getAttribute(), fetch.getJoinType()) :
+                attr instanceof CollectionAttribute ? to.fetch((CollectionAttribute) fetch.getAttribute(), fetch.getJoinType()) :
                 attr instanceof SetAttribute ? to.fetch((SetAttribute) fetch.getAttribute(), fetch.getJoinType()) :
                 attr instanceof ListAttribute ? to.fetch((ListAttribute) fetch.getAttribute(), fetch.getJoinType()) :
                 attr instanceof MapAttribute ? to.fetch((MapAttribute) fetch.getAttribute(), fetch.getJoinType()) :

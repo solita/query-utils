@@ -5,11 +5,12 @@ import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.last;
 
 import java.lang.reflect.Member;
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.ListAttribute;
+import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
@@ -18,11 +19,11 @@ import javax.persistence.metamodel.Type;
 import fi.solita.utils.query.IEntity;
 
 @SuppressWarnings("unchecked")
-class JoiningListAttribute<E extends IEntity, R> implements ListAttribute<E,R>, JoiningAttribute {
+class JoiningCollectionAttribute<E extends IEntity, R> implements CollectionAttribute<E,R>, JoiningAttribute {
     
     private final List<? extends Attribute<?, ?>> attributes;
 
-    <A extends Attribute<?,?> & Bindable<?>> JoiningListAttribute(Iterable<A> attrs) {
+    <A extends Attribute<?,?> & Bindable<?>> JoiningCollectionAttribute(Iterable<A> attrs) {
         attributes = newList(attrs);
     }
     
@@ -60,7 +61,7 @@ class JoiningListAttribute<E extends IEntity, R> implements ListAttribute<E,R>, 
 
     @Override
     public CollectionType getCollectionType() {
-        return CollectionType.LIST;
+        return CollectionType.COLLECTION;
     }
 
     @Override
@@ -69,8 +70,8 @@ class JoiningListAttribute<E extends IEntity, R> implements ListAttribute<E,R>, 
     }
 
     @Override
-    public Class<List<R>> getJavaType() {
-        return (Class<List<R>>) last(attributes).getJavaType();
+    public Class<Collection<R>> getJavaType() {
+        return (Class<Collection<R>>) last(attributes).getJavaType();
     }
 
     @Override
