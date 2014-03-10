@@ -1,7 +1,18 @@
 package fi.solita.utils.query;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import static fi.solita.utils.functional.Compare.by;
+import static fi.solita.utils.functional.Functional.cons;
+import static fi.solita.utils.functional.Functional.filter;
+import static fi.solita.utils.functional.Functional.flatMap;
+import static fi.solita.utils.functional.Functional.lastOption;
+import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Functional.sort;
+import static fi.solita.utils.query.QueryUtils.addListAttributeOrdering;
+import static fi.solita.utils.query.QueryUtils.resolveOrderColumn;
 
+import java.util.Comparator;
+
+import javax.persistence.TupleElement;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -18,20 +29,34 @@ import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
-import static fi.solita.utils.query.QueryUtils.*;
+
+import fi.solita.utils.functional.Compare;
+import fi.solita.utils.functional.Option;
 
 public abstract class JpaCriteriaCopy {
-
-    static final AtomicInteger aliasCounter = new AtomicInteger();
     
+    static final String elemTypeName(TupleElement<?> e) {
+        return e.getJavaType().getName();
+    }
+    
+    static final String fetchTypeName(Fetch<?,?> f) {
+        return f.getAttribute().getJavaType().getName();
+    }
+    
+    static final int hash(Object e) {
+        return e.hashCode();
+    }
+    
+    // as deterministic ordering as possible so that aliases do not change between executions of the same query
+    private static final Comparator<TupleElement<?>> comparator = Compare.by(JpaCriteriaCopy_.elemTypeName).then(by(JpaCriteriaCopy_.hash));
+    private static final Comparator<Fetch<?,?>> fetchComparator = Compare.by(JpaCriteriaCopy_.fetchTypeName).then(by(JpaCriteriaCopy_.hash));
+
     public static void copyCriteriaWithoutSelect(CriteriaQuery<?> from, CriteriaQuery<?> to, CriteriaBuilder cb) {
-        if (aliasCounter.get() > 100000) {
-            aliasCounter.set(0);
-        }
-        for (Root<?> root : from.getRoots()) {
+        int counter = findLatestCustomAlias(from).getOrElse(0);
+        for (Root<?> root : sort(comparator, from.getRoots())) {
             Root<?> r = to.from(root.getJavaType());
-            JpaCriteriaCopy.copyAlias(root, r);
-            JpaCriteriaCopy.copyJoins(root, r);
+            copyAlias(root, r, ++counter);
+            counter = copyJoins(root, r, ++counter);
         }
         to.distinct(from.isDistinct());
         if (from.getGroupList() != null) {
@@ -60,8 +85,60 @@ public abstract class JpaCriteriaCopy {
         }
     }
 
-    private static void copyJoins(From<?, ?> from, From<?, ?> to) {
-        for (Join<?, ?> join : from.getJoins()) {
+    public static void createMissingAliases(CriteriaQuery<?> query) {
+        int counter = findLatestCustomAlias(query).getOrElse(0);
+        for (Root<?> root : sort(comparator, query.getRoots())) {
+            getOrCreateAlias(root, ++counter);
+            counter = createMissingAliases(root, ++counter);
+        }
+    }
+    
+    private static Option<Integer> findLatestCustomAlias(CriteriaQuery<?> query) {
+        Iterable<String> allAliases = flatMap(JpaCriteriaCopy_.getAliases1, query.getRoots());
+        Iterable<Integer> allCustomAliases = map(JpaCriteriaCopy_.toInt, filter(JpaCriteriaCopy_.isCustomAlias, allAliases));
+        return lastOption(sort(allCustomAliases));
+    }
+    
+    static Iterable<String> getAliases(Root<?> root) {
+        return cons(root.getAlias(), flatMap(JpaCriteriaCopy_.getAliases, root.getJoins()));
+    }
+    
+    static Iterable<String> getAliases(Join<?,?> join) {
+        return cons(join.getAlias(), flatMap(JpaCriteriaCopy_.getAliases, join.getJoins()));
+    }
+    
+    static int toInt(String customAlias) {
+        return Integer.parseInt(customAlias.substring(aliasPrefix.length()));
+    }
+    
+    static boolean isCustomAlias(String alias) {
+        return alias != null && alias.startsWith(aliasPrefix);
+    }
+    
+    static String alias(Join<?,?> join) {
+        return join.getAlias();
+    }
+    
+    static String alias(Selection<?> selection) {
+        return selection.getAlias();
+    }
+    
+    /**
+     * @return last possibly used alias
+     */
+    private static int createMissingAliases(From<?, ?> from, int counter) {
+        for (Join<?, ?> join : sort(comparator, from.getJoins())) {
+            getOrCreateAlias(join, ++counter);
+            counter = createMissingAliases(join, ++counter);
+        }
+        return counter;
+    }
+    
+    /**
+     * @return last possibly used alias
+     */
+    private static int copyJoins(From<?, ?> from, From<?, ?> to, int counter) {
+        for (Join<?, ?> join : sort(comparator, from.getJoins())) {
             Attribute<?, ?> attr = join.getAttribute();
             // Hibernate fails with String-bases api; Join.join(String, JoinType)
             @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -71,30 +148,16 @@ public abstract class JpaCriteriaCopy {
                 attr instanceof ListAttribute ? to.join((ListAttribute) join.getAttribute(), join.getJoinType()) :
                 attr instanceof MapAttribute ? to.join((MapAttribute) join.getAttribute(), join.getJoinType()) :
                 to.join((CollectionAttribute) join.getAttribute(), join.getJoinType());
-            copyAlias(join, j);
-            copyJoins(join, j);
+            copyAlias(join, j, ++counter);
+            counter = copyJoins(join, j, ++counter);
         }
-        JpaCriteriaCopy.copyFetches(from, to);
-    }
-    
-    public static void createMissingAliases(CriteriaQuery<?> query) {
-        for (Root<?> root : query.getRoots()) {
-            getOrCreateAlias(root);
-            createMissingAliases(root);
-        }
-    }
-    
-    private static void createMissingAliases(From<?, ?> from) {
-        for (Join<?, ?> join : from.getJoins()) {
-            getOrCreateAlias(join);
-            createMissingAliases(join);
-        }
+        copyFetches(from, to);
+        return counter;
     }
 
     private static void copyFetches(FetchParent<?, ?> from, FetchParent<?, ?> to) {
-        for (Fetch<?, ?> fetch : from.getFetches()) {
+        for (Fetch<?, ?> fetch : sort(fetchComparator, from.getFetches())) {
             Attribute<?, ?> attr = fetch.getAttribute();
-            // Hibernate fails with String-bases api; Join.join(String, JoinType)
             @SuppressWarnings({ "rawtypes", "unchecked" })
             Fetch<?, ?> f = attr instanceof SingularAttribute ? to.fetch((SingularAttribute) fetch.getAttribute(), fetch.getJoinType()) :
                 attr instanceof CollectionAttribute ? to.fetch((CollectionAttribute) fetch.getAttribute(), fetch.getJoinType()) :
@@ -106,18 +169,18 @@ public abstract class JpaCriteriaCopy {
         }
     }
 
-    private static void copyAlias(Selection<?> from, Selection<?> to) {
-        to.alias(getOrCreateAlias(from));
+    private static void copyAlias(Selection<?> from, Selection<?> to, int counter) {
+        to.alias(getOrCreateAlias(from, counter));
     }
     
-    private static <T> String getOrCreateAlias(Selection<T> selection) {
+    private static <T> String getOrCreateAlias(Selection<T> selection, int counter) {
         String alias = selection.getAlias();
         if (alias == null) {
-            alias = "a_" + aliasCounter.getAndIncrement();
+            alias = aliasPrefix + counter;
             selection.alias(alias);
         }
         return alias;
-    
     }
-
+    
+    private static final String aliasPrefix = "queryutils_";
 }
