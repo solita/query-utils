@@ -45,7 +45,7 @@ public class Table {
     }
     
     public static final String processSql(String sql) {
-        return processSqlPattern.matcher(sql).replaceAll("select /*+ cardinality($3,1) */ $1$2$3");
+        return processSqlPattern.matcher(sql).replaceAll("select /*+ dynamic_sampling($3,2) */ $1$2$3");
     }
 
     public static class Value {
