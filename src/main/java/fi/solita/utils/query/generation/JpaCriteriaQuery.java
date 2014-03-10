@@ -3,7 +3,6 @@ package fi.solita.utils.query.generation;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.JoinType;
@@ -12,41 +11,46 @@ import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Bindable;
 
-import org.hibernate.proxy.HibernateProxyHelper;
-
+import fi.solita.utils.functional.Function0;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.QueryUtils;
+import fi.solita.utils.query.backend.TypeProvider;
 
 public class JpaCriteriaQuery {
 
-    @PersistenceContext
-    private EntityManager em;
+    private final Function0<EntityManager> em;
+    private final TypeProvider typeProvider;
+    
+    public JpaCriteriaQuery(Function0<EntityManager> em, TypeProvider typeProvider) {
+        this.em = em;
+        this.typeProvider = typeProvider;
+    }
 
     public <E extends IEntity> CriteriaQuery<E> single(Id<E> id) {
-        CriteriaQuery<E> query = em.getCriteriaBuilder().createQuery(id.getOwningClass());
+        CriteriaQuery<E> query = em.apply().getCriteriaBuilder().createQuery(id.getOwningClass());
         Root<E> root = query.from(id.getOwningClass());
-        return query.where(em.getCriteriaBuilder().equal(root.get(QueryUtils.id(id.getOwningClass(), em)), id));
+        return query.where(em.apply().getCriteriaBuilder().equal(root.get(QueryUtils.id(id.getOwningClass(), em.apply())), id));
     }
 
     public <E extends IEntity> CriteriaQuery<E> all(Class<E> entityClass) {
-        CriteriaQuery<E> query = em.getCriteriaBuilder().createQuery(entityClass);
+        CriteriaQuery<E> query = em.apply().getCriteriaBuilder().createQuery(entityClass);
         return query.select(query.from(entityClass));
     }
 
     @SuppressWarnings("unchecked")
     public <E extends IEntity> CriteriaQuery<E> ofIds(Iterable<? extends Id<? super E>> ids, Class<E> entityClass) {
-        CriteriaQuery<Object> query = em.getCriteriaBuilder().createQuery();
+        CriteriaQuery<Object> query = em.apply().getCriteriaBuilder().createQuery();
         if (ids.iterator().hasNext()) {
             Root<E> root = query.from(entityClass);
-            Path<Id<E>> idPath = root.get(QueryUtils.id(entityClass, em));
-            query.where(QueryUtils.inExpr(query, idPath, (Iterable<Id<E>>)ids, em.getCriteriaBuilder()));
+            Path<Id<E>> idPath = root.get(QueryUtils.id(entityClass, em.apply()));
+            query.where(QueryUtils.inExpr(query, idPath, (Iterable<Id<E>>)ids, em.apply().getCriteriaBuilder()));
             query.select(root);
             return (CriteriaQuery<E>)(Object)query;
         } else {
-            query.where(em.getCriteriaBuilder().or());
+            query.where(em.apply().getCriteriaBuilder().or());
             Root<E> root = query.from(entityClass);
             query.select(root);
             return (CriteriaQuery<E>)(Object)query;
@@ -95,10 +99,10 @@ public class JpaCriteriaQuery {
 
 
     private <E extends IEntity & Identifiable<?>, R> CriteriaQuery<R> doRelated(E entity, Attribute<?, ?>... attributes) {
-        CriteriaQuery<Object> query = em.getCriteriaBuilder().createQuery();
+        CriteriaQuery<Object> query = em.apply().getCriteriaBuilder().createQuery();
         @SuppressWarnings("unchecked")
-        Root<E> root = query.from(HibernateProxyHelper.getClassWithoutInitializingProxy(entity));
-        query.where(em.getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em)), entity.getId()));
+        Root<E> root = (Root<E>) query.from(typeProvider.getEntityClass(entity));
+        query.where(em.apply().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em.apply())), entity.getId()));
         From<?, ?> join = root;
         for (Attribute<?, ?> attr : attributes) {
             join = QueryUtils.join(join, attr, JoinType.INNER);
@@ -151,9 +155,9 @@ public class JpaCriteriaQuery {
 
     private <E extends IEntity, R>
     CriteriaQuery<R> doRelated(CriteriaQuery<E> query, Attribute<?,?>... attributes) {
-        CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
+        CriteriaQuery<Object> q = em.apply().getCriteriaBuilder().createQuery();
 
-        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
+        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
         From<?,?> join = resolveSelection(query, q);
         for (Attribute<?, ?> attr : attributes) {
             join = QueryUtils.join(join, attr, JoinType.INNER);

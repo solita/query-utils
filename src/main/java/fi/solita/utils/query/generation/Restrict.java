@@ -11,7 +11,6 @@ import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -23,6 +22,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.SingularAttribute;
 
+import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.query.Id;
@@ -30,11 +30,14 @@ import fi.solita.utils.query.Numeric;
 
 public class Restrict {
 
-    @PersistenceContext
-    protected EntityManager em;
+    private final Function0<EntityManager> em;
+    
+    public Restrict(Function0<EntityManager> em) {
+        this.em = em;
+    }
     
     protected CriteriaBuilder cb() {
-        return em.getCriteriaBuilder();
+        return em.apply().getCriteriaBuilder();
     }
 
     /**
@@ -139,7 +142,7 @@ public class Restrict {
 
         Path<A> path = resolveSelectionPath(query).get(attribute);
         return query.where(existingRestriction,
-                           inExpr(query, path, values, em.getCriteriaBuilder()));
+                           inExpr(query, path, values, em.apply().getCriteriaBuilder()));
     }
 
     /**
@@ -149,7 +152,7 @@ public class Restrict {
         Predicate existingRestriction = Option.of(query.getRestriction()).getOrElse(cb().and());
 
         Path<E> selectionPath = resolveSelectionPath(query);
-        Path<?> idPath = selectionPath.get(id(selectionPath.getJavaType(), em));
+        Path<?> idPath = selectionPath.get(id(selectionPath.getJavaType(), em.apply()));
         return query.where(existingRestriction,
                            cb().notEqual(idPath, idToExclude));
     }
@@ -161,9 +164,9 @@ public class Restrict {
         Predicate existingRestriction = Option.of(query.getRestriction()).getOrElse(cb().and());
 
         Path<E> selectionPath = resolveSelectionPath(query);
-        Path<Id<E>> idPath = selectionPath.get(id(selectionPath.getJavaType(), em));
+        Path<Id<E>> idPath = selectionPath.get(id(selectionPath.getJavaType(), em.apply()));
         return query.where(existingRestriction,
-                           cb().not(inExpr(query, idPath, idsToExclude, em.getCriteriaBuilder())));
+                           cb().not(inExpr(query, idPath, idsToExclude, em.apply().getCriteriaBuilder())));
     }
 
     /**

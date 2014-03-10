@@ -2,7 +2,7 @@ package fi.solita.utils.query.execution;
 
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
-import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.FunctionalImpl.map;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
@@ -15,7 +15,6 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
@@ -28,8 +27,7 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import org.hibernate.proxy.HibernateProxyHelper;
-
+import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
@@ -39,51 +37,54 @@ import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.Removable;
 import fi.solita.utils.query.attributes.AttributeProxy;
 import fi.solita.utils.query.attributes.OptionalAttribute;
+import fi.solita.utils.query.backend.TypeProvider;
 import fi.solita.utils.query.projection.Project;
 import fi.solita.utils.query.projection.ProjectionHelper;
 import fi.solita.utils.query.projection.ProjectionUtil_;
 
 public class JpaBasicQueries {
 
-    @PersistenceContext
-    private EntityManager em;
+    private final Function0<EntityManager> em;
 
     private final ProjectionHelper projectionSupport;
+    private final TypeProvider typeProvider;
 
-    public JpaBasicQueries(ProjectionHelper projectionSupport) {
+    public JpaBasicQueries(Function0<EntityManager> em, ProjectionHelper projectionSupport, TypeProvider typeProvider) {
+        this.em = em;
         this.projectionSupport = projectionSupport;
+        this.typeProvider = typeProvider;
     }
 
     @SuppressWarnings("unchecked")
     public <E extends IEntity & Identifiable<? extends Id<? super E>>> Id<E> persist(E entity) {
-        em.persist(entity);
+        em.apply().persist(entity);
         return (Id<E>) entity.getId();
     }
 
     public boolean isManaged(IEntity entity) {
-        return em.contains(entity);
+        return em.apply().contains(entity);
     }
 
     public <E extends IEntity & Removable> void remove(Id<E> id) {
-        em.remove(getProxy(id));
+        em.apply().remove(getProxy(id));
     }
 
     public <E extends IEntity & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
-        CriteriaQuery<Object> q = em.getCriteriaBuilder().createQuery();
-        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
+        CriteriaQuery<Object> q = em.apply().getCriteriaBuilder().createQuery();
+        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
         From<?,E> selection = resolveSelection(query, q);
 
         q.multiselect(projectionSupport.prepareProjectingQuery(Project.id(), selection));
-        List<Object> results = em.createQuery(q).getResultList();
+        List<Object> results = em.apply().createQuery(q).getResultList();
 
         Collection<Id<E>> idList = projectionSupport.finalizeProjectingQuery(Project.<E>id(), map(results, ProjectionUtil_.objectToObjectList));
         if (!idList.isEmpty()) {
-            em.createQuery("delete from " + resolveSelection(query).getJavaType().getName() + " e where e.id in(:idList)").setParameter("idList", idList).executeUpdate();
+            em.apply().createQuery("delete from " + resolveSelection(query).getJavaType().getName() + " e where e.id in(:idList)").setParameter("idList", idList).executeUpdate();
         }
     }
 
     public <E extends IEntity> E get(Id<E> id) {
-        E ret = em.find(id.getOwningClass(), id);
+        E ret = em.apply().find(id.getOwningClass(), id);
         if (ret == null) {
             throw new EntityNotFoundException("Entity of type " + id.getOwningClass().getName() + " with id " + id + " not found.");
         }
@@ -91,11 +92,11 @@ public class JpaBasicQueries {
     }
 
     public <E extends IEntity> E getProxy(Id<E> id) {
-        return em.getReference(id.getOwningClass(), id);
+        return em.apply().getReference(id.getOwningClass(), id);
     }
 
     public <E extends IEntity> Option<E> find(Id<E> id) {
-        return Option.of(em.find(id.getOwningClass(), id));
+        return Option.of(em.apply().find(id.getOwningClass(), id));
     }
 
     /**
@@ -138,13 +139,13 @@ public class JpaBasicQueries {
     
     @SuppressWarnings("unchecked")
     private <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity, C extends Collection<T>> Iterable<T> getProxiesIt(E entity, PluralAttribute<? super E, C, T> relation) {
-        SingularAttribute<T, Id<T>> id = QueryUtils.id(relation.getBindableJavaType(), em);
-        CriteriaQuery<Id<T>> query = em.getCriteriaBuilder().createQuery(id.getBindableJavaType());
-        Root<E> root = query.from(HibernateProxyHelper.getClassWithoutInitializingProxy(entity));
-        query.where(em.getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em)), entity.getId()));
+        SingularAttribute<T, Id<T>> id = QueryUtils.id(relation.getBindableJavaType(), em.apply());
+        CriteriaQuery<Id<T>> query = em.apply().getCriteriaBuilder().createQuery(id.getBindableJavaType());
+        Root<E> root = (Root<E>) query.from(typeProvider.getEntityClass(entity));
+        query.where(em.apply().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em.apply())), entity.getId()));
         query.select(((Join<?,T>)QueryUtils.join((Root<?>)root, (Attribute<?,?>)relation, JoinType.INNER)).get(id));
         
-        return map(em.createQuery(query).getResultList(), JpaBasicQueries_.<T>getProxy().ap(this));
+        return map(em.apply().createQuery(query).getResultList(), JpaBasicQueries_.<T>getProxy().ap(this));
     }
 
     public <E extends IEntity> Option<E> getIfDefined(Option<? extends Id<E>> idOption) {

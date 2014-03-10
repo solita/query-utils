@@ -9,9 +9,9 @@ import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Path;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.PluralAttribute;
@@ -69,9 +69,9 @@ public class ProjectionUtil {
         return ret;
     }
 
-    static Pair<? extends Expression<?>, ? extends Attribute<?,?>> doJoins(From<?,?> root, Attribute<?,?> target, JoinType type) {
+    static Pair<? extends Path<?>, ? extends Attribute<?,?>> doJoins(From<?,?> root, Attribute<?,?> target, JoinType type) {
         logger.debug("doJoins({},{},{})", new Object[] {root, target, type});
-        Expression<?> exp = root;
+        Path<?> exp = root;
         for (JoiningAttribute joining: unwrap(JoiningAttribute.class, target)) {
             List<? extends Attribute<?, ?>> attributes = joining.getAttributes();
             for (Attribute<?,?> join: init(attributes)) {
@@ -84,7 +84,7 @@ public class ProjectionUtil {
             }
             target = last(attributes);
         }
-        Pair<? extends Expression<?>, ? extends Attribute<?,?>> ret = Pair.of(exp, target);
+        Pair<? extends Path<?>, ? extends Attribute<?,?>> ret = Pair.of(exp, target);
         logger.debug("doJoins -> {}", ret);
         return ret;
     }

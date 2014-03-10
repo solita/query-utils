@@ -2,28 +2,30 @@ package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newMap;
-import static fi.solita.utils.functional.Functional.filter;
-import static fi.solita.utils.functional.Functional.find;
-import static fi.solita.utils.functional.Functional.flatMap;
-import static fi.solita.utils.functional.Functional.groupBy;
-import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.FunctionalImpl.filter;
+import static fi.solita.utils.functional.FunctionalImpl.find;
+import static fi.solita.utils.functional.FunctionalImpl.flatMap;
+import static fi.solita.utils.functional.FunctionalImpl.groupBy;
+import static fi.solita.utils.functional.FunctionalImpl.map;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 import org.hibernate.Session;
 import org.hibernate.TypeHelper;
 import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.proxy.HibernateProxyHelper;
 import org.hibernate.usertype.CompositeUserType;
 import org.hibernate.usertype.UserType;
 
+import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Functional_;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Predicates;
+import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.backend.Type;
 import fi.solita.utils.query.backend.TypeProvider;
@@ -38,14 +40,13 @@ public class HibernateTypeProvider implements TypeProvider {
         }
     }
 
-    @PersistenceContext
-    private EntityManager em;
+    private final Function0<EntityManager> em;
     
     // cache these, since it's static data.
     private Map<Class<?>,String> typesByUniqueReturnedClassCache;
     private Map<Class<?>,String> typesByUniqueReturnedClass() {
         if (typesByUniqueReturnedClassCache == null) {
-            Iterable<ClassMetadata>                    allClassMetadata           = em.unwrap(Session.class).getSessionFactory().getAllClassMetadata().values();
+            Iterable<ClassMetadata>                    allClassMetadata           = em.apply().unwrap(Session.class).getSessionFactory().getAllClassMetadata().values();
             Map<String, List<org.hibernate.type.Type>> allPropertyTypesByName     = groupBy(flatMap(allClassMetadata, HibernateTypeProvider_.classMetadata2propertyTypes), HibernateTypeProvider_.type2Name);
             Iterable<org.hibernate.type.Type>          allDifferentPropertyTypes  = map(allPropertyTypesByName.values(), Functional_.<org.hibernate.type.Type>head());
             Iterable<List<org.hibernate.type.Type>>    typesByReturnedClass       = groupBy(allDifferentPropertyTypes, HibernateTypeProvider_.type2ReturnedClass).values();
@@ -53,6 +54,10 @@ public class HibernateTypeProvider implements TypeProvider {
             typesByUniqueReturnedClassCache = newMap(map(typesUniqueByReturnedClass, Functional_.<org.hibernate.type.Type>head().andThen(HibernateTypeProvider_.type2ReturnedClassAndNamePair)));
         }
         return typesByUniqueReturnedClassCache;
+    }
+    
+    public HibernateTypeProvider(Function0<EntityManager> em) {
+        this.em = em;
     }
     
     static List<org.hibernate.type.Type> classMetadata2propertyTypes(ClassMetadata c) {
@@ -74,12 +79,12 @@ public class HibernateTypeProvider implements TypeProvider {
 
     @Override
     public <ID extends Serializable, T extends Identifiable<ID>> Type<ID> idType(Class<T> entityType) {
-        return new HibernateType<ID>(em.unwrap(Session.class).getSessionFactory().getClassMetadata(entityType).getIdentifierType());
+        return new HibernateType<ID>(em.apply().unwrap(Session.class).getSessionFactory().getClassMetadata(entityType).getIdentifierType());
     }
 
     @Override
     public <T> Type<T> type(final Class<T> clazz) {
-        TypeHelper typeHelper = em.unwrap(Session.class).getTypeHelper();
+        TypeHelper typeHelper = em.apply().unwrap(Session.class).getTypeHelper();
         
         // basic type?
         org.hibernate.type.Type basicType = typeHelper.basic(clazz);
@@ -97,7 +102,7 @@ public class HibernateTypeProvider implements TypeProvider {
         
         // entity?
         try {
-            em.getMetamodel().entity(clazz);
+            em.apply().getMetamodel().entity(clazz);
             org.hibernate.type.Type entityType = typeHelper.entity(clazz);
             if (entityType != null) {
                 return new HibernateType<T>(entityType);
@@ -123,4 +128,8 @@ public class HibernateTypeProvider implements TypeProvider {
         throw new IllegalArgumentException("Could not resolve Hibernate Type for: " + clazz);
     }
 
+    @Override
+    public Class<?> getEntityClass(IEntity entity) {
+        return HibernateProxyHelper.getClassWithoutInitializingProxy(entity);
+    }
 }

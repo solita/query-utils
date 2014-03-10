@@ -15,11 +15,11 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
-import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Selection;
 
+import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.JpaCriteriaCopy;
@@ -31,19 +31,18 @@ import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 public class JpaCriteriaQueries {
 
     private final JpaCriteriaQueryExecutor queryExecutor;
+    private final Function0<EntityManager> em;
 
-    @PersistenceContext
-    private EntityManager em;
-
-    public JpaCriteriaQueries(JpaCriteriaQueryExecutor queryExecutor) {
+    public JpaCriteriaQueries(Function0<EntityManager> em, JpaCriteriaQueryExecutor queryExecutor) {
+        this.em = em;
         this.queryExecutor = queryExecutor;
     }
 
     public long count(CriteriaQuery<?> query) {
-        CriteriaQuery<Long> q = em.getCriteriaBuilder().createQuery(Long.class);
-        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.getCriteriaBuilder());
+        CriteriaQuery<Long> q = em.apply().getCriteriaBuilder().createQuery(Long.class);
+        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
         Selection<?> selection = resolveSelection(query);
-        q.select(em.getCriteriaBuilder().count((Expression<?>) (selection.isCompoundSelection() ? head(selection.getCompoundSelectionItems()) : selection)));
+        q.select(em.apply().getCriteriaBuilder().count((Expression<?>) (selection.isCompoundSelection() ? head(selection.getCompoundSelectionItems()) : selection)));
         return get(q);
     }
 
@@ -77,7 +76,7 @@ public class JpaCriteriaQueries {
     }
 
     public <T> List<T> getMany(CriteriaQuery<T> query, Page page) {
-        applyOrder(query, resolveSelection(query), em.getCriteriaBuilder());
+        applyOrder(query, resolveSelection(query), em.apply().getCriteriaBuilder());
         checkOrdering(query, page);
         return queryExecutor.getMany(query, page);
     }
@@ -87,6 +86,6 @@ public class JpaCriteriaQueries {
     }
 
     public <E extends IEntity> List<E> getMany(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering) {
-        return queryExecutor.getMany(applyOrder(query, resolveSelectionPath(query), ordering, em.getCriteriaBuilder()), page);
+        return queryExecutor.getMany(applyOrder(query, resolveSelectionPath(query), ordering, em.apply().getCriteriaBuilder()), page);
     }
 }

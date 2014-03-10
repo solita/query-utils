@@ -5,14 +5,14 @@ import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newListOfSize;
 import static fi.solita.utils.functional.Collections.newMultimap;
 import static fi.solita.utils.functional.Functional.cons;
-import static fi.solita.utils.functional.Functional.find;
-import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.isEmpty;
-import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Functional.range;
 import static fi.solita.utils.functional.Functional.transpose;
 import static fi.solita.utils.functional.Functional.zip;
+import static fi.solita.utils.functional.FunctionalImpl.find;
+import static fi.solita.utils.functional.FunctionalImpl.flatMap;
+import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.query.QueryUtils.addListAttributeOrdering;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 import static fi.solita.utils.query.QueryUtils.id;
@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
@@ -53,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.solita.utils.functional.Collections;
+import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.FunctionalA_;
 import fi.solita.utils.functional.Functional_;
 import fi.solita.utils.functional.Option;
@@ -72,8 +72,11 @@ public class ProjectionHelper {
     
     private static final Logger logger = LoggerFactory.getLogger(ProjectionHelper.class);
 
-    @PersistenceContext
-    private EntityManager em;
+    private final Function0<EntityManager> em;
+    
+    public ProjectionHelper(Function0<EntityManager> em) {
+        this.em = em;
+    }
 
     public <E> List<Selection<?>> prepareProjectingQuery(MetaJpaConstructor<E,?,?> projection, From<?,? extends E> selection) {
         logger.info("prepareProjectingQuery({},{})", projection, selection);
@@ -81,7 +84,7 @@ public class ProjectionHelper {
         List<Selection<?>> ret;
         if (projection instanceof IdProjection) {
             logger.info("IdProjection. Replacing selection {} with just Id.", selection);
-            ret = Collections.<Selection<?>>newList(selection.get(QueryUtils.<E>id(selection.getJavaType(), em)));
+            ret = Collections.<Selection<?>>newList(selection.get(QueryUtils.<E>id(selection.getJavaType(), em.apply())));
         } else {
             ret = newListOfSize(projection.getParameters().size());
             for (Tuple3<Integer, Attribute<?,?>, Class<?>> t: zip(range(0), projection.getParameters(), projection.getConstructorParameterTypes())) {
@@ -122,26 +125,26 @@ public class ProjectionHelper {
         
         for (PseudoAttribute pseudo: unwrap(PseudoAttribute.class, param)) {
             logger.info("PseudoAttribute detected: {}", pseudo);
-            Expression<?> s = pseudo.getSelectionForQuery(em, selection);
-            return constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity>)s).get(id((Class<IEntity>)s.getJavaType(), em)) : s;
+            Expression<?> s = pseudo.getSelectionForQuery(em.apply(), selection);
+            return constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity>)s).get(id((Class<IEntity>)s.getJavaType(), em.apply())) : s;
         }
 
         if (unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined()) {
             logger.info("AdditionalQueryPerformingAttribute detected. Replacing parameter with source Id.");
             // add entity id as a placeholder to the query, to be replaced later with the actual result.
-            return selection.get(id(selection.getJavaType(), em));
+            return selection.get(id(selection.getJavaType(), em.apply()));
         }
         
         if (unwrap(PluralAttribute.class, param).isDefined()) {
             logger.info("PluralAttribute detected. Replacing parameter with source Id.");
-            return selection.get(id(selection.getJavaType(), em));
+            return selection.get(id(selection.getJavaType(), em.apply()));
         }
         
         for (SingularAttribute<T,?> attr: unwrap(SingularAttribute.class, param)) {
             if (IEntity.class.isAssignableFrom(attr.getJavaType())) {
                 if (constructorExpectsId) {
                     logger.info("Singular Entity attribute detected, but constructor expects Id. Replacing parameter with Id.");
-                    return selection.get(attr).get(id(attr.getBindableJavaType(), em));
+                    return selection.get(attr).get(id(attr.getBindableJavaType(), em.apply()));
                 } else {
                     logger.info("Singular Entity attribute detected. Performing left join.");
                     return ((From<?, T>) selection).join(attr, JoinType.LEFT);
@@ -200,7 +203,7 @@ public class ProjectionHelper {
         Iterable<? extends Object> result;
         if (isCollectionOfEmbeddables(target)) {
             logger.info("Target is a collection of Embeddables. Picking embeddable parts manually.");
-            result = map(actualResultRows, EmbeddableUtil_.collectEmbeddableFromParts.ap(em.getMetamodel(), (Bindable<?>)target));
+            result = map(actualResultRows, EmbeddableUtil_.collectEmbeddableFromParts.ap(em.apply().getMetamodel(), (Bindable<?>)target));
         } else {
             // for AdditionalQueryPerformingAttribute, replace the result object array with the actual object, performing additional queries if needed
             Option<AdditionalQueryPerformingAttribute> rel = unwrap(AdditionalQueryPerformingAttribute.class, target);
@@ -224,14 +227,14 @@ public class ProjectionHelper {
     private <SOURCE extends IEntity,R> List<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<Id<SOURCE>> sourceIds) {
         logger.debug("queryTargets({},{},{},{},{})", new Object[] {sourceIds, target, isId, isWrapperOfIds, isDistinctable});
         Class<SOURCE> sourceClass = target.getDeclaringType().getJavaType();
-        CriteriaQuery<Object[]> query = em.getCriteriaBuilder().createQuery(Object[].class);
+        CriteriaQuery<Object[]> query = em.apply().getCriteriaBuilder().createQuery(Object[].class);
         Root<SOURCE> source = query.from(sourceClass);
-        Path<Id<SOURCE>> sourceId = source.get(id(sourceClass, em));
+        Path<Id<SOURCE>> sourceId = source.get(id(sourceClass, em.apply()));
         
         logger.info("Inner joining from {} to {}", source, target);
         final Join<SOURCE,Object> relation = (Join<SOURCE, Object>) join(source, target, JoinType.INNER);
         
-        query.where(inExpr(query, sourceId, sourceIds, em.getCriteriaBuilder()));
+        query.where(inExpr(query, sourceId, sourceIds, em.apply().getCriteriaBuilder()));
 
         if (isDistinctable) {
             logger.info("Query is distinctable.");
@@ -240,7 +243,7 @@ public class ProjectionHelper {
 
         if (target instanceof ListAttribute) {
             logger.info("Adding ordering based on ListAttribute");
-            addListAttributeOrdering(query, relation, resolveOrderColumn((ListAttribute<?,?>)target), em.getCriteriaBuilder());
+            addListAttributeOrdering(query, relation, resolveOrderColumn((ListAttribute<?,?>)target), em.apply().getCriteriaBuilder());
         }
         
         Option<AdditionalQueryPerformingAttribute> rel = unwrap(AdditionalQueryPerformingAttribute.class, target);
@@ -249,7 +252,7 @@ public class ProjectionHelper {
             // parentid (of the embeddable) in the select clause, but tries to read
             // all fields from the resultset
             logger.info("Target is a collection of embeddables. Breaking embeddable fields manually for the query.");
-            query.multiselect(newList(cons(sourceId, breakEmbeddableToParts(em.getMetamodel(), (Bindable<?>)target, relation))));
+            query.multiselect(newList(cons(sourceId, breakEmbeddableToParts(em.apply().getMetamodel(), (Bindable<?>)target, relation))));
         } else if (rel.isDefined()) {
             logger.info("Target is AdditionalQueryPerformingAttribute. Preparing.");
             List<Selection<?>> selections = prepareProjectingQuery((MetaJpaConstructor<Object,?,?>)rel.get().getConstructor(), relation);
@@ -259,18 +262,18 @@ public class ProjectionHelper {
                     throw new RuntimeException("whoops");
                 }
                 Path<Object> sel = ((Path<Object>)head(selections));
-                query.multiselect(sourceId, sel.get(id(sel.getJavaType(), em)));
+                query.multiselect(sourceId, sel.get(id(sel.getJavaType(), em.apply())));
             } else {
                 query.multiselect(newList(cons(sourceId, selections)));
             }
         } else if (isWrapperOfIds) {
             logger.info("Constructor expects Ids but the query was not for Ids. Projection to Ids.");
-            query.multiselect(sourceId, relation.get(id(relation.getJavaType(), em)));
+            query.multiselect(sourceId, relation.get(id(relation.getJavaType(), em.apply())));
         } else {
             query.multiselect(sourceId, relation);
         }
 
-        List<Object[]> ret = em.createQuery(query).getResultList();
+        List<Object[]> ret = em.apply().createQuery(query).getResultList();
         logger.info("queryTargets -> {}", ret);
         return ret;
     }

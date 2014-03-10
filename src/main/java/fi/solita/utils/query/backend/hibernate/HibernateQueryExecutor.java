@@ -2,7 +2,7 @@ package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.FunctionalImpl.map;
 
 import java.util.Collection;
 import java.util.List;
@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 
@@ -20,6 +19,7 @@ import org.hibernate.Session;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.transform.ResultTransformer;
 
+import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Pair_;
@@ -34,20 +34,23 @@ import fi.solita.utils.query.generation.QLQuery;
 
 public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQueryExecutor, QLQueryExecutor {
 
-    @PersistenceContext
-    private EntityManager em;
-
+    private final Function0<EntityManager> em;
+    
+    public HibernateQueryExecutor(Function0<EntityManager> em) {
+        this.em = em;
+    }
+    
     @Override
     public <T> T get(CriteriaQuery<T> query) {
         JpaCriteriaCopy.createMissingAliases(query);
-        return replaceProxy(em.createQuery(query).getSingleResult());
+        return replaceProxy(em.apply().createQuery(query).getSingleResult());
     }
 
     @Override
     public <T> List<T> getMany(CriteriaQuery<T> query, Page page) {
         JpaCriteriaCopy.createMissingAliases(query);
         
-        TypedQuery<T> q = em.createQuery(query);
+        TypedQuery<T> q = em.apply().createQuery(query);
         int originalFirstResult = q.getFirstResult();
         int originalMaxResults = q.getMaxResults();
         
@@ -67,13 +70,13 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
 
     @Override
     public void execute(NativeQuery<Void> query) {
-        em.createNativeQuery(query.query).executeUpdate();
+        em.apply().createNativeQuery(query.query).executeUpdate();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> Option<T> find(NativeQuery<T> query) {
-        SQLQuery q = em.unwrap(Session.class).createSQLQuery(query.query);
+        SQLQuery q = em.apply().unwrap(Session.class).createSQLQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -83,7 +86,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> List<T> getMany(NativeQuery<T> query, Page page) {
-        SQLQuery q = em.unwrap(Session.class).createSQLQuery(query.query);
+        SQLQuery q = em.apply().unwrap(Session.class).createSQLQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -93,7 +96,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> Option<T> find(QLQuery<T> query) {
-        Query q = em.unwrap(Session.class).createQuery(query.query);
+        Query q = em.apply().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
         return Option.of(replaceProxy((T)q.uniqueResult()));
     }
@@ -101,7 +104,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> List<T> getMany(QLQuery<T> query, Page page) {
-        Query q = em.unwrap(Session.class).createQuery(query.query);
+        Query q = em.apply().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
         return newList(map(applyPaging(q, page).list(), HibernateQueryExecutor_.replaceProxy()));
     }

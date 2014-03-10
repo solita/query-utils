@@ -139,6 +139,15 @@ public class ProjectTest extends QueryTestBase {
 
         assertEquals("foo", dao.get(query.all(Department.class), Project.value(Department_.mandatoryName)));
     }
+    
+    @Test
+    public void value_entity() {
+        Department dep = new Department();
+        Employee emp = new Employee("foo", new Money(1), dep);
+        persist(dep, emp);
+
+        assertEquals(dep.getId(), dao.get(query.all(Employee.class), Project.value(Employee_.mandatoryDepartment)).getId());
+    }
 
     @Test
     public void relation_value() {
