@@ -1,6 +1,8 @@
 package fi.solita.utils.query;
 
+import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
+import static fi.solita.utils.functional.Collections.newListOfSize;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.isEmpty;
@@ -27,6 +29,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 import javax.persistence.criteria.Subquery;
@@ -168,7 +171,7 @@ public abstract class QueryUtils {
         return query;
     }
 
-    public static final javax.persistence.criteria.Predicate inExpr(CriteriaQuery<?> q, Path<?> path, Iterable<?> values, CriteriaBuilder cb) {
+    public static final Predicate inExpr(CriteriaQuery<?> q, Expression<?> path, Iterable<?> values, CriteriaBuilder cb) {
         if (Table.isSupported(values)) {
             Subquery<Table.Value> sq = q.subquery(Table.Value.class);
             Root<Table> root = sq.from(Table.class);
@@ -177,13 +180,19 @@ public abstract class QueryUtils {
             sq.where(root.get(Table_.helper_column_to_be_removed_from_query.getName()).in(new Table.Value(newList(values))));
             return path.in(sq);
         } else {
-            javax.persistence.criteria.Predicate pred = cb.disjunction();
             // oracle fails if more than 1000 parameters
             List<? extends List<?>> groups = newList(grouped(values, 1000));
+            List<Predicate> preds = newListOfSize(groups.size());
             for (List<?> g: groups) {
-                pred = cb.or(pred, path.in(newList(g)));
+                preds.add(path.in(g));
             }
-            return pred;
+            if (preds.isEmpty()) {
+                return cb.or();
+            } else if (preds.size() == 1) {
+                return head(preds);
+            } else {
+                return cb.or(newArray(Predicate.class, preds));
+            }
         }
     }
     
