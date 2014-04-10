@@ -2,6 +2,7 @@ package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Functional.head;
+import static fi.solita.utils.functional.Functional.headOption;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
@@ -101,20 +102,23 @@ public class TableValueType implements UserType, Serializable {
     }
     
     public static Option<Pair<String,Iterable<Object>>> getSqlTypeAndValues(Iterable<?> values) {
-        Object h = head(values);
+        Option<?> h = headOption(values);
+        if (!h.isDefined()) {
+            return None();
+        }
         
         String t;
         Iterable<Object> v;
-        if (h instanceof CharSequence) {
+        if (h.get() instanceof CharSequence) {
             t = "SYS.ODCIVARCHAR2LIST";
             v = (Iterable<Object>)(Object)map(TableValueType_.toString, (Iterable<CharSequence>)values);
-        } else if (h instanceof BigDecimal) {
+        } else if (h.get() instanceof BigDecimal) {
             t = "SYS.ODCINUMBERLIST";
             v = (Iterable<Object>)values;
-        } else if (h instanceof Number) {
+        } else if (h.get() instanceof Number) {
             t = "SYS.ODCINUMBERLIST";
             v = (Iterable<Object>)(Object)map(TableValueType_.toLong, (Iterable<Number>)values);
-        } else if (h instanceof Numeric) {
+        } else if (h.get() instanceof Numeric) {
             t = "SYS.ODCINUMBERLIST";
             v = (Iterable<Object>)(Object)map(Numeric_.toNumber, (Iterable<Numeric>)values);
         } else {
