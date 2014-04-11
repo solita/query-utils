@@ -137,7 +137,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E> CriteriaQuery<E> excluding(Id<E> idToExclude, CriteriaQuery<E> query) {
+    public <E> CriteriaQuery<E> excluding(Id<? super E> idToExclude, CriteriaQuery<E> query) {
         Path<E> selectionPath = resolveSelectionPath(query);
         Path<?> idPath = selectionPath.get(id(selectionPath.getJavaType(), em.apply()));
         Predicate predicate = cb().notEqual(idPath, idToExclude);
@@ -147,10 +147,30 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E> CriteriaQuery<E> excluding(Iterable<? extends Id<E>> idsToExclude, CriteriaQuery<E> query) {
+    public <E> CriteriaQuery<E> excluding(Iterable<? extends Id<? super E>> idsToExclude, CriteriaQuery<E> query) {
         Path<E> selectionPath = resolveSelectionPath(query);
         Path<Id<E>> idPath = selectionPath.get(id(selectionPath.getJavaType(), em.apply()));
         Predicate predicate = cb().not(inExpr(query, idPath, idsToExclude, em.apply().getCriteriaBuilder()));
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E> CriteriaQuery<E> including(Id<? super E> idToInclude, CriteriaQuery<E> query) {
+        Path<E> selectionPath = resolveSelectionPath(query);
+        Path<?> idPath = selectionPath.get(id(selectionPath.getJavaType(), em.apply()));
+        Predicate predicate = cb().equal(idPath, idToInclude);
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E> CriteriaQuery<E> including(Iterable<? extends Id<? super E>> idsToInclude, CriteriaQuery<E> query) {
+        Path<E> selectionPath = resolveSelectionPath(query);
+        Path<Id<E>> idPath = selectionPath.get(id(selectionPath.getJavaType(), em.apply()));
+        Predicate predicate = inExpr(query, idPath, idsToInclude, em.apply().getCriteriaBuilder());
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
 
