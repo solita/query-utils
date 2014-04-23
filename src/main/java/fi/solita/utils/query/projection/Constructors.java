@@ -111,6 +111,11 @@ public class Constructors {
         public Pair<LEFT, RIGHT> apply(LEFT left, RIGHT right) {
             return Pair.of(left, right);
         }
+        
+        @Override
+        public String toString() {
+            return MetaJpaConstructor.Helper.toString(this);
+        }
     }
     
     private static final class TupleProjection<E extends IEntity, T extends Tuple> implements MetaJpaConstructor<E,T,T> {
@@ -184,6 +189,11 @@ public class Constructors {
         @Override
         public R apply(R t) {
             return t;
+        }
+        
+        @Override
+        public String toString() {
+            return MetaJpaConstructor.Helper.toString(this);
         }
     }
 }
