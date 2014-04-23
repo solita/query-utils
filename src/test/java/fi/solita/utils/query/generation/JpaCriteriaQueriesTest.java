@@ -180,7 +180,7 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
                 query.related(Employee_.optionalMunicipality,                       // drop emp3 since it has no municipality
                     restrict.equals(Employee_.mandatoryName, Some("emp"),           // drop dep3 since its employee has wrong name
                         query.related(Department_.employees,                        // drop (by inner join) dep2 since it has no employees
-                            restrict.equals(Department_.mandatoryName, Some("dep"),
+                            restrict.equals(Department_.mandatoryDepName, Some("dep"),
                                 query.all(Department.class))))));                   // start with both departments...
         
         assertEquals(mun.getId(), dao.get(queryWithRestrictions).getId());

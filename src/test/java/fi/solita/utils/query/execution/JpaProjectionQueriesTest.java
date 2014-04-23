@@ -90,7 +90,7 @@ public class JpaProjectionQueriesTest extends QueryTestBase {
         persist(dep);
         long queryCount = getQueryCount();
 
-        Dto dto = dao.get(query.all(Department.class), Dto_.c20(literal(VALUE._), Department_.mandatoryName));
+        Dto dto = dao.get(query.all(Department.class), Dto_.c20(literal(VALUE._), Department_.mandatoryDepName));
         assertEquals(dep.getMandatoryName(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);

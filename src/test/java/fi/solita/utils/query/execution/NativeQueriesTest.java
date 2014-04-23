@@ -207,7 +207,7 @@ public class NativeQueriesTest extends QueryTestBase {
         persist(mun);
         persist(dep);
 
-        NativeQuery<Option<Municipality>> q = NativeQuery.of("select m.* from Department d left join Municipality m on d.optionalMunicipality_id=m.id")
+        NativeQuery<Option<Municipality>> q = NativeQuery.of("select m.* from Department d left join Municipality m on d.optionalDepMunicipality_id=m.id")
                                         .returnsOptional(Cast.optional(typeProvider.type(Municipality.class)));
         assertEquals(mun.getId(), dao.get(q).get().getId());
     }

@@ -62,7 +62,7 @@ public class SelectTest extends QueryTestBase {
         Collection<Pair<Department, String>> list = dao.getMany(
                 query.all(Department.class),
                     Project.pair(Select.<Department>self(),
-                                 Department_.mandatoryName));
+                                 Department_.mandatoryDepName));
 
         assertEquals(dep.getId(), head(list)._1.getId());
     }

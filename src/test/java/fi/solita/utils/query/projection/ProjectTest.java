@@ -137,7 +137,7 @@ public class ProjectTest extends QueryTestBase {
         Department dep = new Department("foo");
         persist(dep);
 
-        assertEquals("foo", dao.get(query.all(Department.class), Project.value(Department_.mandatoryName)));
+        assertEquals("foo", dao.get(query.all(Department.class), Project.value(Department_.mandatoryDepName)));
     }
     
     @Test

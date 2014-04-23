@@ -21,7 +21,7 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
     private ID id;
 
     @Column(nullable = false)
-    private String mandatoryName;
+    private String mandatoryDepName;
 
     @Column(nullable = false)
     private int mandatoryNumber;
@@ -33,7 +33,7 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
     private Employee optionalManager;
     
     @ManyToOne
-    private Municipality optionalMunicipality;
+    private Municipality optionalDepMunicipality;
     
     @ManyToOne(optional = false) 
     private Department mandatorySelfReference;
@@ -56,7 +56,7 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
     
     @Embedded
     @AttributeOverride(name="year", column = @Column(name = "year2"))
-    private Report optionalReport;
+    private Report optionalDepReport;
     
     public Department() {
         this("");
@@ -68,12 +68,12 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
     
     public Department(String name, Municipality municipality) {
         this(name);
-        this.optionalMunicipality = municipality;
+        this.optionalDepMunicipality = municipality;
     }
     
     public Department(Municipality municipality) {
         this();
-        this.optionalMunicipality = municipality;
+        this.optionalDepMunicipality = municipality;
     }
     
     public Department(Money budget) {
@@ -83,7 +83,7 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
     
     public Department(Report report) {
         this("", 0, report);
-        this.optionalReport = report;
+        this.optionalDepReport = report;
     }
     
     public Department(String mandatoryName, Employee manager) {
@@ -96,7 +96,7 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
     }
 
     public Department(String mandatoryName, int number, Report report) {
-        this.mandatoryName = mandatoryName;
+        this.mandatoryDepName = mandatoryName;
         this.mandatoryNumber = number;
         this.mandatoryReport = report;
         this.mandatorySelfReference = this;
@@ -126,7 +126,7 @@ public class Department implements IEntity, Identifiable<Department.ID>, Removab
     }
 
     public String getMandatoryName() {
-        return mandatoryName;
+        return mandatoryDepName;
     }
 
     public int getNumber() {

@@ -4,16 +4,18 @@ import static fi.solita.utils.functional.Collections.emptyList;
 import static fi.solita.utils.functional.Collections.emptySet;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
-import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.FunctionalImpl.map;
 import static fi.solita.utils.query.projection.Select.literal;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Dto;
@@ -24,10 +26,12 @@ import fi.solita.utils.query.Dto.VALUE;
 import fi.solita.utils.query.Dto_;
 import fi.solita.utils.query.Employee;
 import fi.solita.utils.query.Employee_;
+import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Municipality;
 import fi.solita.utils.query.Municipality_;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.execution.JpaProjectionQueries;
+import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
 public class RelatedProjectionTest extends QueryTestBase {
@@ -166,6 +170,22 @@ public class RelatedProjectionTest extends QueryTestBase {
         
         List<Dto> dtos = dao.get(query.all(Department.class), Project.value(Related.projection(Department_.employees, Dto_.c7(literal(ID._), Employee_.id))));
         assertEquals(emptyList(), dtos);
+        
+        assertEquals(2, getQueryCount() - queryCount);
+    }
+    
+    @Test
+    @Ignore
+    public void getRelatedProjection_relatedValue() {
+        Municipality mun = new Municipality();
+        Department dep = new Department(mun);
+        Employee emp = new Employee("emp", dep);
+        persist(mun, dep, emp);
+        long queryCount = getQueryCount();
+        
+        Option<Id<Municipality>> munid = dao.get(query.all(Employee.class), Project.value(Cast.optional(Related.projection(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepMunicipality),
+                                                                                                     Project.<Municipality>id()))));
+        assertEquals(mun.getId(), munid.get());
         
         assertEquals(2, getQueryCount() - queryCount);
     }

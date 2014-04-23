@@ -100,8 +100,8 @@ public class ProjectionsTest extends QueryTestBase {
         Department dep2 = new Department("b");
         persist(dep1, dep2);
 
-        assertEquals(dep1.getId(), dao.findFirst(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryName)).get());
-        assertEquals(dep2.getId(), dao.findFirst(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryName).desc).get());
+        assertEquals(dep1.getId(), dao.findFirst(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryDepName)).get());
+        assertEquals(dep2.getId(), dao.findFirst(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryDepName).desc).get());
     }
 
     @Test
@@ -128,8 +128,8 @@ public class ProjectionsTest extends QueryTestBase {
         Department dep2 = new Department("b");
         persist(dep1, dep2);
 
-        assertEquals(newList(dep1.getId(), dep2.getId()), dao.getMany(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryName)));
-        assertEquals(newList(dep2.getId(), dep1.getId()), dao.getMany(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryName).desc));
+        assertEquals(newList(dep1.getId(), dep2.getId()), dao.getMany(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryDepName)));
+        assertEquals(newList(dep2.getId(), dep1.getId()), dao.getMany(query.all(Department.class), Project.id(), Order.by(Department_.mandatoryDepName).desc));
     }
 
     @Test
@@ -138,8 +138,8 @@ public class ProjectionsTest extends QueryTestBase {
         Department dep2 = new Department("b");
         persist(dep1, dep2);
 
-        assertEquals(newList(dep1.getId()), dao.getMany(query.all(Department.class), Project.id(), Page.FIRST.withSize(1), Order.by(Department_.mandatoryName)));
-        assertEquals(newList(dep2.getId()), dao.getMany(query.all(Department.class), Project.id(), Page.FIRST.withSize(1), Order.by(Department_.mandatoryName).desc));
+        assertEquals(newList(dep1.getId()), dao.getMany(query.all(Department.class), Project.id(), Page.FIRST.withSize(1), Order.by(Department_.mandatoryDepName)));
+        assertEquals(newList(dep2.getId()), dao.getMany(query.all(Department.class), Project.id(), Page.FIRST.withSize(1), Order.by(Department_.mandatoryDepName).desc));
     }
     
     @Test
@@ -156,6 +156,6 @@ public class ProjectionsTest extends QueryTestBase {
 
     private CriteriaQuery<Department> allDepartmentsOrdered() {
         CriteriaQuery<Department> qOrdered = query.all(Department.class);
-        return qOrdered.orderBy(em.getCriteriaBuilder().asc(qOrdered.getRoots().iterator().next().get("mandatoryName")));
+        return qOrdered.orderBy(em.getCriteriaBuilder().asc(qOrdered.getRoots().iterator().next().get("mandatoryDepName")));
     }
 }

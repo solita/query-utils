@@ -52,15 +52,15 @@ public class RestrictTest extends QueryTestBase {
         persist(dep1, dep2, dep3);
 
         assertEquals("find single matching", dep1.getId(),
-            dao.get(restrict.equals(Department_.mandatoryName, Some("a"),
+            dao.get(restrict.equals(Department_.mandatoryDepName, Some("a"),
                         query.all(Department.class))).getId());
         assertEquals("find multiple matching", newSet(dep2.getId(), dep3.getId()), newSet(map(
-            dao.getMany(restrict.equals(Department_.mandatoryName, Some("b"),
+            dao.getMany(restrict.equals(Department_.mandatoryDepName, Some("b"),
                         query.all(Department.class))),
                         Department_.getId)));
         assertFalse("find by multiple restrictions",
-            dao.exists(restrict.equals(Department_.mandatoryName, Some("a"),
-                       restrict.equals(Department_.mandatoryName, Some("b"),
+            dao.exists(restrict.equals(Department_.mandatoryDepName, Some("a"),
+                       restrict.equals(Department_.mandatoryDepName, Some("b"),
                         query.all(Department.class)))));
     }
 
@@ -70,7 +70,7 @@ public class RestrictTest extends QueryTestBase {
         Department dep2 = new Department("b");
         persist(dep1, dep2);
 
-        assertEquals(dep1.getId(), dao.get(restrict.in(Department_.mandatoryName, newSet("a", "c"),
+        assertEquals(dep1.getId(), dao.get(restrict.in(Department_.mandatoryDepName, newSet("a", "c"),
                             query.all(Department.class))).getId());
     }
 
@@ -80,7 +80,7 @@ public class RestrictTest extends QueryTestBase {
         Department dep2 = new Department("ba");
         persist(dep1, dep2);
 
-        assertEquals(dep1.getId(), dao.get(restrict.startsWithIgnoreCase(Department_.mandatoryName, "a",
+        assertEquals(dep1.getId(), dao.get(restrict.startsWithIgnoreCase(Department_.mandatoryDepName, "a",
                                             query.all(Department.class))).getId());
     }
 
