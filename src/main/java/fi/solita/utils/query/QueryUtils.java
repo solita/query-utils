@@ -83,7 +83,8 @@ public abstract class QueryUtils {
     }
     
     public static String resolveOrderColumn(ListAttribute<?,?> attr) {
-        String specifiedValue = ((AnnotatedElement)attr.getJavaMember()).getAnnotation(OrderColumn.class).name();
+        OrderColumn annotation = ((AnnotatedElement)attr.getJavaMember()).getAnnotation(OrderColumn.class);
+        String specifiedValue = annotation == null ? "" : annotation.name();
         return specifiedValue != "" ? specifiedValue : attr.getName() + "_" + "ORDER";
     }
 
