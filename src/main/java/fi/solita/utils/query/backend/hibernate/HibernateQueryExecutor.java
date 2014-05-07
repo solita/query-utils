@@ -109,10 +109,16 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return newList(map(applyPaging(q, page).list(), HibernateQueryExecutor_.replaceProxy()));
     }
     
+    /**
+     * Sometimes Hibernate returns proxies even for initialized entities. Don't know why.
+     */
     @SuppressWarnings("unchecked")
     private static final <T> T replaceProxy(T entityOrProxy) {
         if (entityOrProxy instanceof HibernateProxy) {
-            return (T) ((HibernateProxy)entityOrProxy).getHibernateLazyInitializer().getImplementation();
+            HibernateProxy proxy = (HibernateProxy)entityOrProxy;
+            if (!proxy.getHibernateLazyInitializer().isUninitialized()) {
+                return (T) proxy.getHibernateLazyInitializer().getImplementation();
+            }
         }
         return entityOrProxy;
     }
