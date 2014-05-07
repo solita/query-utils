@@ -33,10 +33,12 @@ import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.JpaCriteriaCopy;
+import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.Removable;
 import fi.solita.utils.query.attributes.AttributeProxy;
 import fi.solita.utils.query.attributes.OptionalAttribute;
+import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 import fi.solita.utils.query.backend.TypeProvider;
 import fi.solita.utils.query.projection.Project;
 import fi.solita.utils.query.projection.ProjectionHelper;
@@ -48,11 +50,13 @@ public class JpaBasicQueries {
 
     private final ProjectionHelper projectionSupport;
     private final TypeProvider typeProvider;
+    private final JpaCriteriaQueryExecutor queryExecutor;
 
-    public JpaBasicQueries(Function0<EntityManager> em, ProjectionHelper projectionSupport, TypeProvider typeProvider) {
+    public JpaBasicQueries(Function0<EntityManager> em, ProjectionHelper projectionSupport, TypeProvider typeProvider, JpaCriteriaQueryExecutor queryExecutor) {
         this.em = em;
         this.projectionSupport = projectionSupport;
         this.typeProvider = typeProvider;
+        this.queryExecutor = queryExecutor;
     }
 
     @SuppressWarnings("unchecked")
@@ -75,7 +79,7 @@ public class JpaBasicQueries {
         From<?,E> selection = resolveSelection(query, q);
 
         q.multiselect(projectionSupport.prepareProjectingQuery(Project.id(), selection));
-        List<Object> results = em.apply().createQuery(q).getResultList();
+        List<Object> results = queryExecutor.getMany(q, Page.NoPaging);
 
         Collection<Id<E>> idList = projectionSupport.finalizeProjectingQuery(Project.<E>id(), map(results, ProjectionUtil_.objectToObjectList));
         if (!idList.isEmpty()) {
@@ -145,7 +149,7 @@ public class JpaBasicQueries {
         query.where(em.apply().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em.apply())), entity.getId()));
         query.select(((Join<?,T>)QueryUtils.join((Root<?>)root, (Attribute<?,?>)relation, JoinType.INNER)).get(id));
         
-        return map(em.apply().createQuery(query).getResultList(), JpaBasicQueries_.<T>getProxy().ap(this));
+        return map(queryExecutor.getMany(query, Page.NoPaging), JpaBasicQueries_.<T>getProxy().ap(this));
     }
 
     public <E extends IEntity> Option<E> getIfDefined(Option<? extends Id<E>> idOption) {

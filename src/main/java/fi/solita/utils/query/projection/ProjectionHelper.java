@@ -61,10 +61,12 @@ import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
+import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
+import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 import fi.solita.utils.query.codegen.MetaJpaConstructor;
 import fi.solita.utils.query.projection.Constructors.IdProjection;
 
@@ -73,9 +75,11 @@ public class ProjectionHelper {
     private static final Logger logger = LoggerFactory.getLogger(ProjectionHelper.class);
 
     private final Function0<EntityManager> em;
+    private final JpaCriteriaQueryExecutor queryExecutor;
     
-    public ProjectionHelper(Function0<EntityManager> em) {
+    public ProjectionHelper(Function0<EntityManager> em, JpaCriteriaQueryExecutor queryExecutor) {
         this.em = em;
+        this.queryExecutor = queryExecutor;
     }
 
     public <E> List<Selection<?>> prepareProjectingQuery(MetaJpaConstructor<E,?,?> projection, From<?,? extends E> selection) {
@@ -273,7 +277,7 @@ public class ProjectionHelper {
             query.multiselect(sourceId, relation);
         }
 
-        List<Object[]> ret = em.apply().createQuery(query).getResultList();
+        List<Object[]> ret = queryExecutor.getMany(query, Page.NoPaging);
         logger.info("queryTargets -> {}", ret);
         return ret;
     }
