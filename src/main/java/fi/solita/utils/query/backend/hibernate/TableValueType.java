@@ -29,7 +29,7 @@ import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.query.Numeric;
 import fi.solita.utils.query.Numeric_;
-import fi.solita.utils.query.Table;
+import fi.solita.utils.query.entities.Table;
 
 @SuppressWarnings("unchecked")
 @MappedSuperclass

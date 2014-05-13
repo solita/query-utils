@@ -50,6 +50,7 @@ import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.codegen.MetaJpaConstructor;
+import fi.solita.utils.query.entities.Table;
 import fi.solita.utils.query.projection.Constructors.TransparentProjection;
 
 public abstract class QueryUtils {
@@ -176,9 +177,9 @@ public abstract class QueryUtils {
         if (Table.isSupported(values)) {
             Subquery<Table.Value> sq = q.subquery(Table.Value.class);
             Root<Table> root = sq.from(Table.class);
-            Path<Table.Value> val = root.get(Table_.column_value.getName());
+            Path<Table.Value> val = root.get(Table.TableAccessor.column_value().getName());
             sq.select(val);
-            sq.where(root.get(Table_.helper_column_to_be_removed_from_query.getName()).in(new Table.Value(newList(values))));
+            sq.where(root.get(Table.TableAccessor.helper_column_to_be_removed_from_query().getName()).in(new Table.Value(newList(values))));
             return path.in(sq);
         } else {
             // oracle fails if more than 1000 parameters
