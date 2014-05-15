@@ -1,5 +1,6 @@
 package fi.solita.utils.query.generation;
 
+import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.query.QueryUtils.id;
 import static fi.solita.utils.query.QueryUtils.inExpr;
 import static fi.solita.utils.query.QueryUtils.join;
@@ -26,6 +27,8 @@ import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Numeric;
 
 public class Restrict {
+    
+    public static Option<String> wrapComparedNumbersWithFunction = None();
 
     private final Function0<EntityManager> em;
     
@@ -35,6 +38,14 @@ public class Restrict {
     
     protected CriteriaBuilder cb() {
         return em.apply().getCriteriaBuilder();
+    }
+    
+    @SuppressWarnings("unchecked")
+    private <T extends Number> Expression<T> wrap(Number value) {
+        for (String unwrappingFunctionName: wrapComparedNumbersWithFunction) {
+            return (Expression<T>) cb().function(unwrappingFunctionName, value.getClass(), cb().literal(value)); 
+        }
+        return (Expression<T>) cb().literal(value);
     }
 
     /**
@@ -198,7 +209,7 @@ public class Restrict {
      */
     public <E, T extends Number> CriteriaQuery<E> lessThan(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
-        Predicate predicate = cb().lt(selection.get(attribute), value);
+        Predicate predicate = cb().lt(selection.get(attribute), wrap(value));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     };
 
@@ -208,7 +219,7 @@ public class Restrict {
     public <E, T extends Numeric> CriteriaQuery<E> lessThan(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         @SuppressWarnings("unchecked")
-        Predicate predicate = cb().lt((Path<Number>)(Object)selection.get(attribute), cb().literal(value.toNumber()));
+        Predicate predicate = cb().lt((Path<Number>)(Object)selection.get(attribute), wrap(value.toNumber()));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     };
 
@@ -217,7 +228,7 @@ public class Restrict {
      */
     public <E, T extends Number> CriteriaQuery<E> lessThanOrEqual(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
-        Predicate predicate = cb().le(selection.get(attribute), value);
+        Predicate predicate = cb().le(selection.get(attribute), wrap(value));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     };
 
@@ -227,7 +238,7 @@ public class Restrict {
     public <E, T extends Numeric> CriteriaQuery<E> lessThanOrEqual(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         @SuppressWarnings("unchecked")
-        Predicate predicate = cb().le((Path<Number>)(Object)selection.get(attribute), cb().literal(value.toNumber()));
+        Predicate predicate = cb().le((Path<Number>)(Object)selection.get(attribute), wrap(value.toNumber()));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     };
 
@@ -236,7 +247,7 @@ public class Restrict {
      */
     public <E, T extends Number> CriteriaQuery<E> greaterThan(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
-        Predicate predicate = cb().gt(selection.get(attribute), value);
+        Predicate predicate = cb().gt(selection.get(attribute), wrap(value));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     };
 
@@ -246,7 +257,7 @@ public class Restrict {
     public <E, T extends Numeric> CriteriaQuery<E> greaterThan(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         @SuppressWarnings("unchecked")
-        Predicate predicate = cb().gt((Path<Number>)(Object)selection.get(attribute), cb().literal(value.toNumber()));
+        Predicate predicate = cb().gt((Path<Number>)(Object)selection.get(attribute), wrap(value.toNumber()));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     };
 
@@ -255,7 +266,7 @@ public class Restrict {
      */
     public <E, T extends Number> CriteriaQuery<E> greaterThanOrEqual(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
-        Predicate predicate = cb().ge(selection.get(attribute), value);
+        Predicate predicate = cb().ge(selection.get(attribute), wrap(value));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     };
 
@@ -265,7 +276,7 @@ public class Restrict {
     public <E, T extends Numeric> CriteriaQuery<E> greaterThanOrEqual(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         @SuppressWarnings("unchecked")
-        Predicate predicate = cb().ge((Path<Number>)(Object)selection.get(attribute), cb().literal(value.toNumber()));
+        Predicate predicate = cb().ge((Path<Number>)(Object)selection.get(attribute), wrap(value.toNumber()));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     };
 }
