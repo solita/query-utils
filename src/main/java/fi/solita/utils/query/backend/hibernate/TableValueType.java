@@ -16,6 +16,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.MappedSuperclass;
 
@@ -45,12 +47,14 @@ public class TableValueType implements UserType, Serializable {
     public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object owner) throws HibernateException, SQLException {
         throw new UnsupportedOperationException("Shouldn't be here");
     }
-
-    public static final String toString(CharSequence cs) {
+    
+    public static final Map<Class<?>,String> registeredTableTypes = new ConcurrentHashMap<Class<?>, String>();
+    
+    static final String toString(CharSequence cs) {
         return cs.toString();
     }
 
-    public static final long toLong(Number n) {
+    static final long toLong(Number n) {
         return n.longValue();
     }
 
@@ -121,6 +125,9 @@ public class TableValueType implements UserType, Serializable {
         } else if (h.get() instanceof Numeric) {
             t = "SYS.ODCINUMBERLIST";
             v = (Iterable<Object>)(Object)map(Numeric_.toNumber, (Iterable<Numeric>)values);
+        } else if (registeredTableTypes.containsKey(h.get().getClass())) {
+            t = registeredTableTypes.get(h.get().getClass());
+            v = (Iterable<Object>)values;
         } else {
             return None();
         }
