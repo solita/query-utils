@@ -10,9 +10,7 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.usertype.UserType;
 
-import fi.solita.utils.query.Numeric;
-
-public class Money implements Numeric {
+public class Money implements Comparable<Money> {
     public final long euros;
 
     public Money(long euros) {
@@ -40,7 +38,7 @@ public class Money implements Numeric {
             return false;
         return true;
     }
-
+    
     public static class MoneyType implements UserType {
         @Override
         public int[] sqlTypes() {
@@ -111,7 +109,7 @@ public class Money implements Numeric {
     }
 
     @Override
-    public Number toNumber() {
-        return euros;
+    public int compareTo(Money o) {
+        return Long.valueOf(euros).compareTo(o.euros);
     }
 }
