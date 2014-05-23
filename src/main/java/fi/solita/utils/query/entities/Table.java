@@ -3,6 +3,7 @@ package fi.solita.utils.query.entities;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.metamodel.SingularAttribute;
@@ -15,6 +16,7 @@ public class Table {
     @Id
     long id_which_is_only_here_since_hibernate_requires_it;
 
+    @Column(name="*")
     Table.Value column_value;
 
     Table.Value helper_column_to_be_removed_from_query;
