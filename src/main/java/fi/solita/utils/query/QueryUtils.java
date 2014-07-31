@@ -51,6 +51,7 @@ import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.codegen.MetaJpaConstructor;
 import fi.solita.utils.query.entities.Table;
+import fi.solita.utils.query.entities.Table_;
 import fi.solita.utils.query.projection.Constructors.TransparentProjection;
 
 public abstract class QueryUtils {
@@ -175,12 +176,11 @@ public abstract class QueryUtils {
 
     public static final Predicate inExpr(CriteriaQuery<?> q, Expression<?> path, Iterable<?> values, CriteriaBuilder cb) {
         if (Table.isSupported(values)) {
-            Subquery<Table.Value> sq = q.subquery(Table.Value.class);
-            Root<Table> root = sq.from(Table.class);
-            Path<Table.Value> val = root.get(Table.TableAccessor.column_value().getName());
-            sq.select(val);
-            sq.where(root.get(Table.TableAccessor.helper_column_to_be_removed_from_query().getName()).in(new Table.Value(newList(values))));
-            return path.in(sq);
+            Subquery<Long> tableselect = q.subquery(Long.class);
+            Root<Table> root = tableselect.from(Table.class);
+            tableselect.select(cb.function("dynamic_sampling", Long.class));
+            tableselect.where(cb.equal(cb.literal(new Table.Value(newList(values))), root.get(Table_.commentEndWithBindParameter)));
+            return path.in(tableselect);
         } else {
             // oracle fails if more than 1000 parameters
             List<? extends List<?>> groups = newList(grouped(values, 1000));
@@ -196,6 +196,26 @@ public abstract class QueryUtils {
                 return cb.or(newArray(Predicate.class, preds));
             }
         }
+    }
+    
+    /**
+     * Assumes that a function named "column_value" can get the value from the table-subselect.
+     * With Oracle and Hibernate this can be achieved by adding the following line to the Dialect:
+     * <code><pre>
+     * registerFunction("column_value", new NoArgSQLFunction("column_value", StandardBasicTypes.STRING, false));
+     * </pre></code>
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> Subquery<T> table(Subquery<T> tableselect, Expression<? extends Iterable<T>> expr, CriteriaBuilder cb) {
+        Root<Table> r = tableselect.from(Table.class);
+        tableselect.select(cb.function("column_value", (Class<T>)tableselect.getJavaType()));
+        Predicate truthy = cb.equal(cb.literal(0), 0);
+        tableselect.where(cb.and(truthy,
+                                 cb.or(truthy,
+                                       cb.equal(cb.literal(0),
+                                                cb.quot(r.get(Table_.star),
+                                                        (Expression<? extends Number>)(Object)expr)))));
+        return tableselect;
     }
     
     public static Iterable<Join<?,?>> getAllJoins(From<?, ?> parent) {

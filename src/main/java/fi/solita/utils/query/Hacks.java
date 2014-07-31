@@ -17,27 +17,22 @@ public class Hacks {
     /**
      * Optimization for <i>in</i> clauses using Oracle
      * 
-     * To use this, you need to be able to modify the generated SQL.
-     * In Hibernate, this can be done with an Interceptor:
-     *
+     * To use this, you need to register a function (works at least in Hibernate).
+     * In your Dialect:
      * <code><pre>
-     * public class EntityInterceptor extends EmptyInterceptor {
-     *     static {
-     *         Hacks.enableOracleTableInClause();
-     *     }
-     *     @Override
-     *     public String onPrepareStatement(String sql) {
-     *         return Hacks.processOracleTableInClauseSql(super.onPrepareStatement(sql));
-     *     }
+     * registerFunction("dynamic_sampling", new NoArgSQLFunction("/*+ dynamic_sampling(query_utils,2) *
+     * / query_utils.column_value", StandardBasicTypes.STRING, false));
+     * </pre></code>
+     *
+     * And enable somewhere:
+     * <code><pre>
+     * static {
+     *     Hacks.enableOracleTableInClause();
      * }
      * </pre></code>
      */
     public static void enableOracleTableInClause() {
         Table.enabled = true;
-    }
-    
-    public static final String processOracleTableInClauseSql(String sql) {
-        return Table.processSqlPattern.matcher(sql).replaceAll("select /*+ dynamic_sampling($3,2) */ $1$2$3");
     }
     
     public static final Map<Class<?>, Pair<String, ? extends Function2<Connection,?,?>>> registeredTableTypesInternal = new ConcurrentHashMap<Class<?>, Pair<String,? extends Function2<Connection,?,?>>>();

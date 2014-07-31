@@ -1,28 +1,34 @@
 package fi.solita.utils.query.entities;
 
 import java.util.Collection;
-import java.util.regex.Pattern;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.query.backend.hibernate.TableValueType;
 
 @Entity
-@javax.persistence.Table(name = "table(?)")
+@javax.persistence.Table(name = "table(/*")
 public class Table {
+    public static final String tableAlias = "query_utils";
+    
     @Id
-    long id_which_is_only_here_since_hibernate_requires_it;
-
+    @Column(name="column_value")
+    long singleColumn;
+    
     @Column(name="*")
-    Table.Value column_value;
+    long star;
+    
+    @Column(name="*/")
+    long commentEnd;
+    
+    @Column(name="*/)")
+    long commentEndWithParen;
 
-    Table.Value helper_column_to_be_removed_from_query;
-
-    public static final Pattern processSqlPattern = Pattern.compile("select\\s+([^.]+\\.)?([^ ]+\\s+from\\s+table[^ ]+\\s+)([^ ]+)\\s+where\\s+([^.]+\\.)?helper_column_to_be_removed_from_query\\s+in[^)]+\\)", Pattern.CASE_INSENSITIVE);
-
+    @Column(name="*/?) " + tableAlias)
+    Table.Value commentEndWithBindParameter;
+    
     public static boolean enabled = false;
     
     public static final boolean isSupported(Iterable<?> values) {
@@ -33,16 +39,6 @@ public class Table {
         public final Collection<?> values;
         public Value(Collection<?> values) {
             this.values = values;
-        }
-    }
-    
-    public static class TableAccessor {
-        public static SingularAttribute<Table, Value> column_value() {
-            return Table_.column_value;
-        }
-        
-        public static SingularAttribute<Table,Value> helper_column_to_be_removed_from_query() {
-            return Table_.helper_column_to_be_removed_from_query;
         }
     }
 }
