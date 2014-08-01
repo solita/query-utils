@@ -30,6 +30,9 @@ public class Municipality implements IEntity, Identifiable<Municipality.ID> {
     @OneToMany(mappedBy = "optionalMunicipality")
     private Set<Employee> employees;
     
+    @OneToMany(mappedBy = "optionalDepMunicipality")
+    private Set<Department> deps;
+    
     @ElementCollection
     private Set<Report> reports;
     

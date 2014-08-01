@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.QueryUtils_;
+import fi.solita.utils.query.attributes.AttributeProxy;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
@@ -95,6 +96,8 @@ public class EmbeddableUtil {
         
         Option<? extends Attribute<?,?>> ret = None();
         if (attribute == null || attribute instanceof PseudoAttribute) {
+            ret = None();
+        } else if (AttributeProxy.unwrap(PseudoAttribute.class, attribute).isDefined()) {
             ret = None();
         } else if (attribute instanceof JoiningAttribute && last(((JoiningAttribute) attribute).getAttributes()) instanceof PseudoAttribute) {
             ret = None();

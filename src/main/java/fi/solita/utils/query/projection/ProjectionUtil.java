@@ -21,9 +21,11 @@ import org.slf4j.LoggerFactory;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.NotDistinctable;
+import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
+import fi.solita.utils.query.attributes.RestrictingAttribute;
 import fi.solita.utils.query.codegen.MetaJpaConstructor;
 
 public class ProjectionUtil {
@@ -67,11 +69,25 @@ public class ProjectionUtil {
         logger.debug("isDistinctable -> {}", ret);
         return ret;
     }
+    
+    static <A extends From<?,?>> A doRestrictions(A from, Attribute<?,?> a) {
+        for (RestrictingAttribute r: unwrap(RestrictingAttribute.class, a)) {
+            logger.info("Adding restrictions from: {}", from);
+            From<?, ?> join = from;
+            for (Attribute<?,?> rest: r.getRestrictionChain()) {
+                logger.info("Restricting (inner joining) to: {}", rest);
+                join = QueryUtils.join(join, rest, JoinType.INNER);
+                doRestrictions(join, rest);
+            }
+        }
+        return from;
+    }
 
     static Pair<? extends From<?,?>, ? extends Attribute<?,?>> doJoins(From<?,?> root, Attribute<?,?> target, JoinType type) {
         logger.debug("doJoins({},{},{})", new Object[] {root, target, type});
         From<?,?> exp = root;
         for (JoiningAttribute joining: unwrap(JoiningAttribute.class, target)) {
+            logger.info("JoiningAttribute detected. Performing joins from: {}", root);
             List<? extends Attribute<?, ?>> attributes = joining.getAttributes();
             for (Attribute<?,?> join: init(attributes)) {
                 if (!(join instanceof PseudoAttribute)) {

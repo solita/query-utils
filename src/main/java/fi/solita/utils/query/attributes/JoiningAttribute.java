@@ -16,6 +16,8 @@ import fi.solita.utils.query.IEntity;
  * 
  * Do not use this class directly.
  *
+ * An attribute containing other attributes to be inner joined to the
+ * attribute itself, thus changing the resulting type of the original attribute.
  */
 public interface JoiningAttribute {
     public abstract List<? extends Attribute<?, ?>> getAttributes();

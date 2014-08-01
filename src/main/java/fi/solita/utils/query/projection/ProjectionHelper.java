@@ -25,11 +25,13 @@ import static fi.solita.utils.query.projection.EmbeddableUtil.isCollectionOfEmbe
 import static fi.solita.utils.query.projection.ProjectionHelper_.performAdditionalQueriesForPlaceholderValues;
 import static fi.solita.utils.query.projection.ProjectionResultUtil.transformAllRows;
 import static fi.solita.utils.query.projection.ProjectionUtil.doJoins;
+import static fi.solita.utils.query.projection.ProjectionUtil.doRestrictions;
 import static fi.solita.utils.query.projection.ProjectionUtil.isDistinctable;
 import static fi.solita.utils.query.projection.ProjectionUtil.isId;
 import static fi.solita.utils.query.projection.ProjectionUtil.isWrapperOfIds;
 import static fi.solita.utils.query.projection.ProjectionUtil.shouldPerformAdditionalQuery;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -113,23 +115,23 @@ public class ProjectionHelper {
     }
     
     @SuppressWarnings("unchecked")
-    private <T> Selection<?> transformSelectionForQuery(Attribute<?,?> param, boolean constructorExpectsId, From<?,T> sel) {
-        logger.debug("transformSelectionForQuery({},{})", param, sel);
+    private <T> Selection<?> transformSelectionForQuery(Attribute<?,?> param, boolean constructorExpectsId, From<?,T> selection) {
+        logger.debug("transformSelectionForQuery({},{})", param, selection);
         // This check should actually have already occurred, but just in case we are missing it somewhere...
         checkOptionalAttributes((Attribute<?, ?>) param);
         
-        Path<T> selection = sel;
-        for (JoiningAttribute a: unwrap(JoiningAttribute.class, param)) {
-            logger.info("JoiningAttribute detected. Performing joins: {}", a.getAttributes());
+        From<?,?> originalSel = selection;
+        for (@SuppressWarnings("unused") JoiningAttribute a: unwrap(JoiningAttribute.class, param)) {
             // use left join here, since were are modifying the existing selection which should still return all the rows
-            Pair<? extends Expression<?>, ? extends Attribute<?, ?>> relAndTarget = doJoins(sel, param, JoinType.LEFT);
-            selection = (Path<T>) relAndTarget._1;
+            Pair<? extends From<?,?>, ? extends Attribute<?, ?>> relAndTarget = doJoins(originalSel, param, JoinType.LEFT);
+            selection = (From<?, T>) relAndTarget._1;
             param = relAndTarget._2;
         }
         
         for (PseudoAttribute pseudo: unwrap(PseudoAttribute.class, param)) {
             logger.info("PseudoAttribute detected: {}", pseudo);
             Expression<?> s = pseudo.getSelectionForQuery(em.apply(), selection);
+            doRestrictions(selection, param); // to restrict e.g. SelfAttribute, if so wanted.
             return constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity>)s).get(id((Class<IEntity>)s.getJavaType(), em.apply())) : s;
         }
 
@@ -148,10 +150,10 @@ public class ProjectionHelper {
             if (IEntity.class.isAssignableFrom(attr.getJavaType())) {
                 if (constructorExpectsId) {
                     logger.info("Singular Entity attribute detected, but constructor expects Id. Replacing parameter with Id.");
-                    return selection.get(attr).get(id(attr.getBindableJavaType(), em.apply()));
+                    return doRestrictions(selection.join(attr, JoinType.LEFT), attr).get(id(attr.getBindableJavaType(), em.apply()));
                 } else {
                     logger.info("Singular Entity attribute detected. Performing left join.");
-                    return ((From<?, T>) selection).join(attr, JoinType.LEFT);
+                    return doRestrictions(selection.join(attr, JoinType.LEFT), attr);
                 }
             } else {
                 return selection.get(attr);
@@ -238,6 +240,8 @@ public class ProjectionHelper {
         logger.info("Inner joining from {} to {}", source, target);
         final Join<SOURCE,Object> relation = (Join<SOURCE, Object>) join(source, target, JoinType.INNER);
         
+        ProjectionUtil.doRestrictions(relation, target);
+        
         query.where(inExpr(query, sourceId, sourceIds, em.apply().getCriteriaBuilder()));
 
         if (isDistinctable) {
@@ -278,7 +282,14 @@ public class ProjectionHelper {
         }
 
         List<Object[]> ret = queryExecutor.getMany(query, Page.NoPaging);
-        logger.info("queryTargets -> {}", ret);
+        if (logger.isInfoEnabled()) {
+            logger.info("queryTargets -> {}", newList(map(ret, new Transformer<Object[],String>() {
+                @Override
+                public String transform(Object[] source) {
+                    return Arrays.toString(source);
+                }
+            })));
+        }
         return ret;
     }
     
