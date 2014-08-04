@@ -28,7 +28,7 @@ public class Municipality implements IEntity, Identifiable<Municipality.ID> {
     private String optionalArea;
 
     @OneToMany(mappedBy = "optionalMunicipality")
-    private Set<Employee> employees;
+    private Set<Employee> emps;
     
     @OneToMany(mappedBy = "optionalDepMunicipality")
     private Set<Department> deps;

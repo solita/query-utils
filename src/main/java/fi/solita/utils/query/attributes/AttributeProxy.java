@@ -40,42 +40,42 @@ abstract class AbstractAttributeProxy<X,Y,T extends Attribute<X, Y>> implements 
 
     @Override
     public String getName() {
-        return proxyTarget.getName();
+        return proxyTarget == null ? null : proxyTarget.getName();
     }
 
     @Override
     public PersistentAttributeType getPersistentAttributeType() {
-        return proxyTarget.getPersistentAttributeType();
+        return proxyTarget == null ? null :  proxyTarget.getPersistentAttributeType();
     }
 
     @Override
     public ManagedType<X> getDeclaringType() {
-        return proxyTarget.getDeclaringType();
+        return proxyTarget == null ? null :  proxyTarget.getDeclaringType();
     }
 
     @Override
     public Class<Y> getJavaType() {
-        return proxyTarget.getJavaType();
+        return proxyTarget == null ? null :  proxyTarget.getJavaType();
     }
 
     @Override
     public Member getJavaMember() {
-        return proxyTarget.getJavaMember();
+        return proxyTarget == null ? null :  proxyTarget.getJavaMember();
     }
 
     @Override
     public boolean isAssociation() {
-        return proxyTarget.isAssociation();
+        return proxyTarget == null ? null :  proxyTarget.isAssociation();
     }
 
     @Override
     public boolean isCollection() {
-        return proxyTarget.isCollection();
+        return proxyTarget == null ? null :  proxyTarget.isCollection();
     }
     
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "(" + (proxyTarget == null ? "?" : getDeclaringType().getJavaType().getSimpleName() + "." + getName()) + ")";
+        return getClass().getSimpleName() + "(" + (proxyTarget == null ? "?" : (getDeclaringType() == null ? "?" : getDeclaringType().getJavaType().getSimpleName()) + "." + getName()) + ")";
     }
 }
 
@@ -86,12 +86,12 @@ abstract class BindableAttributeProxy<X,Y,R,T extends Attribute<X, Y> & Bindable
 
     @Override
     public BindableType getBindableType() {
-        return proxyTarget.getBindableType();
+        return proxyTarget == null ? null :  proxyTarget.getBindableType();
     }
 
     @Override
     public Class<R> getBindableJavaType() {
-        return proxyTarget.getBindableJavaType();
+        return proxyTarget == null ? null :  proxyTarget.getBindableJavaType();
     }
 }
 
@@ -104,22 +104,22 @@ abstract class SingularAttributeProxy<X,Y> extends BindableAttributeProxy<X,Y,Y,
 
     @Override
     public boolean isId() {
-        return proxyTarget.isId();
+        return proxyTarget == null ? null :  proxyTarget.isId();
     }
 
     @Override
     public boolean isVersion() {
-        return proxyTarget.isVersion();
+        return proxyTarget == null ? null :  proxyTarget.isVersion();
     }
 
     @Override
     public boolean isOptional() {
-        return proxyTarget.isOptional();
+        return proxyTarget == null ? null :  proxyTarget.isOptional();
     }
 
     @Override
     public Type<Y> getType() {
-        return proxyTarget.getType();
+        return proxyTarget == null ? null :  proxyTarget.getType();
     }
     
     @Override
@@ -137,12 +137,12 @@ abstract class PluralAttributeProxy<X,C,Y> extends BindableAttributeProxy<X,C,Y,
 
     @Override
     public CollectionType getCollectionType() {
-        return proxyTarget.getCollectionType();
+        return proxyTarget == null ? null :  proxyTarget.getCollectionType();
     }
 
     @Override
     public Type<Y> getElementType() {
-        return proxyTarget.getElementType();
+        return proxyTarget == null ? null :  proxyTarget.getElementType();
     }
 
     @Override

@@ -266,12 +266,12 @@ public class JpaProjectionQueriesTest extends QueryTestBase {
         persist(mun);
         long queryCount = getQueryCount();
 
-        Dto dto = dao.get(query.all(Municipality.class), Dto_.c18(literal(SET_OF_IDS._), Municipality_.employees));
+        Dto dto = dao.get(query.all(Municipality.class), Dto_.c18(literal(SET_OF_IDS._), Municipality_.emps));
         assertEquals(emptySet(), dto.value);
         
         assertEquals(2, getQueryCount() - queryCount);
         
-        assertTrue(asSet(dao.get(query.all(Municipality.class), Dto_.c3(literal(COLLECTION_OF_IDS._), Municipality_.employees))).isEmpty());
+        assertTrue(asSet(dao.get(query.all(Municipality.class), Dto_.c3(literal(COLLECTION_OF_IDS._), Municipality_.emps))).isEmpty());
     }
     
     @Test
@@ -282,12 +282,12 @@ public class JpaProjectionQueriesTest extends QueryTestBase {
         persist(dep, mun, emp);
         long queryCount = getQueryCount();
 
-        Dto dto = dao.get(query.all(Municipality.class), Dto_.c18(literal(SET_OF_IDS._), Municipality_.employees));
+        Dto dto = dao.get(query.all(Municipality.class), Dto_.c18(literal(SET_OF_IDS._), Municipality_.emps));
         assertEquals(newSet(emp.getId()), dto.value);
         
         assertEquals(2, getQueryCount() - queryCount);
         
-        assertEquals(newSet(emp.getId()), asSet(dao.get(query.all(Municipality.class), Dto_.c3(literal(COLLECTION_OF_IDS._), Municipality_.employees))));
+        assertEquals(newSet(emp.getId()), asSet(dao.get(query.all(Municipality.class), Dto_.c3(literal(COLLECTION_OF_IDS._), Municipality_.emps))));
     }
     
     @Test
@@ -314,12 +314,12 @@ public class JpaProjectionQueriesTest extends QueryTestBase {
         persist(dep, mun, emp);
         long queryCount = getQueryCount();
 
-        Dto dto = dao.get(query.all(Municipality.class), Dto_.c17(literal(SET_OF_ENTITIES._), Municipality_.employees));
+        Dto dto = dao.get(query.all(Municipality.class), Dto_.c17(literal(SET_OF_ENTITIES._), Municipality_.emps));
         assertEquals(newSet(emp), dto.value);
         
         assertEquals(2, getQueryCount() - queryCount);
         
-        assertEquals(newSet(emp), asSet(dao.get(query.all(Municipality.class), Dto_.c2(literal(COLLECTION_OF_ENTITIES._), Municipality_.employees))));
+        assertEquals(newSet(emp), asSet(dao.get(query.all(Municipality.class), Dto_.c2(literal(COLLECTION_OF_ENTITIES._), Municipality_.emps))));
     }
     
     @Test
@@ -328,12 +328,12 @@ public class JpaProjectionQueriesTest extends QueryTestBase {
         persist(mun);
         long queryCount = getQueryCount();
 
-        Dto dto = dao.get(query.all(Municipality.class), Dto_.c17(literal(SET_OF_ENTITIES._), Municipality_.employees));
+        Dto dto = dao.get(query.all(Municipality.class), Dto_.c17(literal(SET_OF_ENTITIES._), Municipality_.emps));
         assertEquals(emptySet(), dto.value);
         
         assertEquals(2, getQueryCount() - queryCount);
         
-        assertEquals(emptySet(), asSet(dao.get(query.all(Municipality.class), Dto_.c2(literal(COLLECTION_OF_ENTITIES._), Municipality_.employees))));
+        assertEquals(emptySet(), asSet(dao.get(query.all(Municipality.class), Dto_.c2(literal(COLLECTION_OF_ENTITIES._), Municipality_.emps))));
     }
     
     @Test
@@ -475,7 +475,7 @@ public class JpaProjectionQueriesTest extends QueryTestBase {
         persist(dep, mun1, mun2, emp1, emp2);
         long queryCount = getQueryCount();
 
-        List<Dto> dtos = dao.getMany(query.all(Municipality.class), Dto_.c17(literal(SET_OF_ENTITIES._), Municipality_.employees), Order.by(Municipality_.id));
+        List<Dto> dtos = dao.getMany(query.all(Municipality.class), Dto_.c17(literal(SET_OF_ENTITIES._), Municipality_.emps), Order.by(Municipality_.id));
         assertEquals(newSet(emp1, emp2), head(dtos).value);
         assertEquals(emptySet(), last(dtos).value);
         

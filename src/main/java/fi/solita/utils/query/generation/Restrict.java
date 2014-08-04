@@ -26,7 +26,6 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.attributes.RestrictingAttribute;
 
@@ -40,110 +39,150 @@ public class Restrict {
         this.em = em;
     }
     
-    public static <E, R, R1 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>>
+    public static <E, R, R1, A1 extends Attribute<? super R, ?> & Bindable<R1>>
     SingularAttribute<E,R> innerJoin(SingularAttribute<E,R> attribute, A1 r1) {
         return RestrictingAttribute.Constructors.singular(attribute, r1);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>> 
+    public static <E, R, R1, R2, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>> 
     SingularAttribute<E,R> innerJoin(SingularAttribute<E,R> attribute, A1 r1, A2 r2) {
         return RestrictingAttribute.Constructors.singular(attribute, r1, r2);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>> 
+    public static <E, R, R1, R2, R3, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>> 
     SingularAttribute<E,R> innerJoin(SingularAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3) {
         return RestrictingAttribute.Constructors.singular(attribute, r1, r2, r3);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>> 
+    public static <E, R, R1, R2, R3, R4, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>> 
     SingularAttribute<E,R> innerJoin(SingularAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4) {
         return RestrictingAttribute.Constructors.singular(attribute, r1, r2, r3, r4);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
+    public static <E, R, R1, R2, R3, R4, R5, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
     SingularAttribute<E,R> innerJoin(SingularAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5) {
         return RestrictingAttribute.Constructors.singular(attribute, r1, r2, r3, r4, r5);
     }
     
+    public static <E, R, R1, R2, R3, R4, R5, R6, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>>
+    SingularAttribute<E,R> innerJoin(SingularAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6) {
+        return RestrictingAttribute.Constructors.singular(attribute, r1, r2, r3, r4, r5, r6);
+    }
+    
+    public static <E, R, R1, R2, R3, R4, R5, R6, R7, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>>
+    SingularAttribute<E,R> innerJoin(SingularAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6, A7 r7) {
+        return RestrictingAttribute.Constructors.singular(attribute, r1, r2, r3, r4, r5, r6, r7);
+    }
     
     
-    public static <E, R, R1 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>>
+    
+    public static <E, R, R1, A1 extends Attribute<? super R, ?> & Bindable<R1>>
     CollectionAttribute<E,R> innerJoin(CollectionAttribute<E,R> attribute, A1 r1) {
         return RestrictingAttribute.Constructors.collection(attribute, r1);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>>
+    public static <E, R, R1, R2, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>>
     CollectionAttribute<E,R> innerJoin(CollectionAttribute<E,R> attribute, A1 r1, A2 r2) {
         return RestrictingAttribute.Constructors.collection(attribute, r1, r2);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>>
+    public static <E, R, R1, R2, R3, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>>
     CollectionAttribute<E,R> innerJoin(CollectionAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3) {
         return RestrictingAttribute.Constructors.collection(attribute, r1, r2, r3);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>>
+    public static <E, R, R1, R2, R3, R4, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>>
     CollectionAttribute<E,R> innerJoin(CollectionAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4) {
         return RestrictingAttribute.Constructors.collection(attribute, r1, r2, r3, r4);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
+    public static <E, R, R1, R2, R3, R4, R5, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
     CollectionAttribute<E,R> innerJoin(CollectionAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5) {
         return RestrictingAttribute.Constructors.collection(attribute, r1, r2, r3, r4, r5);
     }
     
+    public static <E, R, R1, R2, R3, R4, R5, R6, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>>
+    CollectionAttribute<E,R> innerJoin(CollectionAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6) {
+        return RestrictingAttribute.Constructors.collection(attribute, r1, r2, r3, r4, r5, r6);
+    }
+    
+    public static <E, R, R1, R2, R3, R4, R5, R6, R7, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>>
+    CollectionAttribute<E,R> innerJoin(CollectionAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6, A7 r7) {
+        return RestrictingAttribute.Constructors.collection(attribute, r1, r2, r3, r4, r5, r6, r7);
+    }
     
     
-    public static <E, R, R1 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>>
+    
+    public static <E, R, R1, A1 extends Attribute<? super R, ?> & Bindable<R1>>
     SetAttribute<E,R> innerJoin(SetAttribute<E,R> attribute, A1 r1) {
         return RestrictingAttribute.Constructors.set(attribute, r1);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>>
+    public static <E, R, R1, R2, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>>
     SetAttribute<E,R> innerJoin(SetAttribute<E,R> attribute, A1 r1, A2 r2) {
         return RestrictingAttribute.Constructors.set(attribute, r1, r2);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>>
+    public static <E, R, R1, R2, R3, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>>
     SetAttribute<E,R> innerJoin(SetAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3) {
         return RestrictingAttribute.Constructors.set(attribute, r1, r2, r3);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>>
+    public static <E, R, R1, R2, R3, R4, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>>
     SetAttribute<E,R> innerJoin(SetAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4) {
         return RestrictingAttribute.Constructors.set(attribute, r1, r2, r3, r4);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
+    public static <E, R, R1, R2, R3, R4, R5, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
     SetAttribute<E,R> innerJoin(SetAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5) {
         return RestrictingAttribute.Constructors.set(attribute, r1, r2, r3, r4, r5);
     }
     
+    public static <E, R, R1, R2, R3, R4, R5, R6, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>>
+    SetAttribute<E,R> innerJoin(SetAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6) {
+        return RestrictingAttribute.Constructors.set(attribute, r1, r2, r3, r4, r5, r6);
+    }
+    
+    public static <E, R, R1, R2, R3, R4, R5, R6, R7, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>>
+    SetAttribute<E,R> innerJoin(SetAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6, A7 r7) {
+        return RestrictingAttribute.Constructors.set(attribute, r1, r2, r3, r4, r5, r6, r7);
+    }
     
     
-    public static <E, R, R1 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>>
+    
+    public static <E, R, R1, A1 extends Attribute<? super R, ?> & Bindable<R1>>
     ListAttribute<E,R> innerJoin(ListAttribute<E,R> attribute, A1 r1) {
         return RestrictingAttribute.Constructors.list(attribute, r1);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>>
+    public static <E, R, R1, R2, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>>
     ListAttribute<E,R> innerJoin(ListAttribute<E,R> attribute, A1 r1, A2 r2) {
         return RestrictingAttribute.Constructors.list(attribute, r1, r2);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>>
+    public static <E, R, R1, R2, R3, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>>
     ListAttribute<E,R> innerJoin(ListAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3) {
         return RestrictingAttribute.Constructors.list(attribute, r1, r2, r3);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>>
+    public static <E, R, R1, R2, R3, R4, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>>
     ListAttribute<E,R> innerJoin(ListAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4) {
         return RestrictingAttribute.Constructors.list(attribute, r1, r2, r3, r4);
     }
     
-    public static <E, R, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
+    public static <E, R, R1, R2, R3, R4, R5, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
     ListAttribute<E,R> innerJoin(ListAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5) {
         return RestrictingAttribute.Constructors.list(attribute, r1, r2, r3, r4, r5);
+    }
+    
+    public static <E, R, R1, R2, R3, R4, R5, R6, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>>
+    ListAttribute<E,R> innerJoin(ListAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6) {
+        return RestrictingAttribute.Constructors.list(attribute, r1, r2, r3, r4, r5, r6);
+    }
+    
+    public static <E, R, R1, R2, R3, R4, R5, R6, R7, A1 extends Attribute<? super R, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>>
+    ListAttribute<E,R> innerJoin(ListAttribute<E,R> attribute, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6, A7 r7) {
+        return RestrictingAttribute.Constructors.list(attribute, r1, r2, r3, r4, r5, r6, r7);
     }
     
     

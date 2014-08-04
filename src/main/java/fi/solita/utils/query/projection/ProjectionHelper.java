@@ -120,30 +120,36 @@ public class ProjectionHelper {
         // This check should actually have already occurred, but just in case we are missing it somewhere...
         checkOptionalAttributes((Attribute<?, ?>) param);
         
-        From<?,?> originalSel = selection;
-        for (@SuppressWarnings("unused") JoiningAttribute a: unwrap(JoiningAttribute.class, param)) {
-            // use left join here, since were are modifying the existing selection which should still return all the rows
-            Pair<? extends From<?,?>, ? extends Attribute<?, ?>> relAndTarget = doJoins(originalSel, param, JoinType.LEFT);
-            selection = (From<?, T>) relAndTarget._1;
-            param = relAndTarget._2;
-        }
-        
         for (PseudoAttribute pseudo: unwrap(PseudoAttribute.class, param)) {
+            for (@SuppressWarnings("unused") JoiningAttribute a: unwrap(JoiningAttribute.class, param)) {
+                // use left join here, since were are modifying the existing selection which should still return all the rows
+                Pair<? extends From<?,?>, ? extends Attribute<?, ?>> relAndTarget = doJoins(selection, param, JoinType.LEFT);
+                selection = (From<?, T>) relAndTarget._1;
+            }
+            
             logger.info("PseudoAttribute detected: {}", pseudo);
             Expression<?> s = pseudo.getSelectionForQuery(em.apply(), selection);
             doRestrictions(selection, param); // to restrict e.g. SelfAttribute, if so wanted.
             return constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity>)s).get(id((Class<IEntity>)s.getJavaType(), em.apply())) : s;
         }
-
-        if (unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined()) {
-            logger.info("AdditionalQueryPerformingAttribute detected. Replacing parameter with source Id.");
-            // add entity id as a placeholder to the query, to be replaced later with the actual result.
-            return selection.get(id(selection.getJavaType(), em.apply()));
-        }
         
+        if (unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined()) {
+            SingularAttribute<T,Id<T>> replacement = id(selection.getJavaType(), em.apply());
+            logger.info("AdditionalQueryPerformingAttribute detected. Replacing selection {} with source Id {}", selection.getJavaType().getSimpleName(), replacement.getName());
+            // add entity id as a placeholder to the query, to be replaced later with the actual result.
+            return selection.get(replacement);
+        }
+
         if (unwrap(PluralAttribute.class, param).isDefined()) {
             logger.info("PluralAttribute detected. Replacing parameter with source Id.");
             return selection.get(id(selection.getJavaType(), em.apply()));
+        }
+        
+        for (@SuppressWarnings("unused") JoiningAttribute a: unwrap(JoiningAttribute.class, param)) {
+            // use left join here, since were are modifying the existing selection which should still return all the rows
+            Pair<? extends From<?,?>, ? extends Attribute<?, ?>> relAndTarget = doJoins(selection, param, JoinType.LEFT);
+            selection = (From<?, T>) relAndTarget._1;
+            //param = relAndTarget._2;
         }
         
         for (SingularAttribute<T,?> attr: unwrap(SingularAttribute.class, param)) {
@@ -238,7 +244,8 @@ public class ProjectionHelper {
         Path<Id<SOURCE>> sourceId = source.get(id(sourceClass, em.apply()));
         
         logger.info("Inner joining from {} to {}", source, target);
-        final Join<SOURCE,Object> relation = (Join<SOURCE, Object>) join(source, target, JoinType.INNER);
+        Pair<? extends From<?, ?>, ? extends Attribute<?, ?>> joined = doJoins(source, target, JoinType.INNER);
+        final Join<SOURCE,Object> relation = (Join<SOURCE, Object>) join(joined.left, target, JoinType.INNER);
         
         ProjectionUtil.doRestrictions(relation, target);
         

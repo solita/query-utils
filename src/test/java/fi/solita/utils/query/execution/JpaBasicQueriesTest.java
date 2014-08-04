@@ -211,7 +211,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         em.clear();
 
         Municipality v = dao.get(mun.getId());
-        assertEquals(newSet(emp.getId(), emp2.getId()), newSet(map(dao.getProxies(v, Municipality_.employees), Employee_.getId)));
+        assertEquals(newSet(emp.getId(), emp2.getId()), newSet(map(dao.getProxies(v, Municipality_.emps), Employee_.getId)));
     }
     
     @Test
@@ -225,7 +225,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         em.clear();
 
         Municipality v = dao.getProxy(mun.getId());
-        assertEquals(newSet(emp.getId(), emp2.getId()), newSet(map(dao.getProxies(v, Municipality_.employees), Employee_.getId)));
+        assertEquals(newSet(emp.getId(), emp2.getId()), newSet(map(dao.getProxies(v, Municipality_.emps), Employee_.getId)));
     }
     
     @Test(expected = IllegalArgumentException.class)

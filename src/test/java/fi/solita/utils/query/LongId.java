@@ -32,7 +32,7 @@ class LongId<T> implements Id<T>, Serializable {
 
     @Override
     public String toString() {
-        return Long.toString(id);
+        return getClass().getDeclaringClass().getSimpleName() + "[" + Long.toString(id) + "]";
     }
 
     @SuppressWarnings("unchecked")

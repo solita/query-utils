@@ -48,7 +48,7 @@ public class QueryUtilsTest extends QueryTestBase {
                 Employee_.mandatoryName,        // value
                 Employee_.mandatoryDepartment,  // entity
                 Department_.mandatoryReport,    // embeddable
-                Municipality_.employees,        // set
+                Municipality_.emps,        // set
                 Department_.employees);         // list
         
         for (Apply<Attribute<?,?>,Boolean> f: bothFunctions) {
@@ -92,8 +92,8 @@ public class QueryUtilsTest extends QueryTestBase {
     
     @Test
     public void metamodel_joiningToSetListAttributeIsAlwaysRequired() {
-        assertTrue("set",  isRequiredByMetamodel(Related.value(Municipality_.mandatorySelfReference, Municipality_.employees)));
-        assertTrue("set",  isRequiredByMetamodel(Related.value(Employee_.optionalMunicipality, Municipality_.employees)));
+        assertTrue("set",  isRequiredByMetamodel(Related.value(Municipality_.mandatorySelfReference, Municipality_.emps)));
+        assertTrue("set",  isRequiredByMetamodel(Related.value(Employee_.optionalMunicipality, Municipality_.emps)));
         
         assertTrue("list", isRequiredByMetamodel(Related.value(Employee_.mandatoryDepartment, Department_.employees)));
         assertTrue("list", isRequiredByMetamodel(Related.value(Employee_.optionalDepartment, Department_.employees)));
@@ -101,8 +101,8 @@ public class QueryUtilsTest extends QueryTestBase {
     
     @Test
     public void metamodel_joiningFromSetListAttributeIsAlwaysRequired() {
-        assertTrue("set",  isRequiredByMetamodel(Related.value(Municipality_.employees, Employee_.mandatoryName)));
-        assertTrue("set",  isRequiredByMetamodel(Related.value(Municipality_.employees, Employee_.optionalSalary)));
+        assertTrue("set",  isRequiredByMetamodel(Related.value(Municipality_.emps, Employee_.mandatoryName)));
+        assertTrue("set",  isRequiredByMetamodel(Related.value(Municipality_.emps, Employee_.optionalSalary)));
         
         assertTrue("list", isRequiredByMetamodel(Related.value(Department_.employees, Employee_.mandatoryName)));
         assertTrue("list", isRequiredByMetamodel(Related.value(Department_.employees, Employee_.optionalSalary)));
@@ -124,10 +124,10 @@ public class QueryUtilsTest extends QueryTestBase {
         assertFalse("entity",     isRequiredByMetamodel(Related.projection(Employee_.mandatoryDepartment, Project.value(Cast.optional(Department_.optionalDepMunicipality)))));
         assertFalse("embeddable", isRequiredByMetamodel(Related.projection(Employee_.mandatoryDepartment, Project.value(Cast.optional(Department_.optionalDepReport)))));
         
-        assertTrue("set",         isRequiredByMetamodel(Related.projection(Municipality_.mandatorySelfReference, Project.value(Municipality_.employees))));
+        assertTrue("set",         isRequiredByMetamodel(Related.projection(Municipality_.mandatorySelfReference, Project.value(Municipality_.emps))));
         assertTrue("list",        isRequiredByMetamodel(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.employees))));
         
-        assertFalse("set",        isRequiredByMetamodel(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.employees))));
+        assertFalse("set",        isRequiredByMetamodel(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.emps))));
         assertFalse("list",       isRequiredByMetamodel(Related.projection(Employee_.optionalDepartment, Project.value(Department_.employees))));
         
         // Project.value is special, in a sense that it "disappears" and the optionality from underneath propagates upwards.
@@ -170,9 +170,9 @@ public class QueryUtilsTest extends QueryTestBase {
         assertTrue("entity",      isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepMunicipality)));
         assertTrue("embeddable",  isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepReport)));
         
-        assertTrue("set",         isRequiredByQueryAttribute(Related.value(Municipality_.mandatorySelfReference, Municipality_.employees)));
+        assertTrue("set",         isRequiredByQueryAttribute(Related.value(Municipality_.mandatorySelfReference, Municipality_.emps)));
         assertTrue("list",        isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.employees)));
-        assertTrue("set",         isRequiredByQueryAttribute(Related.value(Employee_.optionalMunicipality, Municipality_.employees)));
+        assertTrue("set",         isRequiredByQueryAttribute(Related.value(Employee_.optionalMunicipality, Municipality_.emps)));
         assertTrue("list",        isRequiredByQueryAttribute(Related.value(Employee_.optionalDepartment, Department_.employees))); 
     }
     
@@ -200,10 +200,10 @@ public class QueryUtilsTest extends QueryTestBase {
         assertTrue("entity",     isRequiredByQueryAttribute(Related.projection(Department_.optionalManager, Project.value(Employee_.mandatoryDepartment))));
         assertTrue("embeddable", isRequiredByQueryAttribute(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.mandatoryReport))));
         
-        assertTrue("set",         isRequiredByQueryAttribute(Related.projection(Municipality_.mandatorySelfReference, Project.value(Municipality_.employees))));
+        assertTrue("set",         isRequiredByQueryAttribute(Related.projection(Municipality_.mandatorySelfReference, Project.value(Municipality_.emps))));
         assertTrue("list",        isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.employees))));
         
-        assertTrue("set",        isRequiredByQueryAttribute(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.employees))));
+        assertTrue("set",        isRequiredByQueryAttribute(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.emps))));
         assertTrue("list",       isRequiredByQueryAttribute(Related.projection(Employee_.optionalDepartment, Project.value(Department_.employees)))); 
     }
     
