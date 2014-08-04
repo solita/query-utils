@@ -34,7 +34,6 @@ import fi.solita.utils.functional.Pair;
 import fi.solita.utils.query.Hacks;
 import fi.solita.utils.query.entities.Table;
 
-@SuppressWarnings("unchecked")
 @MappedSuperclass
 @TypeDef(defaultForType = Table.Value.class, typeClass = TableValueType.class)
 public class TableValueType implements UserType, Serializable {
@@ -63,8 +62,12 @@ public class TableValueType implements UserType, Serializable {
     public static boolean isAvailable() {
         if (available == null) {
             try {
-                oracleConnectionClass = (Class<? extends Connection>) Class.forName("oracle.jdbc.OracleConnection");
-                oraclePreparedStatementClass = (Class<? extends PreparedStatement>) Class.forName("oracle.jdbc.OraclePreparedStatement");
+                @SuppressWarnings("unchecked")
+                Class<? extends Connection> oc = (Class<? extends Connection>) Class.forName("oracle.jdbc.OracleConnection");
+                oracleConnectionClass = oc;
+                @SuppressWarnings("unchecked")
+                Class<? extends PreparedStatement> ps = (Class<? extends PreparedStatement>) Class.forName("oracle.jdbc.OraclePreparedStatement");
+                oraclePreparedStatementClass = ps;
                 ARRAYClass = (Class<?>) Class.forName("oracle.sql.ARRAY");
                 Class<?> arrayDescriptorClass = Class.forName("oracle.sql.ArrayDescriptor");
                 ARRAYConstructor = ARRAYClass.getConstructor(arrayDescriptorClass, Connection.class, Object.class);
@@ -110,10 +113,14 @@ public class TableValueType implements UserType, Serializable {
         Apply<Connection,Iterable<Object>> v;
         if (h.get() instanceof CharSequence) {
             t = "SYS.ODCIVARCHAR2LIST";
-            v = Function.constant((Iterable<Object>)(Object)map(TableValueType_.toString, (Iterable<CharSequence>)values));
+            @SuppressWarnings("unchecked")
+            Iterable<Object> m = (Iterable<Object>)(Object)map(TableValueType_.toString, (Iterable<CharSequence>)values);
+            v = Function.constant(m);
         } else if (h.get() instanceof Number) {
             t = "SYS.ODCINUMBERLIST";
-            v = Function.constant((Iterable<Object>)values);
+            @SuppressWarnings("unchecked")
+            Iterable<Object> m = (Iterable<Object>)values;
+            v = Function.constant(m);
         } else if (Hacks.registeredTableTypesInternal.containsKey(h.get().getClass())) {
             final Pair<String, ? extends Function2<Connection, ?, ?>> tabletypeAndConverter = Hacks.registeredTableTypesInternal.get(h.get().getClass());
             Pair<String, Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
@@ -136,6 +143,7 @@ public class TableValueType implements UserType, Serializable {
         String t = tabletypeAndConverter.left;
         Apply<Connection,Iterable<Object>> v = new Function1<Connection, Iterable<Object>>() {
             @Override
+            @SuppressWarnings("unchecked")
             public Iterable<Object> apply(Connection t) {
                 return map((Apply<Object,Object>)tabletypeAndConverter.right.ap(t), (Iterable<Object>)values);
             }

@@ -1,9 +1,6 @@
 package fi.solita.utils.query.projection;
 
-import static fi.solita.utils.functional.Collections.emptyList;
-import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.head;
-import static fi.solita.utils.query.projection.Select.literal;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
@@ -14,14 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
-import fi.solita.utils.query.Dto;
-import fi.solita.utils.query.Dto_;
 import fi.solita.utils.query.Employee;
 import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Municipality;
 import fi.solita.utils.query.Municipality_;
 import fi.solita.utils.query.QueryTestBase;
-import fi.solita.utils.query.Dto.ID;
 import fi.solita.utils.query.execution.JpaProjectionQueries;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 import fi.solita.utils.query.generation.Restrict;

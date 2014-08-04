@@ -29,15 +29,18 @@ import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 import fi.solita.utils.query.backend.NativeQueryExecutor;
 import fi.solita.utils.query.backend.QLQueryExecutor;
 import fi.solita.utils.query.backend.Type;
+import fi.solita.utils.query.backend.TypeProvider;
 import fi.solita.utils.query.generation.NativeQuery;
 import fi.solita.utils.query.generation.QLQuery;
 
 public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQueryExecutor, QLQueryExecutor {
 
     private final Function0<EntityManager> em;
+    private final TypeProvider typeProvider;
     
-    public HibernateQueryExecutor(Function0<EntityManager> em) {
+    public HibernateQueryExecutor(Function0<EntityManager> em, TypeProvider typeProvider) {
         this.em = em;
+        this.typeProvider = typeProvider;
     }
     
     @Override
@@ -123,7 +126,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return entityOrProxy;
     }
 
-    private static final SQLQuery bindReturnValues(SQLQuery q, List<Pair<String, Option<Type<?>>>> retvals) {
+    private final SQLQuery bindReturnValues(SQLQuery q, List<Pair<String, Option<Type<?>>>> retvals) {
         for (Entry<String, Option<Type<?>>> param: retvals) {
             if (param.getValue().isDefined()) {
                 Type<?> type = param.getValue().get();
@@ -139,7 +142,13 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
                     q.addScalar(param.getKey(), t);
                 }
             } else {
-                q.addScalar(param.getKey());
+                try {
+                    // try to find a type
+                    org.hibernate.type.Type t = ((HibernateTypeProvider.HibernateType<?>)typeProvider.type(param.getKey().getClass())).type;
+                    q.addScalar(param.getKey(), t);
+                } catch (Exception e) {
+                    q.addScalar(param.getKey());
+                }
             }
         }
         return q;
@@ -170,7 +179,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return q;
     }
 
-    private static final <T extends Query> T bindParams(T q, Map<String, Pair<?, Option<Type<?>>>> params) {
+    private final <T extends Query> T bindParams(T q, Map<String, Pair<?, Option<Type<?>>>> params) {
         for (Entry<String, Pair<?, Option<Type<?>>>> param: params.entrySet()) {
             if (param.getValue()._1 instanceof Collection) {
                 if (param.getValue()._2.isDefined()) {
@@ -182,7 +191,13 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
                 if (param.getValue()._2.isDefined()) {
                     q.setParameter(param.getKey(), param.getValue()._1, ((HibernateTypeProvider.HibernateType<?>)param.getValue()._2.get()).type);
                 } else {
-                    q.setParameter(param.getKey(), param.getValue()._1);
+                    try {
+                        // try to find a type
+                        org.hibernate.type.Type t = ((HibernateTypeProvider.HibernateType<?>)typeProvider.type(param.getValue()._1.getClass())).type;
+                        q.setParameter(param.getKey(), param.getValue()._1, t);
+                    } catch (Exception e) {
+                        q.setParameter(param.getKey(), param.getValue()._1);
+                    }
                 }
             }
         }

@@ -296,23 +296,25 @@ public abstract class QueryUtils {
         return ret;
     }
     
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Join<?,?> join(From<?, ?> join, Attribute<?,?> attr, JoinType type) {
-        return attr instanceof SingularAttribute ? join.join((SingularAttribute) attr, type) :
-               attr instanceof CollectionAttribute ? join.join((CollectionAttribute) attr, type) :
-               attr instanceof SetAttribute ? join.join((SetAttribute) attr, type) :
-               attr instanceof ListAttribute ? join.join((ListAttribute) attr, type) :
-               attr instanceof MapAttribute ? join.join((MapAttribute) attr, type) :
-                                              join.join((CollectionAttribute) attr, type);
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        Join<?,?> ret = attr instanceof SingularAttribute ? join.join((SingularAttribute) attr, type) :
+                        attr instanceof CollectionAttribute ? join.join((CollectionAttribute) attr, type) :
+                        attr instanceof SetAttribute ? join.join((SetAttribute) attr, type) :
+                        attr instanceof ListAttribute ? join.join((ListAttribute) attr, type) :
+                        attr instanceof MapAttribute ? join.join((MapAttribute) attr, type) :
+                                                       join.join((CollectionAttribute) attr, type);
+        return ret;
     }
     
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static Expression<?> get(Path<?> path, Attribute<?,?> attr) {
-        return attr instanceof SingularAttribute ? path.get((SingularAttribute) attr) :
-               attr instanceof CollectionAttribute ? path.get((CollectionAttribute) attr) :
-               attr instanceof SetAttribute ? path.get((SetAttribute) attr) :
-               attr instanceof ListAttribute ? path.get((ListAttribute) attr) :
-               attr instanceof MapAttribute ? path.get((PluralAttribute) attr) :
-                                               path.get((CollectionAttribute) attr);
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        Expression<?> ret = attr instanceof SingularAttribute ? path.get((SingularAttribute) attr) :
+                            attr instanceof CollectionAttribute ? path.get((CollectionAttribute) attr) :
+                            attr instanceof SetAttribute ? path.get((SetAttribute) attr) :
+                            attr instanceof ListAttribute ? path.get((ListAttribute) attr) :
+                            attr instanceof MapAttribute ? path.get((PluralAttribute) attr) :
+                                                           path.get((CollectionAttribute) attr);
+        return ret;
     }
 }
