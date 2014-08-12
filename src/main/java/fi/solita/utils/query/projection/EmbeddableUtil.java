@@ -3,9 +3,10 @@ package fi.solita.utils.query.projection;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.last;
-import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Functional.sort;
 import static fi.solita.utils.functional.Functional.zip;
+import static fi.solita.utils.functional.FunctionalA.head;
+import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.FunctionalImpl.sort;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 
@@ -16,7 +17,7 @@ import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.persistence.criteria.Join;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Selection;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
@@ -32,16 +33,16 @@ import org.slf4j.LoggerFactory;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.QueryUtils_;
+import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.AttributeProxy;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
-import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 
 public class EmbeddableUtil {
     
     private static final Logger logger = LoggerFactory.getLogger(EmbeddableUtil.class);
 
-    static Iterable<? extends Selection<?>> breakEmbeddableToParts(Metamodel metamodel, Bindable<?> target, final Join<?,Object> source) {
+    static Iterable<? extends Selection<?>> breakEmbeddableToParts(Metamodel metamodel, Bindable<?> target, final From<?,?> source) {
         return map(getEmbeddableAttributes(target, metamodel), QueryUtils_.get.ap(source));
     }
     

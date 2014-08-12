@@ -130,7 +130,7 @@ public class ProjectionHelper {
             logger.info("PseudoAttribute detected: {}", pseudo);
             Expression<?> s = pseudo.getSelectionForQuery(em.apply(), selection);
             doRestrictions(selection, param); // to restrict e.g. SelfAttribute, if so wanted.
-            return constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity>)s).get(id((Class<IEntity>)s.getJavaType(), em.apply())) : s;
+            return unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined() || constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity>)s).get(id((Class<IEntity>)s.getJavaType(), em.apply())) : s;
         }
         
         if (unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined()) {
@@ -176,12 +176,14 @@ public class ProjectionHelper {
         Iterable<Object> ret = values;
         if (shouldPerformAdditionalQuery(attr)) {
             List<Id<IEntity>> ids = (List<Id<IEntity>>)(Object)newList(values);
-            logger.info("Preforming additional query for Attribute: {}", attr);
-            Class<?> projectionType = projection.getConstructorParameterTypes().get(index);
-            List<Object> r = doAdditionalQuery(projectionType, (Attribute<IEntity,?>)attr, isId(projectionType), isWrapperOfIds(projection, index), isDistinctable(projection, index), ids);
-            ret = r;
-            if (r.size() != ids.size()) {
-                throw new RuntimeException("Whoops, a bug");
+            if (!ids.isEmpty()) {
+                logger.info("Preforming additional query for Attribute: {}", attr);
+                Class<?> projectionType = projection.getConstructorParameterTypes().get(index);
+                List<Object> r = doAdditionalQuery(projectionType, (Attribute<IEntity,?>)attr, isId(projectionType), isWrapperOfIds(projection, index), isDistinctable(projection, index), ids);
+                ret = r;
+                if (r.size() != ids.size()) {
+                    throw new RuntimeException("Whoops, a bug");
+                }
             }
         }
         
@@ -238,14 +240,20 @@ public class ProjectionHelper {
     @SuppressWarnings("unchecked")
     private <SOURCE extends IEntity,R> List<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<Id<SOURCE>> sourceIds) {
         logger.debug("queryTargets({},{},{},{},{})", new Object[] {sourceIds, target, isId, isWrapperOfIds, isDistinctable});
-        Class<SOURCE> sourceClass = target.getDeclaringType().getJavaType();
+        Class<SOURCE> sourceClass = head(sourceIds).getOwningClass();
         CriteriaQuery<Object[]> query = em.apply().getCriteriaBuilder().createQuery(Object[].class);
         Root<SOURCE> source = query.from(sourceClass);
         Path<Id<SOURCE>> sourceId = source.get(id(sourceClass, em.apply()));
         
-        logger.info("Inner joining from {} to {}", source, target);
-        Pair<? extends From<?, ?>, ? extends Attribute<?, ?>> joined = doJoins(source, target, JoinType.INNER);
-        final Join<SOURCE,Object> relation = (Join<SOURCE, Object>) join(joined.left, target, JoinType.INNER);
+        final From<SOURCE,Object> relation;
+        if (!unwrap(PseudoAttribute.class, target).isDefined()) { 
+            logger.info("Inner joining from {} to {}", source, target);
+            Pair<? extends From<?, ?>, ? extends Attribute<?, ?>> joined = doJoins(source, target, JoinType.INNER);
+            relation = (Join<SOURCE, Object>) join(joined.left, target, JoinType.INNER);
+        } else {
+            logger.info("Query is for a PseudoAttribute");
+            relation = (From<SOURCE, Object>)(Object)source;
+        }
         
         ProjectionUtil.doRestrictions(relation, target);
         

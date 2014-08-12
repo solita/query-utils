@@ -66,4 +66,17 @@ public class SelectTest extends QueryTestBase {
 
         assertEquals(dep.getId(), head(list)._1.getId());
     }
+    
+    @Test
+    public void self_projection() {
+        Department dep = new Department();
+        persist(dep);
+
+        String name = dao.get(
+                query.all(Department.class),
+                    Project.value(Related.projection(Select.<Department>self(),
+                                 Project.value(Department_.mandatoryDepName))));
+
+        assertEquals(dep.getMandatoryName(), name);
+    }
 }
