@@ -37,6 +37,10 @@ import fi.solita.utils.query.entities.Table;
 @MappedSuperclass
 @TypeDef(defaultForType = Table.Value.class, typeClass = TableValueType.class)
 public class TableValueType implements UserType, Serializable {
+    
+    public TableValueType() {
+        isAvailable();
+    }
 
     @Override
     public int[] sqlTypes() {
