@@ -15,7 +15,6 @@ import javax.persistence.metamodel.SingularAttribute;
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
 import fi.solita.utils.query.execution.JpaBasicQueries;
 import fi.solita.utils.query.execution.JpaCriteriaQueries;
 import fi.solita.utils.query.execution.JpaProjectionQueries;
@@ -23,6 +22,7 @@ import fi.solita.utils.query.execution.NativeQueries;
 import fi.solita.utils.query.execution.QLQueries;
 import fi.solita.utils.query.generation.NativeQuery;
 import fi.solita.utils.query.generation.QLQuery;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 public class Dao {
 

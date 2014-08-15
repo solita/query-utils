@@ -7,6 +7,7 @@ import static fi.solita.utils.functional.Collections.newMultimap;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.isEmpty;
+import static fi.solita.utils.functional.Functional.tail;
 import static fi.solita.utils.functional.Functional.transpose;
 import static fi.solita.utils.functional.Functional.zip;
 import static fi.solita.utils.functional.FunctionalImpl.find;
@@ -55,8 +56,6 @@ import org.slf4j.LoggerFactory;
 
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Function0;
-import fi.solita.utils.functional.FunctionalA_;
-import fi.solita.utils.functional.Functional_;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Transformer;
@@ -69,7 +68,7 @@ import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 import fi.solita.utils.query.projection.Constructors.IdProjection;
 
 public class ProjectionHelper {
@@ -206,13 +205,23 @@ public class ProjectionHelper {
         return ret;
     }
     
-    private <SOURCE extends IEntity> Map<Id<SOURCE>,List<Object>> queryTargetsOfSources(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<Id<SOURCE>> sourceIds) {
+    private <SOURCE extends IEntity> Map<Id<SOURCE>,List<Object>> queryTargetsOfSources(final Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<Id<SOURCE>> sourceIds) {
         logger.debug("queryTargetsOfSources({},{},{},{},{})", new Object[] {target, isId, isWrapperOfIds, isDistinctable, sourceIds});
         List<Object[]> results = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds);
         
         @SuppressWarnings("unchecked")
-        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(results, FunctionalA_.head());
-        Iterable<Iterable<Object>> actualResultRows = map(results, FunctionalA_.tail());
+        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(results, new Transformer<Object[],Object>() {
+            @Override
+            public Object transform(Object[] source) {
+                return head(source);
+            }
+        });
+        Iterable<Iterable<Object>> actualResultRows = map(results, new Transformer<Object[],Iterable<Object>>() {
+            @Override
+            public Iterable<Object> transform(Object[] source) {
+                return tail(source);
+            }
+        });
 
         Iterable<? extends Object> result;
         if (isCollectionOfEmbeddables(target)) {
@@ -225,10 +234,20 @@ public class ProjectionHelper {
                 logger.info("Target is AdditionalQueryPerformingAttribute. Finalizing: {}", target);
                 result = finalizeProjectingQuery(rel.get().getConstructor(), actualResultRows);
             } else {
-                if (!isEmpty(flatMap(actualResultRows, Functional_.tail()))) {
+                if (!isEmpty(flatMap(actualResultRows, new Transformer<Iterable<Object>,Iterable<Object>>() {
+                    @Override
+                    public Iterable<Object> transform(Iterable<Object> source) {
+                        return tail(source);
+                    }
+                }))) {
                     throw new RuntimeException("whoops");
                 }
-                result = map(actualResultRows, Functional_.head().andThen(ProjectionResultUtil_.postProcessValue.ap(target)));
+                result = map(actualResultRows, new Transformer<Iterable<Object>,Object>() {
+                    @Override
+                    public Object transform(Iterable<Object> source) {
+                        return ProjectionResultUtil.postProcessValue(target, head(source));
+                    }
+                });
             }
         }
         

@@ -1,4 +1,4 @@
-package fi.solita.utils.query.codegen;
+package fi.solita.utils.query.meta;
 
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.cons;
@@ -11,10 +11,10 @@ import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
-import fi.solita.utils.codegen.CommonMetadataProcessor;
-import fi.solita.utils.codegen.generators.Generator;
-import fi.solita.utils.query.codegen.JpaMetamodelProcessor.ExtendedGeneratorOptions;
-import fi.solita.utils.query.codegen.generators.JpaMetamodel;
+import fi.solita.utils.meta.CommonMetadataProcessor;
+import fi.solita.utils.meta.generators.Generator;
+import fi.solita.utils.query.meta.JpaMetamodelProcessor.ExtendedGeneratorOptions;
+import fi.solita.utils.query.meta.generators.JpaMetamodel;
 
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)

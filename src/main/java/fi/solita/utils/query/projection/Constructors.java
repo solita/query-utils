@@ -17,7 +17,7 @@ import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 public class Constructors {
     

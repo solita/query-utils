@@ -3,7 +3,7 @@ package fi.solita.utils.query.attributes;
 import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.query.IEntity;
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 class RelationSingularAttribute<E, R> extends SingularAttributeProxy<E, R> implements AdditionalQueryPerformingAttribute {
     private final MetaJpaConstructor<? extends IEntity, R, ?> constructor;

@@ -26,7 +26,7 @@ import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.attributes.RestrictingAttribute;
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 public class ProjectionUtil {
     

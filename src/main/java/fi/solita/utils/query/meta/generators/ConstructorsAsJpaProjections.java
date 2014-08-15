@@ -1,24 +1,24 @@
-package fi.solita.utils.query.codegen.generators;
+package fi.solita.utils.query.meta.generators;
 
-import static fi.solita.utils.codegen.Helpers.boxed;
-import static fi.solita.utils.codegen.Helpers.containedType;
-import static fi.solita.utils.codegen.Helpers.element2Constructors;
-import static fi.solita.utils.codegen.Helpers.elementGenericQualifiedName;
-import static fi.solita.utils.codegen.Helpers.importType;
-import static fi.solita.utils.codegen.Helpers.importTypes;
-import static fi.solita.utils.codegen.Helpers.isPrivate;
-import static fi.solita.utils.codegen.Helpers.joinWithSpace;
-import static fi.solita.utils.codegen.Helpers.padding;
-import static fi.solita.utils.codegen.Helpers.parameterTypesAsClasses;
-import static fi.solita.utils.codegen.Helpers.publicElement;
-import static fi.solita.utils.codegen.Helpers.qualifiedName;
-import static fi.solita.utils.codegen.Helpers.relevantTypeParams;
-import static fi.solita.utils.codegen.Helpers.resolveVisibility;
-import static fi.solita.utils.codegen.Helpers.toString;
-import static fi.solita.utils.codegen.Helpers.typeParameter2String;
-import static fi.solita.utils.codegen.generators.Content.EmptyLine;
-import static fi.solita.utils.codegen.generators.Content.catchBlock;
-import static fi.solita.utils.codegen.generators.Content.reflectionInvokationArgs;
+import static fi.solita.utils.meta.Helpers.boxed;
+import static fi.solita.utils.meta.Helpers.containedType;
+import static fi.solita.utils.meta.Helpers.element2Constructors;
+import static fi.solita.utils.meta.Helpers.elementGenericQualifiedName;
+import static fi.solita.utils.meta.Helpers.importType;
+import static fi.solita.utils.meta.Helpers.importTypes;
+import static fi.solita.utils.meta.Helpers.isPrivate;
+import static fi.solita.utils.meta.Helpers.joinWithSpace;
+import static fi.solita.utils.meta.Helpers.padding;
+import static fi.solita.utils.meta.Helpers.parameterTypesAsClasses;
+import static fi.solita.utils.meta.Helpers.publicElement;
+import static fi.solita.utils.meta.Helpers.qualifiedName;
+import static fi.solita.utils.meta.Helpers.relevantTypeParams;
+import static fi.solita.utils.meta.Helpers.resolveVisibility;
+import static fi.solita.utils.meta.Helpers.toString;
+import static fi.solita.utils.meta.Helpers.typeParameter2String;
+import static fi.solita.utils.meta.generators.Content.EmptyLine;
+import static fi.solita.utils.meta.generators.Content.catchBlock;
+import static fi.solita.utils.meta.generators.Content.reflectionInvokationArgs;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.mkString;
@@ -56,15 +56,15 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import fi.solita.utils.codegen.Helpers;
-import fi.solita.utils.codegen.Helpers_;
-import fi.solita.utils.codegen.generators.Generator;
-import fi.solita.utils.codegen.generators.GeneratorOptions;
+import fi.solita.utils.meta.Helpers;
+import fi.solita.utils.meta.generators.Generator;
+import fi.solita.utils.meta.generators.GeneratorOptions;
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Function1;
 import fi.solita.utils.functional.Function3;
 import fi.solita.utils.functional.Option;
+import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.query.EntityRepresentation;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
@@ -93,6 +93,13 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
         Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = constructorGen.ap(new Helpers.EnvDependent(processingEnv), options);
         return flatMap(zipWithIndex(elements), singleElementTransformer);
     }
+    
+    static Transformer<CharSequence,String> helpersImportTypes = new Transformer<CharSequence,String>() {
+        @Override
+        public String transform(CharSequence source) {
+            return Helpers.importTypes(source);
+        }
+    };
 
     public static Function3<Helpers.EnvDependent, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>> constructorGen = new Function3<Helpers.EnvDependent, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>>() {
         @Override
@@ -165,7 +172,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             int argCount = constructor.getParameters().size();
             String returnTypeImported = importTypes(elementGenericQualifiedName(enclosingElement));
 
-            List<String> argumentTypes = newList(map(constructor.getParameters(), qualifiedName.andThen(boxed).andThen(Helpers_.importTypes)));
+            List<String> argumentTypes = newList(map(constructor.getParameters(), qualifiedName.andThen(boxed).andThen(helpersImportTypes)));
             List<String> argumentNames = argCount == 0 ? Collections.<String>newList() : newList(map(range(1, argCount), toString.andThen(prepend("$p"))));
             List<String> attributeNames = argCount == 0 ? Collections.<String>newList() : newList(map(range(1, argCount), toString.andThen(prepend("$a"))));
             List<? extends TypeParameterElement> relevantTypeParamsForConstructor = newList(relevantTypeParams(constructor));

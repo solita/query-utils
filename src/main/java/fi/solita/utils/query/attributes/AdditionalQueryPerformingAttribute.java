@@ -6,7 +6,7 @@ import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 public interface AdditionalQueryPerformingAttribute {
     MetaJpaConstructor<?, ?, ?> getConstructor();

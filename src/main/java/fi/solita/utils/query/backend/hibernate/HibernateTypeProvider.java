@@ -21,10 +21,12 @@ import org.hibernate.proxy.HibernateProxyHelper;
 import org.hibernate.usertype.CompositeUserType;
 import org.hibernate.usertype.UserType;
 
+import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Function0;
-import fi.solita.utils.functional.Functional_;
+import fi.solita.utils.functional.Functional;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Predicates;
+import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.backend.Type;
@@ -42,16 +44,30 @@ public class HibernateTypeProvider implements TypeProvider {
 
     private final Function0<EntityManager> em;
     
+    static Transformer<List<org.hibernate.type.Type>, org.hibernate.type.Type> head = new Transformer<List<org.hibernate.type.Type>,org.hibernate.type.Type>() {
+        @Override
+        public org.hibernate.type.Type transform(List<org.hibernate.type.Type> source) {
+            return Functional.head(source);
+        }
+    };
+    
+    static Transformer<Iterable<?>, Long> size = new Transformer<Iterable<?>,Long>() {
+        @Override
+        public Long transform(Iterable<?> source) {
+            return Functional.size(source);
+        }
+    };
+    
     // cache these, since it's static data.
     private Map<Class<?>,String> typesByUniqueReturnedClassCache;
     private Map<Class<?>,String> typesByUniqueReturnedClass() {
         if (typesByUniqueReturnedClassCache == null) {
             Iterable<ClassMetadata>                    allClassMetadata           = em.apply().unwrap(Session.class).getSessionFactory().getAllClassMetadata().values();
             Map<String, List<org.hibernate.type.Type>> allPropertyTypesByName     = groupBy(flatMap(allClassMetadata, HibernateTypeProvider_.classMetadata2propertyTypes), HibernateTypeProvider_.type2Name);
-            Iterable<org.hibernate.type.Type>          allDifferentPropertyTypes  = map(allPropertyTypesByName.values(), Functional_.<org.hibernate.type.Type>head());
+            Iterable<org.hibernate.type.Type>          allDifferentPropertyTypes  = map(allPropertyTypesByName.values(), head);
             Iterable<List<org.hibernate.type.Type>>    typesByReturnedClass       = groupBy(allDifferentPropertyTypes, HibernateTypeProvider_.type2ReturnedClass).values();
-            Iterable<List<org.hibernate.type.Type>>    typesUniqueByReturnedClass = filter(typesByReturnedClass, Functional_.size.andThen(Predicates.equalTo(1l)));
-            typesByUniqueReturnedClassCache = newMap(map(typesUniqueByReturnedClass, Functional_.<org.hibernate.type.Type>head().andThen(HibernateTypeProvider_.type2ReturnedClassAndNamePair)));
+            Iterable<List<org.hibernate.type.Type>>    typesUniqueByReturnedClass = filter(typesByReturnedClass, size.andThen(Predicates.equalTo(1l)));
+            typesByUniqueReturnedClassCache = newMap(map(typesUniqueByReturnedClass, head.andThen(HibernateTypeProvider_.type2ReturnedClassAndNamePair)));
         }
         return typesByUniqueReturnedClassCache;
     }

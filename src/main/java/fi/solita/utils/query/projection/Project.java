@@ -8,19 +8,11 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import fi.solita.utils.functional.Pair;
-import fi.solita.utils.functional.Tuple;
-import fi.solita.utils.functional.Tuple1;
-import fi.solita.utils.functional.Tuple2;
-import fi.solita.utils.functional.Tuple3;
-import fi.solita.utils.functional.Tuple4;
-import fi.solita.utils.functional.Tuple5;
-import fi.solita.utils.functional.Tuple6;
 import fi.solita.utils.functional.*;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 public class Project {
 

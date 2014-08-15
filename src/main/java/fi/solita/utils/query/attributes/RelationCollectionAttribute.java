@@ -5,7 +5,7 @@ import java.util.Collection;
 import javax.persistence.metamodel.CollectionAttribute;
 
 import fi.solita.utils.query.IEntity;
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 class RelationCollectionAttribute<E, R> extends PluralAttributeProxy<E, Collection<R>, R> implements CollectionAttribute<E,R>, AdditionalQueryPerformingAttribute {
     private final MetaJpaConstructor<? extends IEntity, R, ?> constructor;

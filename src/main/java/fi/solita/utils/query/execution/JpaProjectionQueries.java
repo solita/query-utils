@@ -28,7 +28,7 @@ import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 import fi.solita.utils.query.projection.ProjectionHelper;
 import fi.solita.utils.query.projection.ProjectionUtil;
 import fi.solita.utils.query.projection.ProjectionUtil_;

@@ -49,9 +49,9 @@ import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
 import fi.solita.utils.query.entities.Table;
 import fi.solita.utils.query.entities.Table_;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 import fi.solita.utils.query.projection.Constructors.TransparentProjection;
 
 public abstract class QueryUtils {

@@ -1,4 +1,4 @@
-package fi.solita.utils.query.codegen;
+package fi.solita.utils.query.meta;
 
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.mkString;
@@ -7,8 +7,8 @@ import java.util.List;
 
 import javax.persistence.metamodel.Attribute;
 
-import fi.solita.utils.codegen.MetaConstructor;
-import fi.solita.utils.codegen.MetaConstructors;
+import fi.solita.utils.meta.MetaConstructor;
+import fi.solita.utils.meta.MetaConstructors;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple0;
 import fi.solita.utils.functional.Tuple10;

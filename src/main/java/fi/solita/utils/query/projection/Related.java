@@ -10,7 +10,7 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 public abstract class Related {
 

@@ -2,11 +2,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fi.solita.utils</groupId>
     <artifactId>query-utils</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.8</version>
     <build>
-        <defaultGoal>package</defaultGoal>
-        <finalName>${project.artifactId}</finalName>
-        
         <resources>
                 <resource>
                     <directory>${basedir}/src/main/resources</directory>
@@ -39,7 +36,7 @@
                         <inherited>false</inherited>
                         <configuration>
                             <includes>
-                                <include>fi/solita/utils/query/codegen/**/*</include>
+                                <include>fi/solita/utils/query/meta/**/*</include>
                             </includes>
                         </configuration>
                     </execution>
@@ -86,9 +83,9 @@
                         <JpaConstructorProcessor.includesRegex>fi.solita.utils.query..*Dto</JpaConstructorProcessor.includesRegex>
                     </optionMap>
                     <processors>
-                        <processor>fi.solita.utils.codegen.CommonMetadataProcessor</processor>
-                        <processor>fi.solita.utils.query.codegen.JpaMetamodelProcessor</processor>
-                        <processor>fi.solita.utils.query.codegen.JpaConstructorProcessor</processor>
+                        <processor>fi.solita.utils.meta.CommonMetadataProcessor</processor>
+                        <processor>fi.solita.utils.query.meta.JpaMetamodelProcessor</processor>
+                        <processor>fi.solita.utils.query.meta.JpaConstructorProcessor</processor>
                     </processors>
                 </configuration>
             </plugin>
@@ -99,14 +96,6 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                   <outputDirectory>${basedir}</outputDirectory>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
@@ -114,7 +103,13 @@
         <dependency>
             <groupId>fi.solita.utils</groupId>
             <artifactId>functional-utils</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.8</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>fi.solita.utils</groupId>
+            <artifactId>meta-utils</artifactId>
+            <version>0.8</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

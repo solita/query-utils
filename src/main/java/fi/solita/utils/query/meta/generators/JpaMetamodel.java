@@ -1,14 +1,14 @@
-package fi.solita.utils.query.codegen.generators;
+package fi.solita.utils.query.meta.generators;
 
-import static fi.solita.utils.codegen.Helpers.boxed;
-import static fi.solita.utils.codegen.Helpers.containedType;
-import static fi.solita.utils.codegen.Helpers.element2Fields;
-import static fi.solita.utils.codegen.Helpers.element2Methods;
-import static fi.solita.utils.codegen.Helpers.simpleName;
-import static fi.solita.utils.codegen.Helpers.typeMirror2GenericQualifiedName;
-import static fi.solita.utils.codegen.Helpers.typeParameter2String;
-import static fi.solita.utils.codegen.Helpers.withAnnotation;
-import static fi.solita.utils.codegen.generators.Content.EmptyLine;
+import static fi.solita.utils.meta.Helpers.boxed;
+import static fi.solita.utils.meta.Helpers.containedType;
+import static fi.solita.utils.meta.Helpers.element2Fields;
+import static fi.solita.utils.meta.Helpers.element2Methods;
+import static fi.solita.utils.meta.Helpers.simpleName;
+import static fi.solita.utils.meta.Helpers.typeMirror2GenericQualifiedName;
+import static fi.solita.utils.meta.Helpers.typeParameter2String;
+import static fi.solita.utils.meta.Helpers.withAnnotation;
+import static fi.solita.utils.meta.generators.Content.EmptyLine;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.filter;
@@ -39,9 +39,9 @@ import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
-import fi.solita.utils.codegen.Helpers;
-import fi.solita.utils.codegen.generators.Generator;
-import fi.solita.utils.codegen.generators.GeneratorOptions;
+import fi.solita.utils.meta.Helpers;
+import fi.solita.utils.meta.generators.Generator;
+import fi.solita.utils.meta.generators.GeneratorOptions;
 import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Predicate;

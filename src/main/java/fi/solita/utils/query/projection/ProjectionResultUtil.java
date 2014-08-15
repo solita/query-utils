@@ -31,7 +31,7 @@ import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.attributes.PseudoAttribute;
-import fi.solita.utils.query.codegen.MetaJpaConstructor;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 class ProjectionResultUtil {
     
