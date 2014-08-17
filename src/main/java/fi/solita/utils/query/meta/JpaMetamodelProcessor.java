@@ -38,14 +38,26 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
     @Override
     public ExtendedGeneratorOptions generatorOptions() {
         final boolean onlyPublicMembers = JpaMetamodelProcessor.this.onlyPublicMembers();
+        final String generatedPackagePattern = JpaMetamodelProcessor.this.generatedPackagePattern();
+        final String generatedClassNamePattern = JpaMetamodelProcessor.this.generatedClassNamePattern();
         return new ExtendedGeneratorOptions() {
             public boolean onlyPublicMembers() {
                 return onlyPublicMembers;
             }
+
+            @Override
+            public String generatedPackagePattern() {
+                return generatedPackagePattern;
+            }
+
+            @Override
+            public String generatedClassNamePattern() {
+                return generatedClassNamePattern;
+            }
         };
     }
     
-    public static class ExtendedGeneratorOptions extends CommonMetadataProcessor.CombinedGeneratorOptions implements JpaMetamodel.Options {
+    public static abstract class ExtendedGeneratorOptions extends CommonMetadataProcessor.CombinedGeneratorOptions implements JpaMetamodel.Options {
     }
 
     public List<Generator<? super ExtendedGeneratorOptions>> generators() {

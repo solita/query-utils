@@ -38,6 +38,8 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
     public ExtendedGeneratorOptions generatorOptions() {
         final boolean makeFieldsPublic = JpaConstructorProcessor.this.makeFieldsPublic();
         final boolean onlyPublicMembers = JpaConstructorProcessor.this.onlyPublicMembers();
+        final String generatedPackagePattern = JpaConstructorProcessor.this.generatedPackagePattern();
+        final String generatedClassNamePattern = JpaConstructorProcessor.this.generatedClassNamePattern();
         return new ExtendedGeneratorOptions() {
             @Override
             public boolean makeFieldsPublic() {
@@ -46,10 +48,18 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
             public boolean onlyPublicMembers() {
                 return onlyPublicMembers;
             }
+            @Override
+            public String generatedPackagePattern() {
+                return generatedPackagePattern;
+            }
+            @Override
+            public String generatedClassNamePattern() {
+                return generatedClassNamePattern;
+            }
         };
     }
     
-    public static class ExtendedGeneratorOptions extends CommonMetadataProcessor.CombinedGeneratorOptions implements ConstructorsAsJpaProjections.Options {
+    public static abstract class ExtendedGeneratorOptions extends CommonMetadataProcessor.CombinedGeneratorOptions implements ConstructorsAsJpaProjections.Options {
         @SuppressWarnings("rawtypes")
         @Override
         public Class<? extends Apply> getClassForJpaConstructors(int argCount) {

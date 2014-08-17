@@ -21,7 +21,6 @@ import org.hibernate.proxy.HibernateProxyHelper;
 import org.hibernate.usertype.CompositeUserType;
 import org.hibernate.usertype.UserType;
 
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Functional;
 import fi.solita.utils.functional.Pair;
