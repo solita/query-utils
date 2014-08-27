@@ -64,16 +64,20 @@ public class Dao {
         return jpaBasicQueries.get(id);
     }
 
-    public <E extends IEntity> E getProxy(Id<E> id) {
-        return jpaBasicQueries.getProxy(id);
+    public <E extends IEntity> E toProxy(Id<E> id) {
+        return jpaBasicQueries.toProxy(id);
+    }
+    
+    public <E extends IEntity> Iterable<E> toProxies(Iterable<? extends Id<E>> ids) {
+        return jpaBasicQueries.toProxies(ids);
     }
 
     public <E extends IEntity> Option<E> find(Id<E> id) {
         return jpaBasicQueries.find(id);
     }
     
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T> T getProxy(E entity, SingularAttribute<? super E, T> relation) {
-        return jpaBasicQueries.getProxy(entity, relation);
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T> T toProxy(E entity, SingularAttribute<? super E, T> relation) {
+        return jpaBasicQueries.toProxy(entity, relation);
     }
     
     public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Collection<T> getProxies(E entity, CollectionAttribute<? super E, T> relation) {
@@ -88,15 +92,7 @@ public class Dao {
         return jpaBasicQueries.getProxies(entity, relation);
     }
 
-    public <E extends IEntity> Option<E> getIfDefined(Option<? extends Id<E>> idOption) {
-        return jpaBasicQueries.getIfDefined(idOption);
-    }
-
-    public <E extends IEntity> Option<E> getProxyIfDefined(Option<? extends Id<E>> idOption) {
-        return jpaBasicQueries.getProxyIfDefined(idOption);
-    }
-
-
+    
 
     public long count(CriteriaQuery<?> query) {
         return jpaCriteriaQueries.count(query);

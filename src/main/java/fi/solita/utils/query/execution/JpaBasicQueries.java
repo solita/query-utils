@@ -2,9 +2,7 @@ package fi.solita.utils.query.execution;
 
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
-import static fi.solita.utils.functional.FunctionalImpl.map;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
+import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
@@ -70,7 +68,7 @@ public class JpaBasicQueries {
     }
 
     public <E extends IEntity & Removable> void remove(Id<E> id) {
-        em.apply().remove(getProxy(id));
+        em.apply().remove(toProxy(id));
     }
 
     public <E extends IEntity & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
@@ -95,8 +93,12 @@ public class JpaBasicQueries {
         return ret;
     }
 
-    public <E extends IEntity> E getProxy(Id<E> id) {
+    public <E extends IEntity> E toProxy(Id<E> id) {
         return em.apply().getReference(id.getOwningClass(), id);
+    }
+    
+    public <E extends IEntity> Iterable<E> toProxies(Iterable<? extends Id<E>> ids) {
+        return map(JpaBasicQueries_.<E>toProxy().ap(this), ids);
     }
 
     public <E extends IEntity> Option<E> find(Id<E> id) {
@@ -108,7 +110,7 @@ public class JpaBasicQueries {
      * (<i>entity</i> already has an ID for a ToOne relation, so this is possible)
      */
     @SuppressWarnings("unchecked")
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T> T getProxy(E entity, SingularAttribute<? super E, T> relation) {
+    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T> T toProxy(E entity, SingularAttribute<? super E, T> relation) {
         checkOptionalAttributes(relation);
         
         Field field = (Field)relation.getJavaMember();
@@ -149,20 +151,6 @@ public class JpaBasicQueries {
         query.where(em.apply().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em.apply())), entity.getId()));
         query.select(((Join<?,T>)QueryUtils.join((Root<?>)root, (Attribute<?,?>)relation, JoinType.INNER)).get(id));
         
-        return map(queryExecutor.getMany(query, Page.NoPaging), JpaBasicQueries_.<T>getProxy().ap(this));
-    }
-
-    public <E extends IEntity> Option<E> getIfDefined(Option<? extends Id<E>> idOption) {
-        for (Id<E> id: idOption) {
-            return Some(get(id));
-        }
-        return None();
-    }
-
-    public <E extends IEntity> Option<E> getProxyIfDefined(Option<? extends Id<E>> idOption) {
-        for (Id<E> id: idOption) {
-            return Some(getProxy(id));
-        }
-        return None();
+        return map(queryExecutor.getMany(query, Page.NoPaging), JpaBasicQueries_.<T>toProxy().ap(this));
     }
 }
