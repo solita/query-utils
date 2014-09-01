@@ -57,7 +57,7 @@ public class JpaCriteriaQuery {
         }
     }
 
-    public <E extends IEntity & Identifiable<?>, R1, A1 extends Attribute<? super E, ?> & Bindable<R1>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>>
             CriteriaQuery<R1> related(E entity, A1 r1) {
         return doRelated(entity, r1);
     }
@@ -67,32 +67,32 @@ public class JpaCriteriaQuery {
         return doRelated(entity, r1, r2);
     }
 
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>>
             CriteriaQuery<R3> related(E entity, A1 r1, A2 r2, A3 r3) {
         return doRelated(entity, r1, r2, r3);
     }
 
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>>
             CriteriaQuery<R4> related(E entity, A1 r1, A2 r2, A3 r3, A4 r4) {
         return doRelated(entity, r1, r2, r3, r4);
     }
 
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
             CriteriaQuery<R5> related(E entity, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5) {
         return doRelated(entity, r1, r2, r3, r4, r5);
     }
 
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>>
             CriteriaQuery<R6> related(E entity, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6) {
         return doRelated(entity, r1, r2, r3, r4, r5, r6);
     }
 
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6 extends IEntity, R7, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6 extends IEntity, R7 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>>
             CriteriaQuery<R7> related(E entity, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6, A7 r7) {
         return doRelated(entity, r1, r2, r3, r4, r5, r6, r7);
     }
 
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6 extends IEntity, R7 extends IEntity, R8, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>, A8 extends Attribute<? super R7, ?> & Bindable<R8>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6 extends IEntity, R7 extends IEntity, R8 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>, A8 extends Attribute<? super R7, ?> & Bindable<R8>>
             CriteriaQuery<R8> related(E entity, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6, A7 r7, A8 r8) {
         return doRelated(entity, r1, r2, r3, r4, r5, r6, r7, r8);
     }
@@ -113,42 +113,42 @@ public class JpaCriteriaQuery {
         return ret;
     }
 
-    public <E extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, R1>
+    public <E extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, R1 extends IEntity>
     CriteriaQuery<R1> related(A1 r1, CriteriaQuery<E> query) {
         return doRelated(query, r1);
     }
 
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>>
     CriteriaQuery<R2> related(A1 r1, A2 r2, CriteriaQuery<E> query) {
         return doRelated(query, r1, r2);
     }
 
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>>
     CriteriaQuery<R3> related(A1 r1, A2 r2, A3 r3, CriteriaQuery<E> query) {
         return doRelated(query, r1, r2, r3);
     }
     
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>>
     CriteriaQuery<R4> related(A1 r1, A2 r2, A3 r3, A4 r4, CriteriaQuery<E> query) {
         return doRelated(query, r1, r2, r3, r4);
     }
     
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
     CriteriaQuery<R5> related(A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, CriteriaQuery<E> query) {
         return doRelated(query, r1, r2, r3, r4, r5);
     }
     
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>>
     CriteriaQuery<R6> related(A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6, CriteriaQuery<E> query) {
         return doRelated(query, r1, r2, r3, r4, r5, r6);
     }
     
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6 extends IEntity, R7, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6 extends IEntity, R7 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>>
     CriteriaQuery<R7> related(A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6, A7 r7, CriteriaQuery<E> query) {
         return doRelated(query, r1, r2, r3, r4, r5, r6, r7);
     }
     
-    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6 extends IEntity, R7 extends IEntity, R8, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>, A8 extends Attribute<? super R7, ?> & Bindable<R8>>
+    public <E extends IEntity & Identifiable<?>, R1 extends IEntity, R2 extends IEntity, R3 extends IEntity, R4 extends IEntity, R5 extends IEntity, R6 extends IEntity, R7 extends IEntity, R8 extends IEntity, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>, A8 extends Attribute<? super R7, ?> & Bindable<R8>>
     CriteriaQuery<R8> related(A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6, A7 r7, A8 r8, CriteriaQuery<E> query) {
         return doRelated(query, r1, r2, r3, r4, r5, r6, r7, r8);
     }

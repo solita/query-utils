@@ -9,7 +9,6 @@ import static org.junit.Assert.assertEquals;
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaQuery;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,7 +21,6 @@ import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Municipality;
 import fi.solita.utils.query.Municipality_;
 import fi.solita.utils.query.QueryTestBase;
-import fi.solita.utils.query.Report;
 import fi.solita.utils.query.execution.JpaCriteriaQueries;
 
 
@@ -92,33 +90,6 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
         assertEquals("relation toMany toOne", mun.getId(), dao.get(query.related(dep, Department_.employees, Employee_.optionalMunicipality)).getId());
     }
     
-    @Test
-    public void relatedEmbeddable() {
-        Department dep = new Department();
-        Employee emp = new Employee("", dep, new Report(42));
-        persist(dep, emp);
-
-        assertEquals((Integer)42, dao.get(query.related(emp, Employee_.optionalReport)).getYear());
-    }
-    
-    @Test
-    @Ignore("Hibernate (4.0.0) generated an invalid query")
-    public void relatedEmbeddableSet() {
-        Municipality mun = new Municipality(newSet(new Report(42)), false);
-        persist(mun);
-
-        assertEquals((Integer)42, dao.get(query.related(mun, Municipality_.reports)).getYear());
-    }
-    
-    @Test
-    @Ignore("Hibernate (4.0.0) generated an invalid query")
-    public void relatedEmbeddableList() {
-        Department dep = new Department("", newList(new Report(42)));
-        persist(dep);
-
-        assertEquals((Integer)42, dao.get(query.related(dep, Department_.reports)).getYear());
-    }
-
     @Test
     public void related_variants() {
         Department dep = new Department();
