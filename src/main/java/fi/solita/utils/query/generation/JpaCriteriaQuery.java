@@ -3,6 +3,7 @@ package fi.solita.utils.query.generation;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.JoinType;
@@ -10,6 +11,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Bindable;
+import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.query.IEntity;
@@ -38,6 +40,44 @@ public class JpaCriteriaQuery {
     public <E extends IEntity> CriteriaQuery<E> all(Class<E> entityClass) {
         CriteriaQuery<E> query = em.apply().getCriteriaBuilder().createQuery(entityClass);
         return query.select(query.from(entityClass));
+    }
+    
+    public <E extends IEntity, A extends IEntity> CriteriaQuery<E> matching(SingularAttribute<E,A> first, Id<A> firstId) {
+        CriteriaBuilder cb = em.apply().getCriteriaBuilder();
+        Class<E> rootType = first.getDeclaringType().getJavaType();
+        CriteriaQuery<E> query = cb.createQuery(rootType);
+        Root<E> root = query.from(rootType);
+        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.apply())), firstId));
+        return query;
+    }
+    
+    public <E extends IEntity, A> CriteriaQuery<E> matching(SingularAttribute<E,A> relation, A value) {
+        CriteriaBuilder cb = em.apply().getCriteriaBuilder();
+        Class<E> rootType = relation.getDeclaringType().getJavaType();
+        CriteriaQuery<E> query = cb.createQuery(rootType);
+        Root<E> root = query.from(rootType);
+        query.where(cb.equal(root.get(relation), value));
+        return query;
+    }
+    
+    public <E extends IEntity, A extends IEntity, B extends IEntity> CriteriaQuery<E> matching(SingularAttribute<E,A> first, SingularAttribute<E,B> second, Id<A> firstId, Id<B> secondId) {
+        CriteriaBuilder cb = em.apply().getCriteriaBuilder();
+        Class<E> rootType = first.getDeclaringType().getJavaType();
+        CriteriaQuery<E> query = cb.createQuery(rootType);
+        Root<E> root = query.from(rootType);
+        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.apply())), firstId),
+                    cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), em.apply())), secondId));
+        return query;
+    }
+    
+    public <E extends IEntity, A, B> CriteriaQuery<E> matching(SingularAttribute<E,A> first, SingularAttribute<E,B> second, A firstValue, B secondValue) {
+        CriteriaBuilder cb = em.apply().getCriteriaBuilder();
+        Class<E> rootType = first.getDeclaringType().getJavaType();
+        CriteriaQuery<E> query = cb.createQuery(rootType);
+        Root<E> root = query.from(rootType);
+        query.where(cb.equal(root.get(first), firstValue),
+                    cb.equal(root.get(second), secondValue));
+        return query;
     }
 
     @SuppressWarnings("unchecked")
