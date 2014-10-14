@@ -257,16 +257,22 @@ public abstract class QueryUtils {
             } else {
                 Member member = ((SingularAttribute<?,?>)param).getJavaMember();
                 if (member instanceof AnnotatedElement) {
-                    Column column = ((AnnotatedElement)member).getAnnotation(Column.class);
-                    Basic basic = ((AnnotatedElement)member).getAnnotation(Basic.class);
-                    ret = column != null && column.nullable() == false ||
-                          basic != null && basic.optional() == false;
+                    ret = memberIsRequired(member);
                 } else {
                     ret = false;
                 }
             }
         } else if (param instanceof SingularAttribute) {
-            ret = !((SingularAttribute<?,?>)param).isOptional();
+            if (!((SingularAttribute<?,?>)param).isOptional()) {
+                ret = true;
+            } else {
+                Member member = ((SingularAttribute<?,?>)param).getJavaMember();
+                if (member instanceof AnnotatedElement) {
+                    ret = memberIsRequired(member);
+                } else {
+                    ret = false;
+                }
+            }
         } else {
             ret = param.isCollection();
         }
@@ -280,6 +286,13 @@ public abstract class QueryUtils {
         }
         
         return ret;
+    }
+
+    private static boolean memberIsRequired(Member member) {
+        Column column = ((AnnotatedElement)member).getAnnotation(Column.class);
+        Basic basic = ((AnnotatedElement)member).getAnnotation(Basic.class);
+        return column != null && column.nullable() == false ||
+               basic != null && basic.optional() == false;
     }
     
     public static boolean isRequiredByQueryAttribute(Attribute<?,?> param) {
