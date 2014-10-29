@@ -2,6 +2,7 @@ package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
+import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.FunctionalImpl.map;
 
 import java.util.Collection;
@@ -142,13 +143,9 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
                     q.addScalar(param.getKey(), t);
                 }
             } else {
-                try {
-                    // try to find a type
-                    org.hibernate.type.Type t = ((HibernateTypeProvider.HibernateType<?>)typeProvider.type(param.getKey().getClass())).type;
-                    q.addScalar(param.getKey(), t);
-                } catch (Exception e) {
-                    q.addScalar(param.getKey());
-                }
+                // try to find a type
+                org.hibernate.type.Type t = ((HibernateTypeProvider.HibernateType<?>)typeProvider.type(param.getKey().getClass())).type;
+                q.addScalar(param.getKey(), t);
             }
         }
         return q;
@@ -182,22 +179,24 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     private final <T extends Query> T bindParams(T q, Map<String, Pair<?, Option<Type<?>>>> params) {
         for (Entry<String, Pair<?, Option<Type<?>>>> param: params.entrySet()) {
             if (param.getValue()._1 instanceof Collection) {
+                Collection<?> col = (Collection<?>)param.getValue()._1;
                 if (param.getValue()._2.isDefined()) {
                     q.setParameterList(param.getKey(), (Collection<?>) param.getValue()._1, ((HibernateTypeProvider.HibernateType<?>)param.getValue()._2.get()).type);
+                } else if (!col.isEmpty()) {
+                    // try to find a type
+                    org.hibernate.type.Type t = ((HibernateTypeProvider.HibernateType<?>)typeProvider.type(head(col).getClass())).type;
+                    q.setParameterList(param.getKey(), (Collection<?>) param.getValue()._1, t);
                 } else {
+                    // fallback to hibernate heuristics when empty collection
                     q.setParameterList(param.getKey(), (Collection<?>) param.getValue()._1);
                 }
             } else {
                 if (param.getValue()._2.isDefined()) {
                     q.setParameter(param.getKey(), param.getValue()._1, ((HibernateTypeProvider.HibernateType<?>)param.getValue()._2.get()).type);
                 } else {
-                    try {
-                        // try to find a type
-                        org.hibernate.type.Type t = ((HibernateTypeProvider.HibernateType<?>)typeProvider.type(param.getValue()._1.getClass())).type;
-                        q.setParameter(param.getKey(), param.getValue()._1, t);
-                    } catch (Exception e) {
-                        q.setParameter(param.getKey(), param.getValue()._1);
-                    }
+                    // try to find a type
+                    org.hibernate.type.Type t = ((HibernateTypeProvider.HibernateType<?>)typeProvider.type(param.getValue()._1.getClass())).type;
+                    q.setParameter(param.getKey(), param.getValue()._1, t);
                 }
             }
         }

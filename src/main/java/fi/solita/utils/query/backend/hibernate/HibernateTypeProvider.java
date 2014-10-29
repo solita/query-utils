@@ -7,6 +7,8 @@ import static fi.solita.utils.functional.FunctionalImpl.find;
 import static fi.solita.utils.functional.FunctionalImpl.flatMap;
 import static fi.solita.utils.functional.FunctionalImpl.groupBy;
 import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.Option.None;
+import static fi.solita.utils.functional.Option.Some;
 
 import java.io.Serializable;
 import java.util.List;
@@ -23,6 +25,7 @@ import org.hibernate.usertype.UserType;
 
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Functional;
+import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Predicates;
 import fi.solita.utils.functional.Transformer;
@@ -96,6 +99,17 @@ public class HibernateTypeProvider implements TypeProvider {
     public <ID extends Serializable, T extends Identifiable<ID>> Type<ID> idType(Class<T> entityType) {
         return new HibernateType<ID>(em.apply().unwrap(Session.class).getSessionFactory().getClassMetadata(entityType).getIdentifierType());
     }
+    
+    @SuppressWarnings("unchecked")
+    private static <T> Option<Class<T>> getEnumType(Class<T> type) {
+        if (type.isEnum()) {
+            return Some((Class<T>) type);
+        }
+        if (type.getEnclosingClass() != null && type.getEnclosingClass().isEnum()) {
+            return Some((Class<T>) type.getEnclosingClass());
+        }
+        return None();
+    }
 
     @Override
     public <T> Type<T> type(final Class<T> clazz) {
@@ -134,13 +148,21 @@ public class HibernateTypeProvider implements TypeProvider {
             }
         }
         
+        // enum type?
+        for (Class<?> enumClass: getEnumType(clazz)) {
+            org.hibernate.type.Type heuristicType = typeHelper.heuristicType(enumClass.getName());
+            if (heuristicType != null) {
+                return new HibernateType<T>(heuristicType);
+            }
+        }
+        
         // still no luck. Fallback to Hibernate heuristics
         org.hibernate.type.Type heuristicType = typeHelper.heuristicType(clazz.getName());
         if (heuristicType != null) {
             return new HibernateType<T>(heuristicType);
         }
         
-        throw new IllegalArgumentException("Could not resolve Hibernate Type for: " + clazz);
+        throw new IllegalArgumentException("Could not resolve Hibernate Type for: " + clazz + ". Please provide the type explicitly");
     }
 
     @Override
