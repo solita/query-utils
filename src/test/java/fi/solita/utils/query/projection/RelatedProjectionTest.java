@@ -48,7 +48,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(dep, emp);
         long queryCount = getQueryCount();
         
-        Dto dto = dao.get(query.all(Employee.class), Dto_.c20(literal(VALUE._), Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.mandatoryNumber))));
+        Dto dto = dao.get(query.all(Employee.class), Dto_.c2(literal(VALUE._), Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.mandatoryNumber))));
         assertEquals(42, dto.value);
         
         assertEquals(2, getQueryCount() - queryCount);
@@ -61,7 +61,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(dep, emp);
         long queryCount = getQueryCount();
         
-        Dto dto = dao.get(query.all(Employee.class), Project.value(Related.projection(Employee_.mandatoryDepartment, Dto_.c20(literal(VALUE._), Department_.mandatoryNumber))));
+        Dto dto = dao.get(query.all(Employee.class), Project.value(Related.projection(Employee_.mandatoryDepartment, Dto_.c2(literal(VALUE._), Department_.mandatoryNumber))));
         assertEquals(42, dto.value);
         
         assertEquals(2, getQueryCount() - queryCount);
@@ -76,7 +76,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(dep, mun, emp1, emp2);
         long queryCount = getQueryCount();
         
-        Dto dto = dao.get(query.all(Municipality.class), Dto_.c18(literal(SET_OF_IDS._), Related.projection(Municipality_.emps, Project.id())));
+        Dto dto = dao.get(query.all(Municipality.class), Dto_.c13(literal(SET_OF_IDS._), Related.projection(Municipality_.emps, Project.id())));
         assertEquals(newSet(emp1.getId(), emp2.getId()), dto.value);
         
         assertEquals(2, getQueryCount() - queryCount);
@@ -91,7 +91,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(dep, mun, emp1, emp2);
         long queryCount = getQueryCount();
         
-        Set<Dto> dtos = dao.get(query.all(Municipality.class), Project.value(Related.projection(Municipality_.emps, Dto_.c7(literal(ID._), Employee_.id))));
+        Set<Dto> dtos = dao.get(query.all(Municipality.class), Project.value(Related.projection(Municipality_.emps, Dto_.c1(literal(ID._), Employee_.id))));
         assertEquals(newSet(emp1.getId(), emp2.getId()), newSet(map(dtos, Dto_.value)));
         
         assertEquals(2, getQueryCount() - queryCount);
@@ -103,7 +103,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(mun);
         long queryCount = getQueryCount();
         
-        Dto dto = dao.get(query.all(Municipality.class), Dto_.c18(literal(SET_OF_IDS._), Related.projection(Municipality_.emps, Project.id())));
+        Dto dto = dao.get(query.all(Municipality.class), Dto_.c13(literal(SET_OF_IDS._), Related.projection(Municipality_.emps, Project.id())));
         assertEquals(emptySet(), dto.value);
         
         assertEquals(2, getQueryCount() - queryCount);
@@ -115,7 +115,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(mun);
         long queryCount = getQueryCount();
         
-        Set<Dto> dtos = dao.get(query.all(Municipality.class), Project.value(Related.projection(Municipality_.emps, Dto_.c7(literal(ID._), Employee_.id))));
+        Set<Dto> dtos = dao.get(query.all(Municipality.class), Project.value(Related.projection(Municipality_.emps, Dto_.c1(literal(ID._), Employee_.id))));
         assertEquals(emptySet(), dtos);
         
         assertEquals(2, getQueryCount() - queryCount);
@@ -129,7 +129,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(dep, emp1, emp2);
         long queryCount = getQueryCount();
         
-        Dto dto = dao.get(query.all(Department.class), Dto_.c10(literal(LIST_OF_IDS._), Related.projection(Department_.employees, Project.id())));
+        Dto dto = dao.get(query.all(Department.class), Dto_.c17(literal(LIST_OF_IDS._), Related.projection(Department_.employees, Project.id())));
         assertEquals(newList(emp1.getId(), emp2.getId()), dto.value);
         
         assertEquals(2, getQueryCount() - queryCount);
@@ -143,7 +143,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(dep, emp1, emp2);
         long queryCount = getQueryCount();
         
-        List<Dto> dtos = dao.get(query.all(Department.class), Project.value(Related.projection(Department_.employees, Dto_.c7(literal(ID._), Employee_.id))));
+        List<Dto> dtos = dao.get(query.all(Department.class), Project.value(Related.projection(Department_.employees, Dto_.c1(literal(ID._), Employee_.id))));
         assertEquals(newList(emp1.getId(), emp2.getId()), newList(map(dtos, Dto_.value)));
         
         assertEquals(2, getQueryCount() - queryCount);
@@ -155,7 +155,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(dep);
         long queryCount = getQueryCount();
         
-        Dto dto = dao.get(query.all(Department.class), Dto_.c10(literal(LIST_OF_IDS._), Related.projection(Department_.employees, Project.id())));
+        Dto dto = dao.get(query.all(Department.class), Dto_.c17(literal(LIST_OF_IDS._), Related.projection(Department_.employees, Project.id())));
         assertEquals(emptyList(), dto.value);
         
         assertEquals(2, getQueryCount() - queryCount);
@@ -167,7 +167,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(dep);
         long queryCount = getQueryCount();
         
-        List<Dto> dtos = dao.get(query.all(Department.class), Project.value(Related.projection(Department_.employees, Dto_.c7(literal(ID._), Employee_.id))));
+        List<Dto> dtos = dao.get(query.all(Department.class), Project.value(Related.projection(Department_.employees, Dto_.c1(literal(ID._), Employee_.id))));
         assertEquals(emptyList(), dtos);
         
         assertEquals(2, getQueryCount() - queryCount);

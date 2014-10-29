@@ -94,17 +94,17 @@ public abstract class JpaCriteriaCopy {
     }
     
     private static Option<Integer> findLatestCustomAlias(CriteriaQuery<?> query) {
-        Iterable<String> allAliases = flatMap(JpaCriteriaCopy_.getAliases1, query.getRoots());
+        Iterable<String> allAliases = flatMap(JpaCriteriaCopy_.getAliases, query.getRoots());
         Iterable<Integer> allCustomAliases = map(JpaCriteriaCopy_.toInt, filter(JpaCriteriaCopy_.isCustomAlias, allAliases));
         return lastOption(sort(allCustomAliases));
     }
     
     static Iterable<String> getAliases(Root<?> root) {
-        return cons(root.getAlias(), flatMap(JpaCriteriaCopy_.getAliases, root.getJoins()));
+        return cons(root.getAlias(), flatMap(JpaCriteriaCopy_.getAliases1, root.getJoins()));
     }
     
     static Iterable<String> getAliases(Join<?,?> join) {
-        return cons(join.getAlias(), flatMap(JpaCriteriaCopy_.getAliases, join.getJoins()));
+        return cons(join.getAlias(), flatMap(JpaCriteriaCopy_.getAliases1, join.getJoins()));
     }
     
     static int toInt(String customAlias) {
