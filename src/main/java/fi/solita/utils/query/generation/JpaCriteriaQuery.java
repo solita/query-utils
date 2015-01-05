@@ -42,7 +42,7 @@ public class JpaCriteriaQuery {
         return query.select(query.from(entityClass));
     }
     
-    public <E extends IEntity, A extends IEntity> CriteriaQuery<E> matching(SingularAttribute<E,A> first, Id<A> firstId) {
+    public <E extends IEntity, A extends IEntity> CriteriaQuery<E> matching(SingularAttribute<E,? super A> first, Id<A> firstId) {
         CriteriaBuilder cb = em.apply().getCriteriaBuilder();
         Class<E> rootType = first.getDeclaringType().getJavaType();
         CriteriaQuery<E> query = cb.createQuery(rootType);
@@ -51,7 +51,7 @@ public class JpaCriteriaQuery {
         return query;
     }
     
-    public <E extends IEntity, A> CriteriaQuery<E> matching(SingularAttribute<E,A> relation, A value) {
+    public <E extends IEntity, A> CriteriaQuery<E> matching(SingularAttribute<E,? super A> relation, A value) {
         CriteriaBuilder cb = em.apply().getCriteriaBuilder();
         Class<E> rootType = relation.getDeclaringType().getJavaType();
         CriteriaQuery<E> query = cb.createQuery(rootType);
@@ -60,7 +60,7 @@ public class JpaCriteriaQuery {
         return query;
     }
     
-    public <E extends IEntity, A extends IEntity, B extends IEntity> CriteriaQuery<E> matching(SingularAttribute<E,A> first, SingularAttribute<E,B> second, Id<A> firstId, Id<B> secondId) {
+    public <E extends IEntity, A extends IEntity, B extends IEntity> CriteriaQuery<E> matching(SingularAttribute<E,? super A> first, SingularAttribute<E,? super B> second, Id<A> firstId, Id<B> secondId) {
         CriteriaBuilder cb = em.apply().getCriteriaBuilder();
         Class<E> rootType = first.getDeclaringType().getJavaType();
         CriteriaQuery<E> query = cb.createQuery(rootType);
@@ -70,7 +70,7 @@ public class JpaCriteriaQuery {
         return query;
     }
     
-    public <E extends IEntity, A, B> CriteriaQuery<E> matching(SingularAttribute<E,A> first, SingularAttribute<E,B> second, A firstValue, B secondValue) {
+    public <E extends IEntity, A, B> CriteriaQuery<E> matching(SingularAttribute<E,? super A> first, SingularAttribute<E,? super B> second, A firstValue, B secondValue) {
         CriteriaBuilder cb = em.apply().getCriteriaBuilder();
         Class<E> rootType = first.getDeclaringType().getJavaType();
         CriteriaQuery<E> query = cb.createQuery(rootType);
@@ -79,13 +79,35 @@ public class JpaCriteriaQuery {
                     cb.equal(root.get(second), secondValue));
         return query;
     }
+    
+    public <E extends IEntity, A extends IEntity, B extends IEntity, C extends IEntity> CriteriaQuery<E> matching(SingularAttribute<E,? super A> first, SingularAttribute<E,? super B> second, SingularAttribute<E,? super C> third, Id<A> firstId, Id<B> secondId, Id<C> thirdId) {
+        CriteriaBuilder cb = em.apply().getCriteriaBuilder();
+        Class<E> rootType = first.getDeclaringType().getJavaType();
+        CriteriaQuery<E> query = cb.createQuery(rootType);
+        Root<E> root = query.from(rootType);
+        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.apply())), firstId),
+                    cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), em.apply())), secondId),
+                    cb.equal(root.get(third).get(QueryUtils.id(third.getBindableJavaType(), em.apply())), thirdId));
+        return query;
+    }
+    
+    public <E extends IEntity, A, B, C> CriteriaQuery<E> matching(SingularAttribute<E,? super A> first, SingularAttribute<E,? super B> second, SingularAttribute<E,? super C> third, A firstValue, B secondValue, C thirdValue) {
+        CriteriaBuilder cb = em.apply().getCriteriaBuilder();
+        Class<E> rootType = first.getDeclaringType().getJavaType();
+        CriteriaQuery<E> query = cb.createQuery(rootType);
+        Root<E> root = query.from(rootType);
+        query.where(cb.equal(root.get(first), firstValue),
+                    cb.equal(root.get(second), secondValue),
+                    cb.equal(root.get(third), thirdValue));
+        return query;
+    }
 
     @SuppressWarnings("unchecked")
     public <E extends IEntity> CriteriaQuery<E> ofIds(Iterable<? extends Id<? super E>> ids, Class<E> entityClass) {
         CriteriaQuery<Object> query = em.apply().getCriteriaBuilder().createQuery();
         if (ids.iterator().hasNext()) {
             Root<E> root = query.from(entityClass);
-            Path<Id<E>> idPath = root.get(QueryUtils.id(entityClass, em.apply()));
+            Path<Id<E>> idPath = root.get(QueryUtils.<E,Id<E>>id(entityClass, em.apply()));
             query.where(QueryUtils.inExpr(query, idPath, (Iterable<Id<E>>)ids, em.apply().getCriteriaBuilder()));
             query.select(root);
             return (CriteriaQuery<E>)(Object)query;

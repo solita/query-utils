@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.persistence.criteria.From;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Selection;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
@@ -42,7 +42,7 @@ public class EmbeddableUtil {
     
     private static final Logger logger = LoggerFactory.getLogger(EmbeddableUtil.class);
 
-    static Iterable<? extends Selection<?>> breakEmbeddableToParts(Metamodel metamodel, Bindable<?> target, final From<?,?> source) {
+    static Iterable<? extends Selection<?>> breakEmbeddableToParts(Metamodel metamodel, Bindable<?> target, final Path<?> source) {
         return map(getEmbeddableAttributes(target, metamodel), QueryUtils_.get.ap(source));
     }
     

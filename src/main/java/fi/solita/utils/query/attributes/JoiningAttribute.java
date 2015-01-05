@@ -13,6 +13,7 @@ import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
+import fi.solita.utils.functional.Predicate;
 import fi.solita.utils.functional.Transformer;
 
 /**
@@ -23,6 +24,15 @@ import fi.solita.utils.functional.Transformer;
  * attribute itself, thus changing the resulting type of the original attribute.
  */
 public interface JoiningAttribute {
+    public static Predicate<Attribute<?,?>> illegalContainedAttribute = new Predicate<Attribute<?,?>>() {
+        @Override
+        public boolean accept(Attribute<?, ?> candidate) {
+            return candidate instanceof PseudoAttribute ||
+                   candidate instanceof AdditionalQueryPerformingAttribute ||
+                   candidate instanceof RestrictingAttribute;
+        }
+    };
+
     public abstract List<? extends Attribute<?, ?>> getAttributes();
     
     public static class Constructors {
@@ -32,68 +42,68 @@ public interface JoiningAttribute {
         
     
         
-        public static <E,Y,Y2,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
-        CollectionAttribute<E,R> collection(A1 a1, A2 a2) {
-            return new JoiningCollectionAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2));
+        public static <E,Y,Y2,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
+        CollectionAttribute<E,Y2> collection(A1 a1, A2 a2) {
+            return new JoiningCollectionAttribute<E,Y2,CollectionAttribute<E,Y2>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2));
         }
         
-        public static <E,Y,Y2,Y3,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
-        CollectionAttribute<E,R> collection(A1 a1, A2 a2, A3 a3) {
-            return new JoiningCollectionAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3));
+        public static <E,Y,Y2,Y3,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
+        CollectionAttribute<E,Y3> collection(A1 a1, A2 a2, A3 a3) {
+            return new JoiningCollectionAttribute<E,Y3,CollectionAttribute<E,Y3>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3));
         }
         
-        public static <E,Y,Y2,Y3,Y4,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>>
-        CollectionAttribute<E,R> collection(A1 a1, A2 a2, A3 a3, A4 a4) {
-            return new JoiningCollectionAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4));
+        public static <E,Y,Y2,Y3,Y4,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>>
+        CollectionAttribute<E,Y4> collection(A1 a1, A2 a2, A3 a3, A4 a4) {
+            return new JoiningCollectionAttribute<E,Y4,CollectionAttribute<E,Y4>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4));
         }
         
-        public static <E,Y,Y2,Y3,Y4,Y5,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>>
-        CollectionAttribute<E,R> collection(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-            return new JoiningCollectionAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5));
+        public static <E,Y,Y2,Y3,Y4,Y5,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>>
+        CollectionAttribute<E,Y5> collection(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+            return new JoiningCollectionAttribute<E,Y5,CollectionAttribute<E,Y5>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5));
         }
         
         
     
-        public static <E,Y,Y2,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
-        SetAttribute<E,R> set(A1 a1, A2 a2) {
-            return new JoiningSetAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2));
+        public static <E,Y,Y2,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
+        SetAttribute<E,Y2> set(A1 a1, A2 a2) {
+            return new JoiningSetAttribute<E,Y2,SetAttribute<E,Y2>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2));
         }
         
-        public static <E,Y,Y2,Y3,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
-        SetAttribute<E,R> set(A1 a1, A2 a2, A3 a3) {
-            return new JoiningSetAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3));
+        public static <E,Y,Y2,Y3,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
+        SetAttribute<E,Y3> set(A1 a1, A2 a2, A3 a3) {
+            return new JoiningSetAttribute<E,Y3,SetAttribute<E,Y3>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3));
         }
         
-        public static <E,Y,Y2,Y3,Y4,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>>
-        SetAttribute<E,R> set(A1 a1, A2 a2, A3 a3, A4 a4) {
-            return new JoiningSetAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4));
+        public static <E,Y,Y2,Y3,Y4,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>>
+        SetAttribute<E,Y4> set(A1 a1, A2 a2, A3 a3, A4 a4) {
+            return new JoiningSetAttribute<E,Y4,SetAttribute<E,Y4>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4));
         }
         
-        public static <E,Y,Y2,Y3,Y4,Y5,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>>
-        SetAttribute<E,R> set(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-            return new JoiningSetAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5));
+        public static <E,Y,Y2,Y3,Y4,Y5,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>>
+        SetAttribute<E,Y5> set(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+            return new JoiningSetAttribute<E,Y5,SetAttribute<E,Y5>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5));
         }
         
         
         
-        public static <E,Y,Y2,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
-        ListAttribute<E,R> list(A1 a1, A2 a2) {
-            return new JoiningListAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2));
+        public static <E,Y,Y2,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
+        ListAttribute<E,Y2> list(A1 a1, A2 a2) {
+            return new JoiningListAttribute<E,Y2,ListAttribute<E,Y2>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2));
         }
         
-        public static <E,Y,Y2,Y3,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
-        ListAttribute<E,R> list(A1 a1, A2 a2, A3 a3) {
-            return new JoiningListAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3));
+        public static <E,Y,Y2,Y3,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
+        ListAttribute<E,Y3> list(A1 a1, A2 a2, A3 a3) {
+            return new JoiningListAttribute<E,Y3,ListAttribute<E,Y3>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3));
         }
         
-        public static <E,Y,Y2,Y3,Y4,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>>
-        ListAttribute<E,R> list(A1 a1, A2 a2, A3 a3, A4 a4) {
-            return new JoiningListAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4));
+        public static <E,Y,Y2,Y3,Y4,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>>
+        ListAttribute<E,Y4> list(A1 a1, A2 a2, A3 a3, A4 a4) {
+            return new JoiningListAttribute<E,Y4,ListAttribute<E,Y4>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4));
         }
         
-        public static <E,Y,Y2,Y3,Y4,Y5,R,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>>
-        ListAttribute<E,R> list(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-            return new JoiningListAttribute<E,R>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5));
+        public static <E,Y,Y2,Y3,Y4,Y5,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>>
+        ListAttribute<E,Y5> list(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+            return new JoiningListAttribute<E,Y5,ListAttribute<E,Y5>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5));
         }
         
         

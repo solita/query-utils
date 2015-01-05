@@ -5,15 +5,17 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.CollectionAttribute;
 
 
-class LiteralCollectionAttribute<X, Y> extends PluralAttributeProxy<X, Collection<Y>, Y> implements CollectionAttribute<X, Y>, PseudoAttribute {
+class LiteralCollectionAttribute<X, Y, A extends Attribute<X, Collection<Y>> & Bindable<Y>> extends PluralAttributeProxy<X, Collection<Y>, Y, A> implements CollectionAttribute<X, Y>, PseudoAttribute {
 
     private final Collection<Y> value;
 
     public LiteralCollectionAttribute(Collection<Y> value) {
-        super(null);
+        super(null, CollectionType.COLLECTION, null);
         this.value = value;
     }
 

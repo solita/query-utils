@@ -75,7 +75,7 @@ public class JpaCriteriaQueries {
         return getMany(query, Page.NoPaging);
     }
 
-    public <T> List<T> getMany(CriteriaQuery<T> query, Page page) {
+    public <T> List<T> getMany(CriteriaQuery<T> query, Page page) throws NoOrderingSpecifiedException {
         applyOrder(query, resolveSelection(query), em.apply().getCriteriaBuilder());
         checkOrdering(query, page);
         return queryExecutor.getMany(query, page);

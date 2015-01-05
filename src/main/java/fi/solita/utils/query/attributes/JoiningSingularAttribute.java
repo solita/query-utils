@@ -19,6 +19,9 @@ class JoiningSingularAttribute<E,R> extends SingularAttributeProxy<E,R> implemen
     @SuppressWarnings("unchecked")
     public JoiningSingularAttribute(SingularAttribute<?,?>... attrs) {
         super((SingularAttribute<E, R>) last(attrs));
+        if (exists(JoiningAttribute.illegalContainedAttribute, attrs)) {
+            throw new IllegalArgumentException("Cannot use attributes of types defined in JoiningAttribute.illegalContainedAttribute within JoiningAttributes!");
+        }
         attributes = newList(attrs);
     }
 

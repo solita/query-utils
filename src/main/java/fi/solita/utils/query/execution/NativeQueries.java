@@ -7,6 +7,7 @@ import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 
+import java.util.Collection;
 import java.util.List;
 
 import fi.solita.utils.functional.Apply;
@@ -59,7 +60,7 @@ public class NativeQueries {
     public <T> Option<T> findFirst(NativeQuery<T> query) {
         return headOption(getMany(query, Page.FIRST.withSize(1)));
     }
-
+    
     public <T, P> Option<P> findFirst(NativeQuery<T> query, Apply<T, P> constructor) {
         List<T> t = getMany(query, Page.FIRST.withSize(1));
         if (t.isEmpty()) {
@@ -68,7 +69,7 @@ public class NativeQueries {
         return Some(constructor.apply(head(t)));
     }
 
-    public <T> List<T> getMany(NativeQuery<T> query) {
+    public <T> Collection<T> getMany(NativeQuery<T> query) {
         return getMany(query, Page.NoPaging);
     }
 

@@ -1,17 +1,23 @@
 package fi.solita.utils.query.projection;
 
 import static fi.solita.utils.functional.Collections.newArray;
+import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
+import static fi.solita.utils.functional.Functional.filter;
 import static fi.solita.utils.functional.Functional.head;
+import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.zip;
-import static fi.solita.utils.functional.FunctionalImpl.map;
 import static fi.solita.utils.functional.FunctionalS.range;
+import static fi.solita.utils.functional.Predicates.not;
 import static fi.solita.utils.query.QueryUtils.isRequiredByMetamodel;
 import static fi.solita.utils.query.QueryUtils.isRequiredByQueryAttribute;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
 import static fi.solita.utils.query.projection.ProjectionResultUtil_.convertNullsToEmbeddableWhereRequired;
+import static fi.solita.utils.query.projection.ProjectionResultUtil_.isNoneOrNull;
+import static fi.solita.utils.query.projection.ProjectionResultUtil_.optionGet;
 import static fi.solita.utils.query.projection.ProjectionResultUtil_.postProcessValue;
+import static fi.solita.utils.query.projection.ProjectionResultUtil_.removeNonesAndSomesFromCollections;
 import static fi.solita.utils.query.projection.ProjectionResultUtil_.transformPseudoResultToActualValue;
 import static fi.solita.utils.query.projection.ProjectionResultUtil_.wrapNullsToOptionsWhereAppropriate;
 
@@ -63,7 +69,8 @@ class ProjectionResultUtil {
         }
         Object ret = transformPseudoResultToActualValue.ap(attr).andThen(
                wrapNullsToOptionsWhereAppropriate.ap(attr)).andThen(
-               convertNullsToEmbeddableWhereRequired.ap(attr))
+               convertNullsToEmbeddableWhereRequired.ap(attr)).andThen(
+               removeNonesAndSomesFromCollections.ap(attr))
                .apply(resultFromDb);
         logger.debug("postProcessValue -> {}", ret);
         return ret;
@@ -85,16 +92,16 @@ class ProjectionResultUtil {
     
     static <T> T transformRow(MetaJpaConstructor<?,T,?> projection, Iterable<Object> row) {
         logger.debug("transformRow({},{})", projection, row);
-        row = postProcessRow(projection.getParameters(), row);
+        List<Object> r = newList(postProcessRow(projection.getParameters(), row));
         // at this point there should be no nulls...
-        for (Tuple2<Object, Integer> result: zip(row, range(0))) {
+        for (Tuple2<Object, Integer> result: zip(r, range(0))) {
             if (result._1 == null) {
                 throw new ProjectionResultUtil.NullValueButNonOptionConstructorArgumentException(projection.getClass(), projection.getConstructorParameterTypes().get(result._2), result._2);
             }
         }
-
+        
         @SuppressWarnings("unchecked")
-        T ret = ((MetaJpaConstructor<?,T,Object>)projection).apply(size(row) == 1 ? head(row) : Tuple.of(newArray(Object.class, row)));
+        T ret = ((MetaJpaConstructor<?,T,Object>)projection).apply(size(r) == 1 ? head(r) : Tuple.of(newArray(Object.class, r)));
         logger.debug("transformRow -> {}", ret);
         return ret;
     }
@@ -151,7 +158,12 @@ class ProjectionResultUtil {
     /** Wraps values to Some and nulls to None for optional parameters, leave others as is */
     static Object wrapNullsToOptionsWhereAppropriate(Attribute<?,?> attribute, Object resultFromDb) {
         logger.debug("wrapNullsToOptionsWhereAppropriate({},{})", attribute, resultFromDb);
-        Object ret = isRequiredByQueryAttribute(attribute) || resultFromDb instanceof Option ? resultFromDb : Option.of(resultFromDb);
+        Object ret;
+        if (attribute.isCollection() || isRequiredByQueryAttribute(attribute)) {
+            ret = resultFromDb;
+        } else {
+            ret = Option.of(resultFromDb);
+        }
         logger.debug("wrapNullsToOptionsWhereAppropriate -> {}", ret);
         return ret;
     }
@@ -171,4 +183,40 @@ class ProjectionResultUtil {
         return ret;
     }
     
+    /**
+     * Removes all Option.None, and unwrap Option.Some from collections
+     */
+    static Object removeNonesAndSomesFromCollections(Attribute<?,?> attribute, Object resultFromDb) {
+        logger.debug("removeNonesAndSomesFromCollections({},{})", attribute, resultFromDb);
+        Object ret;
+        if (resultFromDb instanceof List) {
+            ret = newList(map(optionGet, filter(not(isNoneOrNull), (Collection<?>)resultFromDb)));
+        } else if (resultFromDb instanceof SortedSet) {
+            ret = new TreeSet<Object>(newList(map(optionGet, filter(not(isNoneOrNull), (Collection<?>)resultFromDb))));
+        } else if (resultFromDb instanceof Set) {
+            ret = newSet(map(optionGet, filter(not(isNoneOrNull), (Collection<?>)resultFromDb)));
+        } else {
+            ret = resultFromDb;
+        }
+        logger.debug("removeNonesAndSomesFromCollections -> {}", ret);
+        return ret;
+    }
+    
+    static final boolean isNoneOrNull(Object possiblyOption) {
+        if (possiblyOption == null) {
+            return true;
+        } else if (possiblyOption instanceof Option) {
+            return !((Option<?>) possiblyOption).isDefined();
+        } else {
+            return false;
+        }
+    }
+    
+    static final Object optionGet(Object possiblyOption) {
+        if (possiblyOption instanceof Option) {
+            return ((Option<?>) possiblyOption).get();
+        } else {
+            return possiblyOption;
+        }
+    }
 }

@@ -42,6 +42,7 @@ import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.Type;
 
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.query.Order.Direction;
@@ -79,14 +80,14 @@ public abstract class QueryUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E> SingularAttribute<E, Id<E>> id(Class<? extends E> entityClass, EntityManager em) {
+    public static <E,ID_E> SingularAttribute<E, ID_E> id(Class<? extends E> entityClass, EntityManager em) {
         EntityType<?> e = em.getMetamodel().entity(entityClass);
-        return (SingularAttribute<E, Id<E>>) e.getId(e.getIdType().getJavaType());
+        return (SingularAttribute<E, ID_E>) e.getId(e.getIdType().getJavaType());
     }
     
     public static String resolveOrderColumn(ListAttribute<?,?> attr) {
         OrderColumn annotation = ((AnnotatedElement)attr.getJavaMember()).getAnnotation(OrderColumn.class);
-        String specifiedValue = annotation == null ? "" : annotation.name();
+        String specifiedValue = annotation.name();
         return specifiedValue != "" ? specifiedValue : attr.getName() + "_" + "ORDER";
     }
 
@@ -249,7 +250,6 @@ public abstract class QueryUtils {
         } else if (param instanceof JoiningAttribute && param instanceof SingularAttribute) {
             return forall(((JoiningAttribute) param).getAttributes(), QueryUtils_.isRequiredByMetamodel);
         } else if (param instanceof JoiningAttribute) {
-            // joining set/list attributes return sets/lists and are thus considered always required
             return true;
         } else if (param instanceof SingularAttribute && ((SingularAttribute<?,?>)param).getPersistentAttributeType() == PersistentAttributeType.EMBEDDED) {
             if (!((SingularAttribute<?,?>)param).isOptional()) {
@@ -298,6 +298,8 @@ public abstract class QueryUtils {
     public static boolean isRequiredByQueryAttribute(Attribute<?,?> param) {
         if (param == null || unwrap(PseudoAttribute.class, param).isDefined()) {
             return true;
+        } else if (param instanceof JoiningAttribute) {
+            return forall(((JoiningAttribute) param).getAttributes(), QueryUtils_.isRequiredByQueryAttribute);
         }
         
         boolean ret = !unwrap(OptionalAttribute.class, param).isDefined();
@@ -329,5 +331,14 @@ public abstract class QueryUtils {
                             attr instanceof MapAttribute ? path.get((PluralAttribute) attr) :
                                                            path.get((CollectionAttribute) attr);
         return ret;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <R> Type<R> getElementType(Attribute<?, ?> attr) {
+        if (attr instanceof SingularAttribute) {
+            return ((SingularAttribute<?,R>) attr).getType();
+        } else {
+            return ((PluralAttribute<?,?,R>)attr).getElementType();
+        }
     }
 }

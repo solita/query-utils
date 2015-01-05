@@ -3,10 +3,11 @@ package fi.solita.utils.query.projection;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.init;
 import static fi.solita.utils.functional.Functional.last;
-import static fi.solita.utils.query.QueryUtils.join;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.criteria.From;
@@ -18,7 +19,8 @@ import javax.persistence.metamodel.PluralAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.solita.utils.functional.Pair;
+import fi.solita.utils.functional.Tuple;
+import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.NotDistinctable;
 import fi.solita.utils.query.QueryUtils;
@@ -83,24 +85,36 @@ public class ProjectionUtil {
         return from;
     }
 
-    static Pair<? extends From<?,?>, ? extends Attribute<?,?>> doJoins(From<?,?> root, Attribute<?,?> target, JoinType type) {
+    // TODO: needs cleanup...
+    @SuppressWarnings("unchecked")
+    static Tuple3<Map<Attribute<?,?>,From<?, ?>>, From<?, ?>, Attribute<?,?>> doJoins(From<?,?> root, Attribute<?,?> target, JoinType type) {
         logger.debug("doJoins({},{},{})", new Object[] {root, target, type});
-        From<?,?> exp = root;
+        Map<Attribute<?,?>,From<?,?>> actualJoins = new HashMap<Attribute<?, ?>, From<?, ?>>();
+        actualJoins.put(target, root);
+        From<?,?> previous = root;
         for (JoiningAttribute joining: unwrap(JoiningAttribute.class, target)) {
             logger.info("JoiningAttribute detected. Performing joins from: {}", root);
             List<? extends Attribute<?, ?>> attributes = joining.getAttributes();
             for (Attribute<?,?> join: init(attributes)) {
-                if (!(join instanceof PseudoAttribute)) {
-                    logger.debug("Joining from {} to {} with {}", new Object[]{exp, join, type});
-                    exp = join((From<?,?>)exp, join, type);
+                if (unwrap(JoiningAttribute.class, join).isDefined()) {
+                    Tuple3<Map<Attribute<?,?>,From<?,?>>,From<?,?>,Attribute<?,?>> res = doJoins(previous, join, type);
+                    previous = QueryUtils.join(res._2, join, type);
+                    actualJoins.putAll(res._1);
                 } else {
-                    logger.debug("Skipping PseudoAttribute: {}", join);
+                    logger.debug("Joining from {} to {} with {}", new Object[]{previous, join, type});
+                    previous = QueryUtils.join(previous, join, type);
+                    actualJoins.put(join, previous);
+                }
+            }
+            for (Attribute<?,?> join: newList(last(attributes))) {
+                if (unwrap(JoiningAttribute.class, join).isDefined()) {
+                    Tuple3<Map<Attribute<?,?>,From<?,?>>,From<?,?>,Attribute<?,?>> res = doJoins(previous, join, type);
+                    previous = res._2;
+                    actualJoins.putAll(res._1);
                 }
             }
             target = last(attributes);
         }
-        Pair<? extends From<?,?>, ? extends Attribute<?,?>> ret = Pair.of(exp, target);
-        logger.debug("doJoins -> {}", ret);
-        return ret;
+        return (Tuple3<Map<Attribute<?,?>,From<?, ?>>, From<?, ?>, Attribute<?,?>>)(Object)Tuple.of(actualJoins, previous, target);
     }
 }

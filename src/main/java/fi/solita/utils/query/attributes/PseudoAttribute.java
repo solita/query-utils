@@ -23,15 +23,15 @@ public interface PseudoAttribute {
         }
         
         public static <E, T> CollectionAttribute<E, T> literal(Collection<T> value) {
-            return new LiteralCollectionAttribute<E, T>(value);
+            return new LiteralCollectionAttribute<E, T, CollectionAttribute<E, T>>(value);
         }
     
         public static <E, T> SetAttribute<E, T> literal(Set<T> value) {
-            return new LiteralSetAttribute<E, T>(value);
+            return new LiteralSetAttribute<E, T, SetAttribute<E, T>>(value);
         }
     
         public static <E, T> ListAttribute<E, T> literal(List<T> value) {
-            return new LiteralListAttribute<E, T>(value);
+            return new LiteralListAttribute<E, T, ListAttribute<E, T>>(value);
         }
 
         public static <T> SingularAttribute<T, T> self() {

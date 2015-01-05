@@ -36,30 +36,30 @@ public abstract class Related {
     
     
     
-    public static <E,Y,R, A extends Attribute<E,?> & Bindable<Y>>
-    CollectionAttribute<E, R> value(A a1, CollectionAttribute<? super Y,R> a2) {
+    public static <E,Y,R, A1 extends Attribute<E,?> & Bindable<Y>>
+    CollectionAttribute<E, R> collection(A1 a1, CollectionAttribute<? super Y,R> a2) {
         return JoiningAttribute.Constructors.collection(a1, a2);
     }
     
     public static <E,Y, Y2,R, A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
-    CollectionAttribute<E, R> value(A1 a1, A2 a2, CollectionAttribute<? super Y2,R> a3) {
+    CollectionAttribute<E, R> collection(A1 a1, A2 a2, CollectionAttribute<? super Y2,R> a3) {
         return JoiningAttribute.Constructors.collection(a1, a2, a3);
     }
     
     public static <E,Y, Y2, Y3,R, A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
-    CollectionAttribute<E, R> value(A1 a1, A2 a2, A3 a3, CollectionAttribute<? super Y3,R> a4) {
+    CollectionAttribute<E, R> collection(A1 a1, A2 a2, A3 a3, CollectionAttribute<? super Y3,R> a4) {
         return JoiningAttribute.Constructors.collection(a1, a2, a3, a4);
     }
     
-    
+
     
     public static <E,Y,R, A extends Attribute<E,?> & Bindable<Y>>
-    SetAttribute<E, R> value(A a1, SetAttribute<? super Y, R> a2) {
+    SetAttribute<E, R> set(A a1, SetAttribute<? super Y, R> a2) {
         return JoiningAttribute.Constructors.set(a1, a2);
     }
     
     public static <E,Y, Y2,R, A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
-    SetAttribute<E, R> value(A1 a1, A2 a2, SetAttribute<? super Y2,R> a3) {
+    SetAttribute<E, R> set(A1 a1, A2 a2, SetAttribute<? super Y2,R> a3) {
         return JoiningAttribute.Constructors.set(a1, a2, a3);
     }
     
@@ -71,70 +71,161 @@ public abstract class Related {
     
     
     public static <E,Y,R, A extends Attribute<E,?> & Bindable<Y>>
-    ListAttribute<E, R> value(A a1, ListAttribute<? super Y,R> a2) {
+    ListAttribute<E, R> list(A a1, ListAttribute<? super Y,R> a2) {
         return JoiningAttribute.Constructors.list(a1, a2);
     }
     
     public static <E,Y, Y2,R, A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
-    ListAttribute<E, R> value(A1 a1, A2 a2, ListAttribute<? super Y2,R> a3) {
+    ListAttribute<E, R> list(A1 a1, A2 a2, ListAttribute<? super Y2,R> a3) {
         return JoiningAttribute.Constructors.list(a1, a2, a3);
     }
     
     public static <E,Y, Y2,Y3,R, A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
-    ListAttribute<E, R> value(A1 a1, A2 a2, A3 a3, ListAttribute<? super Y3,R> a4) {
+    ListAttribute<E, R> list(A1 a1, A2 a2, A3 a3, ListAttribute<? super Y3,R> a4) {
         return JoiningAttribute.Constructors.list(a1, a2, a3, a4);
     }
 
     
     
-    public static <E,Y,R, A extends Attribute<? super Y,?> & Bindable<R>>
-    CollectionAttribute<E, R> value(CollectionAttribute<E, Y> a1, A a2) {
+    public static <E,Y,Y2, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
+    CollectionAttribute<E, Y2> collection(CollectionAttribute<E, Y> a1, A2 a2) {
         return JoiningAttribute.Constructors.collection(a1, a2);
     }
     
-    public static <E, E2, E3, R>
-    CollectionAttribute<E, R> value(CollectionAttribute<E, E2> a1, SingularAttribute<? super E2, E3> a2, SingularAttribute<? super E3, R> a3) {
-        return projection(a1, Constructors.value(Related.value(a2, a3)));
+    public static <E,Y,Y2,Y3, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
+    CollectionAttribute<E, Y3> collection(CollectionAttribute<E, Y> a1, A2 a2, A3 a3) {
+        return JoiningAttribute.Constructors.collection(a1, a2, a3);
     }
     
-    public static <E, E2, E3, E4, R>
-    CollectionAttribute<E, R> value(CollectionAttribute<E, E2> a1, SingularAttribute<? super E2, E3> a2, SingularAttribute<? super E3, E4> a3, SingularAttribute<? super E4, R> a4) {
-        return projection(a1, Constructors.value(Related.value(a2, a3, a4)));
-    }
-    
-    
-
-    public static <E, E2, R>
-    SetAttribute<E, R> value(SetAttribute<? super E, E2> a1, SingularAttribute<? super E2, R> a2) {
-        return projection(a1, Constructors.value(a2));
-    }
-    
-    public static <E, E2, E3, R>
-    SetAttribute<E, R> value(SetAttribute<? super E, E2> a1, SingularAttribute<? super E2, E3> a2, SingularAttribute<? super E3, R> a3) {
-        return projection(a1, Constructors.value(Related.value(a2, a3)));
-    }
-    
-    public static <E, E2, E3, E4, R>
-    SetAttribute<E, R> value(SetAttribute<? super E, E2> a1, SingularAttribute<? super E2, E3> a2, SingularAttribute<? super E3, E4> a3, SingularAttribute<? super E4, R> a4) {
-        return projection(a1, Constructors.value(Related.value(a2, a3, a4)));
+    public static <E,Y,Y2,Y3,Y4, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>>
+    CollectionAttribute<E, Y4> collection(CollectionAttribute<E, Y> a1, A2 a2, A3 a3, A4 a4) {
+        return JoiningAttribute.Constructors.collection(a1, a2, a3, a4);
     }
     
     
 
-    public static <E, E2, R>
-    ListAttribute<E, R> value(ListAttribute<? super E, E2> a1, SingularAttribute<? super E2, R> a2) {
-        return projection(a1, Constructors.value(a2));
+    public static <E,Y,Y2, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
+    SetAttribute<E, Y2> set(SetAttribute<E, Y> a1, A2 a2) {
+        return JoiningAttribute.Constructors.set(a1, a2);
     }
     
-    public static <E, E2, E3, R>
-    ListAttribute<E, R> value(ListAttribute<? super E, E2> a1, SingularAttribute<? super E2, E3> a2, SingularAttribute<? super E3, R> a3) {
-        return projection(a1, Constructors.value(Related.value(a2, a3)));
+    public static <E,Y,Y2,Y3, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
+    SetAttribute<E, Y3> set(SetAttribute<E, Y> a1, A2 a2, A3 a3) {
+        return JoiningAttribute.Constructors.set(a1, a2, a3);
     }
     
-    public static <E, E2, E3, E4, R>
-    ListAttribute<E, R> value(ListAttribute<? super E, E2> a1, SingularAttribute<? super E2, E3> a2, SingularAttribute<? super E3, E4> a3, SingularAttribute<? super E4, R> a4) {
-        return projection(a1, Constructors.value(Related.value(a2, a3, a4)));
+    public static <E,Y,Y2,Y3,Y4, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>>
+    SetAttribute<E, Y4> set(SetAttribute<E, Y> a1, A2 a2, A3 a3, A4 a4) {
+        return JoiningAttribute.Constructors.set(a1, a2, a3, a4);
     }
+    
+    
+
+    public static <E,Y,Y2, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
+    ListAttribute<E, Y2> list(ListAttribute<E, Y> a1, A2 a2) {
+        return JoiningAttribute.Constructors.list(a1, a2);
+    }
+    
+    public static <E,Y,Y2,Y3, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
+    ListAttribute<E, Y3> list(ListAttribute<E, Y> a1, A2 a2, A3 a3) {
+        return JoiningAttribute.Constructors.list(a1, a2, a3);
+    }
+    
+    public static <E,Y,Y2,Y3,Y4, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>>
+    ListAttribute<E, Y4> list(ListAttribute<E, Y> a1, A2 a2, A3 a3, A4 a4) {
+        return JoiningAttribute.Constructors.list(a1, a2, a3, a4);
+    }
+    
+    
+    
+    
+    
+    public static <E,Y,Y2, A1 extends Attribute<? super E,?> & Bindable<Y>>
+    CollectionAttribute<E, Y2> collection(CollectionAttribute<E, Y> a1, CollectionAttribute<? super Y, Y2> a2) {
+        return JoiningAttribute.Constructors.collection(a1, a2);
+    }
+    
+    public static <E,Y,Y2,Y3, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
+    CollectionAttribute<E, Y3> collection(CollectionAttribute<E, Y> a1, A2 a2, CollectionAttribute<? super Y2,Y3> a3) {
+        return JoiningAttribute.Constructors.collection(a1, a2, a3);
+    }
+    
+    public static <E,Y,Y2,Y3,Y4, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
+    CollectionAttribute<E, Y4> collection(CollectionAttribute<E, Y> a1, A2 a2, A3 a3, CollectionAttribute<? super Y3,Y4> a4) {
+        return JoiningAttribute.Constructors.collection(a1, a2, a3, a4);
+    }
+    
+    
+
+    public static <E,Y,Y2, A1 extends Attribute<? super E,?> & Bindable<Y>>
+    SetAttribute<E, Y2> set(SetAttribute<E, Y> a1, SetAttribute<? super Y,Y2> a2) {
+        return JoiningAttribute.Constructors.set(a1, a2);
+    }
+    
+    public static <E,Y,Y2,Y3, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
+    SetAttribute<E, Y3> set(SetAttribute<E, Y> a1, A2 a2, SetAttribute<? super Y2,Y3> a3) {
+        return JoiningAttribute.Constructors.set(a1, a2, a3);
+    }
+    
+    public static <E,Y,Y2,Y3,Y4, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
+    SetAttribute<E, Y4> set(SetAttribute<E, Y> a1, A2 a2, A3 a3, SetAttribute<? super Y3,Y4> a4) {
+        return JoiningAttribute.Constructors.set(a1, a2, a3, a4);
+    }
+    
+    
+
+    public static <E,Y,Y2, A1 extends Attribute<? super E,?> & Bindable<Y>>
+    ListAttribute<E, Y2> list(ListAttribute<E, Y> a1, ListAttribute<? super Y,Y2> a2) {
+        return JoiningAttribute.Constructors.list(a1, a2);
+    }
+    
+    public static <E,Y,Y2,Y3, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
+    ListAttribute<E, Y3> list(ListAttribute<E, Y> a1, A2 a2, ListAttribute<? super Y2,Y3> a3) {
+        return JoiningAttribute.Constructors.list(a1, a2, a3);
+    }
+    
+    public static <E,Y,Y2,Y3,Y4, A1 extends Attribute<? super E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>>
+    ListAttribute<E, Y4> list(ListAttribute<E, Y> a1, A2 a2, A3 a3, ListAttribute<? super Y3,Y4> a4) {
+        return JoiningAttribute.Constructors.list(a1, a2, a3, a4);
+    }
+
+    
+    
+    
+    public static <E,Y,Y2,Y3>
+    CollectionAttribute<E, Y3> collection(SingularAttribute<E, Y> a1, CollectionAttribute<? super Y,Y2> a2, SingularAttribute<? super Y2,Y3> a3) {
+        return JoiningAttribute.Constructors.collection(a1, a2, a3);
+    }
+    
+    public static <E,Y,Y2,Y3,Y4>
+    CollectionAttribute<E, Y4> collection(SingularAttribute<E, Y> a1, CollectionAttribute<? super Y,Y2> a2, CollectionAttribute<? super Y2,Y3> a3, SingularAttribute<? super Y3,Y4> a4) {
+        return JoiningAttribute.Constructors.collection(a1, a2, a3, a4);
+    }
+    
+    
+
+    public static <E,Y,Y2,Y3>
+    SetAttribute<E, Y3> set(SingularAttribute<E, Y> a1, SetAttribute<? super Y,Y2> a2, SingularAttribute<? super Y2,Y3> a3) {
+        return JoiningAttribute.Constructors.set(a1, a2, a3);
+    }
+    
+    public static <E,Y,Y2,Y3,Y4>
+    SetAttribute<E, Y4> set(SingularAttribute<E, Y> a1, SetAttribute<? super Y,Y2> a2, SetAttribute<? super Y2,Y3> a3, SingularAttribute<? super Y3,Y4> a4) {
+        return JoiningAttribute.Constructors.set(a1, a2, a3, a4);
+    }
+    
+    
+
+    public static <E,Y,Y2,Y3>
+    ListAttribute<E, Y3> list(SingularAttribute<E, Y> a1, ListAttribute<? super Y,Y2> a2, SingularAttribute<? super Y2,Y3> a3) {
+        return JoiningAttribute.Constructors.list(a1, a2, a3);
+    }
+    
+    public static <E,Y,Y2,Y3,Y4>
+    ListAttribute<E, Y4> list(SingularAttribute<E, Y> a1, ListAttribute<? super Y,Y2> a2, ListAttribute<? super Y2,Y3> a3, SingularAttribute<? super Y3,Y4> a4) {
+        return JoiningAttribute.Constructors.list(a1, a2, a3, a4);
+    }
+    
     
     
     

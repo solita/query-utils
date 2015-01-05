@@ -1,6 +1,7 @@
 package fi.solita.utils.query.attributes;
 
 import static fi.solita.utils.functional.Collections.newList;
+import static fi.solita.utils.functional.Functional.exists;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.last;
 
@@ -8,17 +9,22 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.ManagedType;
-import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SetAttribute;
 
+import fi.solita.utils.query.QueryUtils;
+
 @SuppressWarnings("unchecked")
-class JoiningSetAttribute<E, R> extends PluralAttributeProxy<E,Set<R>,R> implements SetAttribute<E,R>, JoiningAttribute {
+class JoiningSetAttribute<E, R, A extends Attribute<E, Set<R>> & Bindable<R>> extends PluralAttributeProxy<E,Set<R>,R,A> implements SetAttribute<E,R>, JoiningAttribute {
     
     private final List<? extends Attribute<?, ?>> attributes;
 
     JoiningSetAttribute(Iterable<Attribute<?,?>> attrs) {
-        super((PluralAttribute<E, Set<R>, R>) last(attrs));
+        super((A) last(attrs), CollectionType.SET, QueryUtils.<R>getElementType(last(attrs)));
+        if (exists(JoiningAttribute.illegalContainedAttribute, attrs)) {
+            throw new IllegalArgumentException("Cannot use attributes of types defined in JoiningAttribute.illegalContainedAttribute within JoiningAttributes!");
+        }
         attributes = newList(attrs);
     }
     

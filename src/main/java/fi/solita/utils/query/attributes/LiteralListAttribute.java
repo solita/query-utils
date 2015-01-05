@@ -5,15 +5,17 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.ListAttribute;
 
 
-class LiteralListAttribute<X, Y> extends PluralAttributeProxy<X, List<Y>, Y> implements ListAttribute<X, Y>, PseudoAttribute {
+class LiteralListAttribute<X, Y, A extends Attribute<X, List<Y>> & Bindable<Y>> extends PluralAttributeProxy<X, List<Y>, Y, A> implements ListAttribute<X, Y>, PseudoAttribute {
 
     private final List<Y> value;
 
     public LiteralListAttribute(List<Y> value) {
-        super(null);
+        super(null, CollectionType.LIST, null);
         this.value = value;
     }
 

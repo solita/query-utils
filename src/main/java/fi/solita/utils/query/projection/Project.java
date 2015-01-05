@@ -4,6 +4,9 @@ package fi.solita.utils.query.projection;
 
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 
+import java.lang.reflect.Constructor;
+import java.util.List;
+
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
@@ -15,6 +18,37 @@ import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 public class Project {
+    
+    public static final <S,T,P> MetaJpaConstructor<S, T, P> recurse(final Function0<? extends MetaJpaConstructor<S, T, P>> f) {
+        return new MetaJpaConstructor<S, T, P>() {
+            private final Function0<? extends MetaJpaConstructor<S, T, P>> c = Function.memoize(f);
+            
+            @Override
+            public List<Class<?>> getConstructorParameterTypes() {
+                return c.apply().getConstructorParameterTypes();
+            }
+
+            @Override
+            public Constructor<T> getMember() {
+                return c.apply().getMember();
+            }
+
+            @Override
+            public T apply(P t) {
+                return c.apply().apply(t);
+            }
+
+            @Override
+            public List<Attribute<?, ?>> getParameters() {
+                return c.apply().getParameters();
+            }
+            @Override
+
+            public List<Integer> getIndexesOfIdWrappingParameters() {
+                return c.apply().getIndexesOfIdWrappingParameters();
+            }
+        };
+    }
 
     public static <E extends IEntity & Identifiable<?>> MetaJpaConstructor<E,Id<E>,Id<E>> id() {
         return Constructors.id();

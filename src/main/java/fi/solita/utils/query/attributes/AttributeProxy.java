@@ -129,20 +129,25 @@ abstract class SingularAttributeProxy<X,Y> extends BindableAttributeProxy<X,Y,Y,
 
 }
 
-abstract class PluralAttributeProxy<X,C,Y> extends BindableAttributeProxy<X,C,Y,PluralAttribute<X,C,Y>> implements PluralAttribute<X,C,Y> {
+abstract class PluralAttributeProxy<X,C,Y,A extends Attribute<X,C> & Bindable<Y>> extends BindableAttributeProxy<X,C,Y,A> implements PluralAttribute<X,C,Y> {
 
-    PluralAttributeProxy(PluralAttribute<X,C,Y> proxyTarget) {
+    private final CollectionType ct;
+    private final Type<Y> et;
+
+    PluralAttributeProxy(A proxyTarget, CollectionType ct, Type<Y> et) {
         super(proxyTarget);
+        this.ct = ct;
+        this.et = et;
     }
 
     @Override
     public CollectionType getCollectionType() {
-        return proxyTarget == null ? null :  proxyTarget.getCollectionType();
+        return ct;
     }
 
     @Override
     public Type<Y> getElementType() {
-        return proxyTarget == null ? null :  proxyTarget.getElementType();
+        return et;
     }
 
     @Override

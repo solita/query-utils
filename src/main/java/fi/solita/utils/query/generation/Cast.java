@@ -38,27 +38,27 @@ public class Cast {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity & Identifiable<?>, T extends IEntity & Identifiable<?>> SingularAttribute<E, T> castSuper(SingularAttribute<? extends E, T> attribute) {
+    public static <E extends IEntity & Identifiable<?>, T> SingularAttribute<E, T> castSuper(SingularAttribute<? extends E, T> attribute) {
         return (SingularAttribute<E, T>) attribute;
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity & Identifiable<?>, T extends IEntity> SingularAttribute<E, T> cast(SingularAttribute<? super E, ? super T> attribute) {
+    public static <E extends IEntity & Identifiable<?>, T> SingularAttribute<E, T> cast(SingularAttribute<? super E, ? super T> attribute) {
         return (SingularAttribute<E, T>) attribute;
     }
     
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity & Identifiable<?>, T extends IEntity & Identifiable<?>> CollectionAttribute<E, T> cast(CollectionAttribute<? super E, ? super T> attribute) {
+    public static <E extends IEntity & Identifiable<?>, T> CollectionAttribute<E, T> cast(CollectionAttribute<? super E, ? super T> attribute) {
         return (CollectionAttribute<E, T>) attribute;
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity & Identifiable<?>, T extends IEntity & Identifiable<?>> SetAttribute<E, T> cast(SetAttribute<? super E, ? super T> attribute) {
+    public static <E extends IEntity & Identifiable<?>, T> SetAttribute<E, T> cast(SetAttribute<? super E, ? super T> attribute) {
         return (SetAttribute<E, T>) attribute;
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity & Identifiable<?>, T extends IEntity & Identifiable<?>> ListAttribute<E, T> cast(ListAttribute<? super E, ? super T> attribute) {
+    public static <E extends IEntity & Identifiable<?>, T> ListAttribute<E, T> cast(ListAttribute<? super E, ? super T> attribute) {
         return (ListAttribute<E, T>) attribute;
     }
 }

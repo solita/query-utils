@@ -91,21 +91,21 @@ public class QueryUtilsTest extends QueryTestBase {
     }
     
     @Test
-    public void metamodel_joiningToSetListAttributeIsAlwaysRequired() {
-        assertTrue("set",  isRequiredByMetamodel(Related.value(Municipality_.mandatorySelfReference, Municipality_.emps)));
-        assertTrue("set",  isRequiredByMetamodel(Related.value(Employee_.optionalMunicipality, Municipality_.emps)));
+    public void metamodel_joiningToSetListAttributeIsRequiredWhenLastIsRequired() {
+        assertTrue("set",  isRequiredByMetamodel(Related.set(Municipality_.mandatorySelfReference, Municipality_.emps)));
+        assertTrue("set",  isRequiredByMetamodel(Related.set(Employee_.optionalMunicipality, Municipality_.emps)));
         
-        assertTrue("list", isRequiredByMetamodel(Related.value(Employee_.mandatoryDepartment, Department_.employees)));
-        assertTrue("list", isRequiredByMetamodel(Related.value(Employee_.optionalDepartment, Department_.employees)));
+        assertTrue("list", isRequiredByMetamodel(Related.list(Employee_.mandatoryDepartment, Department_.employees)));
+        assertTrue("list", isRequiredByMetamodel(Related.list(Employee_.optionalDepartment, Department_.employees)));
     }
     
     @Test
     public void metamodel_joiningFromSetListAttributeIsAlwaysRequired() {
-        assertTrue("set",  isRequiredByMetamodel(Related.value(Municipality_.emps, Employee_.mandatoryName)));
-        assertTrue("set",  isRequiredByMetamodel(Related.value(Municipality_.emps, Employee_.optionalSalary)));
+        assertTrue("set",  isRequiredByMetamodel(Related.set(Municipality_.emps, Employee_.mandatoryName)));
+        assertTrue("set",  isRequiredByMetamodel(Related.set(Municipality_.emps, Employee_.optionalSalary)));
         
-        assertTrue("list", isRequiredByMetamodel(Related.value(Department_.employees, Employee_.mandatoryName)));
-        assertTrue("list", isRequiredByMetamodel(Related.value(Department_.employees, Employee_.optionalSalary)));
+        assertTrue("list", isRequiredByMetamodel(Related.list(Department_.employees, Employee_.mandatoryName)));
+        assertTrue("list", isRequiredByMetamodel(Related.list(Department_.employees, Employee_.optionalSalary)));
     }
     
     @Test
@@ -155,7 +155,7 @@ public class QueryUtilsTest extends QueryTestBase {
     }
     
     @Test
-    public void queryAttribute_joiningAttributeWithoutWrappedAttributesIsAlwaysRequired() {
+    public void queryAttribute_joiningAttribute() {
         assertTrue("id",          isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.id)));
         assertTrue("value",       isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.mandatoryDepName)));
         assertTrue("entity",      isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.mandatorySelfReference)));
@@ -170,10 +170,10 @@ public class QueryUtilsTest extends QueryTestBase {
         assertTrue("entity",      isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepMunicipality)));
         assertTrue("embeddable",  isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepReport)));
         
-        assertTrue("set",         isRequiredByQueryAttribute(Related.value(Municipality_.mandatorySelfReference, Municipality_.emps)));
-        assertTrue("list",        isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.employees)));
-        assertTrue("set",         isRequiredByQueryAttribute(Related.value(Employee_.optionalMunicipality, Municipality_.emps)));
-        assertTrue("list",        isRequiredByQueryAttribute(Related.value(Employee_.optionalDepartment, Department_.employees))); 
+        assertTrue("set",         isRequiredByQueryAttribute(Related.set(Municipality_.mandatorySelfReference, Municipality_.emps)));
+        assertTrue("list",        isRequiredByQueryAttribute(Related.list(Employee_.mandatoryDepartment, Department_.employees)));
+        assertTrue("set",         isRequiredByQueryAttribute(Related.set(Employee_.optionalMunicipality, Municipality_.emps)));
+        assertTrue("list",        isRequiredByQueryAttribute(Related.list(Employee_.optionalDepartment, Department_.employees))); 
     }
     
     @Test

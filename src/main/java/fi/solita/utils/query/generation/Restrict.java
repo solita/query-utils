@@ -27,6 +27,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Id;
+import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.attributes.RestrictingAttribute;
 
 public class Restrict {
@@ -313,7 +314,7 @@ public class Restrict {
      */
     public <E> CriteriaQuery<E> excluding(Iterable<? extends Id<? super E>> idsToExclude, CriteriaQuery<E> query) {
         Path<E> selectionPath = resolveSelectionPath(query);
-        Path<Id<E>> idPath = selectionPath.get(id(selectionPath.getJavaType(), em.apply()));
+        Path<Id<E>> idPath = selectionPath.get(QueryUtils.<E,Id<E>>id(selectionPath.getJavaType(), em.apply()));
         Predicate predicate = cb().not(inExpr(query, idPath, idsToExclude, em.apply().getCriteriaBuilder()));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
@@ -333,7 +334,7 @@ public class Restrict {
      */
     public <E> CriteriaQuery<E> including(Iterable<? extends Id<? super E>> idsToInclude, CriteriaQuery<E> query) {
         Path<E> selectionPath = resolveSelectionPath(query);
-        Path<Id<E>> idPath = selectionPath.get(id(selectionPath.getJavaType(), em.apply()));
+        Path<Id<E>> idPath = selectionPath.get(QueryUtils.<E,Id<E>>id(selectionPath.getJavaType(), em.apply()));
         Predicate predicate = inExpr(query, idPath, idsToInclude, em.apply().getCriteriaBuilder());
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }

@@ -5,15 +5,17 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.SetAttribute;
 
 
-class LiteralSetAttribute<X, Y> extends PluralAttributeProxy<X, Set<Y>, Y> implements SetAttribute<X, Y>, PseudoAttribute {
+class LiteralSetAttribute<X, Y, A extends Attribute<X, Set<Y>> & Bindable<Y>> extends PluralAttributeProxy<X, Set<Y>, Y, A> implements SetAttribute<X, Y>, PseudoAttribute {
 
     private final Set<Y> value;
 
     public LiteralSetAttribute(Set<Y> value) {
-        super(null);
+        super(null, CollectionType.SET, null);
         this.value = value;
     }
 
