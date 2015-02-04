@@ -176,15 +176,17 @@ public abstract class QueryUtils {
     }
 
     public static final Predicate inExpr(CriteriaQuery<?> q, Expression<?> path, Iterable<?> values, CriteriaBuilder cb) {
-        if (Table.isSupported(values)) {
+        List<?> vals = newList(values);
+        // keep default in-expressions for small sets since oracle performs waaaaaaay better...
+        if (vals.size() > 5 && Table.isSupported(vals)) {
             Subquery<Long> tableselect = q.subquery(Long.class);
             Root<Table> root = tableselect.from(Table.class);
             tableselect.select(cb.function("dynamic_sampling", Long.class));
-            tableselect.where(cb.equal(cb.literal(new Table.Value(newList(values))), root.get(Table_.commentEndWithBindParameter)));
+            tableselect.where(cb.equal(cb.literal(new Table.Value(vals)), root.get(Table_.commentEndWithBindParameter)));
             return path.in(tableselect);
         } else {
             // oracle fails if more than 1000 parameters
-            List<? extends List<?>> groups = newList(grouped(values, 1000));
+            List<? extends List<?>> groups = newList(grouped(vals, 1000));
             List<Predicate> preds = newListOfSize(groups.size());
             for (List<?> g: groups) {
                 preds.add(path.in(g));
