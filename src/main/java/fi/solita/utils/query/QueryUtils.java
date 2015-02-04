@@ -177,8 +177,11 @@ public abstract class QueryUtils {
 
     public static final Predicate inExpr(CriteriaQuery<?> q, Expression<?> path, Iterable<?> values, CriteriaBuilder cb) {
         List<?> vals = newList(values);
+        if (vals.size() == 1) {
+            return cb.equal(path, head(values));
+        }
         // keep default in-expressions for small sets since oracle performs waaaaaaay better...
-        if (vals.size() > 5 && Table.isSupported(vals)) {
+        else if (vals.size() > 5 && Table.isSupported(vals)) {
             Subquery<Long> tableselect = q.subquery(Long.class);
             Root<Table> root = tableselect.from(Table.class);
             tableselect.select(cb.function("dynamic_sampling", Long.class));
