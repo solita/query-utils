@@ -114,8 +114,8 @@ public class QLQueriesTest extends QueryTestBase {
         Department dep2 = new Department();
         persist(dep1, dep2);
 
-        assertEquals(newList(dep1.getId()), newList(map(dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1)), Department_.getId)));
-        assertEquals(newList(dep2.getId()), newList(map(dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1).nextPage()), Department_.getId)));
+        assertEquals(newList(dep1.getId()), newList(map(Department_.getId, dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1)))));
+        assertEquals(newList(dep2.getId()), newList(map(Department_.getId, dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1).nextPage()))));
     }
 
 }

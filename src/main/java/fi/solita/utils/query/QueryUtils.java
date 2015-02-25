@@ -6,10 +6,10 @@ import static fi.solita.utils.functional.Collections.newListOfSize;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.isEmpty;
-import static fi.solita.utils.functional.FunctionalImpl.flatMap;
-import static fi.solita.utils.functional.FunctionalImpl.forall;
-import static fi.solita.utils.functional.FunctionalImpl.grouped;
-import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.Functional.flatMap;
+import static fi.solita.utils.functional.Functional.forall;
+import static fi.solita.utils.functional.Functional.grouped;
+import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
 
 import java.lang.reflect.AnnotatedElement;
@@ -157,7 +157,7 @@ public abstract class QueryUtils {
     
     public static final <E extends IEntity> CriteriaQuery<E> applyOrder(CriteriaQuery<E> query, final Path<E> selection, Iterable<? extends fi.solita.utils.query.Order<? super E, ?>> orderings, final CriteriaBuilder cb) {
         if (!isEmpty(orderings)) {
-            query.orderBy(newList(map(orderings, QueryUtils_.<E>order2jpaOrder().ap(cb, selection))));
+            query.orderBy(newList(map(QueryUtils_.<E>order2jpaOrder().ap(cb, selection), orderings)));
         } else {
             applyOrder(query, selection, cb);
         }
@@ -189,7 +189,7 @@ public abstract class QueryUtils {
             return path.in(tableselect);
         } else {
             // oracle fails if more than 1000 parameters
-            List<? extends List<?>> groups = newList(grouped(vals, 1000));
+            List<? extends List<?>> groups = newList(grouped(1000, vals));
             List<Predicate> preds = newListOfSize(groups.size());
             for (List<?> g: groups) {
                 preds.add(path.in(g));
@@ -225,12 +225,12 @@ public abstract class QueryUtils {
     }
     
     public static Iterable<Join<?,?>> getAllJoins(From<?, ?> parent) {
-        return flatMap(parent.getJoins(), new Transformer<Join<?,?>,Iterable<Join<?,?>>>() {
+        return flatMap(new Transformer<Join<?,?>,Iterable<Join<?,?>>>() {
             @Override
             public Iterable<Join<?, ?>> transform(Join<?, ?> source) {
                 return cons(source, getAllJoins(source));
             }
-        });
+        }, parent.getJoins());
     }
 
     public static void checkOptionalAttributes(Attribute<?,?> param) {
@@ -253,7 +253,7 @@ public abstract class QueryUtils {
         if (param instanceof OptionalAttribute) {
             return false;
         } else if (param instanceof JoiningAttribute && param instanceof SingularAttribute) {
-            return forall(((JoiningAttribute) param).getAttributes(), QueryUtils_.isRequiredByMetamodel);
+            return forall(QueryUtils_.isRequiredByMetamodel, ((JoiningAttribute) param).getAttributes());
         } else if (param instanceof JoiningAttribute) {
             return true;
         } else if (param instanceof SingularAttribute && ((SingularAttribute<?,?>)param).getPersistentAttributeType() == PersistentAttributeType.EMBEDDED) {
@@ -286,7 +286,7 @@ public abstract class QueryUtils {
             MetaJpaConstructor<?,?,?> c = ((AdditionalQueryPerformingAttribute)param).getConstructor();
             if (c instanceof TransparentProjection) {
                 // optionality of a TransparentProjection propagates
-                ret &= forall(c.getParameters(), QueryUtils_.isRequiredByMetamodel);
+                ret &= forall(QueryUtils_.isRequiredByMetamodel, c.getParameters());
             }
         }
         
@@ -304,13 +304,13 @@ public abstract class QueryUtils {
         if (param == null || unwrap(PseudoAttribute.class, param).isDefined()) {
             return true;
         } else if (param instanceof JoiningAttribute) {
-            return forall(((JoiningAttribute) param).getAttributes(), QueryUtils_.isRequiredByQueryAttribute);
+            return forall(QueryUtils_.isRequiredByQueryAttribute, ((JoiningAttribute) param).getAttributes());
         }
         
         boolean ret = !unwrap(OptionalAttribute.class, param).isDefined();
         
         if (param instanceof AdditionalQueryPerformingAttribute && param instanceof SingularAttribute) {
-            ret &= forall(((AdditionalQueryPerformingAttribute)param).getConstructor().getParameters(), QueryUtils_.isRequiredByQueryAttribute);
+            ret &= forall(QueryUtils_.isRequiredByQueryAttribute, ((AdditionalQueryPerformingAttribute)param).getConstructor().getParameters());
         }
         
         return ret;

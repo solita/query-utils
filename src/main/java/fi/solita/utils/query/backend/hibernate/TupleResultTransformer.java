@@ -33,7 +33,7 @@ public final class TupleResultTransformer implements ResultTransformer {
         if (aliases.length == 2) {
             return Pair.of(m.get(a[0]), m.get(a[1]));
         } else {
-            return Tuple.of(newArray(Object.class, map(a, getter(m))));
+            return Tuple.of(newArray(Object.class, map(getter(m), a)));
         }
     }
     

@@ -4,7 +4,7 @@ import static fi.solita.utils.functional.Collections.emptyList;
 import static fi.solita.utils.functional.Collections.emptySet;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
-import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.query.projection.Select.literal;
 import static org.junit.Assert.assertEquals;
 
@@ -92,7 +92,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         long queryCount = getQueryCount();
         
         Set<Dto> dtos = dao.get(query.all(Municipality.class), Project.value(Related.projection(Municipality_.emps, Dto_.c1(literal(ID._), Employee_.id))));
-        assertEquals(newSet(emp1.getId(), emp2.getId()), newSet(map(dtos, Dto_.value)));
+        assertEquals(newSet(emp1.getId(), emp2.getId()), newSet(map(Dto_.value, dtos)));
         
         assertEquals(2, getQueryCount() - queryCount);
     }
@@ -144,7 +144,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         long queryCount = getQueryCount();
         
         List<Dto> dtos = dao.get(query.all(Department.class), Project.value(Related.projection(Department_.employees, Dto_.c1(literal(ID._), Employee_.id))));
-        assertEquals(newList(emp1.getId(), emp2.getId()), newList(map(dtos, Dto_.value)));
+        assertEquals(newList(emp1.getId(), emp2.getId()), newList(map(Dto_.value, dtos)));
         
         assertEquals(2, getQueryCount() - queryCount);
     }

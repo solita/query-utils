@@ -25,9 +25,9 @@ import static fi.solita.utils.functional.Functional.mkString;
 import static fi.solita.utils.functional.Functional.zip;
 import static fi.solita.utils.functional.Functional.zipWithIndex;
 import static fi.solita.utils.functional.FunctionalA.concat;
-import static fi.solita.utils.functional.FunctionalImpl.filter;
-import static fi.solita.utils.functional.FunctionalImpl.flatMap;
-import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.Functional.filter;
+import static fi.solita.utils.functional.Functional.flatMap;
+import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.functional.Transformers.prepend;
@@ -87,11 +87,11 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
         
         Iterable<ExecutableElement> elements = element2Constructors.apply(source);
         if (options.onlyPublicMembers()) {
-            elements = filter(elements, publicElement);
+            elements = filter(publicElement, elements);
         }
 
         Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = constructorGen.ap(new Helpers.EnvDependent(processingEnv), options);
-        return flatMap(zipWithIndex(elements), singleElementTransformer);
+        return flatMap(singleElementTransformer, zipWithIndex(elements));
     }
     
     static Transformer<CharSequence,String> helpersImportTypes = new Transformer<CharSequence,String>() {
@@ -172,11 +172,11 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             int argCount = constructor.getParameters().size();
             String returnTypeImported = importTypes(elementGenericQualifiedName(enclosingElement));
 
-            List<String> argumentTypes = newList(map(constructor.getParameters(), qualifiedName.andThen(boxed).andThen(helpersImportTypes)));
-            List<String> argumentNames = argCount == 0 ? Collections.<String>newList() : newList(map(range(1, argCount), toString.andThen(prepend("$p"))));
-            List<String> attributeNames = argCount == 0 ? Collections.<String>newList() : newList(map(range(1, argCount), toString.andThen(prepend("$a"))));
+            List<String> argumentTypes = newList(map(qualifiedName.andThen(boxed).andThen(helpersImportTypes), constructor.getParameters()));
+            List<String> argumentNames = argCount == 0 ? Collections.<String>newList() : newList(map(toString.andThen(prepend("$p")), range(1, argCount)));
+            List<String> attributeNames = argCount == 0 ? Collections.<String>newList() : newList(map(toString.andThen(prepend("$a")), range(1, argCount)));
             List<? extends TypeParameterElement> relevantTypeParamsForConstructor = newList(relevantTypeParams(constructor));
-            List<String> relevantTypeParams = newList(map(relevantTypeParamsForConstructor, typeParameter2String));
+            List<String> relevantTypeParams = newList(map(typeParameter2String, relevantTypeParamsForConstructor));
             
             boolean isPrivate = isPrivate(constructor);
             boolean throwsChecked = helper.throwsCheckedExceptions(constructor);
@@ -192,15 +192,15 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             Iterable<String> tryCatchBlock = isPrivate || throwsChecked
                 ? concat(
                     Some("try {"),
-                    map(tryBlock, padding),
+                    map(padding, tryBlock),
                     catchBlock,
                     Some("}"))
                 : tryBlock;
                     
             Iterable<String> applyBlock = concat(
                 Some("@Override"),
-                Some("public " + returnTypeImported + " apply(" + mkString(", ", map(zip(argumentTypes, argumentNames), joinWithSpace)) + ") {"),
-                map(tryCatchBlock, padding),
+                Some("public " + returnTypeImported + " apply(" + mkString(", ", map(joinWithSpace, zip(argumentTypes, argumentNames))) + ") {"),
+                map(padding, tryCatchBlock),
                 Some("}")
             );
             
@@ -211,7 +211,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             );
             Iterable<String> getIndexesOfIdWrappingParametersBlock = newList(
                 "public " + importType(List.class) + "<Integer> getIndexesOfIdWrappingParameters() {",
-                padding.apply("return " + importType(Arrays.class) + ".<Integer>asList(" + mkString(", ", map(idIndexes, toString)) + ");"),
+                padding.apply("return " + importType(Arrays.class) + ".<Integer>asList(" + mkString(", ", map(toString, idIndexes)) + ");"),
                 "}"
             );
             
@@ -224,12 +224,12 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             );
 
             return concat(
-                Some(declaration + "(" + mkString(", ", map(zip(map(attributeTypes, prepend("final ")), attributeNames), joinWithSpace)) + ") {"),
-                map(concat(
+                Some(declaration + "(" + mkString(", ", map(joinWithSpace, zip(map(prepend("final "), attributeTypes), attributeNames))) + ") {"),
+                map(padding, concat(
                     Some("return new " + fundef + "(" + mkString(", ", cons(importTypes(enclosingElementQualifiedName) + ".class", reflectionInvokationArgs(parameterTypesAsClasses(constructor, relevantTypeParamsForConstructor)))) + ") {"),
-                    map(body, padding),
+                    map(padding, body),
                     Some("};")
-                ), padding),
+                )),
                 Some("}"),
                 EmptyLine
             );

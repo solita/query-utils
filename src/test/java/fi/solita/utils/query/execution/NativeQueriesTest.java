@@ -119,7 +119,7 @@ public class NativeQueriesTest extends QueryTestBase {
         Department dep2 = new Department();
         persist(dep1, dep2);
 
-        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(dao.getMany(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))), Department_.getId)));
+        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(Department_.getId, dao.getMany(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))))));
     }
 
     @Test
@@ -128,8 +128,8 @@ public class NativeQueriesTest extends QueryTestBase {
         Department dep2 = new Department();
         persist(dep1, dep2);
 
-        assertEquals(newList(dep1.getId()), newList(map(dao.getMany(NativeQuery.of("select * from Department order by id").returns(typeProvider.type(Department.class)), Page.FIRST.withSize(1)), Department_.getId)));
-        assertEquals(newList(dep2.getId()), newList(map(dao.getMany(NativeQuery.of("select * from Department order by id").returns(typeProvider.type(Department.class)), Page.FIRST.withSize(1).nextPage()), Department_.getId)));
+        assertEquals(newList(dep1.getId()), newList(map(Department_.getId, dao.getMany(NativeQuery.of("select * from Department order by id").returns(typeProvider.type(Department.class)), Page.FIRST.withSize(1)))));
+        assertEquals(newList(dep2.getId()), newList(map(Department_.getId, dao.getMany(NativeQuery.of("select * from Department order by id").returns(typeProvider.type(Department.class)), Page.FIRST.withSize(1).nextPage()))));
     }
 
     @Test

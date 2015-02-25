@@ -4,11 +4,10 @@ import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.mkString;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.metamodel.Attribute;
 
-import fi.solita.utils.meta.MetaConstructor;
-import fi.solita.utils.meta.MetaConstructors;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple0;
 import fi.solita.utils.functional.Tuple10;
@@ -21,7 +20,6 @@ import fi.solita.utils.functional.Tuple16;
 import fi.solita.utils.functional.Tuple17;
 import fi.solita.utils.functional.Tuple18;
 import fi.solita.utils.functional.Tuple19;
-import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.functional.Tuple20;
 import fi.solita.utils.functional.Tuple21;
 import fi.solita.utils.functional.Tuple22;
@@ -32,6 +30,8 @@ import fi.solita.utils.functional.Tuple6;
 import fi.solita.utils.functional.Tuple7;
 import fi.solita.utils.functional.Tuple8;
 import fi.solita.utils.functional.Tuple9;
+import fi.solita.utils.meta.MetaConstructor;
+import fi.solita.utils.meta.MetaConstructors;
 
 public interface MetaJpaConstructor<OWNER,R,PARAMS> extends MetaConstructor<PARAMS,R> {
     public static abstract class C0<OWNER,R> extends MetaConstructors.C0<R> implements MetaJpaConstructor<OWNER,R,Tuple0> {
@@ -44,7 +44,7 @@ public interface MetaJpaConstructor<OWNER,R,PARAMS> extends MetaConstructor<PARA
             super(clazz, argClasses);
         }
     }
-    public static abstract class C2<OWNER,T1,T2,R> extends MetaConstructors.C2<T1,T2,R> implements MetaJpaConstructor<OWNER,R,Tuple2<T1,T2>> {
+    public static abstract class C2<OWNER,T1,T2,R> extends MetaConstructors.C2<T1,T2,R> implements MetaJpaConstructor<OWNER,R,Map.Entry<T1,T2>> {
         public C2(Class<?> clazz, Class<?>... argClasses) {
             super(clazz, argClasses);
         }
@@ -155,7 +155,7 @@ public interface MetaJpaConstructor<OWNER,R,PARAMS> extends MetaConstructor<PARA
     
     public static class Helper {
         public static final String toString(MetaJpaConstructor<?,?,?> c) {
-            return className.apply(c.getClass()) + "(" + mkString(",", map(c.getConstructorParameterTypes(), className)) + ")";
+            return className.apply(c.getClass()) + "(" + mkString(",", map(className, c.getConstructorParameterTypes())) + ")";
         }
         
         public static final Transformer<Class<?>,String> className = new Transformer<Class<?>,String>() {

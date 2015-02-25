@@ -39,7 +39,7 @@ public class QLQueries {
     }
 
     public <T, P> P get(QLQuery<T> query, Apply<T, P> constructor) {
-        return head(map(find(query), constructor));
+        return head(map(constructor, find(query)));
     }
 
     public <T> Option<T> find(QLQuery<T> query) {
@@ -47,7 +47,7 @@ public class QLQueries {
     }
 
     public <T, P> Option<P> find(QLQuery<T> query, Apply<T, P> constructor) {
-        return headOption(map(queryExecutor.find(query), constructor));
+        return headOption(map(constructor, queryExecutor.find(query)));
     }
 
     public <T> Option<T> findFirst(QLQuery<T> query) {
@@ -75,6 +75,6 @@ public class QLQueries {
     }
 
     public <T, P> List<P> getMany(QLQuery<T> query, Page page, Apply<T, P> constructor) {
-        return newList(map(getMany(query, page), constructor));
+        return newList(map(constructor, getMany(query, page)));
     }
 }

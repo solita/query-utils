@@ -3,10 +3,9 @@ package fi.solita.utils.query.projection;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.last;
+import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Functional.sort;
 import static fi.solita.utils.functional.Functional.zip;
-import static fi.solita.utils.functional.FunctionalA.head;
-import static fi.solita.utils.functional.FunctionalImpl.map;
-import static fi.solita.utils.functional.FunctionalImpl.sort;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 
@@ -43,7 +42,7 @@ public class EmbeddableUtil {
     private static final Logger logger = LoggerFactory.getLogger(EmbeddableUtil.class);
 
     static Iterable<? extends Selection<?>> breakEmbeddableToParts(Metamodel metamodel, Bindable<?> target, final Path<?> source) {
-        return map(getEmbeddableAttributes(target, metamodel), QueryUtils_.get.ap(source));
+        return map(QueryUtils_.get.ap(source), getEmbeddableAttributes(target, metamodel));
     }
     
     static Object instantiate(Class<?> clazz) {
@@ -133,7 +132,7 @@ public class EmbeddableUtil {
     
     static List<? extends Attribute<?,?>> getEmbeddableAttributes(Bindable<?> attribute, Metamodel metamodel) {
         logger.debug("getEmbeddableAttributes({},{})", attribute, metamodel);
-        List<? extends Attribute<?,?>> ret = newList(sort(EmbeddableUtil.getEmbeddableType(attribute, metamodel).getAttributes(), attributeByName));
+        List<? extends Attribute<?,?>> ret = newList(sort(attributeByName, EmbeddableUtil.getEmbeddableType(attribute, metamodel).getAttributes()));
         logger.debug("getEmbeddableAttributes -> {}", ret);
         return ret;
     }

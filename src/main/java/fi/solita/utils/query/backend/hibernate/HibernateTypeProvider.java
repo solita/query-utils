@@ -2,11 +2,11 @@ package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newMap;
-import static fi.solita.utils.functional.FunctionalImpl.filter;
-import static fi.solita.utils.functional.FunctionalImpl.find;
-import static fi.solita.utils.functional.FunctionalImpl.flatMap;
-import static fi.solita.utils.functional.FunctionalImpl.groupBy;
-import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.Functional.filter;
+import static fi.solita.utils.functional.Functional.find;
+import static fi.solita.utils.functional.Functional.flatMap;
+import static fi.solita.utils.functional.Functional.groupBy;
+import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 
@@ -65,11 +65,11 @@ public class HibernateTypeProvider implements TypeProvider {
     private Map<Class<?>,String> typesByUniqueReturnedClass() {
         if (typesByUniqueReturnedClassCache == null) {
             Iterable<ClassMetadata>                    allClassMetadata           = em.apply().unwrap(Session.class).getSessionFactory().getAllClassMetadata().values();
-            Map<String, List<org.hibernate.type.Type>> allPropertyTypesByName     = groupBy(flatMap(allClassMetadata, HibernateTypeProvider_.classMetadata2propertyTypes), HibernateTypeProvider_.type2Name);
-            Iterable<org.hibernate.type.Type>          allDifferentPropertyTypes  = map(allPropertyTypesByName.values(), head);
-            Iterable<List<org.hibernate.type.Type>>    typesByReturnedClass       = groupBy(allDifferentPropertyTypes, HibernateTypeProvider_.type2ReturnedClass).values();
-            Iterable<List<org.hibernate.type.Type>>    typesUniqueByReturnedClass = filter(typesByReturnedClass, size.andThen(Predicates.equalTo(1l)));
-            typesByUniqueReturnedClassCache = newMap(map(typesUniqueByReturnedClass, head.andThen(HibernateTypeProvider_.type2ReturnedClassAndNamePair)));
+            Map<String, List<org.hibernate.type.Type>> allPropertyTypesByName     = groupBy(HibernateTypeProvider_.type2Name, flatMap(HibernateTypeProvider_.classMetadata2propertyTypes, allClassMetadata));
+            Iterable<org.hibernate.type.Type>          allDifferentPropertyTypes  = map(head, allPropertyTypesByName.values());
+            Iterable<List<org.hibernate.type.Type>>    typesByReturnedClass       = groupBy(HibernateTypeProvider_.type2ReturnedClass, allDifferentPropertyTypes).values();
+            Iterable<List<org.hibernate.type.Type>>    typesUniqueByReturnedClass = filter(size.andThen(Predicates.equalTo(1l)), typesByReturnedClass);
+            typesByUniqueReturnedClassCache = newMap(map(head.andThen(HibernateTypeProvider_.type2ReturnedClassAndNamePair), typesUniqueByReturnedClass));
         }
         return typesByUniqueReturnedClassCache;
     }
@@ -141,7 +141,7 @@ public class HibernateTypeProvider implements TypeProvider {
         }
         
         // no luck with standard stuff, try searching a unique match from all entity metadata
-        for (String typeName: find(typesByUniqueReturnedClass(), clazz)) {
+        for (String typeName: find(clazz, typesByUniqueReturnedClass())) {
             org.hibernate.type.Type heuristicType = typeHelper.heuristicType(typeName);
             if (heuristicType != null) {
                 return new HibernateType<T>(heuristicType);

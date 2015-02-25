@@ -10,9 +10,9 @@ import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
+import fi.solita.utils.functional.Apply;
 import fi.solita.utils.meta.CommonMetadataProcessor;
 import fi.solita.utils.meta.generators.Generator;
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.query.meta.generators.ConstructorsAsJpaProjections;
 
 @SupportedAnnotationTypes("*")

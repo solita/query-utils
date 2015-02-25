@@ -1,10 +1,18 @@
 package fi.solita.utils.query;
 
-import javax.persistence.*;
+import javax.persistence.Access;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.GenericGenerator;
 
-import fi.solita.utils.functional.*;
+import fi.solita.utils.functional.Option;
 
 
 @javax.persistence.Entity

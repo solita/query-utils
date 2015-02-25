@@ -78,14 +78,14 @@ class ProjectionResultUtil {
     
     static Iterable<Object> postProcessRow(List<Attribute<?,?>> projectionParameters, Iterable<Object> row) {
         logger.debug("postProcessRow({},{})", projectionParameters, row);
-        Iterable<Object> ret = map(zip(projectionParameters, row), postProcessValue);
+        Iterable<Object> ret = map(postProcessValue, zip(projectionParameters, row));
         logger.debug("postProcessRow -> {}", ret);
         return ret;
     }
 
     static <R> Iterable<R> transformAllRows(MetaJpaConstructor<?, R, ?> projection, Iterable<Iterable<Object>> rows) {
         logger.debug("transformAllRows({},{})", projection, rows);
-        Iterable<R> ret = map(rows, ProjectionResultUtil_.<R>transformRow().ap(projection));
+        Iterable<R> ret = map(ProjectionResultUtil_.<R>transformRow().ap(projection), rows);
         logger.debug("transformAllRows -> {}", ret);
         return ret;
     }

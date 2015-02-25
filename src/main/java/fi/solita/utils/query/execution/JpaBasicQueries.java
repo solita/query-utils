@@ -79,7 +79,7 @@ public class JpaBasicQueries {
         q.multiselect(projectionSupport.prepareProjectingQuery(Project.id(), selection));
         List<Object> results = queryExecutor.getMany(q, Page.NoPaging);
 
-        Collection<Id<E>> idList = projectionSupport.finalizeProjectingQuery(Project.<E>id(), map(results, ProjectionUtil_.objectToObjectList));
+        Collection<Id<E>> idList = projectionSupport.finalizeProjectingQuery(Project.<E>id(), map(ProjectionUtil_.objectToObjectList, results));
         if (!idList.isEmpty()) {
             em.apply().createQuery("delete from " + resolveSelection(query).getJavaType().getName() + " e where e.id in(:idList)").setParameter("idList", idList).executeUpdate();
         }
@@ -151,6 +151,6 @@ public class JpaBasicQueries {
         query.where(em.apply().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em.apply())), entity.getId()));
         query.select(((Join<?,T>)QueryUtils.join((Root<?>)root, (Attribute<?,?>)relation, JoinType.INNER)).get(id));
         
-        return map(queryExecutor.getMany(query, Page.NoPaging), JpaBasicQueries_.<T>toProxy().ap(this));
+        return map(JpaBasicQueries_.<T>toProxy().ap(this), queryExecutor.getMany(query, Page.NoPaging));
     }
 }

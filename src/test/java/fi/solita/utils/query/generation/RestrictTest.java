@@ -54,10 +54,9 @@ public class RestrictTest extends QueryTestBase {
         assertEquals("find single matching", dep1.getId(),
             dao.get(restrict.equals(Department_.mandatoryDepName, Some("a"),
                         query.all(Department.class))).getId());
-        assertEquals("find multiple matching", newSet(dep2.getId(), dep3.getId()), newSet(map(
+        assertEquals("find multiple matching", newSet(dep2.getId(), dep3.getId()), newSet(map(Department_.getId,
             dao.getMany(restrict.equals(Department_.mandatoryDepName, Some("b"),
-                        query.all(Department.class))),
-                        Department_.getId)));
+                        query.all(Department.class))))));
         assertFalse("find by multiple restrictions",
             dao.exists(restrict.equals(Department_.mandatoryDepName, Some("a"),
                        restrict.equals(Department_.mandatoryDepName, Some("b"),
@@ -110,9 +109,9 @@ public class RestrictTest extends QueryTestBase {
         PartTimeEmployee ptemp = new PartTimeEmployee("", dep);
         persist(dep, emp, ptemp);
 
-        assertEquals(newSet(emp.getId(), ptemp.getId()), newSet(map(dao.getMany(query.all(Employee.class)), Employee_.getId)));
-        assertEquals(newSet(emp.getId())               , newSet(map(dao.getMany(restrict.typeIs(Employee.class, query.all(Employee.class))), Employee_.getId)));
-        assertEquals(newSet(ptemp.getId())             , newSet(map(dao.getMany(restrict.typeIn(Collections.<Class<? extends Employee>>newSet(PartTimeEmployee.class), query.all(Employee.class))), Employee_.getId)));
+        assertEquals(newSet(emp.getId(), ptemp.getId()), newSet(map(Employee_.getId, dao.getMany(query.all(Employee.class)))));
+        assertEquals(newSet(emp.getId())               , newSet(map(Employee_.getId, dao.getMany(restrict.typeIs(Employee.class, query.all(Employee.class))))));
+        assertEquals(newSet(ptemp.getId())             , newSet(map(Employee_.getId, dao.getMany(restrict.typeIn(Collections.<Class<? extends Employee>>newSet(PartTimeEmployee.class), query.all(Employee.class))))));
     }
 
     @Test
@@ -126,21 +125,21 @@ public class RestrictTest extends QueryTestBase {
         Set<Department.ID> both = newSet(dep1.getId(), dep2.getId());
         Set<Department.ID> neither = newSet();
 
-        assertEquals(both,    newSet(map(dao.getMany(query.all(Department.class)), Department_.getId)));
+        assertEquals(both,    newSet(map(Department_.getId, dao.getMany(query.all(Department.class)))));
 
-        assertEquals(both,    newSet(map(dao.getMany(restrict.greaterThanOrEqual(Department_.mandatoryNumber, 1, query.all(Department.class))), Department_.getId)));
-        assertEquals(d2,      newSet(map(dao.getMany(restrict.greaterThanOrEqual(Department_.mandatoryNumber, 3, query.all(Department.class))), Department_.getId)));
-        assertEquals(neither, newSet(map(dao.getMany(restrict.greaterThanOrEqual(Department_.mandatoryNumber, 4, query.all(Department.class))), Department_.getId)));
+        assertEquals(both,    newSet(map(Department_.getId, dao.getMany(restrict.greaterThanOrEqual(Department_.mandatoryNumber, 1, query.all(Department.class))))));
+        assertEquals(d2,      newSet(map(Department_.getId, dao.getMany(restrict.greaterThanOrEqual(Department_.mandatoryNumber, 3, query.all(Department.class))))));
+        assertEquals(neither, newSet(map(Department_.getId, dao.getMany(restrict.greaterThanOrEqual(Department_.mandatoryNumber, 4, query.all(Department.class))))));
 
-        assertEquals(d2,      newSet(map(dao.getMany(restrict.greaterThan(Department_.mandatoryNumber, 2, query.all(Department.class))), Department_.getId)));
-        assertEquals(neither, newSet(map(dao.getMany(restrict.greaterThan(Department_.mandatoryNumber, 3, query.all(Department.class))), Department_.getId)));
+        assertEquals(d2,      newSet(map(Department_.getId, dao.getMany(restrict.greaterThan(Department_.mandatoryNumber, 2, query.all(Department.class))))));
+        assertEquals(neither, newSet(map(Department_.getId, dao.getMany(restrict.greaterThan(Department_.mandatoryNumber, 3, query.all(Department.class))))));
 
-        assertEquals(d1,      newSet(map(dao.getMany(restrict.lessThanOrEqual(Department_.mandatoryNumber, 1, query.all(Department.class))), Department_.getId)));
-        assertEquals(both,    newSet(map(dao.getMany(restrict.lessThanOrEqual(Department_.mandatoryNumber, 3, query.all(Department.class))), Department_.getId)));
+        assertEquals(d1,      newSet(map(Department_.getId, dao.getMany(restrict.lessThanOrEqual(Department_.mandatoryNumber, 1, query.all(Department.class))))));
+        assertEquals(both,    newSet(map(Department_.getId, dao.getMany(restrict.lessThanOrEqual(Department_.mandatoryNumber, 3, query.all(Department.class))))));
 
-        assertEquals(neither, newSet(map(dao.getMany(restrict.lessThan(Department_.mandatoryNumber, 1, query.all(Department.class))), Department_.getId)));
-        assertEquals(d1,      newSet(map(dao.getMany(restrict.lessThan(Department_.mandatoryNumber, 2, query.all(Department.class))), Department_.getId)));
-        assertEquals(both,    newSet(map(dao.getMany(restrict.lessThan(Department_.mandatoryNumber, 4, query.all(Department.class))), Department_.getId)));
+        assertEquals(neither, newSet(map(Department_.getId, dao.getMany(restrict.lessThan(Department_.mandatoryNumber, 1, query.all(Department.class))))));
+        assertEquals(d1,      newSet(map(Department_.getId, dao.getMany(restrict.lessThan(Department_.mandatoryNumber, 2, query.all(Department.class))))));
+        assertEquals(both,    newSet(map(Department_.getId, dao.getMany(restrict.lessThan(Department_.mandatoryNumber, 4, query.all(Department.class))))));
     }
 
     @Test
@@ -155,20 +154,20 @@ public class RestrictTest extends QueryTestBase {
         Set<Employee.ID> both = newSet(emp1.getId(), emp2.getId());
         Set<Employee.ID> neither = newSet();
 
-        assertEquals(both,    newSet(map(dao.getMany(query.all(Employee.class)), Employee_.getId)));
+        assertEquals(both,    newSet(map(Employee_.getId, dao.getMany(query.all(Employee.class)))));
 
-        assertEquals(both,    newSet(map(dao.getMany(restrict.greaterThanOrEqual(Employee_.optionalSalary, new Money(1), query.all(Employee.class))), Employee_.getId)));
-        assertEquals(e2,      newSet(map(dao.getMany(restrict.greaterThanOrEqual(Employee_.optionalSalary, new Money(3), query.all(Employee.class))), Employee_.getId)));
-        assertEquals(neither, newSet(map(dao.getMany(restrict.greaterThanOrEqual(Employee_.optionalSalary, new Money(4), query.all(Employee.class))), Employee_.getId)));
+        assertEquals(both,    newSet(map(Employee_.getId, dao.getMany(restrict.greaterThanOrEqual(Employee_.optionalSalary, new Money(1), query.all(Employee.class))))));
+        assertEquals(e2,      newSet(map(Employee_.getId, dao.getMany(restrict.greaterThanOrEqual(Employee_.optionalSalary, new Money(3), query.all(Employee.class))))));
+        assertEquals(neither, newSet(map(Employee_.getId, dao.getMany(restrict.greaterThanOrEqual(Employee_.optionalSalary, new Money(4), query.all(Employee.class))))));
 
-        assertEquals(e2,      newSet(map(dao.getMany(restrict.greaterThan(Employee_.optionalSalary, new Money(2), query.all(Employee.class))), Employee_.getId)));
-        assertEquals(neither, newSet(map(dao.getMany(restrict.greaterThan(Employee_.optionalSalary, new Money(3), query.all(Employee.class))), Employee_.getId)));
+        assertEquals(e2,      newSet(map(Employee_.getId, dao.getMany(restrict.greaterThan(Employee_.optionalSalary, new Money(2), query.all(Employee.class))))));
+        assertEquals(neither, newSet(map(Employee_.getId, dao.getMany(restrict.greaterThan(Employee_.optionalSalary, new Money(3), query.all(Employee.class))))));
 
-        assertEquals(e1,      newSet(map(dao.getMany(restrict.lessThanOrEqual(Employee_.optionalSalary, new Money(1), query.all(Employee.class))), Employee_.getId)));
-        assertEquals(both,    newSet(map(dao.getMany(restrict.lessThanOrEqual(Employee_.optionalSalary, new Money(3), query.all(Employee.class))), Employee_.getId)));
+        assertEquals(e1,      newSet(map(Employee_.getId, dao.getMany(restrict.lessThanOrEqual(Employee_.optionalSalary, new Money(1), query.all(Employee.class))))));
+        assertEquals(both,    newSet(map(Employee_.getId, dao.getMany(restrict.lessThanOrEqual(Employee_.optionalSalary, new Money(3), query.all(Employee.class))))));
 
-        assertEquals(neither, newSet(map(dao.getMany(restrict.lessThan(Employee_.optionalSalary, new Money(1), query.all(Employee.class))), Employee_.getId)));
-        assertEquals(e1,      newSet(map(dao.getMany(restrict.lessThan(Employee_.optionalSalary, new Money(2), query.all(Employee.class))), Employee_.getId)));
-        assertEquals(both,    newSet(map(dao.getMany(restrict.lessThan(Employee_.optionalSalary, new Money(4), query.all(Employee.class))), Employee_.getId)));
+        assertEquals(neither, newSet(map(Employee_.getId, dao.getMany(restrict.lessThan(Employee_.optionalSalary, new Money(1), query.all(Employee.class))))));
+        assertEquals(e1,      newSet(map(Employee_.getId, dao.getMany(restrict.lessThan(Employee_.optionalSalary, new Money(2), query.all(Employee.class))))));
+        assertEquals(both,    newSet(map(Employee_.getId, dao.getMany(restrict.lessThan(Employee_.optionalSalary, new Money(4), query.all(Employee.class))))));
     }
 }

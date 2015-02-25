@@ -2,7 +2,7 @@ package fi.solita.utils.query.execution;
 
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
-import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -182,7 +182,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         em.clear();
 
         Department v = dao.get(dep.getId());
-        assertEquals(newList(emp.getId(), emp2.getId()), newList(map(dao.getProxies(v, Department_.employees), Employee_.getId)));
+        assertEquals(newList(emp.getId(), emp2.getId()), newList(map(Employee_.getId, dao.getProxies(v, Department_.employees))));
     }
     
     @Test
@@ -196,7 +196,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         em.clear();
 
         Municipality v = dao.get(mun.getId());
-        assertEquals(newSet(emp.getId(), emp2.getId()), newSet(map(dao.getProxies(v, Municipality_.emps), Employee_.getId)));
+        assertEquals(newSet(emp.getId(), emp2.getId()), newSet(map(Employee_.getId, dao.getProxies(v, Municipality_.emps))));
     }
     
     @Test
@@ -210,7 +210,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         em.clear();
 
         Municipality v = dao.toProxy(mun.getId());
-        assertEquals(newSet(emp.getId(), emp2.getId()), newSet(map(dao.getProxies(v, Municipality_.emps), Employee_.getId)));
+        assertEquals(newSet(emp.getId(), emp2.getId()), newSet(map(Employee_.getId, dao.getProxies(v, Municipality_.emps))));
     }
     
     @Test(expected = IllegalArgumentException.class)

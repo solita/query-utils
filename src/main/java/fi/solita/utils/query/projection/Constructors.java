@@ -6,6 +6,7 @@ import static fi.solita.utils.functional.Functional.repeat;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.PluralAttribute;
@@ -14,7 +15,6 @@ import javax.persistence.metamodel.SingularAttribute;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple;
-import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
@@ -36,7 +36,7 @@ public class Constructors {
         return new ValueAttributeProjection<E,T>(attribute);
     }
 
-    static <E, LEFT, RIGHT> MetaJpaConstructor<E,Pair<LEFT,RIGHT>,Tuple2<LEFT,RIGHT>> pair(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
+    static <E, LEFT, RIGHT> MetaJpaConstructor<E,Pair<LEFT,RIGHT>,Map.Entry<LEFT,RIGHT>> pair(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
         return new PairProjection<E,LEFT,RIGHT>(left, right);
     }
     

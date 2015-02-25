@@ -52,7 +52,7 @@ public class TableValueType implements UserType, Serializable {
         throw new UnsupportedOperationException("Shouldn't be here");
     }
     
-    static final String toString(CharSequence cs) {
+    public static final String toStr(CharSequence cs) {
         return cs.toString();
     }
 
@@ -118,7 +118,7 @@ public class TableValueType implements UserType, Serializable {
         if (h.get() instanceof CharSequence) {
             t = "SYS.ODCIVARCHAR2LIST";
             @SuppressWarnings("unchecked")
-            Iterable<Object> m = (Iterable<Object>)(Object)map(TableValueType_.toString, (Iterable<CharSequence>)values);
+            Iterable<Object> m = (Iterable<Object>)(Object)map(TableValueType_.toStr, (Iterable<CharSequence>)values);
             v = Function.constant(m);
         } else if (h.get() instanceof Number) {
             t = "SYS.ODCINUMBERLIST";

@@ -3,7 +3,7 @@ package fi.solita.utils.query.backend.hibernate;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.head;
-import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.Functional.map;
 
 import java.util.Collection;
 import java.util.List;
@@ -63,7 +63,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
             q.setMaxResults(page.getMaxResults());
         }
         try {
-            return newList(map(q.getResultList(), HibernateQueryExecutor_.<T>replaceProxy()));
+            return newList(map(HibernateQueryExecutor_.<T>replaceProxy(), q.getResultList()));
         } finally {
             if (page != Page.NoPaging) {
                 q.setFirstResult(originalFirstResult);
@@ -94,7 +94,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
-        return newList(map(applyPaging(q, page).list(), HibernateQueryExecutor_.replaceProxy()));
+        return newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
     }
 
     @SuppressWarnings("unchecked")
@@ -110,7 +110,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     public <T> List<T> getMany(QLQuery<T> query, Page page) {
         Query q = em.apply().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
-        return newList(map(applyPaging(q, page).list(), HibernateQueryExecutor_.replaceProxy()));
+        return newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
     }
     
     /**
@@ -152,7 +152,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     }
 
     private static final SQLQuery bindTransformer(SQLQuery q, NativeQuery<?> query) {
-        String[] retvals = newArray(String.class, map(query.retvals, Transformers.<String>left()));
+        String[] retvals = newArray(String.class, map(Transformers.<String>left(), query.retvals));
         final OptionResultTransformer resultTransformer = new OptionResultTransformer(query.retvals);
         if (query instanceof NativeQuery.NativeQuerySingleEntity ||
             query instanceof NativeQuery.NativeQueryT1 ||

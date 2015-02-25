@@ -46,7 +46,7 @@ public class NativeQueries {
     }
 
     public <T, P> P get(NativeQuery<T> query, Apply<T, P> constructor) {
-        return head(map(find(query), constructor));
+        return head(map(constructor, find(query)));
     }
 
     public <T> Option<T> find(NativeQuery<T> query) {
@@ -54,7 +54,7 @@ public class NativeQueries {
     }
 
     public <T, P> Option<P> find(NativeQuery<T> query, Apply<T, P> constructor) {
-        return headOption(map(queryExecutor.find(query), constructor));
+        return headOption(map(constructor, queryExecutor.find(query)));
     }
 
     public <T> Option<T> findFirst(NativeQuery<T> query) {
@@ -82,6 +82,6 @@ public class NativeQueries {
     }
 
     public <T, P> List<P> getMany(NativeQuery<T> query, Page page, Apply<T, P> constructor) {
-        return newList(map(getMany(query, page), constructor));
+        return newList(map(constructor, getMany(query, page)));
     }
 }

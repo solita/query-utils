@@ -7,7 +7,7 @@ import static fi.solita.utils.meta.Helpers.element2Methods;
 import static fi.solita.utils.meta.Helpers.simpleName;
 import static fi.solita.utils.meta.Helpers.typeMirror2GenericQualifiedName;
 import static fi.solita.utils.meta.Helpers.typeParameter2String;
-import static fi.solita.utils.meta.Helpers.withAnnotation;
+import static fi.solita.utils.meta.Helpers.withAnnotations;
 import static fi.solita.utils.meta.generators.Content.EmptyLine;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.concat;
@@ -66,12 +66,12 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
         };
     }
     
-    public static final Predicate<Element> isTransient = withModifier(Modifier.TRANSIENT).or(withAnnotation(Transient.class.getName()));
+    public static final Predicate<Element> isTransient = withModifier(Modifier.TRANSIENT).or(withAnnotations(Transient.class.getName()));
     
     public static final Predicate<Element> isPersistentClass = 
-        withAnnotation(Entity.class.getName()).or(
-        withAnnotation(MappedSuperclass.class.getName()).or(
-        withAnnotation(Embeddable.class.getName())));
+        withAnnotations(Entity.class.getName()).or(
+        withAnnotations(MappedSuperclass.class.getName()).or(
+        withAnnotations(Embeddable.class.getName())));
     
     @Override
     public Iterable<String> apply(ProcessingEnvironment processingEnv, Options options, TypeElement source) {
@@ -82,22 +82,22 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
         Access classAccess = source.getAnnotation(Access.class);
         final AccessType defaultAccess = classAccess == null ? resolveAccessTypeFromId(source) : classAccess.value();
         
-        Iterable<? extends Element> fields = filter(element2Fields.apply(source), not(isTransient).and(new Predicate<Element>() {
+        Iterable<? extends Element> fields = filter(not(isTransient).and(new Predicate<Element>() {
             @Override
             public boolean accept(Element candidate) {
                 Access acc = candidate.getAnnotation(Access.class);
                 return defaultAccess == AccessType.FIELD && acc == null || acc != null && acc.value() == AccessType.FIELD;
             }
-        }));
-        Iterable<? extends Element> methods = filter(element2Methods.apply(source), not(isTransient).and(new Predicate<Element>() {
+        }), element2Fields.apply(source));
+        Iterable<? extends Element> methods = filter(not(isTransient).and(new Predicate<Element>() {
             @Override
             public boolean accept(Element candidate) {
                 Access acc = candidate.getAnnotation(Access.class);
                 return defaultAccess == AccessType.PROPERTY && acc == null || acc != null && acc.value() == AccessType.PROPERTY;
             }
-        }));
+        }), element2Methods.apply(source));
         
-        return flatMap(zipWithIndex(concat(fields, methods)), singleElementHandler.ap(new Helpers.EnvDependent(processingEnv)));
+        return flatMap(singleElementHandler.ap(new Helpers.EnvDependent(processingEnv)), zipWithIndex(concat(fields, methods)));
     }
 
     private AccessType resolveAccessTypeFromId(TypeElement source) {
@@ -137,12 +137,12 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
                                    isCollection ? "Collection" :
                                    "Singular";
             
-            Iterable<Pair<String, String>> classTypeParameters = map(enclosingElement.getTypeParameters(), new Transformer<TypeParameterElement, Pair<String,String>>() {
+            Iterable<Pair<String, String>> classTypeParameters = map(new Transformer<TypeParameterElement, Pair<String,String>>() {
                 @Override
                 public Pair<String, String> transform(TypeParameterElement source) {
                     return Pair.of(simpleName.apply(source), typeParameter2String.apply(source));
                 }
-            });
+            }, enclosingElement.getTypeParameters());
             
             String ownerType = typeMirror2GenericQualifiedName.apply(enclosingElement.asType());
             String attributeType = isCollection ? containedType(member) : typeMirror2GenericQualifiedName.andThen(boxed).apply(returnType);

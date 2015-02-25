@@ -2,6 +2,7 @@ package fi.solita.utils.query.meta;
 
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.cons;
+import static fi.solita.utils.functional.Functional.mkString;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -10,6 +11,9 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
 
 import fi.solita.utils.meta.CommonMetadataProcessor;
 import fi.solita.utils.meta.generators.Generator;
@@ -55,6 +59,21 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
                 return generatedClassNamePattern;
             }
         };
+    }
+    
+    @Override
+    public boolean onlyPublicMembers() {
+        return Boolean.parseBoolean(findOption(CommonMetadataProcessor.Options.onlyPublicMembers, "true"));
+    }
+    
+    @Override
+    public String includesAnnotation() {
+        return findOption(CommonMetadataProcessor.Options.includesAnnotation, mkString(",", newList(Entity.class.getName(), MappedSuperclass.class.getName(), Embeddable.class.getName())));
+    }
+    
+    @Override
+    public String excludesAnnotation() {
+        return findOption(CommonMetadataProcessor.Options.excludesAnnotation, "");
     }
     
     public static abstract class ExtendedGeneratorOptions extends CommonMetadataProcessor.CombinedGeneratorOptions implements JpaMetamodel.Options {

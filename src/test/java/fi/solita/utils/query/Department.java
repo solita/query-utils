@@ -2,9 +2,20 @@ package fi.solita.utils.query;
 
 import java.util.List;
 
-import javax.persistence.*;
+import javax.persistence.Access;
+import javax.persistence.AttributeOverride;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
+import javax.persistence.GeneratedValue;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
+import javax.persistence.Transient;
 
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.GenericGenerator;
 
 @javax.persistence.Entity
 @Access(javax.persistence.AccessType.FIELD)

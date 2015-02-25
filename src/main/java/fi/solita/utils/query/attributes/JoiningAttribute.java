@@ -2,7 +2,7 @@ package fi.solita.utils.query.attributes;
 
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.mkString;
-import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.Functional.map;
 
 import java.util.List;
 
@@ -109,12 +109,12 @@ public interface JoiningAttribute {
         
         
         static <A extends Attribute<?,?> & JoiningAttribute> String joiningAttributeToString(A a) {
-            return a.getClass().getSimpleName() + "(" + mkString("->", map(a.getAttributes(), new Transformer<Attribute<?,?>,String>() {
+            return a.getClass().getSimpleName() + "(" + mkString("->", map(new Transformer<Attribute<?,?>,String>() {
                 @Override
                 public String transform(Attribute<?,?> source) {
                     return source.getDeclaringType() == null ? "?" : source.getDeclaringType().getJavaType().getSimpleName() + "." + source.getName();
                 }
-            })) + ")";
+            }, a.getAttributes())) + ")";
         }
     }
 }

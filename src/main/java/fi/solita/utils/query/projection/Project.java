@@ -6,6 +6,7 @@ import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.PluralAttribute;
@@ -64,7 +65,7 @@ public class Project {
         return Constructors.value(attribute);
     }
 
-    public static <E extends IEntity, LEFT, RIGHT> MetaJpaConstructor<E,Pair<LEFT,RIGHT>,Tuple2<LEFT,RIGHT>> pair(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
+    public static <E extends IEntity, LEFT, RIGHT> MetaJpaConstructor<E,Pair<LEFT,RIGHT>,Map.Entry<LEFT,RIGHT>> pair(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
         checkOptionalAttributes(left);
         checkOptionalAttributes(right);
         return Constructors.pair(left, right);

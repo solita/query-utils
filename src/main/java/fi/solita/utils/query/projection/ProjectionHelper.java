@@ -6,16 +6,14 @@ import static fi.solita.utils.functional.Collections.newListOfSize;
 import static fi.solita.utils.functional.Collections.newMap;
 import static fi.solita.utils.functional.Collections.newMultimap;
 import static fi.solita.utils.functional.Functional.cons;
+import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.isEmpty;
+import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.tail;
 import static fi.solita.utils.functional.Functional.transpose;
 import static fi.solita.utils.functional.Functional.zip;
-import static fi.solita.utils.functional.FunctionalA.head;
-import static fi.solita.utils.functional.FunctionalA.tail;
-import static fi.solita.utils.functional.FunctionalImpl.find;
-import static fi.solita.utils.functional.FunctionalImpl.flatMap;
-import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.FunctionalM.find;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.query.QueryUtils.addListAttributeOrdering;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
@@ -111,7 +109,7 @@ public class ProjectionHelper {
     public <R> List<R> finalizeProjectingQuery(MetaJpaConstructor<?,R,?> projection, Iterable<? extends Iterable<Object>> rows) {
         logger.info("finalizeProjectingQuery({},{})", projection, rows);
         Iterable<Iterable<Object>> columns = transpose(rows);
-        columns = newList(map(zip(range(0), projection.getParameters(), columns), performAdditionalQueriesForPlaceholderValues.ap(this).ap(projection)));
+        columns = newList(map(performAdditionalQueriesForPlaceholderValues.ap(this).ap(projection), zip(range(0), projection.getParameters(), columns)));
         List<R> ret = newList(transformAllRows(projection, transpose(columns)));
         logger.debug("finalizeProjectingQuery -> {}", ret);
         return ret;
@@ -196,13 +194,13 @@ public class ProjectionHelper {
         logger.debug("doAdditionalQuery({},{},{},{},{},{})", new Object[] {projectionType, attr, isId, isWrapperOfIds, isDistinctable, sourceIdsToQuery});
         final Map<?, List<Object>> targetQueryResults = queryTargetsOfSources(attr, isId, isWrapperOfIds, isDistinctable, sourceIdsToQuery);
 
-        Iterable<List<Object>> results = map(sourceIdsToQuery, new Transformer<Object,List<Object>>() {
+        Iterable<List<Object>> results = map(new Transformer<Object,List<Object>>() {
             @Override
             public List<Object> transform(Object source) {
-                return find(targetQueryResults, source).getOrElse(emptyList());
+                return find(source, targetQueryResults).getOrElse(emptyList());
             }
-        });
-        List<Object>ret = newList(map(results, ProjectionResultUtil_.postProcessResult.ap(projectionType, attr)));
+        }, sourceIdsToQuery);
+        List<Object>ret = newList(map(ProjectionResultUtil_.postProcessResult.ap(projectionType, attr), results));
         logger.debug("doAdditionalQuery -> {}", ret);
         return ret;
     }
@@ -212,23 +210,23 @@ public class ProjectionHelper {
         Collection<Object[]> results = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds);
         
         @SuppressWarnings("unchecked")
-        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(results, new Transformer<Object[],Object>() {
+        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(new Transformer<Object[],Object>() {
             @Override
             public Object transform(Object[] source) {
                 return head(source);
             }
-        });
-        Iterable<Iterable<Object>> actualResultRows = map(results, new Transformer<Object[],Iterable<Object>>() {
+        }, results);
+        Iterable<Iterable<Object>> actualResultRows = map(new Transformer<Object[],Iterable<Object>>() {
             @Override
             public Iterable<Object> transform(Object[] source) {
                 return tail(source);
             }
-        });
+        }, results);
 
         Iterable<? extends Object> result;
         if (isCollectionOfEmbeddables(target)) {
             logger.info("Target is a collection of Embeddables. Picking embeddable parts manually.");
-            result = map(actualResultRows, EmbeddableUtil_.collectEmbeddableFromParts.ap(em.apply().getMetamodel(), (Bindable<?>)target));
+            result = map(EmbeddableUtil_.collectEmbeddableFromParts.ap(em.apply().getMetamodel(), (Bindable<?>)target), actualResultRows);
         } else {
             // for AdditionalQueryPerformingAttribute, replace the result object array with the actual object, performing additional queries if needed
             Option<AdditionalQueryPerformingAttribute> rel = unwrap(AdditionalQueryPerformingAttribute.class, target);
@@ -236,20 +234,20 @@ public class ProjectionHelper {
                 logger.info("Target is AdditionalQueryPerformingAttribute. Finalizing: {}", target);
                 result = finalizeProjectingQuery(rel.get().getConstructor(), actualResultRows);
             } else {
-                if (!isEmpty(flatMap(actualResultRows, new Transformer<Iterable<Object>,Iterable<Object>>() {
+                if (!isEmpty(flatMap(new Transformer<Iterable<Object>,Iterable<Object>>() {
                     @Override
                     public Iterable<Object> transform(Iterable<Object> source) {
                         return tail(source);
                     }
-                }))) {
+                }, actualResultRows))) {
                     throw new RuntimeException("whoops");
                 }
-                result = map(actualResultRows, new Transformer<Iterable<Object>,Object>() {
+                result = map(new Transformer<Iterable<Object>,Object>() {
                     @Override
                     public Object transform(Iterable<Object> source) {
                         return ProjectionResultUtil.postProcessValue(target, head(source));
                     }
-                });
+                }, actualResultRows);
             }
         }
         
@@ -334,12 +332,12 @@ public class ProjectionHelper {
 
         Collection<Object[]> ret = queryExecutor.getMany(query, Page.NoPaging);
         if (logger.isInfoEnabled()) {
-            logger.info("queryTargets -> {}", newList(map(ret, new Transformer<Object[],String>() {
+            logger.info("queryTargets -> {}", newList(map(new Transformer<Object[],String>() {
                 @Override
                 public String transform(Object[] source) {
                     return Arrays.toString(source);
                 }
-            })));
+            }, ret)));
         }
         return ret;
     }

@@ -3,7 +3,7 @@ package fi.solita.utils.query.execution;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.headOption;
-import static fi.solita.utils.functional.FunctionalImpl.map;
+import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.query.QueryUtils.applyOrder;
@@ -98,6 +98,6 @@ public class JpaProjectionQueries {
         q.multiselect(projectionSupport.prepareProjectingQuery(constructor, selection));
         
         List<Object> results = queryExecutor.getMany(ordered, page);
-        return projectionSupport.finalizeProjectingQuery(constructor, map(results, ProjectionUtil_.objectToObjectList));
+        return projectionSupport.finalizeProjectingQuery(constructor, map(ProjectionUtil_.objectToObjectList, results));
     }
 }
