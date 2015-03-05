@@ -37,7 +37,7 @@ public class Dto {
     public Dto(VALUE _, Object val) {
         this.value = val;
     }
-    public Dto(ENTITY _, IEntity val) {
+    public Dto(ENTITY _, IEntity<?> val) {
         this.value = val;
     }
     public Dto(EMBEDDABLE _, Report val) {
@@ -46,7 +46,7 @@ public class Dto {
     public Dto(OPTIONAL_ID _, Option<Id<?>> val) {
         this.value = val;
     }
-    public Dto(OPTIONAL_ENTITY _, Option<? extends IEntity> val) {
+    public Dto(OPTIONAL_ENTITY _, Option<? extends IEntity<?>> val) {
         this.value = val;
     }
     public Dto(OPTIONAL_VALUE _, Option<?> val) {
@@ -61,7 +61,7 @@ public class Dto {
     public Dto(COLLECTION_OF_VALUES _, Collection<?> val) {
         this.value = val;
     }
-    public Dto(COLLECTION_OF_ENTITIES _, Collection<? extends IEntity> val) {
+    public Dto(COLLECTION_OF_ENTITIES _, Collection<? extends IEntity<?>> val) {
         this.value = val;
     }
     public Dto(COLLECTION_OF_EMBEDDABLES _, Collection<Report> val) {
@@ -73,7 +73,7 @@ public class Dto {
     public Dto(SET_OF_VALUES _, Set<?> val) {
         this.value = val;
     }
-    public Dto(SET_OF_ENTITIES _, Set<? extends IEntity> val) {
+    public Dto(SET_OF_ENTITIES _, Set<? extends IEntity<?>> val) {
         this.value = val;
     }
     public Dto(SET_OF_EMBEDDABLES _, Set<Report> val) {
@@ -85,7 +85,7 @@ public class Dto {
     public Dto(LIST_OF_VALUES _, List<?> val) {
         this.value = val;
     }
-    public Dto(LIST_OF_ENTITIES _, List<? extends IEntity> val) {
+    public Dto(LIST_OF_ENTITIES _, List<? extends IEntity<?>> val) {
         this.value = val;
     }
     public Dto(LIST_OF_EMBEDDABLES _, List<Report> val) {

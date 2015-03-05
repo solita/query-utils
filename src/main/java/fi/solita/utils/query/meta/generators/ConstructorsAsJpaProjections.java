@@ -1,5 +1,17 @@
 package fi.solita.utils.query.meta.generators;
 
+import static fi.solita.utils.functional.Collections.newList;
+import static fi.solita.utils.functional.Functional.cons;
+import static fi.solita.utils.functional.Functional.filter;
+import static fi.solita.utils.functional.Functional.flatMap;
+import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Functional.mkString;
+import static fi.solita.utils.functional.Functional.zip;
+import static fi.solita.utils.functional.Functional.zipWithIndex;
+import static fi.solita.utils.functional.FunctionalA.concat;
+import static fi.solita.utils.functional.FunctionalS.range;
+import static fi.solita.utils.functional.Option.Some;
+import static fi.solita.utils.functional.Transformers.prepend;
 import static fi.solita.utils.meta.Helpers.boxed;
 import static fi.solita.utils.meta.Helpers.containedType;
 import static fi.solita.utils.meta.Helpers.element2Constructors;
@@ -19,18 +31,6 @@ import static fi.solita.utils.meta.Helpers.typeParameter2String;
 import static fi.solita.utils.meta.generators.Content.EmptyLine;
 import static fi.solita.utils.meta.generators.Content.catchBlock;
 import static fi.solita.utils.meta.generators.Content.reflectionInvokationArgs;
-import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Functional.cons;
-import static fi.solita.utils.functional.Functional.mkString;
-import static fi.solita.utils.functional.Functional.zip;
-import static fi.solita.utils.functional.Functional.zipWithIndex;
-import static fi.solita.utils.functional.FunctionalA.concat;
-import static fi.solita.utils.functional.Functional.filter;
-import static fi.solita.utils.functional.Functional.flatMap;
-import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.FunctionalS.range;
-import static fi.solita.utils.functional.Option.Some;
-import static fi.solita.utils.functional.Transformers.prepend;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,15 +56,15 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import fi.solita.utils.meta.Helpers;
-import fi.solita.utils.meta.generators.Generator;
-import fi.solita.utils.meta.generators.GeneratorOptions;
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Function1;
 import fi.solita.utils.functional.Function3;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Transformer;
+import fi.solita.utils.meta.Helpers;
+import fi.solita.utils.meta.generators.Generator;
+import fi.solita.utils.meta.generators.GeneratorOptions;
 import fi.solita.utils.query.EntityRepresentation;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
@@ -103,7 +103,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
 
     public static Function3<Helpers.EnvDependent, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>> constructorGen = new Function3<Helpers.EnvDependent, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>>() {
         @Override
-        public Iterable<String> apply(Helpers.EnvDependent helper, ConstructorsAsJpaProjections.Options options, Map.Entry<Integer, ExecutableElement> entry) {
+        public Iterable<String> apply(final Helpers.EnvDependent helper, ConstructorsAsJpaProjections.Options options, Map.Entry<Integer, ExecutableElement> entry) {
             ExecutableElement constructor = entry.getValue();
             TypeElement enclosingElement = (TypeElement) constructor.getEnclosingElement();
             String enclosingElementQualifiedName = qualifiedName.apply(enclosingElement);
@@ -117,9 +117,14 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                 Class<?> attributeClass;
                 String otherTypeParams;
                 TypeMirror argumentType = argument.asType();
-                if (helper.isSubtype(argumentType, Id.class)) {
+                if (helper.isSameType(argumentType, Id.class)) {
                     attributeClass = SingularAttribute.class;
-                    otherTypeParams = "? extends " + importType(EntityRepresentation.class);
+                    String elementType = containedType(argument);
+                    otherTypeParams = "? extends " + importType(EntityRepresentation.class) + (elementType.equals("?") ? "<?>" : "<? super " + importTypes(elementType) +">");
+                } else if (helper.isSubtype(argumentType, Id.class)) {
+                    attributeClass = SingularAttribute.class;
+                    // TODO: real paramerer type
+                    otherTypeParams = "? extends " + importType(EntityRepresentation.class) + "<?>";
                 } else {
                     Elements elements = helper.elementUtils;
                     Types types = helper.typeUtils;
@@ -146,10 +151,25 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                         }
                         
                         String elementType = containedType(argument);
-                        if (isEntity || isId) {
-                            elementType = importType(EntityRepresentation.class);
+                        if (elementType.startsWith(Id.class.getName())) {
+                            elementType = containedType(elementType);
+                        } /*else {
+                            elementType = containedType(Helpers.typeMirror2QualifiedName.apply(find(new Predicate<TypeMirror>() {
+                                    @Override
+                                    public boolean accept(TypeMirror candidate) {
+                                        return helper.isSameType(candidate, Id.class);
+                                    }
+                                }, types.directSupertypes(elements.getTypeElement(containedType(elementType)).asType())).get()));
+                        }*/
+                        if (isEntity) {
+                            elementType = elementType.startsWith("?") ? elementType : "? super " + elementType;
+                            elementType = "? extends " + importType(EntityRepresentation.class) + "<" + importTypes(elementType) + ">";
+                        } else if (isId) {
+                            // TODO: real parameter type
+                            elementType = "? extends " + importType(EntityRepresentation.class) + "<?>";
+                        } else {
+                            elementType = elementType.startsWith("?") ? importTypes(elementType) : "? extends " + importTypes(elementType);
                         }
-                        elementType = elementType.startsWith("?") ? elementType : "? extends " + elementType;
                         
                         if (isExactlyCollection) {
                             otherTypeParams = "? extends " + importType(Collection.class) + "<" + elementType +  ">, " + elementType;

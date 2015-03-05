@@ -21,7 +21,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Access(AccessType.FIELD)
-public class Municipality implements IEntity, Identifiable<Municipality.ID> {
+public class Municipality implements IEntity<Municipality>, Identifiable<Municipality.ID> {
 
     @Embeddable
     public static class ID extends LongId<Municipality> {

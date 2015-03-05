@@ -28,6 +28,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.slf4j.Logger;
@@ -159,7 +160,13 @@ class ProjectionResultUtil {
     static Object wrapNullsToOptionsWhereAppropriate(Attribute<?,?> attribute, Object resultFromDb) {
         logger.debug("wrapNullsToOptionsWhereAppropriate({},{})", attribute, resultFromDb);
         Object ret;
-        if (attribute.isCollection() || isRequiredByQueryAttribute(attribute)) {
+        if (attribute.isCollection()) {
+            if (!(resultFromDb instanceof Collection) && isOption(attribute)) {
+                ret = Option.of(resultFromDb);
+            } else {
+                ret = resultFromDb;
+            }
+        } else if (isRequiredByQueryAttribute(attribute)) {
             ret = resultFromDb;
         } else {
             ret = Option.of(resultFromDb);
@@ -183,12 +190,23 @@ class ProjectionResultUtil {
         return ret;
     }
     
+    static boolean isOption(Attribute<?,?> attr) {
+        if (attr instanceof Bindable) {
+            Class<?> b = ((Bindable<?>) attr).getBindableJavaType();
+            return b != null && Option.class.isAssignableFrom(b);
+        }
+        return false;
+    }
+    
     /**
      * Removes all Option.None, and unwrap Option.Some from collections
      */
     static Object removeNonesAndSomesFromCollections(Attribute<?,?> attribute, Object resultFromDb) {
         logger.debug("removeNonesAndSomesFromCollections({},{})", attribute, resultFromDb);
         Object ret;
+        if (isOption(attribute)) {
+            return resultFromDb;
+        }
         if (resultFromDb instanceof List) {
             ret = newList(map(optionGet, filter(not(isNoneOrNull), (Collection<?>)resultFromDb)));
         } else if (resultFromDb instanceof SortedSet) {

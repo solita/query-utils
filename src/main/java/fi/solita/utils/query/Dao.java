@@ -44,75 +44,75 @@ public class Dao {
         this.qlQueries = qlQueries;
     }
 
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>> Id<E> persist(E entity) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<? super E>>> Id<E> persist(E entity) {
         return jpaBasicQueries.persist(entity);
     }
 
-    public boolean isManaged(IEntity entity) {
+    public boolean isManaged(IEntity<?> entity) {
         return jpaBasicQueries.isManaged(entity);
     }
 
     /**
      * Removes the entity corresponding to <i>id</i> from the database. Fails if not found.
      */
-    public <E extends IEntity & Removable> void remove(Id<E> id) {
+    public <E extends IEntity<?> & Removable> void remove(Id<E> id) {
         jpaBasicQueries.remove(id);
     }
 
-    public <E extends IEntity & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
         jpaBasicQueries.removeAll(query);
     }
 
     /**
      * Get the entity corresponding to <i>id</i>. Fails if not found.
      */
-    public <E extends IEntity> E get(Id<E> id) {
+    public <E extends IEntity<?>> E get(Id<E> id) {
         return jpaBasicQueries.get(id);
     }
 
     /**
      * Convert <i>id</i> to a proxy instance without hitting the database
      */
-    public <E extends IEntity> E toProxy(Id<E> id) {
+    public <E extends IEntity<?>> E toProxy(Id<E> id) {
         return jpaBasicQueries.toProxy(id);
     }
     
     /**
      * Convert <i>ids</i> to a proxy instances without hitting the database
      */
-    public <E extends IEntity> Iterable<E> toProxies(Iterable<? extends Id<E>> ids) {
+    public <E extends IEntity<?>> Iterable<E> toProxies(Iterable<? extends Id<E>> ids) {
         return jpaBasicQueries.toProxies(ids);
     }
 
-    public <E extends IEntity> Option<E> find(Id<E> id) {
+    public <E extends IEntity<?>> Option<E> find(Id<E> id) {
         return jpaBasicQueries.find(id);
     }
     
     /**
      * Get a proxy of <i>relation</i> from <i>entity</i> without hitting the database 
      */
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T> T toProxy(E entity, SingularAttribute<? super E, T> relation) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<? super E>>, T> T toProxy(E entity, SingularAttribute<? super E, T> relation) {
         return jpaBasicQueries.toProxy(entity, relation);
     }
     
     /**
      * Get proxies of <i>relation</i> from <i>entity</i>. THIS HITS THE DATABASE. 
      */
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Collection<T> getProxies(E entity, CollectionAttribute<? super E, T> relation) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<? super E>>, T extends IEntity<?>> Collection<T> getProxies(E entity, CollectionAttribute<? super E, T> relation) {
         return jpaBasicQueries.getProxies(entity, relation);
     }
     
     /**
      * Get proxies of <i>relation</i> from <i>entity</i>. THIS HITS THE DATABASE. 
      */
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Set<T> getProxies(E entity, SetAttribute<? super E, T> relation) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<? super E>>, T extends IEntity<?>> Set<T> getProxies(E entity, SetAttribute<? super E, T> relation) {
         return jpaBasicQueries.getProxies(entity, relation);
     }
     
     /**
      * Get proxies of <i>relation</i> from <i>entity</i>. THIS HITS THE DATABASE. 
      */
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> List<T> getProxies(E entity, ListAttribute<? super E, T> relation) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<? super E>>, T extends IEntity<?>> List<T> getProxies(E entity, ListAttribute<? super E, T> relation) {
         return jpaBasicQueries.getProxies(entity, relation);
     }
 
@@ -150,7 +150,7 @@ public class Dao {
     /**
      * Get the first row of <i>query</i>, if any
      */
-    public <E extends IEntity> Option<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering) {
+    public <E> Option<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering) {
         return jpaCriteriaQueries.findFirst(query, ordering);
     }
 
@@ -165,14 +165,14 @@ public class Dao {
         return jpaCriteriaQueries.getMany(query, page);
     }
 
-    public <E extends IEntity> List<E> getMany(CriteriaQuery<E> query, Iterable<? extends Order<? super E, ?>> ordering) {
+    public <E> List<E> getMany(CriteriaQuery<E> query, Iterable<? extends Order<? super E, ?>> ordering) {
         return jpaCriteriaQueries.getMany(query, ordering);
     }
 
     /**
      * Get rows of <i>query</i> considering <i>page</i>
      */
-    public <E extends IEntity> List<E> getMany(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering) {
+    public <E> List<E> getMany(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering) {
         return jpaCriteriaQueries.getMany(query, page, ordering);
     }
 
@@ -181,56 +181,56 @@ public class Dao {
     /**
      * Get the single row of <i>query</i>, projecting the result. Fails if multiple or no rows found.
      */
-    public <E extends IEntity, R> R get(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) throws NoResultException, NonUniqueResultException {
+    public <E, R> R get(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) throws NoResultException, NonUniqueResultException {
         return jpaProjectionQueries.get(query, projection);
     }
 
     /**
      * Get the only row of <i>query</i>, if any, projecting the result. Fails if multiple or no rows found.
      */
-    public <E extends IEntity, R> Option<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) throws NonUniqueResultException {
+    public <E, R> Option<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) throws NonUniqueResultException {
         return jpaProjectionQueries.find(query, projection);
     }
 
     /**
      * Get the first row of <i>query</i>, if any, projecting the result. Requires <i>query</i> to have ordering.
      */
-    public <E extends IEntity,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) {
+    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) {
         return jpaProjectionQueries.findFirst(query, projection);
     }
 
     /**
      * Get the first row of <i>query</i>, if any, projecting the result
      */
-    public <E extends IEntity,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Iterable<? extends Order<? super E,?>> ordering) {
+    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Iterable<? extends Order<? super E,?>> ordering) {
         return jpaProjectionQueries.findFirst(query, projection, ordering);
     }
 
     /**
      * Get all rows of <i>query</i>, projecting the results
      */
-    public <E extends IEntity,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) {
+    public <E,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) {
         return jpaProjectionQueries.getMany(query, projection);
     }
 
     /**
      * Get rows of <i>query</i> considering <i>page</i>, projecting the results. Requires <i>query</i> to have ordering.
      */
-    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Page page) throws NoOrderingSpecifiedException {
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Page page) throws NoOrderingSpecifiedException {
         return jpaProjectionQueries.getMany(query, projection, page);
     }
 
     /**
      * Get all rows of <i>query</i>, projecting the results
      */
-    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Iterable<? extends Order<? super E,?>> ordering) {
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Iterable<? extends Order<? super E,?>> ordering) {
         return jpaProjectionQueries.getMany(query, projection, ordering);
     }
 
     /**
      * Get rows of <i>query</i> considering <i>page</i>, projecting the results
      */
-    public <E extends IEntity,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Page page, Iterable<? extends Order<? super E,?>> ordering) {
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Page page, Iterable<? extends Order<? super E,?>> ordering) {
         return jpaProjectionQueries.getMany(query, projection, page, ordering);
     }
 

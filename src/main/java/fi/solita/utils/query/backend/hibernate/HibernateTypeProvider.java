@@ -166,7 +166,7 @@ public class HibernateTypeProvider implements TypeProvider {
     }
 
     @Override
-    public Class<?> getEntityClass(IEntity entity) {
+    public Class<?> getEntityClass(IEntity<?> entity) {
         return HibernateProxyHelper.getClassWithoutInitializingProxy(entity);
     }
 }

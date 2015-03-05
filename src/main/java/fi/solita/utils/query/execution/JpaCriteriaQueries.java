@@ -21,7 +21,6 @@ import javax.persistence.criteria.Selection;
 
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Order;
 import fi.solita.utils.query.Page;
@@ -67,7 +66,7 @@ public class JpaCriteriaQueries {
         return headOption(getMany(query, Page.FIRST.withSize(1)));
     }
 
-    public <E extends IEntity> Option<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering) {
+    public <E> Option<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering) {
         return headOption(getMany(query, Page.FIRST.withSize(1), ordering));
     }
 
@@ -81,11 +80,11 @@ public class JpaCriteriaQueries {
         return queryExecutor.getMany(query, page);
     }
 
-    public <E extends IEntity> List<E> getMany(CriteriaQuery<E> query, Iterable<? extends Order<? super E, ?>> ordering) {
+    public <E> List<E> getMany(CriteriaQuery<E> query, Iterable<? extends Order<? super E, ?>> ordering) {
         return getMany(query, Page.NoPaging, ordering);
     }
 
-    public <E extends IEntity> List<E> getMany(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering) {
+    public <E> List<E> getMany(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering) {
         return queryExecutor.getMany(applyOrder(query, resolveSelectionPath(query), ordering, em.apply().getCriteriaBuilder()), page);
     }
 }

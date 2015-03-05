@@ -61,11 +61,11 @@ public abstract class NativeQuery<T> {
             super(query, Collections.<Pair<String, Option<Type<?>>>>emptyList(), params);
         }
 
-        public <E extends IEntity> NativeQuerySingleEntity<E> returns(Type<E> entityType) {
+        public <E extends IEntity<?>> NativeQuerySingleEntity<E> returns(Type<E> entityType) {
             return new NativeQuerySingleEntity<E>(query, withRetval(ENTITY_RETURN_VALUE, entityType), params);
         }
         
-        public <E extends IEntity> NativeQuerySingleEntity<Option<E>> returnsOptional(Type.Optional<E> entityType) {
+        public <E extends IEntity<?>> NativeQuerySingleEntity<Option<E>> returnsOptional(Type.Optional<E> entityType) {
             return new NativeQuerySingleEntity<Option<E>>(query, withRetval(ENTITY_RETURN_VALUE, entityType), params);
         }
         

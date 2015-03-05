@@ -58,20 +58,20 @@ public class JpaBasicQueries {
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>> Id<E> persist(E entity) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<? super E>>> Id<E> persist(E entity) {
         em.apply().persist(entity);
         return (Id<E>) entity.getId();
     }
 
-    public boolean isManaged(IEntity entity) {
+    public boolean isManaged(IEntity<?> entity) {
         return em.apply().contains(entity);
     }
 
-    public <E extends IEntity & Removable> void remove(Id<E> id) {
+    public <E extends IEntity<?> & Removable> void remove(Id<E> id) {
         em.apply().remove(toProxy(id));
     }
 
-    public <E extends IEntity & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
         CriteriaQuery<Object> q = em.apply().getCriteriaBuilder().createQuery();
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
         From<?,E> selection = resolveSelection(query, q);
@@ -85,7 +85,7 @@ public class JpaBasicQueries {
         }
     }
 
-    public <E extends IEntity> E get(Id<E> id) {
+    public <E extends IEntity<?>> E get(Id<E> id) {
         E ret = em.apply().find(id.getOwningClass(), id);
         if (ret == null) {
             throw new EntityNotFoundException("Entity of type " + id.getOwningClass().getName() + " with id " + id + " not found.");
@@ -93,15 +93,15 @@ public class JpaBasicQueries {
         return ret;
     }
 
-    public <E extends IEntity> E toProxy(Id<E> id) {
+    public <E extends IEntity<?>> E toProxy(Id<E> id) {
         return em.apply().getReference(id.getOwningClass(), id);
     }
     
-    public <E extends IEntity> Iterable<E> toProxies(Iterable<? extends Id<E>> ids) {
+    public <E extends IEntity<?>> Iterable<E> toProxies(Iterable<? extends Id<E>> ids) {
         return map(JpaBasicQueries_.<E>toProxy().ap(this), ids);
     }
 
-    public <E extends IEntity> Option<E> find(Id<E> id) {
+    public <E extends IEntity<?>> Option<E> find(Id<E> id) {
         return Option.of(em.apply().find(id.getOwningClass(), id));
     }
 
@@ -110,7 +110,7 @@ public class JpaBasicQueries {
      * (<i>entity</i> already has an ID for a ToOne relation, so this is possible)
      */
     @SuppressWarnings("unchecked")
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T> T toProxy(E entity, SingularAttribute<? super E, T> relation) {
+    public <E extends Identifiable<? extends Id<? super E>>, T> T toProxy(E entity, SingularAttribute<? super E, T> relation) {
         checkOptionalAttributes(relation);
         
         Field field = (Field)relation.getJavaMember();
@@ -131,20 +131,20 @@ public class JpaBasicQueries {
         }
     }
     
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Collection<T> getProxies(E entity, CollectionAttribute<? super E, T> relation) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<? super E>>, T extends IEntity<?>> Collection<T> getProxies(E entity, CollectionAttribute<? super E, T> relation) {
         return newList(getProxiesIt(entity, relation));
     }
     
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> Set<T> getProxies(E entity, SetAttribute<? super E, T> relation) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<? super E>>, T extends IEntity<?>> Set<T> getProxies(E entity, SetAttribute<? super E, T> relation) {
         return newSet(getProxiesIt(entity, relation));
     }
     
-    public <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity> List<T> getProxies(E entity, ListAttribute<? super E, T> relation) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<? super E>>, T extends IEntity<?>> List<T> getProxies(E entity, ListAttribute<? super E, T> relation) {
         return newList(getProxiesIt(entity, relation));
     }
     
     @SuppressWarnings("unchecked")
-    private <E extends IEntity & Identifiable<? extends Id<? super E>>, T extends IEntity, C extends Collection<T>> Iterable<T> getProxiesIt(E entity, PluralAttribute<? super E, C, T> relation) {
+    private <E extends IEntity<?> & Identifiable<? extends Id<? super E>>, T extends IEntity<?>, C extends Collection<T>> Iterable<T> getProxiesIt(E entity, PluralAttribute<? super E, C, T> relation) {
         SingularAttribute<T, Id<T>> id = QueryUtils.id(relation.getBindableJavaType(), em.apply());
         CriteriaQuery<Id<T>> query = em.apply().getCriteriaBuilder().createQuery(id.getBindableJavaType());
         Root<E> root = (Root<E>) query.from(typeProvider.getEntityClass(entity));

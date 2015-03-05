@@ -4,11 +4,11 @@ import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newListOfSize;
 import static fi.solita.utils.functional.Functional.cons;
-import static fi.solita.utils.functional.Functional.head;
-import static fi.solita.utils.functional.Functional.isEmpty;
 import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.Functional.forall;
 import static fi.solita.utils.functional.Functional.grouped;
+import static fi.solita.utils.functional.Functional.head;
+import static fi.solita.utils.functional.Functional.isEmpty;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
 
@@ -155,7 +155,7 @@ public abstract class QueryUtils {
         }
     }
     
-    public static final <E extends IEntity> CriteriaQuery<E> applyOrder(CriteriaQuery<E> query, final Path<E> selection, Iterable<? extends fi.solita.utils.query.Order<? super E, ?>> orderings, final CriteriaBuilder cb) {
+    public static final <E> CriteriaQuery<E> applyOrder(CriteriaQuery<E> query, final Path<E> selection, Iterable<? extends fi.solita.utils.query.Order<? super E, ?>> orderings, final CriteriaBuilder cb) {
         if (!isEmpty(orderings)) {
             query.orderBy(newList(map(QueryUtils_.<E>order2jpaOrder().ap(cb, selection), orderings)));
         } else {

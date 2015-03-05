@@ -130,7 +130,7 @@ public class ProjectionHelper {
             logger.info("PseudoAttribute detected: {}", pseudo);
             Expression<?> s = pseudo.getSelectionForQuery(em.apply(), selection);
             doRestrictions(selection, param); // to restrict e.g. SelfAttribute, if so wanted.
-            return unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined() || constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity>)s).get(id((Class<IEntity>)s.getJavaType(), em.apply())) : s;
+            return unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined() || constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity<?>>)s).get(id((Class<IEntity<?>>)s.getJavaType(), em.apply())) : s;
         }
         
         if (unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined()) {
@@ -174,11 +174,11 @@ public class ProjectionHelper {
         
         Iterable<Object> ret = values;
         if (shouldPerformAdditionalQuery(attr)) {
-            List<Id<IEntity>> ids = (List<Id<IEntity>>)(Object)newList(values);
+            List<Id<IEntity<?>>> ids = (List<Id<IEntity<?>>>)(Object)newList(values);
             if (!ids.isEmpty()) {
                 logger.info("Preforming additional query for Attribute: {}", attr);
                 Class<?> projectionType = projection.getConstructorParameterTypes().get(index);
-                List<Object> r = doAdditionalQuery(projectionType, (Attribute<IEntity,?>)attr, isId(projectionType), isWrapperOfIds(projection, index), isDistinctable(projection, index), ids);
+                List<Object> r = doAdditionalQuery(projectionType, (Attribute<IEntity<?>,?>)attr, isId(projectionType), isWrapperOfIds(projection, index), isDistinctable(projection, index), ids);
                 ret = r;
                 if (r.size() != ids.size()) {
                     throw new RuntimeException("Whoops, a bug");
@@ -190,7 +190,7 @@ public class ProjectionHelper {
         return ret;
     }
 
-    private <SOURCE extends IEntity> List<Object> doAdditionalQuery(Class<?> projectionType, Attribute<SOURCE, ?> attr, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<Id<SOURCE>> sourceIdsToQuery) {
+    private <SOURCE extends IEntity<?>> List<Object> doAdditionalQuery(Class<?> projectionType, Attribute<SOURCE, ?> attr, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<Id<SOURCE>> sourceIdsToQuery) {
         logger.debug("doAdditionalQuery({},{},{},{},{},{})", new Object[] {projectionType, attr, isId, isWrapperOfIds, isDistinctable, sourceIdsToQuery});
         final Map<?, List<Object>> targetQueryResults = queryTargetsOfSources(attr, isId, isWrapperOfIds, isDistinctable, sourceIdsToQuery);
 
@@ -205,7 +205,7 @@ public class ProjectionHelper {
         return ret;
     }
     
-    private <SOURCE extends IEntity> Map<Id<SOURCE>,List<Object>> queryTargetsOfSources(final Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<Id<SOURCE>> sourceIds) {
+    private <SOURCE extends IEntity<?>> Map<Id<SOURCE>,List<Object>> queryTargetsOfSources(final Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<Id<SOURCE>> sourceIds) {
         logger.debug("queryTargetsOfSources({},{},{},{},{})", new Object[] {target, isId, isWrapperOfIds, isDistinctable, sourceIds});
         Collection<Object[]> results = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds);
         
@@ -257,7 +257,7 @@ public class ProjectionHelper {
     }
     
     @SuppressWarnings("unchecked")
-    private <SOURCE extends IEntity, SOURCE_ID,R> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<SOURCE_ID> sourceIds) {
+    private <SOURCE extends IEntity<?>, SOURCE_ID,R> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<SOURCE_ID> sourceIds) {
         logger.debug("queryTargets({},{},{},{},{})", new Object[] {sourceIds, target, isId, isWrapperOfIds, isDistinctable});
         Class<SOURCE> sourceClass = target.getDeclaringType() != null ? target.getDeclaringType().getJavaType() : ((Id<SOURCE>)head(sourceIds)).getOwningClass();
         CriteriaQuery<Object[]> query = em.apply().getCriteriaBuilder().createQuery(Object[].class);

@@ -9,5 +9,5 @@ public interface TypeProvider {
     <ID extends Serializable, T extends Identifiable<ID>> Type<ID> idType(Class<T> entityType);
     <T> Type<T> type(Class<T> clazz);
     
-    Class<?> getEntityClass(IEntity entity);
+    Class<?> getEntityClass(IEntity<?> entity);
 }

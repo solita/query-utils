@@ -19,7 +19,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 @javax.persistence.Entity
 @Access(javax.persistence.AccessType.FIELD)
-public class Department implements IEntity, Identifiable<Department.ID>, Removable {
+public class Department implements IEntity<Department>, Identifiable<Department.ID>, Removable {
 
     @Embeddable
     public static class ID extends LongId<Department> {

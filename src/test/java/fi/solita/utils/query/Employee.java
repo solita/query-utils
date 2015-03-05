@@ -17,7 +17,7 @@ import fi.solita.utils.functional.Option;
 
 @javax.persistence.Entity
 @Access(javax.persistence.AccessType.FIELD)
-public class Employee implements IEntity, Identifiable<Employee.ID> {
+public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
 
     @Embeddable
     public static class ID extends LongId<Employee> {

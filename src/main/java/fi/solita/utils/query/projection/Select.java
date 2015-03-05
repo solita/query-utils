@@ -17,7 +17,7 @@ public abstract class Select {
     /**
      * Include the whole entity itself in the projection (instead of an attribute of it)
      */
-    public static <T extends IEntity> SingularAttribute<T, T> self() {
+    public static <T extends IEntity<?>> SingularAttribute<T, T> self() {
         return PseudoAttribute.Constructors.self();
     }
 

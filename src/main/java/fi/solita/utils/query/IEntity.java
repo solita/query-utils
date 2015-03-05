@@ -1,5 +1,5 @@
 package fi.solita.utils.query;
 
 
-public interface IEntity extends EntityRepresentation {
+public interface IEntity<T> extends EntityRepresentation<T> {
 }

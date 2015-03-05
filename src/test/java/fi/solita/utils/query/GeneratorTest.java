@@ -10,9 +10,12 @@ import fi.solita.utils.query._.B;
 import fi.solita.utils.query._.C;
 import fi.solita.utils.query._.D;
 import fi.solita.utils.query._.E;
+import fi.solita.utils.query._.F;
+import fi.solita.utils.query._.G;
+import fi.solita.utils.query._.H;
 import fi.solita.utils.query.projection.Select;
 
-class Foo implements IEntity {
+class Foo implements IEntity<Foo> {
 }
 
 class FooId implements Id<Foo> {
@@ -28,6 +31,9 @@ class _ {
     enum C {_}
     enum D {_}
     enum E {_}
+    enum F {_}
+    enum G {_}
+    enum H {_}
 }
 
 class FooDto {
@@ -41,6 +47,12 @@ class FooDto {
     }
     public FooDto(_.E _, Option<? extends Id<Foo>> a) {
     }
+    public FooDto(_.F _, Foo a) {
+    }
+    public FooDto(_.G _, Option<Foo> a) {
+    }
+    public FooDto(_.H _, Option<? extends Foo> a) {
+    }
 }
 
 public class GeneratorTest {
@@ -52,5 +64,8 @@ public class GeneratorTest {
          FooDto_.c3(Select.literal(C._), Select.literal(Some(new Foo())));
          FooDto_.c4(Select.literal(D._), Select.literal(Some(new Foo())));
          FooDto_.c5(Select.literal(E._), Select.literal(Some(new Foo())));
+         FooDto_.c6(Select.literal(F._), Select.literal(new Foo()));
+         FooDto_.c7(Select.literal(G._), Select.literal(Some(new Foo())));
+         FooDto_.c8(Select.literal(H._), Select.literal(Some(new Foo())));
     }
 }
