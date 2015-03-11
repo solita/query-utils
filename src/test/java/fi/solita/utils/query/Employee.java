@@ -11,12 +11,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Tuplizer;
 
 import fi.solita.utils.functional.Option;
+import fi.solita.utils.query.backend.hibernate.OptionAwarePojoEntityTuplizer;
 
 
 @javax.persistence.Entity
 @Access(javax.persistence.AccessType.FIELD)
+@Tuplizer(impl = OptionAwarePojoEntityTuplizer.class)
 public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
 
     @Embeddable
@@ -34,6 +37,9 @@ public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
 
     @org.hibernate.annotations.Type(type = "fi.solita.utils.query.Money$MoneyType")
     private Money optionalSalary;
+    
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.IntegerType")
+    private Option<Integer> optionAge;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Department mandatoryDepartment;
@@ -93,6 +99,10 @@ public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
         return Option.of(optionalSalary);
     }
     
+    public Option<Integer> getOptionAge() {
+        return optionAge;
+    }
+    
     public Employee setOptionalSalary(Money optionalSalary) {
         this.optionalSalary = optionalSalary;
         return this;
@@ -101,5 +111,9 @@ public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
     public Employee setOptionalDepartment(Department optionalDepartment) {
         this.optionalDepartment = optionalDepartment;
         return this;
+    }
+    
+    public void setOptionAge(Option<Integer> optionAge) {
+        this.optionAge = optionAge;
     }
 }

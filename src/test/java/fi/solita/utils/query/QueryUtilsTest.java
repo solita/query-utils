@@ -71,6 +71,8 @@ public class QueryUtilsTest extends QueryTestBase {
         assertFalse("value_subtype",      isRequiredByMetamodel(Cast.optionalSubtype(Employee_.optionalSalary)));
         assertFalse("entity_subtype",     isRequiredByMetamodel(Cast.optionalSubtype(Employee_.optionalMunicipality)));
         assertFalse("embeddable_subtype", isRequiredByMetamodel(Cast.optionalSubtype(Employee_.optionalReport)));
+        
+        assertFalse("option",             isRequiredByMetamodel(Employee_.optionAge));
     }
     
     @Test
@@ -88,6 +90,8 @@ public class QueryUtilsTest extends QueryTestBase {
         assertFalse("value",      isRequiredByMetamodel(Related.value(Employee_.mandatoryDepartment, Department_.optionalBudget)));
         assertFalse("entity",     isRequiredByMetamodel(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepMunicipality)));
         assertFalse("embeddable", isRequiredByMetamodel(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepReport)));
+        
+        assertFalse("option",     isRequiredByMetamodel(Related.value(Department_.optionalManager, Employee_.optionAge)));
     }
     
     @Test
@@ -103,9 +107,11 @@ public class QueryUtilsTest extends QueryTestBase {
     public void metamodel_joiningFromSetListAttributeIsAlwaysRequired() {
         assertTrue("set",  isRequiredByMetamodel(Related.set(Municipality_.emps, Employee_.mandatoryName)));
         assertTrue("set",  isRequiredByMetamodel(Related.set(Municipality_.emps, Employee_.optionalSalary)));
+        assertTrue("set",  isRequiredByMetamodel(Related.set(Municipality_.emps, Employee_.optionAge)));
         
         assertTrue("list", isRequiredByMetamodel(Related.list(Department_.employees, Employee_.mandatoryName)));
         assertTrue("list", isRequiredByMetamodel(Related.list(Department_.employees, Employee_.optionalSalary)));
+        assertTrue("list", isRequiredByMetamodel(Related.list(Department_.employees, Employee_.optionAge)));
     }
     
     @Test
@@ -124,6 +130,8 @@ public class QueryUtilsTest extends QueryTestBase {
         assertFalse("entity",     isRequiredByMetamodel(Related.projection(Employee_.mandatoryDepartment, Project.value(Cast.optional(Department_.optionalDepMunicipality)))));
         assertFalse("embeddable", isRequiredByMetamodel(Related.projection(Employee_.mandatoryDepartment, Project.value(Cast.optional(Department_.optionalDepReport)))));
         
+        assertFalse("option",     isRequiredByMetamodel(Related.projection(Department_.optionalManager, Project.value(Employee_.optionAge))));
+        
         assertTrue("set",         isRequiredByMetamodel(Related.projection(Municipality_.mandatorySelfReference, Project.value(Municipality_.emps))));
         assertTrue("list",        isRequiredByMetamodel(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.employees))));
         
@@ -137,10 +145,15 @@ public class QueryUtilsTest extends QueryTestBase {
     }
     
     @Test
-    public void queryAttribute_optionalAttributesAreRequired() {
+    public void queryAttribute_optionalAreRequired() {
         assertTrue("value",      isRequiredByQueryAttribute(Employee_.optionalSalary));
         assertTrue("entity",     isRequiredByQueryAttribute(Employee_.optionalMunicipality));
-        assertTrue("embeddable", isRequiredByQueryAttribute(Employee_.optionalReport)); 
+        assertTrue("embeddable", isRequiredByQueryAttribute(Employee_.optionalReport));
+    }
+    
+    @Test
+    public void queryAttribute_optionIsNotRequired() {
+        assertFalse("option", isRequiredByQueryAttribute(Employee_.optionAge));
     }
     
     @Test
@@ -155,7 +168,7 @@ public class QueryUtilsTest extends QueryTestBase {
     }
     
     @Test
-    public void queryAttribute_joiningAttribute() {
+    public void queryAttribute_joiningToValueIsRequired() {
         assertTrue("id",          isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.id)));
         assertTrue("value",       isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.mandatoryDepName)));
         assertTrue("entity",      isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.mandatorySelfReference)));
@@ -169,7 +182,10 @@ public class QueryUtilsTest extends QueryTestBase {
         assertTrue("value",       isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.optionalBudget)));
         assertTrue("entity",      isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepMunicipality)));
         assertTrue("embeddable",  isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepReport)));
-        
+    }
+    
+    @Test
+    public void queryAttribute_joiningToCollectionIsRequired() {
         assertTrue("set",         isRequiredByQueryAttribute(Related.set(Municipality_.mandatorySelfReference, Municipality_.emps)));
         assertTrue("list",        isRequiredByQueryAttribute(Related.list(Employee_.mandatoryDepartment, Department_.employees)));
         assertTrue("set",         isRequiredByQueryAttribute(Related.set(Employee_.optionalMunicipality, Municipality_.emps)));
@@ -177,7 +193,7 @@ public class QueryUtilsTest extends QueryTestBase {
     }
     
     @Test
-    public void queryAttribute_joiningAttributeWrappedIsNotRequired() {
+    public void queryAttribute_joiningWrappedIsNotRequired() {
         assertFalse("id",         isRequiredByQueryAttribute(Cast.optional(Related.value(Department_.optionalManager, Employee_.id))));
         assertFalse("value",      isRequiredByQueryAttribute(Cast.optional(Related.value(Department_.optionalManager, Employee_.mandatoryName))));
         assertFalse("entity",     isRequiredByQueryAttribute(Cast.optional(Related.value(Department_.optionalManager, Employee_.mandatoryDepartment))));
@@ -189,26 +205,35 @@ public class QueryUtilsTest extends QueryTestBase {
     }
     
     @Test
-    public void queryAttribute_relationAttributeWithoutWrappedAttributesIsAlwaysRequired() {
-        assertTrue("id",          isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.id))));
-        assertTrue("value",       isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.mandatoryDepName))));
-        assertTrue("entity",      isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.mandatorySelfReference))));
-        assertTrue("embeddable",  isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.mandatoryReport))));
+    public void queryAttribute_joiningOptionIsNotRequired() {
+        assertFalse("option", isRequiredByQueryAttribute(Related.value(Department_.optionalManager, Employee_.optionAge)));
+        assertFalse("option", isRequiredByQueryAttribute(Related.value(Employee_.mandatoryDepartment, Department_.optionSize)));
+    }
+    
+    @Test
+    public void queryAttribute_relationToValueIsRequired() {
+        assertTrue("id",         isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.id))));
+        assertTrue("value",      isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.mandatoryDepName))));
+        assertTrue("entity",     isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.mandatorySelfReference))));
+        assertTrue("embeddable", isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.mandatoryReport))));
         
         assertTrue("id",         isRequiredByQueryAttribute(Related.projection(Department_.optionalManager, Project.value(Employee_.id))));
         assertTrue("value",      isRequiredByQueryAttribute(Related.projection(Department_.optionalManager, Project.value(Employee_.mandatoryName))));
         assertTrue("entity",     isRequiredByQueryAttribute(Related.projection(Department_.optionalManager, Project.value(Employee_.mandatoryDepartment))));
         assertTrue("embeddable", isRequiredByQueryAttribute(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.mandatoryReport))));
-        
-        assertTrue("set",         isRequiredByQueryAttribute(Related.projection(Municipality_.mandatorySelfReference, Project.value(Municipality_.emps))));
-        assertTrue("list",        isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.employees))));
+    }
+    
+    @Test
+    public void queryAttribute_relationToCollectionIsRequired() {
+        assertTrue("set",        isRequiredByQueryAttribute(Related.projection(Municipality_.mandatorySelfReference, Project.value(Municipality_.emps))));
+        assertTrue("list",       isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.employees))));
         
         assertTrue("set",        isRequiredByQueryAttribute(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.emps))));
         assertTrue("list",       isRequiredByQueryAttribute(Related.projection(Employee_.optionalDepartment, Project.value(Department_.employees)))); 
     }
     
     @Test
-    public void queryAttribute_relationAttributeWrappedIsNotRequired() {
+    public void queryAttribute_relationWrappedIsNotRequired() {
         assertFalse("id",         isRequiredByQueryAttribute(Cast.optional(Related.projection(Department_.optionalManager, Project.value(Employee_.id)))));
         assertFalse("value",      isRequiredByQueryAttribute(Cast.optional(Related.projection(Department_.optionalManager, Project.value(Employee_.mandatoryName)))));
         assertFalse("entity",     isRequiredByQueryAttribute(Cast.optional(Related.projection(Department_.optionalManager, Project.value(Employee_.mandatoryDepartment)))));
@@ -217,5 +242,18 @@ public class QueryUtilsTest extends QueryTestBase {
         assertFalse("value",      isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Cast.optional(Department_.optionalBudget)))));
         assertFalse("entity",     isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Cast.optional(Department_.optionalDepMunicipality)))));
         assertFalse("embeddable", isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Cast.optional(Department_.optionalDepReport)))));
+    }
+    
+    @Test
+    public void queryAttribute_relationOptionIsNotRequired() {
+        assertFalse("option", isRequiredByQueryAttribute(Related.projection(Department_.optionalManager, Project.value(Employee_.optionAge))));
+        assertFalse("option", isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.optionSize))));
+    }
+    
+    @Test
+    public void queryAttribute_relationOptionWithinProjectionIsRequired() {
+        assertTrue("option", isRequiredByQueryAttribute(Related.projection(Department_.optionalManager, Project.pair(Employee_.mandatoryName, Employee_.optionAge))));
+        assertTrue("option", isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.pair(Department_.mandatoryDepName, Department_.optionSize))));
+        assertTrue("option", isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Dto_.c2(Select.literal(Dto.VALUE._), Department_.optionSize))));
     }
 }

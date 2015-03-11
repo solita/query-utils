@@ -16,9 +16,14 @@ import javax.persistence.OrderColumn;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Tuplizer;
+
+import fi.solita.utils.functional.Option;
+import fi.solita.utils.query.backend.hibernate.OptionAwarePojoEntityTuplizer;
 
 @javax.persistence.Entity
 @Access(javax.persistence.AccessType.FIELD)
+@Tuplizer(impl = OptionAwarePojoEntityTuplizer.class)
 public class Department implements IEntity<Department>, Identifiable<Department.ID>, Removable {
 
     @Embeddable
@@ -36,6 +41,9 @@ public class Department implements IEntity<Department>, Identifiable<Department.
 
     @Column(nullable = false)
     private int mandatoryNumber;
+    
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.IntegerType")
+    private Option<Integer> optionSize;
     
     @org.hibernate.annotations.Type(type = "fi.solita.utils.query.Money$MoneyType")
     private Money optionalBudget;
@@ -146,5 +154,13 @@ public class Department implements IEntity<Department>, Identifiable<Department.
     
     public Money getBudget() {
         return optionalBudget;
+    }
+    
+    public Option<Integer> getOptionSize() {
+        return optionSize;
+    }
+    
+    public void setOptionSize(Option<Integer> optionSize) {
+        this.optionSize = optionSize;
     }
 }

@@ -22,6 +22,7 @@ import fi.solita.utils.query.meta.MetaJpaConstructor;
 public class Constructors {
     
     public static interface TransparentProjection {
+        Attribute<?,?> getWrapped();
     }
     
     static <E extends Identifiable<?>> MetaJpaConstructor<E,Id<E>,Id<E>> id() {
@@ -193,6 +194,11 @@ public class Constructors {
         @Override
         public String toString() {
             return MetaJpaConstructor.Helper.toString(this);
+        }
+
+        @Override
+        public Attribute<?, ?> getWrapped() {
+            return attribute;
         }
     }
 }

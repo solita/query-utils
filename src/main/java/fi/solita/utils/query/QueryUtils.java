@@ -13,7 +13,9 @@ import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,6 +37,7 @@ import javax.persistence.criteria.Selection;
 import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
+import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ListAttribute;
@@ -44,6 +47,7 @@ import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
+import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.query.Order.Direction;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
@@ -65,13 +69,13 @@ public abstract class QueryUtils {
 
     public static final class RequiredAttributeMustNotHaveOptionTypeException extends RuntimeException {
         public RequiredAttributeMustNotHaveOptionTypeException(Attribute<?,?> attribute) {
-            super(attribute.getDeclaringType().getJavaType().getSimpleName() + "." + attribute.getName() + ". Remove Cast.optional() wrapping from a mandatory attribute");
+            super(attribute + ". Remove Cast.optional() wrapping from a mandatory attribute");
         }
     }
 
     public static final class OptionalAttributeNeedOptionTypeException extends RuntimeException {
         public OptionalAttributeNeedOptionTypeException(Attribute<?,?> attribute) {
-            super(attribute.getDeclaringType().getJavaType().getSimpleName() + "." + attribute.getName() + ". Wrap the optional attribute with Cast.optional()");
+            super(attribute + ". Wrap the optional attribute with Cast.optional()");
         }
     }
 
@@ -245,7 +249,10 @@ public abstract class QueryUtils {
     }
     
     public static boolean isRequiredByMetamodel(Attribute<?,?> param) {
-        if (param == null || unwrap(PseudoAttribute.class, param).isDefined()) {
+        if (param == null) {
+            return true;
+        }
+        if (unwrap(PseudoAttribute.class, param).isDefined()) {
             return true;
         }
         
@@ -256,6 +263,8 @@ public abstract class QueryUtils {
             return forall(QueryUtils_.isRequiredByMetamodel, ((JoiningAttribute) param).getAttributes());
         } else if (param instanceof JoiningAttribute) {
             return true;
+        } else if (!(param instanceof AdditionalQueryPerformingAttribute) && param instanceof Bindable && Option.class.isAssignableFrom(((Bindable<?>) param).getBindableJavaType())) {
+            return false;
         } else if (param instanceof SingularAttribute && ((SingularAttribute<?,?>)param).getPersistentAttributeType() == PersistentAttributeType.EMBEDDED) {
             if (!((SingularAttribute<?,?>)param).isOptional()) {
                 ret = true;
@@ -297,23 +306,38 @@ public abstract class QueryUtils {
         Column column = ((AnnotatedElement)member).getAnnotation(Column.class);
         Basic basic = ((AnnotatedElement)member).getAnnotation(Basic.class);
         return column != null && column.nullable() == false ||
-               basic != null && basic.optional() == false;
+               basic != null && basic.optional() == false ||
+               member instanceof Field && Option.class.isAssignableFrom(((Field)member).getType()) ||
+               member instanceof Method && Option.class.isAssignableFrom(((Method)member).getReturnType());
     }
     
     public static boolean isRequiredByQueryAttribute(Attribute<?,?> param) {
-        if (param == null || unwrap(PseudoAttribute.class, param).isDefined()) {
+        if (param == null) {
             return true;
-        } else if (param instanceof JoiningAttribute) {
+        }
+        if (unwrap(PseudoAttribute.class, param).isDefined()) {
+            return true;
+        }
+        
+        if (param instanceof AdditionalQueryPerformingAttribute && ((AdditionalQueryPerformingAttribute) param).getConstructor() instanceof TransparentProjection) {
+            return isRequiredByQueryAttribute(((TransparentProjection)((AdditionalQueryPerformingAttribute) param).getConstructor()).getWrapped());
+        }
+        
+        if (param instanceof JoiningAttribute && param instanceof SingularAttribute) {
             return forall(QueryUtils_.isRequiredByQueryAttribute, ((JoiningAttribute) param).getAttributes());
+        } else if (param instanceof JoiningAttribute) {
+            return true;
         }
         
-        boolean ret = !unwrap(OptionalAttribute.class, param).isDefined();
-        
-        if (param instanceof AdditionalQueryPerformingAttribute && param instanceof SingularAttribute) {
-            ret &= forall(QueryUtils_.isRequiredByQueryAttribute, ((AdditionalQueryPerformingAttribute)param).getConstructor().getParameters());
+        if (unwrap(OptionalAttribute.class, param).isDefined()) {
+            return false;
         }
         
-        return ret;
+        if (param instanceof Bindable && Option.class.isAssignableFrom(((Bindable<?>) param).getBindableJavaType())) {
+            return false;
+        }
+        
+        return true;
     }
     
     public static Join<?,?> join(From<?, ?> join, Attribute<?,?> attr, JoinType type) {

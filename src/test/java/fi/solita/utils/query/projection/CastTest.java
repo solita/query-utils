@@ -6,6 +6,7 @@ import javax.persistence.PersistenceContext;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Municipality_;
 import fi.solita.utils.query.QueryTestBase;
@@ -70,5 +71,29 @@ public class CastTest extends QueryTestBase {
     @Test(expected = IllegalArgumentException.class)
     public void cannotWrapSelfAttribute_subtype() {
          Cast.optionalSubtype(Select.self());
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void cannotWrapOption() {
+         Cast.optional(Employee_.optionAge);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void cannotWrapOption_subtype() {
+         Cast.optionalSubtype(Employee_.optionAge);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void cannotWrapWrappedOption() {
+         Cast.optional(Related.value(Department_.optionalManager, Employee_.optionAge));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void cannotWrapProjectedOption() {
+         Cast.optional(Related.projection(Department_.optionalManager, Project.value(Employee_.optionAge)));
+    }
+    
+    public void canWrapProjectedOptionIfInsideAnotherObject() {
+         Cast.optional(Related.projection(Department_.optionalManager, Project.pair(Employee_.optionAge, Employee_.mandatoryName)));
     }
 }
