@@ -106,13 +106,14 @@ public class ProjectionHelper {
         return ret;
     }
     
-    public <R> List<R> finalizeProjectingQuery(MetaJpaConstructor<?,R,?> projection, Iterable<? extends Iterable<Object>> rows) {
+    @SuppressWarnings("unchecked")
+    public <R> List<R> finalizeProjectingQuery(MetaJpaConstructor<?,? extends R,?> projection, Iterable<? extends Iterable<Object>> rows) {
         logger.info("finalizeProjectingQuery({},{})", projection, rows);
         Iterable<Iterable<Object>> columns = transpose(rows);
         columns = newList(map(performAdditionalQueriesForPlaceholderValues.ap(this).ap(projection), zip(range(0), projection.getParameters(), columns)));
-        List<R> ret = newList(transformAllRows(projection, transpose(columns)));
+        List<? extends R> ret = newList(transformAllRows(projection, transpose(columns)));
         logger.debug("finalizeProjectingQuery -> {}", ret);
-        return ret;
+        return (List<R>) ret;
     }
     
     @SuppressWarnings("unchecked")

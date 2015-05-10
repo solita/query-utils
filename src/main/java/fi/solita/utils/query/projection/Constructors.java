@@ -37,7 +37,7 @@ public class Constructors {
         return new ValueAttributeProjection<E,T>(attribute);
     }
 
-    static <E, LEFT, RIGHT> MetaJpaConstructor<E,Pair<LEFT,RIGHT>,Map.Entry<LEFT,RIGHT>> pair(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
+    static <E, LEFT, RIGHT> MetaJpaConstructor<E,Pair<LEFT,RIGHT>,Map.Entry<? extends LEFT,? extends RIGHT>> pair(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
         return new PairProjection<E,LEFT,RIGHT>(left, right);
     }
     

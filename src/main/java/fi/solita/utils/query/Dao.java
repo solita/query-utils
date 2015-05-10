@@ -251,7 +251,7 @@ public class Dao {
         return nativeQueries.get(query);
     }
     
-    public <T, P> P get(NativeQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> P get(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         return nativeQueries.get(query, constructor);
     }
 
@@ -262,7 +262,7 @@ public class Dao {
         return nativeQueries.find(query);
     }
     
-    public <T, P> Option<P> find(NativeQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Option<P> find(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         return nativeQueries.find(query, constructor);
     }
 
@@ -273,7 +273,7 @@ public class Dao {
         return nativeQueries.findFirst(query);
     }
     
-    public <T, P> Option<P> findFirst(NativeQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Option<P> findFirst(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         return nativeQueries.findFirst(query, constructor);
     }
 
@@ -284,7 +284,7 @@ public class Dao {
         return nativeQueries.getMany(query);
     }
 
-    public <T, P> List<P> getMany(NativeQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> List<P> getMany(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         return nativeQueries.getMany(query, constructor);
     }
     
@@ -295,7 +295,7 @@ public class Dao {
         return nativeQueries.getMany(query, page);
     }
 
-    public <T, P> List<P> getMany(NativeQuery<T> query, Page page, Apply<T, P> constructor) {
+    public <T, P> List<P> getMany(NativeQuery<? extends T> query, Page page, Apply<T, P> constructor) {
         return nativeQueries.getMany(query, page, constructor);
     }
 

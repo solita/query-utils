@@ -79,7 +79,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> Option<T> find(NativeQuery<T> query) {
+    public <T> Option<T> find(NativeQuery<? extends T> query) {
         SQLQuery q = em.apply().unwrap(Session.class).createSQLQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
@@ -89,7 +89,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> List<T> getMany(NativeQuery<T> query, Page page) {
+    public <T> List<T> getMany(NativeQuery<? extends T> query, Page page) {
         SQLQuery q = em.apply().unwrap(Session.class).createSQLQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);

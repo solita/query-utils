@@ -41,27 +41,27 @@ public class NativeQueries {
         return count(query) > 0;
     }
 
-    public <T> T get(NativeQuery<T> query) {
+    public <T> T get(NativeQuery<? extends T> query) {
         return find(query).get();
     }
 
-    public <T, P> P get(NativeQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> P get(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         return head(map(constructor, find(query)));
     }
 
-    public <T> Option<T> find(NativeQuery<T> query) {
+    public <T> Option<T> find(NativeQuery<? extends T> query) {
         return queryExecutor.find(query);
     }
 
-    public <T, P> Option<P> find(NativeQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Option<P> find(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         return headOption(map(constructor, queryExecutor.find(query)));
     }
 
-    public <T> Option<T> findFirst(NativeQuery<T> query) {
+    public <T> Option<T> findFirst(NativeQuery<? extends T> query) {
         return headOption(getMany(query, Page.FIRST.withSize(1)));
     }
     
-    public <T, P> Option<P> findFirst(NativeQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Option<P> findFirst(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         List<T> t = getMany(query, Page.FIRST.withSize(1));
         if (t.isEmpty()) {
             return None();
@@ -69,19 +69,19 @@ public class NativeQueries {
         return Some(constructor.apply(head(t)));
     }
 
-    public <T> Collection<T> getMany(NativeQuery<T> query) {
+    public <T> Collection<T> getMany(NativeQuery<? extends T> query) {
         return getMany(query, Page.NoPaging);
     }
 
-    public <T, P> List<P> getMany(NativeQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> List<P> getMany(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         return getMany(query, Page.NoPaging, constructor);
     }
 
-    public <T> List<T> getMany(NativeQuery<T> query, Page page) {
+    public <T> List<T> getMany(NativeQuery<? extends T> query, Page page) {
         return queryExecutor.getMany(query, page);
     }
 
-    public <T, P> List<P> getMany(NativeQuery<T> query, Page page, Apply<T, P> constructor) {
+    public <T, P> List<P> getMany(NativeQuery<? extends T> query, Page page, Apply<T, P> constructor) {
         return newList(map(constructor, getMany(query, page)));
     }
 }
