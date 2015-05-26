@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
@@ -331,7 +332,7 @@ public class ProjectionHelper {
             }
         }
 
-        Collection<Object[]> ret = queryExecutor.getMany(query, Page.NoPaging);
+        Collection<Object[]> ret = queryExecutor.getMany(query, Page.NoPaging, LockModeType.NONE);
         if (logger.isInfoEnabled()) {
             logger.info("queryTargets -> {}", newList(map(new Transformer<Object[],String>() {
                 @Override

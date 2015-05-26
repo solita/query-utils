@@ -6,6 +6,7 @@ import javax.persistence.PersistenceContext;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import fi.solita.utils.query.Dao;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Municipality_;
@@ -24,7 +25,7 @@ public class CastTest extends QueryTestBase {
     private JpaCriteriaQuery query;
 
     @Autowired
-    private JpaProjectionQueries dao;
+    private Dao dao;
 
     @Test(expected = QueryUtils.OptionalAttributeNeedOptionTypeException.class)
     public void Projectvalue_needs_optional() {

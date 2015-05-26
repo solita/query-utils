@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple3;
+import fi.solita.utils.query.Dao;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Employee;
@@ -33,7 +34,7 @@ public class ProjectTest extends QueryTestBase {
     private JpaCriteriaQuery query;
 
     @Autowired
-    private JpaProjectionQueries dao;
+    private Dao dao;
 
     @Test
     public void option_get() {

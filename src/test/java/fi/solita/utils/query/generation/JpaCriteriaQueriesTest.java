@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fi.solita.utils.functional.Collections;
+import fi.solita.utils.query.Dao;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Employee;
@@ -30,7 +31,7 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
     private JpaCriteriaQuery query;
 
     @Autowired
-    private JpaCriteriaQueries dao;
+    private Dao dao;
     
     @Autowired
     private Restrict restrict;

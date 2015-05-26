@@ -25,7 +25,7 @@ public class RestrictTest extends QueryTestBase {
     private JpaCriteriaQuery query;
 
     @Autowired
-    private JpaCriteriaQueries dao;
+    private Dao dao;
 
     @Test
     public void innerJoin() {

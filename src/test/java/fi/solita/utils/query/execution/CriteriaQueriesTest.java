@@ -23,7 +23,7 @@ import fi.solita.utils.query.generation.Restrict;
 public class CriteriaQueriesTest extends QueryTestBase {
 
     @Autowired
-    private JpaCriteriaQueries dao;
+    private Dao dao;
 
     @Autowired
     private JpaCriteriaQuery query;

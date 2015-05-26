@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.criteria.CriteriaQuery;
@@ -43,50 +44,50 @@ public class JpaProjectionQueries {
         this.projectionSupport = projectionSupport;
         this.queryExecutor = queryExecutor;
     }
-
-    public <E, R> R get(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NoResultException, NonUniqueResultException {
+    
+    public <E, R> R get(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, LockModeType lock) throws NoResultException, NonUniqueResultException {
         CriteriaQuery<Object> q = em.apply().getCriteriaBuilder().createQuery();
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
         From<?,E> selection = QueryUtils.resolveSelection(query, q);
         q.multiselect(projectionSupport.prepareProjectingQuery(constructor, selection));
         
         List<Iterable<Object>> res = newList();
-        res.add(ProjectionUtil.objectToObjectList(queryExecutor.get(q)));
+        res.add(ProjectionUtil.objectToObjectList(queryExecutor.get(q, lock)));
         return head(projectionSupport.finalizeProjectingQuery(constructor, res));
     }
-
-    public <E, R> Option<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NonUniqueResultException {
+    
+    public <E, R> Option<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, LockModeType lock) throws NonUniqueResultException {
         try {
-            return Some(get(query, constructor));
+            return Some(get(query, constructor, lock));
         } catch (NoResultException e) {
             return None();
         }
     }
-
-    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NoOrderingSpecifiedException {
-        return headOption(getMany(query, constructor, Page.FIRST.withSize(1)));
+    
+    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, LockModeType lock) throws NoOrderingSpecifiedException {
+        return headOption(getMany(query, constructor, Page.FIRST.withSize(1), lock));
     }
 
-    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
-        return headOption(getMany(query, constructor, Page.FIRST.withSize(1), ordering));
+    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
+        return headOption(getMany(query, constructor, Page.FIRST.withSize(1), ordering, lock));
     }
 
-    public <E,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NoOrderingSpecifiedException {
-        return getMany(query, constructor, Page.NoPaging);
+    public <E,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, LockModeType lock) throws NoOrderingSpecifiedException {
+        return getMany(query, constructor, Page.NoPaging, lock);
     }
 
-    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Page page) throws NoOrderingSpecifiedException {
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Page page, LockModeType lock) throws NoOrderingSpecifiedException {
         QueryUtils.applyOrder(query, resolveSelection(query), em.apply().getCriteriaBuilder());
         QueryUtils.checkOrdering(query, page);
         List<Order<? super E,?>> noOrdering = Collections.emptyList();
-        return getMany(query, constructor, page, noOrdering);
+        return getMany(query, constructor, page, noOrdering, lock);
     }
 
-    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
-        return getMany(query, constructor, Page.NoPaging, ordering);
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
+        return getMany(query, constructor, Page.NoPaging, ordering, lock);
     }
-
-    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Page page, Iterable<? extends Order<? super E,?>> ordering) {
+    
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Page page, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
         CriteriaQuery<Object> q = em.apply().getCriteriaBuilder().createQuery();
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
         From<?,E> selection = resolveSelection(query, q);
@@ -96,7 +97,7 @@ public class JpaProjectionQueries {
 
         q.multiselect(projectionSupport.prepareProjectingQuery(constructor, selection));
         
-        List<Object> results = queryExecutor.getMany(ordered, page);
+        List<Object> results = queryExecutor.getMany(ordered, page, lock);
         return projectionSupport.finalizeProjectingQuery(constructor, map(ProjectionUtil_.objectToObjectList, results));
     }
 }

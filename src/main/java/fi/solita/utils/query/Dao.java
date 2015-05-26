@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.criteria.CriteriaQuery;
@@ -117,63 +118,94 @@ public class Dao {
     }
 
     
-
     public long count(CriteriaQuery<?> query) {
-        return jpaCriteriaQueries.count(query);
+        return count(query, LockModeType.NONE);
+    }
+
+    public long count(CriteriaQuery<?> query, LockModeType lock) {
+        return jpaCriteriaQueries.count(query, lock);
     }
 
     public boolean exists(CriteriaQuery<?> query) {
-        return jpaCriteriaQueries.exists(query);
+        return exists(query, LockModeType.NONE);
+    }
+    
+    public boolean exists(CriteriaQuery<?> query, LockModeType lock) {
+        return jpaCriteriaQueries.exists(query, lock);
     }
 
     /**
      * Get the single row of <i>query</i>. Fails if multiple or no rows found.
      */
     public <T> T get(CriteriaQuery<T> query) throws NoResultException, NonUniqueResultException {
-        return jpaCriteriaQueries.get(query);
+        return get(query, LockModeType.NONE);
+    }
+    public <T> T get(CriteriaQuery<T> query, LockModeType lock) throws NoResultException, NonUniqueResultException {
+        return jpaCriteriaQueries.get(query, lock);
     }
 
     /**
      * Get the only row of <i>query</i>, if any. Fails if multiple rows found.
      */
     public <T> Option<T> find(CriteriaQuery<T> query) throws NonUniqueResultException {
-        return jpaCriteriaQueries.find(query);
+        return find(query, LockModeType.NONE);
+    }
+    public <T> Option<T> find(CriteriaQuery<T> query, LockModeType lock) throws NonUniqueResultException {
+        return jpaCriteriaQueries.find(query, lock);
     }
 
     /**
      * Get the first row of <i>query</i>, if any. Requires <i>query</i> to have ordering.
      */
     public <T> Option<T> findFirst(CriteriaQuery<T> query) throws NoOrderingSpecifiedException {
-        return jpaCriteriaQueries.findFirst(query);
+        return findFirst(query, LockModeType.NONE);
+    }
+    public <T> Option<T> findFirst(CriteriaQuery<T> query, LockModeType lock) throws NoOrderingSpecifiedException {
+        return jpaCriteriaQueries.findFirst(query, lock);
     }
 
     /**
      * Get the first row of <i>query</i>, if any
      */
     public <E> Option<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering) {
-        return jpaCriteriaQueries.findFirst(query, ordering);
+        return findFirst(query, ordering, LockModeType.NONE);
+    }
+    public <E> Option<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
+        return jpaCriteriaQueries.findFirst(query, ordering, lock);
     }
 
-    public <T> Collection<T> getMany(CriteriaQuery<T> query) {
-        return jpaCriteriaQueries.getMany(query);
+    public <T> Collection<T> getMany(CriteriaQuery<T> query) throws NoOrderingSpecifiedException {
+        return getMany(query, Page.NoPaging, LockModeType.NONE);
+    }
+    public <T> Collection<T> getMany(CriteriaQuery<T> query, LockModeType lock) {
+        return jpaCriteriaQueries.getMany(query, lock);
     }
 
     /**
      * Get rows of <i>query</i> considering <i>page</i>. Requires <i>query</i> to have ordering.
      */
     public <T> List<T> getMany(CriteriaQuery<T> query, Page page) throws NoOrderingSpecifiedException {
-        return jpaCriteriaQueries.getMany(query, page);
+        return getMany(query, page, LockModeType.NONE);
+    }
+    public <T> List<T> getMany(CriteriaQuery<T> query, Page page, LockModeType lock) throws NoOrderingSpecifiedException {
+        return jpaCriteriaQueries.getMany(query, page, lock);
     }
 
     public <E> List<E> getMany(CriteriaQuery<E> query, Iterable<? extends Order<? super E, ?>> ordering) {
-        return jpaCriteriaQueries.getMany(query, ordering);
+        return getMany(query, ordering, LockModeType.NONE);
+    }
+    public <E> List<E> getMany(CriteriaQuery<E> query, Iterable<? extends Order<? super E, ?>> ordering, LockModeType lock) {
+        return jpaCriteriaQueries.getMany(query, ordering, lock);
     }
 
     /**
      * Get rows of <i>query</i> considering <i>page</i>
      */
     public <E> List<E> getMany(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering) {
-        return jpaCriteriaQueries.getMany(query, page, ordering);
+        return getMany(query, page, ordering, LockModeType.NONE);
+    }
+    public <E> List<E> getMany(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering, LockModeType lock) {
+        return jpaCriteriaQueries.getMany(query, page, ordering, lock);
     }
 
 
@@ -181,57 +213,81 @@ public class Dao {
     /**
      * Get the single row of <i>query</i>, projecting the result. Fails if multiple or no rows found.
      */
-    public <E, R> R get(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) throws NoResultException, NonUniqueResultException {
-        return jpaProjectionQueries.get(query, projection);
+    public <E, R> R get(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NoResultException, NonUniqueResultException {
+        return get(query, constructor, LockModeType.NONE);
+    }
+    public <E, R> R get(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, LockModeType lock) throws NoResultException, NonUniqueResultException {
+        return jpaProjectionQueries.get(query, projection, lock);
     }
 
     /**
      * Get the only row of <i>query</i>, if any, projecting the result. Fails if multiple or no rows found.
      */
-    public <E, R> Option<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) throws NonUniqueResultException {
-        return jpaProjectionQueries.find(query, projection);
+    public <E, R> Option<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NonUniqueResultException {
+        return find(query, constructor, LockModeType.NONE);
+    }
+    public <E, R> Option<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, LockModeType lock) throws NonUniqueResultException {
+        return jpaProjectionQueries.find(query, projection, lock);
     }
 
     /**
      * Get the first row of <i>query</i>, if any, projecting the result. Requires <i>query</i> to have ordering.
      */
-    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) {
-        return jpaProjectionQueries.findFirst(query, projection);
+    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NoOrderingSpecifiedException {
+        return findFirst(query, constructor, LockModeType.NONE);
+    }
+    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, LockModeType lock) {
+        return jpaProjectionQueries.findFirst(query, projection, lock);
     }
 
     /**
      * Get the first row of <i>query</i>, if any, projecting the result
      */
-    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Iterable<? extends Order<? super E,?>> ordering) {
-        return jpaProjectionQueries.findFirst(query, projection, ordering);
+    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
+        return findFirst(query, constructor, ordering, LockModeType.NONE);
+    }
+    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
+        return jpaProjectionQueries.findFirst(query, projection, ordering, lock);
     }
 
     /**
      * Get all rows of <i>query</i>, projecting the results
      */
-    public <E,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection) {
-        return jpaProjectionQueries.getMany(query, projection);
+    public <E,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NoOrderingSpecifiedException {
+        return getMany(query, constructor, LockModeType.NONE);
+    }
+    public <E,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, LockModeType lock) {
+        return jpaProjectionQueries.getMany(query, projection, lock);
     }
 
     /**
      * Get rows of <i>query</i> considering <i>page</i>, projecting the results. Requires <i>query</i> to have ordering.
      */
-    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Page page) throws NoOrderingSpecifiedException {
-        return jpaProjectionQueries.getMany(query, projection, page);
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Page page) throws NoOrderingSpecifiedException {
+        return getMany(query, constructor, page, LockModeType.NONE);
+    }
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, Page page, LockModeType lock) throws NoOrderingSpecifiedException {
+        return jpaProjectionQueries.getMany(query, projection, page, lock);
     }
 
     /**
      * Get all rows of <i>query</i>, projecting the results
      */
-    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Iterable<? extends Order<? super E,?>> ordering) {
-        return jpaProjectionQueries.getMany(query, projection, ordering);
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
+        return getMany(query, constructor, ordering, LockModeType.NONE);
+    }
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
+        return jpaProjectionQueries.getMany(query, projection, ordering, lock);
     }
 
     /**
      * Get rows of <i>query</i> considering <i>page</i>, projecting the results
      */
-    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,R, ?> projection, Page page, Iterable<? extends Order<? super E,?>> ordering) {
-        return jpaProjectionQueries.getMany(query, projection, page, ordering);
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Page page, Iterable<? extends Order<? super E,?>> ordering) {
+        return getMany(query, constructor, page, ordering, LockModeType.NONE);
+    }
+    public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, Page page, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
+        return jpaProjectionQueries.getMany(query, projection, page, ordering, lock);
     }
 
 

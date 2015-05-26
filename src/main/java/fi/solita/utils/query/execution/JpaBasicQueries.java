@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.LockModeType;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
@@ -77,7 +78,7 @@ public class JpaBasicQueries {
         From<?,E> selection = resolveSelection(query, q);
 
         q.multiselect(projectionSupport.prepareProjectingQuery(Project.id(), selection));
-        List<Object> results = queryExecutor.getMany(q, Page.NoPaging);
+        List<Object> results = queryExecutor.getMany(q, Page.NoPaging, LockModeType.NONE);
 
         Collection<Id<E>> idList = projectionSupport.finalizeProjectingQuery(Project.<E>id(), map(ProjectionUtil_.objectToObjectList, results));
         if (!idList.isEmpty()) {
@@ -151,6 +152,6 @@ public class JpaBasicQueries {
         query.where(em.apply().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em.apply())), entity.getId()));
         query.select(((Join<?,T>)QueryUtils.join((Root<?>)root, (Attribute<?,?>)relation, JoinType.INNER)).get(id));
         
-        return map(JpaBasicQueries_.<T>toProxy().ap(this), queryExecutor.getMany(query, Page.NoPaging));
+        return map(JpaBasicQueries_.<T>toProxy().ap(this), queryExecutor.getMany(query, Page.NoPaging, LockModeType.NONE));
     }
 }

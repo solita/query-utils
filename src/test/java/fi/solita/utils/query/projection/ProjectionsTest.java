@@ -15,6 +15,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import fi.solita.utils.query.Dao;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Employee;
@@ -30,7 +31,7 @@ public class ProjectionsTest extends QueryTestBase {
     private EntityManager em;
 
     @Autowired
-    private JpaProjectionQueries dao;
+    private Dao dao;
 
     @Autowired
     private JpaCriteriaQuery query;

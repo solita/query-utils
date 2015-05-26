@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 
@@ -45,16 +46,16 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     }
     
     @Override
-    public <T> T get(CriteriaQuery<T> query) {
+    public <T> T get(CriteriaQuery<T> query, LockModeType lock) {
         JpaCriteriaCopy.createMissingAliases(query);
-        return replaceProxy(em.apply().createQuery(query).getSingleResult());
+        return replaceProxy(em.apply().createQuery(query).setLockMode(lock).getSingleResult());
     }
 
     @Override
-    public <T> List<T> getMany(CriteriaQuery<T> query, Page page) {
+    public <T> List<T> getMany(CriteriaQuery<T> query, Page page, LockModeType lock) {
         JpaCriteriaCopy.createMissingAliases(query);
         
-        TypedQuery<T> q = em.apply().createQuery(query);
+        TypedQuery<T> q = em.apply().createQuery(query).setLockMode(lock);
         int originalFirstResult = q.getFirstResult();
         int originalMaxResults = q.getMaxResults();
         
