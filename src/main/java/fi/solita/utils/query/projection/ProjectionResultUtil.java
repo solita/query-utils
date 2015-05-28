@@ -4,7 +4,6 @@ import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.filter;
-import static fi.solita.utils.functional.Functional.forall;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.size;
@@ -40,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.functional.Predicates;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.attributes.PseudoAttribute;
@@ -136,7 +134,7 @@ class ProjectionResultUtil {
             } else if (constructorParameterType.equals(Collection.class) || constructorParameterType.equals(Object.class) && attr instanceof CollectionAttribute) {
                 logger.debug("Constructor expecting a Collection: {}", constructorParameterType.getName());
                 ret = val;
-            } else if (constructorParameterType.equals(SortedSet.class) || constructorParameterType.equals(TreeSet.class) || constructorParameterType.equals(Object.class) && attr instanceof SetAttribute && forall(Predicates.<Object>instanceOf(Comparable.class), val)) {
+            } else if (constructorParameterType.equals(SortedSet.class) || constructorParameterType.equals(TreeSet.class)) {
                 logger.debug("Constructor expecting a SortedSet: {}", constructorParameterType.getName());
                 ret = new TreeSet<Object>(val);
             } else if (constructorParameterType.equals(Set.class) || constructorParameterType.equals(Object.class) && attr instanceof SetAttribute) {
