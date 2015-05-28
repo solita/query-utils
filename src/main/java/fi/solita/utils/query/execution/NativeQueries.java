@@ -33,7 +33,7 @@ public class NativeQueries {
     public long count(NativeQuery<?> query) {
         @SuppressWarnings("unchecked")
         Option<Type<?>> type = (Option<Type<?>>)(Object)Some(typeProvider.type(long.class));
-        return find(new NativeQuery.NativeQueryT1<Long>("select count(*) from (" + query.query + ")", newList(Pair.of("c", type)), query.params)).get();
+        return find(new NativeQuery.NativeQueryT1<Long>("select count(*) c from (" + query.query + ")", newList(Pair.of("c", type)), query.params)).get();
     }
 
     public boolean exists(NativeQuery<?> query) {

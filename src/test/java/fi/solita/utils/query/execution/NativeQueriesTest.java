@@ -131,6 +131,17 @@ public class NativeQueriesTest extends QueryTestBase {
         assertEquals(newList(dep1.getId()), newList(map(Department_.getId, dao.getMany(NativeQuery.of("select * from Department order by id").returns(typeProvider.type(Department.class)), Page.FIRST.withSize(1)))));
         assertEquals(newList(dep2.getId()), newList(map(Department_.getId, dao.getMany(NativeQuery.of("select * from Department order by id").returns(typeProvider.type(Department.class)), Page.FIRST.withSize(1).nextPage()))));
     }
+    
+    @Test
+    public void count() {
+        Department dep = new Department();
+        persist(dep);
+        em.flush();
+
+        NativeQuery<Department.ID> q = NativeQuery.of("select id as c from Department")
+                                 .returns("c", typeProvider.idType(Department.class));
+        assertEquals(1, dao.count(q));
+    }
 
     @Test
     public void get_sql() {
