@@ -2,6 +2,7 @@ package fi.solita.utils.query.execution;
 
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
+import static fi.solita.utils.functional.Functional.grouped;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
@@ -41,7 +42,6 @@ import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 import fi.solita.utils.query.backend.TypeProvider;
 import fi.solita.utils.query.projection.Project;
 import fi.solita.utils.query.projection.ProjectionHelper;
-import fi.solita.utils.query.projection.ProjectionUtil_;
 
 public class JpaBasicQueries {
 
@@ -73,16 +73,17 @@ public class JpaBasicQueries {
     }
 
     public <E extends IEntity<?> & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
-        CriteriaQuery<Object> q = em.apply().getCriteriaBuilder().createQuery();
+        @SuppressWarnings("unchecked")
+        CriteriaQuery<Id<E>> q = (CriteriaQuery<Id<E>>)(Object)em.apply().getCriteriaBuilder().createQuery();
         JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
         From<?,E> selection = resolveSelection(query, q);
 
         q.multiselect(projectionSupport.prepareProjectingQuery(Project.id(), selection));
-        List<Object> results = queryExecutor.getMany(q, Page.NoPaging, LockModeType.NONE);
+        Collection<Id<E>> idList = queryExecutor.getMany(q, Page.NoPaging, LockModeType.NONE);
 
-        Collection<Id<E>> idList = projectionSupport.finalizeProjectingQuery(Project.<E>id(), map(ProjectionUtil_.objectToObjectList, results));
-        if (!idList.isEmpty()) {
-            em.apply().createQuery("delete from " + resolveSelection(query).getJavaType().getName() + " e where e.id in(:idList)").setParameter("idList", idList).executeUpdate();
+        // oracle has 1000 element limit in in-list
+        for (Iterable<Id<E>> ids: grouped(1000, idList)) {
+            em.apply().createQuery("delete from " + resolveSelection(query).getJavaType().getName() + " e where e.id in (:ids)").setParameter("ids", newList(ids)).executeUpdate();
         }
     }
 

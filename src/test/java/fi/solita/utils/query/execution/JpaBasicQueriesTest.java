@@ -3,6 +3,7 @@ package fi.solita.utils.query.execution;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Functional.range;
 import static fi.solita.utils.functional.Option.None;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -76,6 +77,21 @@ public class JpaBasicQueriesTest extends QueryTestBase {
 
         assertFalse(dao.find(dep1.getId()).isDefined());
         assertTrue(dao.find(dep2.getId()).isDefined());
+    }
+    
+    @Test
+    public void removeAll_over1000() {
+        Department dep = new Department();
+        persist(dep);
+        for (@SuppressWarnings("unused") int i: range(1, 1001)) {
+            persist(new Department());
+        }
+
+        dao.removeAll(query.all(Department.class));
+        em.flush();
+        em.clear();
+
+        assertFalse(dao.find(dep.getId()).isDefined());
     }
 
     @Test
