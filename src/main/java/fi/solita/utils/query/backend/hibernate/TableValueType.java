@@ -124,6 +124,9 @@ public class TableValueType implements UserType, Serializable {
             t = "SYS.ODCINUMBERLIST";
             @SuppressWarnings("unchecked")
             Iterable<Object> m = (Iterable<Object>)values;
+            if (h.get() instanceof Short) {
+                m = map(TableValueType_.castShortToLong, m);
+            }
             v = Function.constant(m);
         } else if (Hacks.registeredTableTypesInternal.containsKey(h.get().getClass())) {
             final Pair<String, ? extends Function2<Connection, ?, ?>> tabletypeAndConverter = Hacks.registeredTableTypesInternal.get(h.get().getClass());
@@ -141,6 +144,10 @@ public class TableValueType implements UserType, Serializable {
             return None();
         }
         return Some(Pair.of(t, v));
+    }
+    
+    public static Object castShortToLong(Object o) {
+        return Long.valueOf(((Short)o).longValue());
     }
     
     static Pair<String,Apply<Connection,Iterable<Object>>> foo(final Pair<String, ? extends Function2<Connection, ?, ?>> tabletypeAndConverter, final Iterable<?> values) {
