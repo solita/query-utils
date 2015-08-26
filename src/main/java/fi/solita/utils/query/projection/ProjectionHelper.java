@@ -157,7 +157,7 @@ public class ProjectionHelper {
             if (IEntity.class.isAssignableFrom(attr.getJavaType())) {
                 if (constructorExpectsId) {
                     logger.info("Singular Entity attribute detected, but constructor expects Id. Replacing parameter with Id.");
-                    return doRestrictions(selection.join(attr, JoinType.LEFT), attr).get(id(attr.getBindableJavaType(), em.apply()));
+                    return selection.get(attr).get(id(attr.getBindableJavaType(), em.apply()));
                 } else {
                     logger.info("Singular Entity attribute detected. Performing left join.");
                     return doRestrictions(selection.join(attr, JoinType.LEFT), attr);
