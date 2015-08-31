@@ -28,6 +28,7 @@ import fi.solita.utils.query.meta.generators.JpaMetamodel;
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.includesRegex,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.excludesRegex,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.onlyPublicMembers,
+                   "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.includePrivateMembers,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.includesAnnotation,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.excludesAnnotation,
                    "JpaMetamodelProcessor." + JpaMetamodelProcessor.Options.extendClassNamePattern})
@@ -42,11 +43,17 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
     @Override
     public ExtendedGeneratorOptions generatorOptions() {
         final boolean onlyPublicMembers = JpaMetamodelProcessor.this.onlyPublicMembers();
+        final boolean includePrivateMembers = JpaMetamodelProcessor.this.includePrivateMembers();
         final String generatedPackagePattern = JpaMetamodelProcessor.this.generatedPackagePattern();
         final String generatedClassNamePattern = JpaMetamodelProcessor.this.generatedClassNamePattern();
         return new ExtendedGeneratorOptions() {
             public boolean onlyPublicMembers() {
                 return onlyPublicMembers;
+            }
+            
+            @Override
+            public boolean includePrivateMembers() {
+                return includePrivateMembers;
             }
 
             @Override

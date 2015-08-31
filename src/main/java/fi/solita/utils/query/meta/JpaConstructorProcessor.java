@@ -23,6 +23,7 @@ import fi.solita.utils.query.meta.generators.ConstructorsAsJpaProjections;
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.includesRegex,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.excludesRegex,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.onlyPublicMembers,
+                   "JpaConstructorProcessor." + CommonMetadataProcessor.Options.includePrivateMembers,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.includesAnnotation,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.excludesAnnotation,
                    "JpaConstructorProcessor." + JpaConstructorProcessor.Options.makeFieldsPublic})
@@ -38,6 +39,7 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
     public ExtendedGeneratorOptions generatorOptions() {
         final boolean makeFieldsPublic = JpaConstructorProcessor.this.makeFieldsPublic();
         final boolean onlyPublicMembers = JpaConstructorProcessor.this.onlyPublicMembers();
+        final boolean includePrivateMembers = JpaConstructorProcessor.this.includePrivateMembers();
         final String generatedPackagePattern = JpaConstructorProcessor.this.generatedPackagePattern();
         final String generatedClassNamePattern = JpaConstructorProcessor.this.generatedClassNamePattern();
         return new ExtendedGeneratorOptions() {
@@ -47,6 +49,10 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
             }
             public boolean onlyPublicMembers() {
                 return onlyPublicMembers;
+            }
+            @Override
+            public boolean includePrivateMembers() {
+                return includePrivateMembers;
             }
             @Override
             public String generatedPackagePattern() {

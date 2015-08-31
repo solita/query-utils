@@ -11,6 +11,7 @@ import static fi.solita.utils.functional.Functional.zipWithIndex;
 import static fi.solita.utils.functional.FunctionalA.concat;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Option.Some;
+import static fi.solita.utils.functional.Predicates.not;
 import static fi.solita.utils.functional.Transformers.prepend;
 import static fi.solita.utils.meta.Helpers.boxed;
 import static fi.solita.utils.meta.Helpers.containedType;
@@ -23,6 +24,7 @@ import static fi.solita.utils.meta.Helpers.joinWithSpace;
 import static fi.solita.utils.meta.Helpers.padding;
 import static fi.solita.utils.meta.Helpers.parameterTypesAsClasses;
 import static fi.solita.utils.meta.Helpers.publicElement;
+import static fi.solita.utils.meta.Helpers.privateElement;
 import static fi.solita.utils.meta.Helpers.qualifiedName;
 import static fi.solita.utils.meta.Helpers.relevantTypeParams;
 import static fi.solita.utils.meta.Helpers.resolveVisibility;
@@ -73,6 +75,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
 
     public static interface Options extends GeneratorOptions {
         boolean onlyPublicMembers();
+        boolean includePrivateMembers();
         @SuppressWarnings("rawtypes")
         Class<? extends Apply> getClassForJpaConstructors(int argCount);
     }
@@ -88,6 +91,8 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
         Iterable<ExecutableElement> elements = element2Constructors.apply(source);
         if (options.onlyPublicMembers()) {
             elements = filter(publicElement, elements);
+        } else if (!options.includePrivateMembers()) {
+            elements = filter(not(privateElement), elements);
         }
 
         Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = constructorGen.ap(new Helpers.EnvDependent(processingEnv), options);
