@@ -184,27 +184,37 @@ public abstract class QueryUtils {
         if (vals.size() == 1) {
             return cb.equal(path, head(values));
         }
+        
+        List<? extends List<?>> groups;
+        List<Predicate> preds;
+        
         // keep default in-expressions for small sets since oracle performs waaaaaaay better...
-        else if (vals.size() > 5 && Table.isSupported(vals)) {
-            Subquery<Long> tableselect = q.subquery(Long.class);
-            Root<Table> root = tableselect.from(Table.class);
-            tableselect.select(cb.function("dynamic_sampling", Long.class));
-            tableselect.where(cb.equal(cb.literal(new Table.Value(vals)), root.get(Table_.commentEndWithBindParameter)));
-            return path.in(tableselect);
+        if (vals.size() > 10 && Table.isSupported(vals)) {
+            // oracle jdbc drivers seem to have a hard-coded 4000 value limit
+            groups = newList(grouped(4000, vals));
+            preds = newListOfSize(groups.size());
+            for (List<?> g: groups) {
+                Subquery<Long> tableselect = q.subquery(Long.class);
+                Root<Table> root = tableselect.from(Table.class);
+                tableselect.select(cb.function("dynamic_sampling", Long.class));
+                tableselect.where(cb.equal(cb.literal(new Table.Value(g)), root.get(Table_.commentEndWithBindParameter)));
+                preds.add(path.in(tableselect));
+            }
         } else {
             // oracle fails if more than 1000 parameters
-            List<? extends List<?>> groups = newList(grouped(1000, vals));
-            List<Predicate> preds = newListOfSize(groups.size());
+            groups = newList(grouped(1000, vals));
+            preds = newListOfSize(groups.size());
             for (List<?> g: groups) {
                 preds.add(path.in(g));
             }
-            if (preds.isEmpty()) {
-                return cb.or();
-            } else if (preds.size() == 1) {
-                return head(preds);
-            } else {
-                return cb.or(newArray(Predicate.class, preds));
-            }
+        }
+        
+        if (preds.isEmpty()) {
+            return cb.or();
+        } else if (preds.size() == 1) {
+            return head(preds);
+        } else {
+            return cb.or(newArray(Predicate.class, preds));
         }
     }
     
