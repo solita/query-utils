@@ -374,6 +374,15 @@ public class Restrict {
         Predicate predicate = inExpr(query, path, values, em.apply().getCriteriaBuilder());
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E, A> CriteriaQuery<E> inIds(SingularAttribute<? super E, A> attribute, Iterable<? extends Id<A>> values, CriteriaQuery<E> query) {
+        Path<A> path = resolveSelectionPath(query).get(attribute);
+        Predicate predicate = inExpr(query, path.get(id(path.getJavaType(), em.apply())), values, em.apply().getCriteriaBuilder());
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
 
     /**
      * Modifies existing query!

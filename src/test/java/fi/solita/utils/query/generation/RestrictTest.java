@@ -72,6 +72,16 @@ public class RestrictTest extends QueryTestBase {
         assertEquals(dep1.getId(), dao.get(restrict.in(Department_.mandatoryDepName, newSet("a", "c"),
                             query.all(Department.class))).getId());
     }
+    
+    @Test
+    public void attributeInIds() {
+        Department dep1 = new Department("a");
+        Employee emp1 = new Employee("c", dep1);
+        persist(dep1, emp1);
+
+        assertEquals(emp1.getId(), dao.get(restrict.inIds(Employee_.mandatoryDepartment, newSet(dep1.getId()),
+                            query.all(Employee.class))).getId());
+    }
 
     @Test
     public void attributeStartsWithIgnoreCase() {
