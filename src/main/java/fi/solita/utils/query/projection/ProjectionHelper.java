@@ -259,7 +259,7 @@ public class ProjectionHelper {
     }
     
     @SuppressWarnings("unchecked")
-    private <SOURCE extends IEntity<?>, SOURCE_ID,R> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<SOURCE_ID> sourceIds) {
+    private <SOURCE extends IEntity<?>, SOURCE_ID> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<SOURCE_ID> sourceIds) {
         logger.debug("queryTargets({},{},{},{},{})", new Object[] {sourceIds, target, isId, isWrapperOfIds, isDistinctable});
         Class<SOURCE> sourceClass = target.getDeclaringType() != null ? target.getDeclaringType().getJavaType() : ((Id<SOURCE>)head(sourceIds)).getOwningClass();
         CriteriaQuery<Object[]> query = em.apply().getCriteriaBuilder().createQuery(Object[].class);
@@ -295,10 +295,11 @@ public class ProjectionHelper {
         
         query.where(inExpr(query, sourceId, sourceIds, em.apply().getCriteriaBuilder()));
 
+        /* Would this provide any benefit? Maybe only overhead...
         if (isDistinctable) {
             logger.info("Query is distinctable.");
             query.distinct(true);
-        }
+        }*/
 
         setListAttributeOrderings(target, query, actualJoins);
         
