@@ -291,6 +291,10 @@ public class Dao {
     }
 
 
+    
+    public int execute(NativeQuery<Void> query) {
+        return nativeQueries.execute(query);
+    }
 
     public long count(NativeQuery<?> query) {
         return nativeQueries.count(query);

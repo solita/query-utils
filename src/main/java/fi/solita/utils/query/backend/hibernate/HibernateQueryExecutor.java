@@ -74,8 +74,12 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     }
 
     @Override
-    public void execute(NativeQuery<Void> query) {
-        em.apply().createNativeQuery(query.query).executeUpdate();
+    public int execute(NativeQuery<Void> query) {
+        SQLQuery q = em.apply().unwrap(Session.class).createSQLQuery(query.query);
+        q = bindParams(q, query.params);
+        q = bindReturnValues(q, query.retvals);
+        q = bindTransformer(q, query);
+        return q.executeUpdate();
     }
 
     @SuppressWarnings("unchecked")

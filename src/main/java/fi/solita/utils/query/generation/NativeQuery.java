@@ -56,7 +56,7 @@ public abstract class NativeQuery<T> {
         return new NativeQueryVoid(query, Collections.<String, Pair<?, Option<Type<?>>>>emptyMap());
     }
 
-    public static class NativeQueryVoid extends ReturningNativeQuery<Void, NativeQuery<Void>> {
+    public static class NativeQueryVoid extends ReturningNativeQuery<Void, NativeQueryVoid> {
         public NativeQueryVoid(String query, Map<String, Pair<?, Option<Type<?>>>> params) {
             super(query, Collections.<Pair<String, Option<Type<?>>>>emptyList(), params);
         }
@@ -78,7 +78,7 @@ public abstract class NativeQuery<T> {
         }
 
         @Override
-        protected NativeQuery<Void> create(String query, List<Pair<String, Option<Type<?>>>> retvals, Map<String, Pair<?, Option<Type<?>>>> params) {
+        protected NativeQueryVoid create(String query, List<Pair<String, Option<Type<?>>>> retvals, Map<String, Pair<?, Option<Type<?>>>> params) {
             return new NativeQueryVoid(query, params);
         }
     }

@@ -29,6 +29,10 @@ public class NativeQueries {
         this.queryExecutor = queryExecutor;
         this.typeProvider = typeProvider;
     }
+    
+    public int execute(NativeQuery<Void> query) {
+        return queryExecutor.execute(query);
+    }
 
     public long count(NativeQuery<?> query) {
         @SuppressWarnings("unchecked")
