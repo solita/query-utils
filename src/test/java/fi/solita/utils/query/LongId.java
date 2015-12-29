@@ -40,4 +40,9 @@ class LongId<T> implements Id<T>, Serializable {
     public Class<T> getOwningClass() {
         return (Class<T>) getClass().getDeclaringClass();
     }
+
+    @Override
+    public int compareTo(Id<T> o) {
+        return o instanceof LongId ? Long.valueOf(id).compareTo(((LongId<?>)o).id) : -1;
+    }
 }

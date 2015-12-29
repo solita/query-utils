@@ -23,6 +23,11 @@ class FooId implements Id<Foo> {
     public Class<Foo> getOwningClass() {
         return null;
     }
+
+    @Override
+    public int compareTo(Id<Foo> o) {
+        return -1;
+    }
 }
 
 class _ {
