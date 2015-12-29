@@ -60,15 +60,23 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         int originalMaxResults = q.getMaxResults();
         
         if (page != Page.NoPaging) {
-            q.setFirstResult(page.getFirstResult());
-            q.setMaxResults(page.getMaxResults());
+            if (page.getFirstResult() != 0) {
+                q.setFirstResult(page.getFirstResult());
+            }
+            if (page.getMaxResults() != Integer.MAX_VALUE) {
+                q.setMaxResults(page.getMaxResults());
+            }
         }
         try {
             return newList(map(HibernateQueryExecutor_.<T>replaceProxy(), q.getResultList()));
         } finally {
             if (page != Page.NoPaging) {
-                q.setFirstResult(originalFirstResult);
-                q.setMaxResults(originalMaxResults);
+                if (page.getFirstResult() != 0) {
+                    q.setFirstResult(originalFirstResult);
+                }
+                if (page.getMaxResults() != Integer.MAX_VALUE) {
+                    q.setMaxResults(originalMaxResults);
+                }
             }
         }
     }
