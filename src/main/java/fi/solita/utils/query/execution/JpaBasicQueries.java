@@ -59,7 +59,7 @@ public class JpaBasicQueries {
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends IEntity<?> & Identifiable<? extends Id<? super E>>> Id<E> persist(E entity) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<?>>> Id<E> persist(E entity) {
         em.apply().persist(entity);
         return (Id<E>) entity.getId();
     }

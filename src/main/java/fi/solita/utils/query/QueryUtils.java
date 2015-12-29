@@ -69,13 +69,13 @@ public abstract class QueryUtils {
 
     public static final class RequiredAttributeMustNotHaveOptionTypeException extends RuntimeException {
         public RequiredAttributeMustNotHaveOptionTypeException(Attribute<?,?> attribute) {
-            super(attribute + ". Remove Cast.optional() wrapping from a mandatory attribute");
+            super((attribute.getDeclaringType() != null ? attribute.getDeclaringType().getJavaType().getSimpleName() : attribute) + "->" + attribute.getName() + ". Remove Cast.optional() wrapping from a mandatory attribute");
         }
     }
 
     public static final class OptionalAttributeNeedOptionTypeException extends RuntimeException {
         public OptionalAttributeNeedOptionTypeException(Attribute<?,?> attribute) {
-            super(attribute + ". Wrap the optional attribute with Cast.optional()");
+            super((attribute.getDeclaringType() != null ? attribute.getDeclaringType().getJavaType().getSimpleName() : attribute) + "->" + attribute.getName() + ". Wrap the optional attribute with Cast.optional()");
         }
     }
 

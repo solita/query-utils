@@ -45,7 +45,7 @@ public class Dao {
         this.qlQueries = qlQueries;
     }
 
-    public <E extends IEntity<?> & Identifiable<? extends Id<? super E>>> Id<E> persist(E entity) {
+    public <E extends IEntity<?> & Identifiable<? extends Id<?>>> Id<E> persist(E entity) {
         return jpaBasicQueries.persist(entity);
     }
 

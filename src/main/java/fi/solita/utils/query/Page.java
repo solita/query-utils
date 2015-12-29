@@ -32,7 +32,8 @@ public final class Page implements Serializable {
      *            Zero-based
      */
     public static Page of(int pageNumber, int pageSize) {
-        return new Page(pageNumber, pageSize);
+        Page ret = new Page(pageNumber, pageSize);
+        return ret.equals(NoPaging) ? NoPaging : ret;
     }
 
     public Page withPageNumber(int pageNumber) {
