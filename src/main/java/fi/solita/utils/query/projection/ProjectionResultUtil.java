@@ -156,7 +156,7 @@ class ProjectionResultUtil {
         logger.debug("transformPseudoResultToActualValue({},{})", attribute, resultFromDb);
         Object ret = resultFromDb;
         for (PseudoAttribute pseudo: unwrap(PseudoAttribute.class, attribute)) {
-            logger.info("Replacing pseudo placeholder with actual value");
+            logger.debug("Replacing pseudo placeholder with actual value");
             ret = pseudo.getValueToReplaceResult(resultFromDb);
         }
         logger.debug("transformPseudoResultToActualValue -> {}", ret);
@@ -190,7 +190,7 @@ class ProjectionResultUtil {
         Option<? extends Attribute<?, ?>> embeddable = EmbeddableUtil.unwrapEmbeddableAttribute(attribute);
         if (embeddable.isDefined() && resultFromDb == null && isRequiredByMetamodel(attribute)) {
             Class<?> clazz = embeddable.get().getJavaType();
-            logger.info("Instantiating an empty Embeddable {} in place of a null result", clazz);
+            logger.debug("Instantiating an empty Embeddable {} in place of a null result", clazz);
             ret = EmbeddableUtil.instantiate(clazz);
         }
         logger.debug("convertNullsToEmbeddableWhereRequired -> {}", ret);

@@ -74,10 +74,10 @@ public class ProjectionUtil {
     
     static <A extends From<?,?>> A doRestrictions(A from, Attribute<?,?> a) {
         for (RestrictingAttribute r: unwrap(RestrictingAttribute.class, a)) {
-            logger.info("Adding restrictions from: {}", from);
+            logger.debug("Adding restrictions from: {}", from);
             From<?, ?> join = from;
             for (Attribute<?,?> rest: r.getRestrictionChain()) {
-                logger.info("Restricting (inner joining) to: {}", rest);
+                logger.debug("Restricting (inner joining) to: {}", rest);
                 join = QueryUtils.join(join, rest, JoinType.INNER);
                 doRestrictions(join, rest);
             }
@@ -93,7 +93,7 @@ public class ProjectionUtil {
         actualJoins.put(target, root);
         From<?,?> previous = root;
         for (JoiningAttribute joining: unwrap(JoiningAttribute.class, target)) {
-            logger.info("JoiningAttribute detected. Performing joins from: {}", root);
+            logger.debug("JoiningAttribute detected. Performing joins from: {}", root);
             List<? extends Attribute<?, ?>> attributes = joining.getAttributes();
             for (Attribute<?,?> join: init(attributes)) {
                 if (unwrap(JoiningAttribute.class, join).isDefined()) {
