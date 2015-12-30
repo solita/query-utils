@@ -197,7 +197,7 @@ public abstract class QueryUtils {
                 Subquery<Long> tableselect = q.subquery(Long.class);
                 Root<Table> root = tableselect.from(Table.class);
                 tableselect.select(cb.function("dynamic_sampling", Long.class));
-                tableselect.where(cb.equal(cb.literal(new Table.Value(g)), root.get(Table_.commentEndWithBindParameter)));
+                tableselect.where(cb.equal(cb.literal(Table.of(g)), root.get(Table_.commentEndWithBindParameter)));
                 preds.add(path.in(tableselect));
             }
         } else {

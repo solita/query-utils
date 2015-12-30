@@ -13,6 +13,10 @@ import fi.solita.utils.query.backend.hibernate.TableValueType;
 public class Table {
     public static final String tableAlias = "query_utils";
     
+    public static final Table.Value of(Collection<?> values) {
+        return new Table.Value(values);
+    }
+    
     @Id
     @Column(name="column_value")
     long singleColumn;
@@ -37,7 +41,7 @@ public class Table {
     
     public static class Value {
         public final Collection<?> values;
-        public Value(Collection<?> values) {
+        Value(Collection<?> values) {
             this.values = values;
         }
     }
