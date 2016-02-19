@@ -9,8 +9,6 @@ import java.util.regex.Pattern;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -21,7 +19,6 @@ import fi.solita.utils.query.meta.JpaMetamodelProcessor.ExtendedGeneratorOptions
 import fi.solita.utils.query.meta.generators.JpaMetamodel;
 
 @SupportedAnnotationTypes("*")
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedOptions({"JpaMetamodelProcessor." + CommonMetadataProcessor.Options.enabled,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.generatedClassNamePattern,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.generatedPackagePattern,

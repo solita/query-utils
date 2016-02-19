@@ -7,8 +7,6 @@ import java.util.List;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
 
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.meta.CommonMetadataProcessor;
@@ -16,7 +14,6 @@ import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.query.meta.generators.ConstructorsAsJpaProjections;
 
 @SupportedAnnotationTypes("*")
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedOptions({"JpaConstructorProcessor." + CommonMetadataProcessor.Options.enabled,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.generatedClassNamePattern,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.generatedPackagePattern,
@@ -93,6 +90,7 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
             case 20: return MetaJpaConstructor.C20.class;
             case 21: return MetaJpaConstructor.C21.class;
             case 22: return MetaJpaConstructor.C22.class;
+            case 23: return MetaJpaConstructor.C23.class;
         }
         throw new RuntimeException("Not implemented: F" + argCount);
         }

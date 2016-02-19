@@ -28,6 +28,7 @@ import fi.solita.utils.functional.Tuple19;
 import fi.solita.utils.functional.Tuple20;
 import fi.solita.utils.functional.Tuple21;
 import fi.solita.utils.functional.Tuple22;
+import fi.solita.utils.functional.Tuple23;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.functional.Tuple4;
 import fi.solita.utils.functional.Tuple5;
@@ -499,6 +500,25 @@ public abstract class NativeQuery<T> {
             super(query, retvals, params);
         }
 
+        public NativeQueryT23<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, Object> returns(String alias) {
+            return new NativeQueryT23<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, Object>(query, withRetval(alias), params);
+        }
+
+        public <T> NativeQueryT23<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T> returns(String alias, Type<? extends T> type) {
+            return new NativeQueryT23<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T>(query, withRetval(alias, type), params);
+        }
+        
+        @Override
+        protected NativeQueryT22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22> create(String query, List<Pair<String, Option<Type<?>>>> retvals, Map<String, Pair<?, Option<Type<?>>>> params) {
+            return new NativeQueryT22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22>(query, retvals, params);
+        }
+    }
+    
+    public static class NativeQueryT23<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22,T23> extends ReturningNativeQuery<Tuple23<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22,T23>, NativeQueryT23<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22,T23>> {
+        public NativeQueryT23(String query, List<Pair<String, Option<Type<?>>>> retvals, Map<String, Pair<?, Option<Type<?>>>> params) {
+            super(query, retvals, params);
+        }
+
         public NativeQueryBig returns(String alias) {
             return new NativeQueryBig(query, withRetval(alias), params);
         }
@@ -508,8 +528,8 @@ public abstract class NativeQuery<T> {
         }
         
         @Override
-        protected NativeQueryT22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22> create(String query, List<Pair<String, Option<Type<?>>>> retvals, Map<String, Pair<?, Option<Type<?>>>> params) {
-            return new NativeQueryT22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22>(query, retvals, params);
+        protected NativeQueryT23<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23> create(String query, List<Pair<String, Option<Type<?>>>> retvals, Map<String, Pair<?, Option<Type<?>>>> params) {
+            return new NativeQueryT23<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23>(query, retvals, params);
         }
     }
 
