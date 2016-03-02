@@ -30,6 +30,9 @@ public class Table {
     @Column(name="*/)")
     long commentEndWithParen;
 
+    @Column(name="*/?) " + tableAlias + " UNION ALL /*")
+    Table.Value commentEndWithBindParameterAndUnionAll;
+    
     @Column(name="*/?) " + tableAlias)
     Table.Value commentEndWithBindParameter;
     

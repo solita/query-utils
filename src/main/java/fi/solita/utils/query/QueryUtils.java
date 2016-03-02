@@ -188,16 +188,17 @@ public abstract class QueryUtils {
         List<? extends List<?>> groups;
         List<Predicate> preds;
         
-        // keep default in-expressions for small sets since oracle performs waaaaaaay better...
-        if (vals.size() > 10 && Table.isSupported(vals)) {
+        // only use table-expression for large sets since oracle performs better with regular in-clause
+        if (vals.size() > 5 && Table.isSupported(vals)) {
             // oracle jdbc drivers seem to have a hard-coded 4000 value limit
             groups = newList(grouped(4000, vals));
             preds = newListOfSize(groups.size());
-            for (List<?> g: groups) {
+            for (int i = 0; i < groups.size(); ++i) {
+                List<?> g = groups.get(i);
                 Subquery<Long> tableselect = q.subquery(Long.class);
                 Root<Table> root = tableselect.from(Table.class);
-                tableselect.select(cb.function("dynamic_sampling", Long.class));
-                tableselect.where(cb.equal(cb.literal(Table.of(g)), root.get(Table_.commentEndWithBindParameter)));
+                tableselect.select(i == 0 ? cb.function("dynamic_sampling_start", Long.class) : cb.function("dynamic_sampling", Long.class));
+                tableselect.where(cb.equal(cb.literal(Table.of(g)), root.get(i == groups.size() - 1 ? Table_.commentEndWithBindParameter : Table_.commentEndWithBindParameterAndUnionAll)));
                 preds.add(path.in(tableselect));
             }
         } else {
