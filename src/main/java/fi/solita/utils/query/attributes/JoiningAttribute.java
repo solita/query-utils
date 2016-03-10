@@ -62,6 +62,16 @@ public interface JoiningAttribute {
             return new JoiningCollectionAttribute<E,Y5,CollectionAttribute<E,Y5>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5));
         }
         
+        public static <E,Y,Y2,Y3,Y4,Y5,Y6,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>, A6 extends Attribute<? super Y5,?> & Bindable<Y6>>
+        CollectionAttribute<E,Y6> collection(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+            return new JoiningCollectionAttribute<E,Y6,CollectionAttribute<E,Y6>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5, (Attribute<?,?>)a6));
+        }
+        
+        public static <E,Y,Y2,Y3,Y4,Y5,Y6,Y7,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>, A6 extends Attribute<? super Y5,?> & Bindable<Y6>, A7 extends Attribute<? super Y6,?> & Bindable<Y7>>
+        CollectionAttribute<E,Y7> collection(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+            return new JoiningCollectionAttribute<E,Y7,CollectionAttribute<E,Y7>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5, (Attribute<?,?>)a6, (Attribute<?,?>)a7));
+        }
+        
         
     
         public static <E,Y,Y2,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
@@ -84,6 +94,16 @@ public interface JoiningAttribute {
             return new JoiningSetAttribute<E,Y5,SetAttribute<E,Y5>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5));
         }
         
+        public static <E,Y,Y2,Y3,Y4,Y5,Y6,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>, A6 extends Attribute<? super Y5,?> & Bindable<Y6>>
+        SetAttribute<E,Y6> set(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+            return new JoiningSetAttribute<E,Y6,SetAttribute<E,Y6>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5, (Attribute<?,?>)a6));
+        }
+        
+        public static <E,Y,Y2,Y3,Y4,Y5,Y6,Y7,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>, A6 extends Attribute<? super Y5,?> & Bindable<Y6>, A7 extends Attribute<? super Y6,?> & Bindable<Y7>>
+        SetAttribute<E,Y7> set(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+            return new JoiningSetAttribute<E,Y7,SetAttribute<E,Y7>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5, (Attribute<?,?>)a6, (Attribute<?,?>)a7));
+        }
+        
         
         
         public static <E,Y,Y2,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>>
@@ -104,6 +124,16 @@ public interface JoiningAttribute {
         public static <E,Y,Y2,Y3,Y4,Y5,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>>
         ListAttribute<E,Y5> list(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
             return new JoiningListAttribute<E,Y5,ListAttribute<E,Y5>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5));
+        }
+        
+        public static <E,Y,Y2,Y3,Y4,Y5,Y6,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>, A6 extends Attribute<? super Y5,?> & Bindable<Y6>>
+        ListAttribute<E,Y6> list(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+            return new JoiningListAttribute<E,Y6,ListAttribute<E,Y6>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5, (Attribute<?,?>)a6));
+        }
+        
+        public static <E,Y,Y2,Y3,Y4,Y5,Y6,Y7,A1 extends Attribute<E,?> & Bindable<Y>, A2 extends Attribute<? super Y,?> & Bindable<Y2>, A3 extends Attribute<? super Y2,?> & Bindable<Y3>, A4 extends Attribute<? super Y3,?> & Bindable<Y4>, A5 extends Attribute<? super Y4,?> & Bindable<Y5>, A6 extends Attribute<? super Y5,?> & Bindable<Y6>, A7 extends Attribute<? super Y6,?> & Bindable<Y7>>
+        ListAttribute<E,Y7> list(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) {
+            return new JoiningListAttribute<E,Y7,ListAttribute<E,Y7>>(newList((Attribute<?,?>)a1, (Attribute<?,?>)a2, (Attribute<?,?>)a3, (Attribute<?,?>)a4, (Attribute<?,?>)a5, (Attribute<?,?>)a6, (Attribute<?,?>)a7));
         }
         
         
