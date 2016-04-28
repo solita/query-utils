@@ -1,8 +1,6 @@
 package fi.solita.utils.query.generation;
 
-import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.query.QueryUtils.id;
-import static fi.solita.utils.query.QueryUtils.inExpr;
 import static fi.solita.utils.query.QueryUtils.join;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
@@ -26,18 +24,22 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
+import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.attributes.RestrictingAttribute;
 
 public class Restrict {
     
-    public static Option<String> wrapComparedNumbersWithFunction = None();
-
     private final Function0<EntityManager> em;
+
+    private final Configuration config;
+    private final QueryUtils queryUtils;
     
-    public Restrict(Function0<EntityManager> em) {
+    public Restrict(Function0<EntityManager> em, Configuration config) {
         this.em = em;
+        this.config = config;
+        this.queryUtils = new QueryUtils(config);
     }
     
     public static <E, R, R1, A1 extends Attribute<? super R, ?> & Bindable<R1>>
@@ -195,7 +197,7 @@ public class Restrict {
     @SuppressWarnings("unchecked")
     private <T> Expression<T> wrap(T value) {
         if (value instanceof Number) {
-            for (String unwrappingFunctionName: wrapComparedNumbersWithFunction) {
+            for (String unwrappingFunctionName: config.wrapComparedNumbersWithFunction()) {
                 return (Expression<T>) cb().function(unwrappingFunctionName, value.getClass(), cb().literal(value.toString())); 
             }
         }
@@ -371,7 +373,7 @@ public class Restrict {
      */
     public <E, A> CriteriaQuery<E> in(SingularAttribute<? super E, A> attribute, Iterable<A> values, CriteriaQuery<E> query) {
         Path<A> path = resolveSelectionPath(query).get(attribute);
-        Predicate predicate = inExpr(query, path, values, em.apply().getCriteriaBuilder());
+        Predicate predicate = queryUtils.inExpr(path, values, em.apply().getCriteriaBuilder());
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
     
@@ -380,7 +382,7 @@ public class Restrict {
      */
     public <E, A> CriteriaQuery<E> inIds(SingularAttribute<? super E, A> attribute, Iterable<? extends Id<A>> values, CriteriaQuery<E> query) {
         Path<A> path = resolveSelectionPath(query).get(attribute);
-        Predicate predicate = inExpr(query, path.get(id(path.getJavaType(), em.apply())), values, em.apply().getCriteriaBuilder());
+        Predicate predicate = queryUtils.inExpr(path.get(id(path.getJavaType(), em.apply())), values, em.apply().getCriteriaBuilder());
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
 
@@ -400,7 +402,7 @@ public class Restrict {
     public <E> CriteriaQuery<E> excluding(Iterable<? extends Id<? super E>> idsToExclude, CriteriaQuery<E> query) {
         Path<E> selectionPath = resolveSelectionPath(query);
         Path<Id<E>> idPath = selectionPath.get(QueryUtils.<E,Id<E>>id(selectionPath.getJavaType(), em.apply()));
-        Predicate predicate = cb().not(inExpr(query, idPath, idsToExclude, em.apply().getCriteriaBuilder()));
+        Predicate predicate = cb().not(queryUtils.inExpr(idPath, idsToExclude, em.apply().getCriteriaBuilder()));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
     
@@ -420,7 +422,7 @@ public class Restrict {
     public <E> CriteriaQuery<E> including(Iterable<? extends Id<? super E>> idsToInclude, CriteriaQuery<E> query) {
         Path<E> selectionPath = resolveSelectionPath(query);
         Path<Id<E>> idPath = selectionPath.get(QueryUtils.<E,Id<E>>id(selectionPath.getJavaType(), em.apply()));
-        Predicate predicate = inExpr(query, idPath, idsToInclude, em.apply().getCriteriaBuilder());
+        Predicate predicate = queryUtils.inExpr(idPath, idsToInclude, em.apply().getCriteriaBuilder());
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
 
@@ -439,7 +441,7 @@ public class Restrict {
      */
     public <E> CriteriaQuery<E> typeIn(Set<Class<? extends E>> classes, CriteriaQuery<E> query) {
         Path<E> path = resolveSelectionPath(query);
-        Predicate predicate = inExpr(query, path.type(), classes, cb());
+        Predicate predicate = queryUtils.inExpr(path.type(), classes, cb());
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
 

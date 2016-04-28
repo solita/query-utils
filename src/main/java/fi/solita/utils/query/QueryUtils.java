@@ -4,6 +4,7 @@ import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newListOfSize;
 import static fi.solita.utils.functional.Functional.cons;
+import static fi.solita.utils.functional.Functional.contains;
 import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.Functional.forall;
 import static fi.solita.utils.functional.Functional.grouped;
@@ -17,6 +18,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -57,14 +59,15 @@ import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
-import fi.solita.utils.query.backend.hibernate.TableValueType;
 import fi.solita.utils.query.entities.Table;
 import fi.solita.utils.query.entities.Table_;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
 import fi.solita.utils.query.projection.Constructors.TransparentProjection;
 
-public abstract class QueryUtils {
+public class QueryUtils {
     
+    static final String MEMBER_OF_CAST = "member_of_cast_";
+
     public static final class NoOrderingSpecifiedException extends RuntimeException {
         public NoOrderingSpecifiedException() {
             super("Paged query requires an Ordering. Either give Order.by:s as parameter (preferred), or use a query which defines ordering itself");
@@ -83,8 +86,12 @@ public abstract class QueryUtils {
         }
     }
 
-    private QueryUtils() {
-        //
+    private final Configuration config;
+    private final TableValueSupport tableValueSupport;
+    
+    public QueryUtils(Configuration config) {
+        this.config = config;
+        this.tableValueSupport = new TableValueSupport(config);
     }
 
     @SuppressWarnings("unchecked")
@@ -105,7 +112,7 @@ public abstract class QueryUtils {
             orders.addAll(query.getOrderList());
         }
         // "index" is a "function" in HQL that is used to order by the @Indexcolumn/@OrderColumn
-        // Yes, this is Hibernate-specific. Gotta figure out what to do with this...
+        // Yes, this is Hibern-specific. Gotta figure out what to do with this...
         orders.add(cb.asc(cb.function("index", null, listAttributePath)));
         query.orderBy(orders);
     }
@@ -183,7 +190,7 @@ public abstract class QueryUtils {
         return query;
     }
 
-    public static final Predicate inExpr(CriteriaQuery<?> q, Expression<?> path, Iterable<?> values, CriteriaBuilder cb) {
+    public final Predicate inExpr(Expression<?> path, Iterable<?> values, CriteriaBuilder cb) {
         List<?> vals = newList(values);
         if (vals.size() == 1) {
             return cb.equal(path, head(values));
@@ -193,21 +200,24 @@ public abstract class QueryUtils {
         List<Predicate> preds;
         
         // only use table-expression for large sets since oracle performs better with regular in-clause.
-        if (vals.size() > 20 && Table.isSupported(vals)) {
+        if (vals.size() > config.getMaxValuesForMemberOfRestriction() && tableValueSupport.isSupported(config, vals)) {
             // use 'table' for huge sets since member-of starts to perform badly
             preds = newList(cb.equal(cb.function("table", Boolean.class, path, cb.literal(Table.of(vals))), 1));
-        } else if (vals.size() > 5 && Table.isSupported(vals)) {
-            // use member-of for sets from 5 to 20
-            Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> targetType = TableValueType.getSqlTypeAndValues(vals);
+        } else if (vals.size() > config.getMinValuesForMemberOfRestriction() && tableValueSupport.isSupported(config, vals)) {
+            // use member-of
+            Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> targetType = tableValueSupport.getSqlTypeAndValues(vals);
             if (targetType == null) {
                 throw new IllegalArgumentException("No tabletype registered (Hacks.registerTableType) for type " + head(vals).getClass());
             }
             // return type doesn't seem to make a difference, so just set to boolean...
-            preds = newList(cb.equal(cb.function("member_of_cast_" + targetType.get()._1, Boolean.class, path, cb.literal(Table.of(vals))), 1));
+            preds = newList(cb.equal(cb.function(MEMBER_OF_CAST + targetType.get()._1, Boolean.class, path, cb.literal(Table.of(vals))), 1));
         } else {
-            // use regular in-clause for less than 5 values
-            // oracle fails if more than 1000 parameters
-            groups = newList(grouped(1000, vals));
+            // Use regular in-clause for less small sets.
+            if (config.getMaxInClauseValues().isDefined()) {
+                groups = newList(grouped(config.getMaxInClauseValues().get(), vals));
+            } else {
+                groups = Arrays.asList(vals);
+            }
             preds = newListOfSize(groups.size());
             for (List<?> g: groups) {
                 preds.add(path.in(g));
@@ -225,7 +235,7 @@ public abstract class QueryUtils {
     
     /**
      * Assumes that a function named "column_value" can get the value from the table-subselect.
-     * With Oracle and Hibernate this can be achieved by adding the following line to the Dialect:
+     * With Oracle and Hibern this can be achieved by adding the following line to the Dialect:
      * <code><pre>
      * registerFunction("column_value", new NoArgSQLFunction("column_value", StandardBasicTypes.STRING, false));
      * </pre></code>

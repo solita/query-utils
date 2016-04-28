@@ -14,6 +14,7 @@ import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Function0;
+import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
@@ -25,10 +26,14 @@ public class JpaCriteriaQuery {
 
     private final Function0<EntityManager> em;
     private final TypeProvider typeProvider;
+    private final JpaCriteriaCopy jpaCriteriaCopy;
+    private final QueryUtils queryUtils;
     
-    public JpaCriteriaQuery(Function0<EntityManager> em, TypeProvider typeProvider) {
+    public JpaCriteriaQuery(Function0<EntityManager> em, TypeProvider typeProvider, Configuration config) {
         this.em = em;
         this.typeProvider = typeProvider;
+        this.jpaCriteriaCopy = new JpaCriteriaCopy(config);
+        this.queryUtils = new QueryUtils(config);
     }
 
     public <E extends IEntity<?>> CriteriaQuery<E> single(Id<E> id) {
@@ -108,7 +113,7 @@ public class JpaCriteriaQuery {
         if (ids.iterator().hasNext()) {
             Root<E> root = query.from(entityClass);
             Path<Id<E>> idPath = root.get(QueryUtils.<E,Id<E>>id(entityClass, em.apply()));
-            query.where(QueryUtils.inExpr(query, idPath, (Iterable<Id<E>>)ids, em.apply().getCriteriaBuilder()));
+            query.where(queryUtils.inExpr(idPath, (Iterable<Id<E>>)ids, em.apply().getCriteriaBuilder()));
             query.select(root);
             return (CriteriaQuery<E>)(Object)query;
         } else {
@@ -219,7 +224,7 @@ public class JpaCriteriaQuery {
     CriteriaQuery<R> doRelated(CriteriaQuery<E> query, Attribute<?,?>... attributes) {
         CriteriaQuery<Object> q = em.apply().getCriteriaBuilder().createQuery();
 
-        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
+        jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
         From<?,?> join = resolveSelection(query, q);
         for (Attribute<?, ?> attr : attributes) {
             join = QueryUtils.join(join, attr, JoinType.INNER);

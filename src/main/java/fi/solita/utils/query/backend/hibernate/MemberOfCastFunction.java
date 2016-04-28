@@ -1,7 +1,6 @@
-package fi.solita.utils.query;
+package fi.solita.utils.query.backend.hibernate;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.hibernate.QueryException;
 import org.hibernate.dialect.function.SQLFunction;
@@ -10,7 +9,16 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.Type;
 
-public final class TableFunction implements SQLFunction {
+import fi.solita.utils.functional.Option;
+
+public final class MemberOfCastFunction implements SQLFunction {
+    private final String targetTableType;
+    private final Option<String> targetObjectType;
+    
+    public MemberOfCastFunction(String targetTableType, Option<String> targetObjectType) {
+        this.targetTableType = targetTableType;
+        this.targetObjectType = targetObjectType;
+    }
     
     @Override
     public boolean hasArguments() {
@@ -31,15 +39,9 @@ public final class TableFunction implements SQLFunction {
     @Override
     public String render(Type columnType, @SuppressWarnings("rawtypes") List args, SessionFactoryImplementor factory) throws QueryException {
         if ( args.size()!=2 ) {
-            throw new QueryException("table requires two arguments");
+            throw new QueryException("member_of_cast requires two arguments");
         }
         
-        return args.get(0) + " IN (/*qu*/SELECT * FROM table(" + args.get(1) + ")) AND 1";
-    }
-    
-    private static final Pattern union = Pattern.compile("\\) AND 1=1\\s+[oO][rR][^/]+/[*]qu[*]/");
-    
-    static String makeUnion(String sql) {
-        return union.matcher(sql).replaceAll(" UNION ALL ");
+        return targetObjectType.getOrElse("") + args.get(0) + " MEMBER OF CAST(" + args.get(1) + " AS " + targetTableType + ") AND 1";
     }
 }

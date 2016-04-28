@@ -6,6 +6,8 @@
     
     <import resource="classpath:applicationContext_query-utils.xml" />
     
+    <bean id="query-utils_Configuration" class="fi.solita.utils.query.backend.hibernate.DefaultHibernateConfiguration" />
+    
     <bean class="fi.solita.utils.query.backend.hibernate.HibernateQueryExecutor" />
     <bean class="fi.solita.utils.query.backend.hibernate.HibernateTypeProvider" />
 </beans>

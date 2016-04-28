@@ -25,6 +25,7 @@ import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Transformers;
+import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
@@ -39,21 +40,23 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
 
     private final Function0<EntityManager> em;
     private final TypeProvider typeProvider;
+    private final JpaCriteriaCopy jpaCriteriaCopy;
     
-    public HibernateQueryExecutor(Function0<EntityManager> em, TypeProvider typeProvider) {
+    public HibernateQueryExecutor(Function0<EntityManager> em, TypeProvider typeProvider, Configuration config) {
         this.em = em;
         this.typeProvider = typeProvider;
+        this.jpaCriteriaCopy = new JpaCriteriaCopy(config);
     }
     
     @Override
     public <T> T get(CriteriaQuery<T> query, LockModeType lock) {
-        JpaCriteriaCopy.createMissingAliases(query);
+        jpaCriteriaCopy.createMissingAliases(query);
         return replaceProxy(em.apply().createQuery(query).setLockMode(lock).getSingleResult());
     }
 
     @Override
     public <T> List<T> getMany(CriteriaQuery<T> query, Page page, LockModeType lock) {
-        JpaCriteriaCopy.createMissingAliases(query);
+        jpaCriteriaCopy.createMissingAliases(query);
         
         TypedQuery<T> q = em.apply().createQuery(query).setLockMode(lock);
         int originalFirstResult = q.getFirstResult();

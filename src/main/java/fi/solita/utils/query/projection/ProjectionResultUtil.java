@@ -182,7 +182,7 @@ class ProjectionResultUtil {
         return ret;
     }
     
-    /** Hibernate cannot handle embeddables with all-null values correctly, since it doesn't separate a missing embeddable and an existing all-null embeddable.
+    /** Hibern cannot handle embeddables with all-null values correctly, since it doesn't separate a missing embeddable and an existing all-null embeddable.
      *  So we instantiate the empty embeddable if the result has been left null but the attribute is required */
     static Object convertNullsToEmbeddableWhereRequired(Attribute<?,?> attribute, Object resultFromDb) {
         logger.debug("convertNullsToEmbeddableWhereRequired({},{})", attribute, resultFromDb);

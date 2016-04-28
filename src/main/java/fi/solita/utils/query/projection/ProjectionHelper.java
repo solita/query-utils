@@ -13,12 +13,13 @@ import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.tail;
 import static fi.solita.utils.functional.Functional.transpose;
 import static fi.solita.utils.functional.Functional.zip;
+import static fi.solita.utils.functional.FunctionalA.head;
+import static fi.solita.utils.functional.FunctionalA.tail;
 import static fi.solita.utils.functional.FunctionalM.find;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.query.QueryUtils.addListAttributeOrdering;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 import static fi.solita.utils.query.QueryUtils.id;
-import static fi.solita.utils.query.QueryUtils.inExpr;
 import static fi.solita.utils.query.QueryUtils.join;
 import static fi.solita.utils.query.QueryUtils.resolveOrderColumn;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
@@ -63,6 +64,7 @@ import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple3;
+import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Page;
@@ -80,10 +82,14 @@ public class ProjectionHelper {
 
     private final Function0<EntityManager> em;
     private final JpaCriteriaQueryExecutor queryExecutor;
+    private final Configuration config;
+    private final QueryUtils queryUtils;
     
-    public ProjectionHelper(Function0<EntityManager> em, JpaCriteriaQueryExecutor queryExecutor) {
+    public ProjectionHelper(Function0<EntityManager> em, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.em = em;
         this.queryExecutor = queryExecutor;
+        this.config = config;
+        this.queryUtils = new QueryUtils(config);
     }
 
     public <E> List<Selection<?>> prepareProjectingQuery(MetaJpaConstructor<E,?,?> projection, From<?,? extends E> selection) {
@@ -138,19 +144,18 @@ public class ProjectionHelper {
         if (unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined()) {
             SingularAttribute<T,Id<T>> replacement = id(selection.getJavaType(), em.apply());
             logger.debug("AdditionalQueryPerformingAttribute detected. Replacing selection {} with source Id {}", selection.getJavaType().getSimpleName(), replacement.getName());
-            // add entity id as a placeholder to the query, to be replaced later with the actual result.
             return selection.get(replacement);
         }
 
         if (unwrap(PluralAttribute.class, param).isDefined()) {
+            SingularAttribute<T,Id<T>> replacement = id(selection.getJavaType(), em.apply());
             logger.debug("PluralAttribute detected. Replacing parameter with source Id.");
-            return selection.get(id(selection.getJavaType(), em.apply()));
+            return selection.get(replacement);
         }
         
         for (@SuppressWarnings("unused") JoiningAttribute a: unwrap(JoiningAttribute.class, param)) {
             // use left join here, since were are modifying the existing selection which should still return all the rows
             selection = (From<?, T>) doJoins(selection, param, JoinType.LEFT)._2;
-            //param = relAndTarget._2;
         }
         
         for (SingularAttribute<T,?> attr: unwrap(SingularAttribute.class, param)) {
@@ -293,19 +298,19 @@ public class ProjectionHelper {
             ProjectionUtil.doRestrictions(r, target);
         }
         
-        query.where(inExpr(query, sourceId, sourceIds, em.apply().getCriteriaBuilder()));
+        query.where(queryUtils.inExpr(sourceId, sourceIds, em.apply().getCriteriaBuilder()));
 
-        /* Would this provide any benefit? Maybe only overhead...
-        if (isDistinctable) {
+        // Would this provide any benefit? Maybe only overhead...
+        if (isDistinctable && config.makeProjectionQueriesDistinct()) {
             logger.debug("Query is distinctable.");
             query.distinct(true);
-        }*/
+        }
 
         setListAttributeOrderings(target, query, actualJoins);
         
         Option<AdditionalQueryPerformingAttribute> rel = unwrap(AdditionalQueryPerformingAttribute.class, target);
         if (isCollectionOfEmbeddables(target)) {
-            // Must handle collections of embeddables separately, since hibernate seems to include only
+            // Must handle collections of embeddables separately, since hibern seems to include only
             // parentid (of the embeddable) in the select clause, but tries to read
             // all fields from the resultset
             logger.debug("Target is a collection of embeddables. Breaking embeddable fields manually for the query.");

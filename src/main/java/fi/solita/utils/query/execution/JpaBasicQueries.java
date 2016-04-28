@@ -29,6 +29,7 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
+import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
@@ -50,12 +51,15 @@ public class JpaBasicQueries {
     private final ProjectionHelper projectionSupport;
     private final TypeProvider typeProvider;
     private final JpaCriteriaQueryExecutor queryExecutor;
+    
+    private final JpaCriteriaCopy jpaCriteriaCopy;
 
-    public JpaBasicQueries(Function0<EntityManager> em, ProjectionHelper projectionSupport, TypeProvider typeProvider, JpaCriteriaQueryExecutor queryExecutor) {
+    public JpaBasicQueries(Function0<EntityManager> em, ProjectionHelper projectionSupport, TypeProvider typeProvider, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.em = em;
         this.projectionSupport = projectionSupport;
         this.typeProvider = typeProvider;
         this.queryExecutor = queryExecutor;
+        this.jpaCriteriaCopy = new JpaCriteriaCopy(config);
     }
 
     @SuppressWarnings("unchecked")
@@ -75,7 +79,7 @@ public class JpaBasicQueries {
     public <E extends IEntity<?> & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
         @SuppressWarnings("unchecked")
         CriteriaQuery<Id<E>> q = (CriteriaQuery<Id<E>>)(Object)em.apply().getCriteriaBuilder().createQuery();
-        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
+        jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
         From<?,E> selection = resolveSelection(query, q);
 
         q.multiselect(projectionSupport.prepareProjectingQuery(Project.id(), selection));

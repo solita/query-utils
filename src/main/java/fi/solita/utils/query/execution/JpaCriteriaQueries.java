@@ -22,6 +22,7 @@ import javax.persistence.criteria.Selection;
 
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
+import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Order;
 import fi.solita.utils.query.Page;
@@ -32,15 +33,17 @@ public class JpaCriteriaQueries {
 
     private final JpaCriteriaQueryExecutor queryExecutor;
     private final Function0<EntityManager> em;
+    private final JpaCriteriaCopy jpaCriteriaCopy;
 
-    public JpaCriteriaQueries(Function0<EntityManager> em, JpaCriteriaQueryExecutor queryExecutor) {
+    public JpaCriteriaQueries(Function0<EntityManager> em, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.em = em;
         this.queryExecutor = queryExecutor;
+        this.jpaCriteriaCopy = new JpaCriteriaCopy(config);
     }
 
     public long count(CriteriaQuery<?> query, LockModeType lock) {
         CriteriaQuery<Long> q = em.apply().getCriteriaBuilder().createQuery(Long.class);
-        JpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
+        jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.apply().getCriteriaBuilder());
         Selection<?> selection = resolveSelection(query);
         q.select(em.apply().getCriteriaBuilder().count((Expression<?>) (selection.isCompoundSelection() ? head(selection.getCompoundSelectionItems()) : selection)));
         return get(q, lock);
