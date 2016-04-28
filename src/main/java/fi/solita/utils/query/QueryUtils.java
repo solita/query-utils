@@ -16,6 +16,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,13 +48,16 @@ import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
+import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Transformer;
+import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Order.Direction;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
+import fi.solita.utils.query.backend.hibernate.TableValueType;
 import fi.solita.utils.query.entities.Table;
 import fi.solita.utils.query.entities.Table_;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
@@ -188,20 +192,20 @@ public abstract class QueryUtils {
         List<? extends List<?>> groups;
         List<Predicate> preds;
         
-        // only use table-expression for large sets since oracle performs better with regular in-clause
-        if (vals.size() > 5 && Table.isSupported(vals)) {
-            // oracle jdbc drivers seem to have a hard-coded 4000 value limit
-            groups = newList(grouped(4000, vals));
-            preds = newListOfSize(groups.size());
-            for (int i = 0; i < groups.size(); ++i) {
-                List<?> g = groups.get(i);
-                Subquery<Long> tableselect = q.subquery(Long.class);
-                Root<Table> root = tableselect.from(Table.class);
-                tableselect.select(i == 0 ? cb.function("dynamic_sampling_start", Long.class) : cb.function("dynamic_sampling", Long.class));
-                tableselect.where(cb.equal(cb.literal(Table.of(g)), root.get(i == groups.size() - 1 ? Table_.commentEndWithBindParameter : Table_.commentEndWithBindParameterAndUnionAll)));
-                preds.add(path.in(tableselect));
+        // only use table-expression for large sets since oracle performs better with regular in-clause.
+        if (vals.size() > 20 && Table.isSupported(vals)) {
+            // use 'table' for huge sets since member-of starts to perform badly
+            preds = newList(cb.equal(cb.function("table", Boolean.class, path, cb.literal(Table.of(vals))), 1));
+        } else if (vals.size() > 5 && Table.isSupported(vals)) {
+            // use member-of for sets from 5 to 20
+            Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> targetType = TableValueType.getSqlTypeAndValues(vals);
+            if (targetType == null) {
+                throw new IllegalArgumentException("No tabletype registered (Hacks.registerTableType) for type " + head(vals).getClass());
             }
+            // return type doesn't seem to make a difference, so just set to boolean...
+            preds = newList(cb.equal(cb.function("member_of_cast_" + targetType.get()._1, Boolean.class, path, cb.literal(Table.of(vals))), 1));
         } else {
+            // use regular in-clause for less than 5 values
             // oracle fails if more than 1000 parameters
             groups = newList(grouped(1000, vals));
             preds = newListOfSize(groups.size());

@@ -30,7 +30,8 @@ import fi.solita.utils.functional.Function;
 import fi.solita.utils.functional.Function1;
 import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.functional.Pair;
+import fi.solita.utils.functional.Tuple;
+import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Hacks;
 import fi.solita.utils.query.entities.Table;
 
@@ -93,11 +94,11 @@ public class TableValueType implements UserType, Serializable {
             Connection c = st.getConnection().unwrap(oracleConnectionClass);
             Collection<?> values = ((Table.Value)value).values;
             
-            Option<Pair<String,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = getSqlTypeAndValues(values);
+            Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = getSqlTypeAndValues(values);
             if (sqlTypeAndValues.isDefined()) {
                 try {
-                    Object ad = arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get().left, c);
-                    oraclePreparedStatementMethod.invoke(st.unwrap(oraclePreparedStatementClass), index, ARRAYConstructor.newInstance(ad, c, newArray(Object.class, sqlTypeAndValues.get().right.apply(c))));
+                    Object ad = arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);
+                    oraclePreparedStatementMethod.invoke(st.unwrap(oraclePreparedStatementClass), index, ARRAYConstructor.newInstance(ad, c, newArray(Object.class, sqlTypeAndValues.get()._3.apply(c))));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -107,21 +108,24 @@ public class TableValueType implements UserType, Serializable {
         }
     }
     
-    public static Option<Pair<String,Apply<Connection,Iterable<Object>>>> getSqlTypeAndValues(final Iterable<?> values) {
+    public static Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> getSqlTypeAndValues(final Iterable<?> values) {
         Option<?> h = headOption(values);
         if (!h.isDefined()) {
             return None();
         }
         
         String t;
+        Option<String> o;
         Apply<Connection,Iterable<Object>> v;
         if (h.get() instanceof CharSequence) {
             t = "SYS.ODCIVARCHAR2LIST";
+            o = None();
             @SuppressWarnings("unchecked")
             Iterable<Object> m = (Iterable<Object>)(Object)map(TableValueType_.toStr, (Iterable<CharSequence>)values);
             v = Function.constant(m);
         } else if (h.get() instanceof Number) {
             t = "SYS.ODCINUMBERLIST";
+            o = None();
             @SuppressWarnings("unchecked")
             Iterable<Object> m = (Iterable<Object>)values;
             if (h.get() instanceof Short) {
@@ -129,37 +133,36 @@ public class TableValueType implements UserType, Serializable {
             }
             v = Function.constant(m);
         } else if (Hacks.registeredTableTypesInternal.containsKey(h.get().getClass())) {
-            final Pair<String, ? extends Function2<Connection, ?, ?>> tabletypeAndConverter = Hacks.registeredTableTypesInternal.get(h.get().getClass());
-            Pair<String, Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
-            t = res.left;
-            v = res.right;
+            final Tuple3<String,Option<String>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = Hacks.registeredTableTypesInternal.get(h.get().getClass());
+            Tuple3<String,Option<String>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
+            t = res._1;
+            o = res._2;
+            v = res._3;
         } else {
             // if no exact type found, try some registered for a superclass
-            for (Entry<Class<?>, Pair<String, ? extends Function2<Connection, ?, ?>>> entry: Hacks.registeredTableTypesInternal.entrySet()) {
+            for (Entry<Class<?>, Tuple3<String,Option<String>, ? extends Function2<Connection, ?, ?>>> entry: Hacks.registeredTableTypesInternal.entrySet()) {
                 if (entry.getKey().isAssignableFrom(h.get().getClass())) {
-                    Pair<String, Apply<Connection, Iterable<Object>>> res = foo(entry.getValue(), values);
-                    return Some(Pair.of(res.left, res.right));
+                    return Some(foo(entry.getValue(), values));
                 }
             }
             return None();
         }
-        return Some(Pair.of(t, v));
+        return Some(Tuple.of(t, o, v));
     }
     
     public static Object castShortToLong(Object o) {
         return Long.valueOf(((Short)o).longValue());
     }
     
-    static Pair<String,Apply<Connection,Iterable<Object>>> foo(final Pair<String, ? extends Function2<Connection, ?, ?>> tabletypeAndConverter, final Iterable<?> values) {
-        String t = tabletypeAndConverter.left;
+    static Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>> foo(final Tuple3<String,Option<String>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter, final Iterable<?> values) {
         Apply<Connection,Iterable<Object>> v = new Function1<Connection, Iterable<Object>>() {
             @Override
             @SuppressWarnings("unchecked")
             public Iterable<Object> apply(Connection t) {
-                return map((Apply<Object,Object>)tabletypeAndConverter.right.ap(t), (Iterable<Object>)values);
+                return map((Apply<Object,Object>)tabletypeAndConverter._3.ap(t), (Iterable<Object>)values);
             }
         };
-        return Pair.of(t, v); 
+        return Tuple.of(tabletypeAndConverter._1, tabletypeAndConverter._2, v); 
     }
 
     @Override

@@ -24,18 +24,6 @@ public class Table {
     @Column(name="*")
     long star;
     
-    @Column(name="*/")
-    long commentEnd;
-    
-    @Column(name="*/)")
-    long commentEndWithParen;
-
-    @Column(name="*/?) " + tableAlias + " UNION ALL /*")
-    Table.Value commentEndWithBindParameterAndUnionAll;
-    
-    @Column(name="*/?) " + tableAlias)
-    Table.Value commentEndWithBindParameter;
-    
     public static boolean enabled = false;
     
     public static final boolean isSupported(Iterable<?> values) {
