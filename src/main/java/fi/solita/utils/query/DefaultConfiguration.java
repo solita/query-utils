@@ -10,27 +10,11 @@ import java.util.Map;
 import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple3;
+import fi.solita.utils.query.db.TableInClauseOptimization;
 
-public class DefaultConfiguration extends Configuration {
-    private final boolean oraclePresent;
-    
-    public DefaultConfiguration() {
-        boolean oraclePresent;
-        try {
-            Class.forName("oracle.jdbc.OracleConnection");
-            oraclePresent = true;
-        } catch (ClassNotFoundException e) {
-            oraclePresent = false;
-        }
-        this.oraclePresent = oraclePresent;
-    }
-    
+public class DefaultConfiguration implements Configuration {
     public String getAliasPrefix() {
         return "queryutils_";
-    }
-
-    public boolean isOracleTableInClauseEnabled() {
-        return oraclePresent;
     }
 
     public int getMaxValuesForMemberOfRestriction() {
@@ -42,8 +26,8 @@ public class DefaultConfiguration extends Configuration {
     }
     
     public Option<Integer> getMaxInClauseValues() {
-        // limits for other db vendors?
-        return oraclePresent ? Some(1000) : Option.<Integer>None();
+        // ora has a limit of 1000. Don't know of other db verndors.
+        return Some(1000);
     }
 
     public Option<String> wrapComparedNumbersWithFunction() {
@@ -56,5 +40,9 @@ public class DefaultConfiguration extends Configuration {
 
     public Map<Class<?>, Tuple3<String, Option<String>, ? extends Function2<Connection, ?, ?>>> getRegisteredTableTypes() {
         return emptyMap();
+    }
+
+    public Option<TableInClauseOptimization> getTableInClauseProvider() {
+        return None();
     }
 }

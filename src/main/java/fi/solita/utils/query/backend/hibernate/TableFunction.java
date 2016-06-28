@@ -1,7 +1,6 @@
 package fi.solita.utils.query.backend.hibernate;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.hibernate.QueryException;
 import org.hibernate.dialect.function.SQLFunction;
@@ -34,12 +33,6 @@ public final class TableFunction implements SQLFunction {
             throw new QueryException("table requires two arguments");
         }
         
-        return args.get(0) + " IN (/*qu*/SELECT * FROM table(" + args.get(1) + ")) AND 1";
-    }
-    
-    private static final Pattern union = Pattern.compile("\\) AND 1=1\\s+[oO][rR][^/]+/[*]qu[*]/");
-    
-    static String makeUnion(String sql) {
-        return union.matcher(sql).replaceAll(" UNION ALL ");
+        return args.get(0) + " IN (SELECT /*+ dynamic_sampling(10) */ * FROM table(" + args.get(1) + ")) AND 1";
     }
 }

@@ -8,6 +8,7 @@ import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -53,13 +54,15 @@ public class JpaBasicQueries {
     private final JpaCriteriaQueryExecutor queryExecutor;
     
     private final JpaCriteriaCopy jpaCriteriaCopy;
-
+    private final Configuration config;
+    
     public JpaBasicQueries(Function0<EntityManager> em, ProjectionHelper projectionSupport, TypeProvider typeProvider, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.em = em;
         this.projectionSupport = projectionSupport;
         this.typeProvider = typeProvider;
         this.queryExecutor = queryExecutor;
         this.jpaCriteriaCopy = new JpaCriteriaCopy(config);
+        this.config = config;
     }
 
     @SuppressWarnings("unchecked")
@@ -85,8 +88,13 @@ public class JpaBasicQueries {
         q.multiselect(projectionSupport.prepareProjectingQuery(Project.id(), selection));
         Collection<Id<E>> idList = queryExecutor.getMany(q, Page.NoPaging, LockModeType.NONE);
 
-        // oracle has 1000 element limit in in-list
-        for (Iterable<Id<E>> ids: grouped(1000, idList)) {
+        Iterable<? extends Iterable<Id<E>>> grouped;
+        if (config.getMaxInClauseValues().isDefined()) {
+            grouped = grouped(config.getMaxInClauseValues().get(), idList);
+        } else {
+            grouped = Arrays.asList(idList);
+        }
+        for (Iterable<Id<E>> ids: grouped) {
             em.apply().createQuery("delete from " + resolveSelection(query).getJavaType().getName() + " e where e.id in (:ids)").setParameter("ids", newList(ids)).executeUpdate();
         }
     }

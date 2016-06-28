@@ -22,18 +22,14 @@ import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Configuration;
-import fi.solita.utils.query.TableValueSupport;
+import fi.solita.utils.query.db.oracle.OracleSupport;
 import fi.solita.utils.query.entities.Table;
 
 @MappedSuperclass
-@TypeDef(defaultForType = Table.Value.class, typeClass = TableValueType.class)
-public class TableValueType implements UserType, Serializable {
+@TypeDef(defaultForType = Table.Value.class, typeClass = OracleTableValueType.class)
+public class OracleTableValueType implements UserType, Serializable {
     
     public static Configuration config;
-    
-    public TableValueType() {
-        TableValueSupport.isAvailable();
-    }
 
     @Override
     public int[] sqlTypes() {
@@ -50,14 +46,14 @@ public class TableValueType implements UserType, Serializable {
         if (value == null) {
             throw new UnsupportedOperationException("Shouldn't be here");
         } else {
-            Connection c = st.getConnection().unwrap(TableValueSupport.oracleConnectionClass);
+            Connection c = st.getConnection().unwrap(OracleSupport.oracleConnectionClass);
             Collection<?> values = ((Table.Value)value).values;
             
-            Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new TableValueSupport(config).getSqlTypeAndValues(values);
+            Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
             if (sqlTypeAndValues.isDefined()) {
                 try {
-                    Object ad = TableValueSupport.arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);
-                    TableValueSupport.oraclePreparedStatementMethod.invoke(st.unwrap(TableValueSupport.oraclePreparedStatementClass), index, TableValueSupport.ARRAYConstructor.newInstance(ad, c, newArray(Object.class, sqlTypeAndValues.get()._3.apply(c))));
+                    Object ad = OracleSupport.arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);
+                    OracleSupport.oraclePreparedStatementMethod.invoke(st.unwrap(OracleSupport.oraclePreparedStatementClass), index, OracleSupport.ARRAYConstructor.newInstance(ad, c, newArray(Object.class, sqlTypeAndValues.get()._3.apply(c))));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

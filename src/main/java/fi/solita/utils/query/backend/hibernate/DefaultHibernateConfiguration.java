@@ -4,6 +4,6 @@ import fi.solita.utils.query.DefaultConfiguration;
 
 public class DefaultHibernateConfiguration extends DefaultConfiguration {
     public DefaultHibernateConfiguration() {
-        TableValueType.config = this;
+        OracleTableValueType.config = this;
     }
 }

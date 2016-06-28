@@ -4,7 +4,6 @@ import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newListOfSize;
 import static fi.solita.utils.functional.Functional.cons;
-import static fi.solita.utils.functional.Functional.contains;
 import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.Functional.forall;
 import static fi.solita.utils.functional.Functional.grouped;
@@ -59,6 +58,7 @@ import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
+import fi.solita.utils.query.db.TableInClauseOptimization;
 import fi.solita.utils.query.entities.Table;
 import fi.solita.utils.query.entities.Table_;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
@@ -87,11 +87,9 @@ public class QueryUtils {
     }
 
     private final Configuration config;
-    private final TableValueSupport tableValueSupport;
     
     public QueryUtils(Configuration config) {
         this.config = config;
-        this.tableValueSupport = new TableValueSupport(config);
     }
 
     @SuppressWarnings("unchecked")
@@ -189,30 +187,42 @@ public class QueryUtils {
         }
         return query;
     }
-
+    
     public final Predicate inExpr(Expression<?> path, Iterable<?> values, CriteriaBuilder cb) {
+        return inExpr(path, values, cb, true);
+    }
+
+    public final Predicate inExpr(Expression<?> path, Iterable<?> values, CriteriaBuilder cb, boolean enableOptimizations) {
         List<?> vals = newList(values);
         if (vals.size() == 1) {
             return cb.equal(path, head(values));
+        } else if (vals.isEmpty()) {
+            return cb.or();
         }
         
         List<? extends List<?>> groups;
-        List<Predicate> preds;
+        List<Predicate> preds = null;
         
-        // only use table-expression for large sets since oracle performs better with regular in-clause.
-        if (vals.size() > config.getMaxValuesForMemberOfRestriction() && tableValueSupport.isSupported(config, vals)) {
-            // use 'table' for huge sets since member-of starts to perform badly
-            preds = newList(cb.equal(cb.function("table", Boolean.class, path, cb.literal(Table.of(vals))), 1));
-        } else if (vals.size() > config.getMinValuesForMemberOfRestriction() && tableValueSupport.isSupported(config, vals)) {
-            // use member-of
-            Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> targetType = tableValueSupport.getSqlTypeAndValues(vals);
-            if (targetType == null) {
-                throw new IllegalArgumentException("No tabletype registered (Hacks.registerTableType) for type " + head(vals).getClass());
+        if (enableOptimizations) {
+            for (TableInClauseOptimization provider: config.getTableInClauseProvider()) {
+                Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> targetType = provider.getSqlTypeAndValues(vals);
+                if (!targetType.isDefined()) {
+                    throw new IllegalArgumentException("No tabletype registered (Hacks.registerTableType) for type " + head(vals).getClass());
+                }
+                // only use table-expression for large sets since ora performs better with regular in-clause.
+                if (vals.size() > config.getMaxValuesForMemberOfRestriction()) {
+                    // use 'table' for huge sets since member-of starts to perform badly
+                    preds = newList(cb.equal(cb.function("table", Boolean.class, path, cb.literal(Table.of(vals))), 1));
+                } else if (vals.size() > config.getMinValuesForMemberOfRestriction()) {
+                    // use member-of
+                    // return type doesn't seem to make a difference, so just set to boolean...
+                    preds = newList(cb.equal(cb.function(MEMBER_OF_CAST + targetType.get()._1, Boolean.class, path, cb.literal(Table.of(vals))), 1));
+                }
             }
-            // return type doesn't seem to make a difference, so just set to boolean...
-            preds = newList(cb.equal(cb.function(MEMBER_OF_CAST + targetType.get()._1, Boolean.class, path, cb.literal(Table.of(vals))), 1));
-        } else {
-            // Use regular in-clause for less small sets.
+        }
+        
+        if (preds == null) {
+            // Use regular in-clause for smaller sets.
             if (config.getMaxInClauseValues().isDefined()) {
                 groups = newList(grouped(config.getMaxInClauseValues().get(), vals));
             } else {
@@ -224,9 +234,7 @@ public class QueryUtils {
             }
         }
         
-        if (preds.isEmpty()) {
-            return cb.or();
-        } else if (preds.size() == 1) {
+        if (preds.size() == 1) {
             return head(preds);
         } else {
             return cb.or(newArray(Predicate.class, preds));
@@ -235,7 +243,7 @@ public class QueryUtils {
     
     /**
      * Assumes that a function named "column_value" can get the value from the table-subselect.
-     * With Oracle and Hibern this can be achieved by adding the following line to the Dialect:
+     * With Ora and Hibern this can be achieved by adding the following line to the Dialect:
      * <code><pre>
      * registerFunction("column_value", new NoArgSQLFunction("column_value", StandardBasicTypes.STRING, false));
      * </pre></code>

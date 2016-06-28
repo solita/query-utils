@@ -6,24 +6,22 @@ import java.util.Map;
 import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple3;
+import fi.solita.utils.query.db.TableInClauseOptimization;
 
-public abstract class Configuration {
-    public abstract String getAliasPrefix();
+public interface Configuration {
+    public String getAliasPrefix();
     
-    /**
-     * Optimization for <i>array-valued in clauses</i> using Oracle
-     */
-    public abstract boolean isOracleTableInClauseEnabled();
+    public int getMaxValuesForMemberOfRestriction();
 
-    public abstract int getMaxValuesForMemberOfRestriction();
+    public int getMinValuesForMemberOfRestriction();
+    
+    public Option<Integer> getMaxInClauseValues();
+    
+    public Option<String> wrapComparedNumbersWithFunction();
 
-    public abstract int getMinValuesForMemberOfRestriction();
+    public boolean makeProjectionQueriesDistinct();
     
-    public abstract Option<Integer> getMaxInClauseValues();
+    public Map<Class<?>, Tuple3<String, Option<String>, ? extends Function2<Connection,?,?>>> getRegisteredTableTypes();
     
-    public abstract Option<String> wrapComparedNumbersWithFunction();
-
-    public abstract boolean makeProjectionQueriesDistinct();
-    
-    public abstract Map<Class<?>, Tuple3<String, Option<String>, ? extends Function2<Connection,?,?>>> getRegisteredTableTypes();
+    public Option<TableInClauseOptimization> getTableInClauseProvider();
 }

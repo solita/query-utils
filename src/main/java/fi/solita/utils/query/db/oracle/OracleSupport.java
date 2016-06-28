@@ -1,4 +1,4 @@
-package fi.solita.utils.query;
+package fi.solita.utils.query.db.oracle;
 
 import static fi.solita.utils.functional.Functional.headOption;
 import static fi.solita.utils.functional.Functional.map;
@@ -19,19 +19,17 @@ import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple3;
+import fi.solita.utils.query.Configuration;
+import fi.solita.utils.query.db.TableInClauseOptimization;
 
-public class TableValueSupport {
+public class OracleSupport implements TableInClauseOptimization {
     
     private final Configuration config;
     
-    public TableValueSupport(Configuration config) {
+    public OracleSupport(Configuration config) {
         this.config = config;
     }
     
-    public final boolean isSupported(Configuration config, Iterable<?> values) {
-        return config.isOracleTableInClauseEnabled() && isAvailable() && getSqlTypeAndValues(values).isDefined();
-    }
-
     public Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> getSqlTypeAndValues(final Iterable<?> values) {
         Option<?> h = headOption(values);
         if (!h.isDefined()) {
@@ -61,7 +59,7 @@ public class TableValueSupport {
                 t = "SYS.ODCIVARCHAR2LIST";
                 o = None();
                 @SuppressWarnings("unchecked")
-                Iterable<Object> m = (Iterable<Object>)(Object)map(TableValueSupport_.toStr, (Iterable<CharSequence>)values);
+                Iterable<Object> m = (Iterable<Object>)(Object)map(OracleSupport_.toStr, (Iterable<CharSequence>)values);
                 v = Function.constant(m);
             } else if (h.get() instanceof Number) {
                 t = "SYS.ODCINUMBERLIST";
@@ -69,7 +67,7 @@ public class TableValueSupport {
                 @SuppressWarnings("unchecked")
                 Iterable<Object> m = (Iterable<Object>)values;
                 if (h.get() instanceof Short) {
-                    m = map(TableValueSupport_.castShortToLong, m);
+                    m = map(OracleSupport_.castShortToLong, m);
                 }
                 v = Function.constant(m);
             } else {
@@ -96,27 +94,22 @@ public class TableValueSupport {
     private static Class<?> ARRAYClass;
     public static Constructor<?> ARRAYConstructor;
     public static Method arrayDescriptorMethod;
-    private static Boolean available;
-    public static boolean isAvailable() {
-        if (available == null) {
-            try {
-                @SuppressWarnings("unchecked")
-                Class<? extends Connection> oc = (Class<? extends Connection>) Class.forName("oracle.jdbc.OracleConnection");
-                TableValueSupport.oracleConnectionClass = oc;
-                @SuppressWarnings("unchecked")
-                Class<? extends PreparedStatement> ps = (Class<? extends PreparedStatement>) Class.forName("oracle.jdbc.OraclePreparedStatement");
-                oraclePreparedStatementClass = ps;
-                ARRAYClass = (Class<?>) Class.forName("oracle.sql.ARRAY");
-                Class<?> arrayDescriptorClass = Class.forName("oracle.sql.ArrayDescriptor");
-                ARRAYConstructor = ARRAYClass.getConstructor(arrayDescriptorClass, Connection.class, Object.class);
-                oraclePreparedStatementMethod = oraclePreparedStatementClass.getMethod("setARRAY", int.class, ARRAYClass);
-                arrayDescriptorMethod = arrayDescriptorClass.getMethod("createDescriptor", String.class, Connection.class);
-                available = true;
-            } catch (Exception e) {
-                available = false;
-            }
+    
+    static {
+        try {
+            @SuppressWarnings("unchecked")
+            Class<? extends Connection> oc = (Class<? extends Connection>) Class.forName("oracle.jdbc.OracleConnection");
+            OracleSupport.oracleConnectionClass = oc;
+            @SuppressWarnings("unchecked")
+            Class<? extends PreparedStatement> ps = (Class<? extends PreparedStatement>) Class.forName("oracle.jdbc.OraclePreparedStatement");
+            oraclePreparedStatementClass = ps;
+            ARRAYClass = (Class<?>) Class.forName("oracle.sql.ARRAY");
+            Class<?> arrayDescriptorClass = Class.forName("oracle.sql.ArrayDescriptor");
+            ARRAYConstructor = ARRAYClass.getConstructor(arrayDescriptorClass, Connection.class, Object.class);
+            oraclePreparedStatementMethod = oraclePreparedStatementClass.getMethod("setARRAY", int.class, ARRAYClass);
+            arrayDescriptorMethod = arrayDescriptorClass.getMethod("createDescriptor", String.class, Connection.class);
+        } catch (Exception e) {
         }
-        return available;
     }
     
     static final String toStr(CharSequence cs) {

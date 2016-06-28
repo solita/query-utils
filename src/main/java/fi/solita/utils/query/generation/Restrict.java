@@ -380,6 +380,15 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
+    public <E, A> CriteriaQuery<E> in_regularForm(SingularAttribute<? super E, A> attribute, Iterable<A> values, CriteriaQuery<E> query) {
+        Path<A> path = resolveSelectionPath(query).get(attribute);
+        Predicate predicate = queryUtils.inExpr(path, values, em.apply().getCriteriaBuilder(), false);
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Modifies existing query!
+     */
     public <E, A> CriteriaQuery<E> inIds(SingularAttribute<? super E, A> attribute, Iterable<? extends Id<A>> values, CriteriaQuery<E> query) {
         Path<A> path = resolveSelectionPath(query).get(attribute);
         Predicate predicate = queryUtils.inExpr(path.get(id(path.getJavaType(), em.apply())), values, em.apply().getCriteriaBuilder());
@@ -441,7 +450,7 @@ public class Restrict {
      */
     public <E> CriteriaQuery<E> typeIn(Set<Class<? extends E>> classes, CriteriaQuery<E> query) {
         Path<E> path = resolveSelectionPath(query);
-        Predicate predicate = queryUtils.inExpr(path.type(), classes, cb());
+        Predicate predicate = path.type().in(classes);
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
 
