@@ -8,7 +8,6 @@ import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.JoinType;
@@ -66,8 +65,10 @@ public class ProjectionUtil {
 
     static boolean isDistinctable(MetaJpaConstructor<?, ?, ?> projection, int columnIndex) {
         logger.debug("isDistinctable({},{})", projection, columnIndex);
-        boolean ret = Set.class.isAssignableFrom(projection.getConstructorParameterTypes().get(columnIndex)) &&
-               !NotDistinctable.class.isAssignableFrom(((Bindable<?>)projection.getParameters().get(columnIndex)).getBindableJavaType());
+        boolean ret = Bindable.class.isAssignableFrom(projection.getConstructorParameterTypes().get(columnIndex)) &&
+                      !NotDistinctable.class.isAssignableFrom(((Bindable<?>)projection.getParameters().get(columnIndex)).getBindableJavaType()) ||
+                      !Bindable.class.isAssignableFrom(projection.getConstructorParameterTypes().get(columnIndex)) &&
+                      NotDistinctable.class.isAssignableFrom(projection.getParameters().get(columnIndex).getJavaType());
         logger.debug("isDistinctable -> {}", ret);
         return ret;
     }
