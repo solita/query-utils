@@ -66,6 +66,21 @@ public class Cast {
     public static <E extends IEntity<?> & Identifiable<?>, T> SingularAttribute<E, T> castSuper(SingularAttribute<? extends E, T> attribute) {
         return (SingularAttribute<E, T>) attribute;
     }
+    
+    @SuppressWarnings("unchecked")
+    public static <E extends IEntity<?> & Identifiable<?>, T> CollectionAttribute<E, T> castSuper(CollectionAttribute<? extends E, T> attribute) {
+        return (CollectionAttribute<E, T>) attribute;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <E extends IEntity<?> & Identifiable<?>, T> SetAttribute<E, T> castSuper(SetAttribute<? extends E, T> attribute) {
+        return (SetAttribute<E, T>) attribute;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <E extends IEntity<?> & Identifiable<?>, T> ListAttribute<E, T> castSuper(ListAttribute<? extends E, T> attribute) {
+        return (ListAttribute<E, T>) attribute;
+    }
 
     @SuppressWarnings("unchecked")
     public static <E extends IEntity<?> & Identifiable<?>, T> SingularAttribute<E, T> cast(SingularAttribute<? super E, ? super T> attribute) {
