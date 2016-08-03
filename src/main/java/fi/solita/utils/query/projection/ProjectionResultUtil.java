@@ -98,9 +98,9 @@ class ProjectionResultUtil {
     static <T> T transformRow(MetaJpaConstructor<?,T,?> projection, Iterable<Object> row) {
         logger.debug("transformRow({},{})", projection, row);
         List<Object> r = newList(postProcessRow(projection.getParameters(), row));
-        // at this point there should be no nulls...
+        // at this point there should be no nulls, except explicit null-literals
         for (Tuple2<Object, Integer> result: zip(r, range(0))) {
-            if (result._1 == null) {
+            if (result._1 == null && !(projection.getParameters().get(result._2) instanceof PseudoAttribute)) {
                 throw new ProjectionResultUtil.NullValueButNonOptionConstructorArgumentException(projection.getClass(), projection.getConstructorParameterTypes().get(result._2), result._2);
             }
         }

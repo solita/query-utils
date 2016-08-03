@@ -15,7 +15,7 @@ class LiteralSingularAttribute<X, T> extends SingularAttributeProxy<X, T> implem
     @SuppressWarnings("unchecked")
     @Override
     public Class<T> getJavaType() {
-        return (Class<T>) value.getClass();
+        return (Class<T>) (value == null ? void.class : value.getClass());
     }
     
     @Override
