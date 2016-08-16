@@ -1,7 +1,7 @@
 package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.newArray;
-import static fi.solita.utils.functional.Functional.head;
+import static fi.solita.utils.functional.Functional.headOption;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -58,9 +58,13 @@ public class OracleTableValueType implements UserType, Serializable {
                     throw new RuntimeException(e);
                 }
             } else {
-                throw new UnsupportedOperationException("type not implemented: " + head(values).getClass());
+                throw new UnsupportedOperationException("type not implemented: " + headOption(values).map(OracleTableValueType_.className));
             }
         }
+    }
+    
+    public static String className(Object o) {
+        return o.getClass().getName();
     }
     
     @Override
