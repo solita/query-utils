@@ -3,6 +3,7 @@ package fi.solita.utils.query.projection;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ListAttribute;
@@ -45,9 +46,9 @@ public abstract class Select {
     public static <E, T> CollectionAttribute<E, T> collectionNull() {
         return PseudoAttribute.Constructors.literal((Collection<T>)Collections.<T>emptyList());
     }
-
+    
     public static <E, T> SetAttribute<E, T> setNull() {
-        return PseudoAttribute.Constructors.literal(Collections.<T>emptySet());
+        return PseudoAttribute.Constructors.literal(Collections.<T>emptySortedSet());
     }
 
     public static <E, T> ListAttribute<E, T> listNull() {
