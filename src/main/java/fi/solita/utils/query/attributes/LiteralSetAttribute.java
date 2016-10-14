@@ -1,6 +1,7 @@
 package fi.solita.utils.query.attributes;
 
 import java.util.Set;
+import java.util.SortedSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.Expression;
@@ -22,7 +23,7 @@ class LiteralSetAttribute<X, Y, A extends Attribute<X, Set<Y>> & Bindable<Y>> ex
     @SuppressWarnings("unchecked")
     @Override
     public Class<Set<Y>> getJavaType() {
-        return (Class<Set<Y>>) value.getClass();
+        return (Class<Set<Y>>)(Object)SortedSet.class;
     }
 
     @Override

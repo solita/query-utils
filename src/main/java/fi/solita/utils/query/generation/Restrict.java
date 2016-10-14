@@ -378,6 +378,9 @@ public class Restrict {
     }
     
     /**
+     * Like {@link #in(SingularAttribute, Iterable, CriteriaQuery)}
+     * but always explodes arguments to an ordinary in-clause. So doesn't use table/collection optimizations.
+     * 
      * Modifies existing query!
      */
     public <E, A> CriteriaQuery<E> in_regularForm(SingularAttribute<? super E, A> attribute, Iterable<A> values, CriteriaQuery<E> query) {

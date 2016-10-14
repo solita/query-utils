@@ -22,7 +22,7 @@ class LiteralCollectionAttribute<X, Y, A extends Attribute<X, Collection<Y>> & B
     @SuppressWarnings("unchecked")
     @Override
     public Class<Collection<Y>> getJavaType() {
-        return (Class<Collection<Y>>) value.getClass();
+        return (Class<Collection<Y>>)(Object)Collection.class;
     }
 
     @Override

@@ -44,14 +44,14 @@ public abstract class Select {
     }
     
     public static <E, T> CollectionAttribute<E, T> collectionNull() {
-        return PseudoAttribute.Constructors.literal((Collection<T>)Collections.<T>emptyList());
+        return PseudoAttribute.Constructors.literal((Collection<T>)null);
     }
     
     public static <E, T> SetAttribute<E, T> setNull() {
-        return PseudoAttribute.Constructors.literal(Collections.<T>emptySortedSet());
+        return PseudoAttribute.Constructors.literal((Set<T>)null);
     }
 
     public static <E, T> ListAttribute<E, T> listNull() {
-        return PseudoAttribute.Constructors.literal(Collections.<T>emptyList());
+        return PseudoAttribute.Constructors.literal((List<T>)null);
     }
 }

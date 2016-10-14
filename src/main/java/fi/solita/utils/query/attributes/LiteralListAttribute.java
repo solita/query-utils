@@ -22,7 +22,7 @@ class LiteralListAttribute<X, Y, A extends Attribute<X, List<Y>> & Bindable<Y>> 
     @SuppressWarnings("unchecked")
     @Override
     public Class<List<Y>> getJavaType() {
-        return (Class<List<Y>>) value.getClass();
+        return (Class<List<Y>>)(Object)List.class;
     }
 
     @Override
