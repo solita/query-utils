@@ -33,6 +33,6 @@ public final class TableFunction implements SQLFunction {
             throw new QueryException("table requires two arguments");
         }
         
-        return args.get(0) + " IN (SELECT /*+ dynamic_sampling(10) */ * FROM table(" + args.get(1) + ")) AND 1";
+        return args.get(0) + " IN (SELECT /*+ dynamic_sampling(tt 2) */ * FROM table(" + args.get(1) + ") tt) AND 1";
     }
 }
