@@ -460,7 +460,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, T extends Comparable<T>> CriteriaQuery<E> lessThan(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> lessThan(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         Predicate predicate = cb().lessThan(selection.get(attribute), wrap(value));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
@@ -469,7 +469,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, T extends Comparable<T>> CriteriaQuery<E> lessThan(T value, SingularAttribute<? super E, T> attribute, CriteriaQuery<E> query) {
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> lessThan(T value, SingularAttribute<? super E, T> attribute, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         Predicate predicate = cb().lessThan(wrap(value), selection.get(attribute));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
@@ -478,7 +478,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, T extends Comparable<T>> CriteriaQuery<E> lessThanOrEqual(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> lessThanOrEqual(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         Predicate predicate = cb().lessThanOrEqualTo(selection.get(attribute), wrap(value));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
@@ -487,7 +487,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, T extends Comparable<T>> CriteriaQuery<E> lessThanOrEqual(T value, SingularAttribute<? super E, T> attribute, CriteriaQuery<E> query) {
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> lessThanOrEqual(T value, SingularAttribute<? super E, T> attribute, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         Predicate predicate = cb().lessThanOrEqualTo(wrap(value), selection.get(attribute));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
@@ -496,7 +496,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, T extends Comparable<T>> CriteriaQuery<E> greaterThan(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> greaterThan(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         Predicate predicate = cb().greaterThan(selection.get(attribute), wrap(value));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
@@ -505,7 +505,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, T extends Comparable<T>> CriteriaQuery<E> greaterThan(T value, SingularAttribute<? super E, T> attribute, CriteriaQuery<E> query) {
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> greaterThan(T value, SingularAttribute<? super E, T> attribute, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         Predicate predicate = cb().greaterThan(wrap(value), selection.get(attribute));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
@@ -514,7 +514,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, T extends Comparable<T>> CriteriaQuery<E> greaterThanOrEqual(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> greaterThanOrEqual(SingularAttribute<? super E, T> attribute, T value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         Predicate predicate = cb().greaterThanOrEqualTo(selection.get(attribute), wrap(value));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
@@ -523,7 +523,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, T extends Comparable<T>> CriteriaQuery<E> greaterThanOrEqual(T value, SingularAttribute<? super E, T> attribute, CriteriaQuery<E> query) {
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> greaterThanOrEqual(T value, SingularAttribute<? super E, T> attribute, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         Predicate predicate = cb().greaterThanOrEqualTo(wrap(value), selection.get(attribute));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
@@ -532,7 +532,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, T extends Comparable<T>> CriteriaQuery<E> between(T value, SingularAttribute<? super E, T> a1, SingularAttribute<? super E, T> a2, CriteriaQuery<E> query) {
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> between(T value, SingularAttribute<? super E, T> a1, SingularAttribute<? super E, T> a2, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         Predicate predicate = cb().between(wrap(value), selection.get(a1), selection.get(a2));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
@@ -541,7 +541,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, T extends Comparable<T>> CriteriaQuery<E> between(SingularAttribute<? super E, T> a, T value1, T value2, CriteriaQuery<E> query) {
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> between(SingularAttribute<? super E, T> a, T value1, T value2, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         Predicate predicate = cb().between(selection.get(a), wrap(value1), wrap(value2));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
