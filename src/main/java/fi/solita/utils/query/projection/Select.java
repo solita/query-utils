@@ -3,14 +3,12 @@ package fi.solita.utils.query.projection;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import fi.solita.utils.functional.Collections;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 

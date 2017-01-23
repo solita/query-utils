@@ -6,6 +6,8 @@ import static fi.solita.utils.functional.Collections.newListOfSize;
 import static fi.solita.utils.functional.Collections.newMap;
 import static fi.solita.utils.functional.Collections.newMultimap;
 import static fi.solita.utils.functional.Functional.cons;
+import static fi.solita.utils.functional.Functional.exists;
+import static fi.solita.utils.functional.Functional.filter;
 import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.isEmpty;
@@ -13,10 +15,9 @@ import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.tail;
 import static fi.solita.utils.functional.Functional.transpose;
 import static fi.solita.utils.functional.Functional.zip;
-import static fi.solita.utils.functional.FunctionalA.head;
-import static fi.solita.utils.functional.FunctionalA.tail;
 import static fi.solita.utils.functional.FunctionalM.find;
 import static fi.solita.utils.functional.FunctionalS.range;
+import static fi.solita.utils.functional.Predicates.not;
 import static fi.solita.utils.query.QueryUtils.addListAttributeOrdering;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 import static fi.solita.utils.query.QueryUtils.id;
@@ -62,6 +63,7 @@ import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Either;
 import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
+import fi.solita.utils.functional.Predicates;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Configuration;
@@ -263,6 +265,10 @@ public class ProjectionHelper {
         return ret;
     }
     
+    public static Class<?> javaType(Attribute<?,?> a) {
+        return a instanceof Bindable ? ((Bindable<?>)a).getBindableJavaType() : a.getJavaType();
+    }
+    
     @SuppressWarnings("unchecked")
     private <SOURCE extends IEntity<?>, SOURCE_ID> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<SOURCE_ID> sourceIds) {
         logger.debug("queryTargets({},{},{},{},{})", new Object[] {sourceIds, target, isId, isWrapperOfIds, isDistinctable});
@@ -298,7 +304,14 @@ public class ProjectionHelper {
             ProjectionUtil.doRestrictions(r, target);
         }
         
-        query.where(queryUtils.inExpr(sourceId, sourceIds, em.apply().getCriteriaBuilder()));
+        Iterable<Class<?>> allEntities = filter(not(Predicates.isNull()), map(ProjectionHelper_.javaType, actualJoins.keySet()));
+        if (logger.isDebugEnabled()) {
+            allEntities = newList(allEntities);
+            logger.debug("All entities: {}", allEntities);
+        }
+        boolean enableInClauseOptimizations = !exists(QueryUtils.ImplementsProjectWithRegularInClause, allEntities);
+        logger.debug("Enable in-clause optimizations: {}", enableInClauseOptimizations);
+        query.where(queryUtils.inExpr(sourceId, sourceIds, em.apply().getCriteriaBuilder(), enableInClauseOptimizations));
 
         // Would this provide any benefit? Maybe only overhead...
         if (isDistinctable && config.makeProjectionQueriesDistinct()) {

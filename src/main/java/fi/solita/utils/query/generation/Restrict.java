@@ -1,5 +1,7 @@
 package fi.solita.utils.query.generation;
 
+import static fi.solita.utils.functional.Collections.newList;
+import static fi.solita.utils.functional.Functional.exists;
 import static fi.solita.utils.query.QueryUtils.id;
 import static fi.solita.utils.query.QueryUtils.join;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
@@ -372,8 +374,10 @@ public class Restrict {
      * Modifies existing query!
      */
     public <E, A> CriteriaQuery<E> in(SingularAttribute<? super E, A> attribute, Iterable<A> values, CriteriaQuery<E> query) {
-        Path<A> path = resolveSelectionPath(query).get(attribute);
-        Predicate predicate = queryUtils.inExpr(path, values, em.apply().getCriteriaBuilder());
+        Path<E> selectionPath = resolveSelectionPath(query);
+        boolean enableInClauseOptimizations = !exists(QueryUtils.ImplementsProjectWithRegularInClause, newList(attribute.getJavaType(), attribute.getDeclaringType().getJavaType()));
+        Path<A> path = selectionPath.get(attribute);
+        Predicate predicate = queryUtils.inExpr(path, values, em.apply().getCriteriaBuilder(), enableInClauseOptimizations);
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
     

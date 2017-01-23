@@ -28,6 +28,8 @@ import javax.persistence.OrderColumn;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Fetch;
+import javax.persistence.criteria.FetchParent;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
@@ -85,6 +87,13 @@ public class QueryUtils {
             super((attribute.getDeclaringType() != null ? attribute.getDeclaringType().getJavaType().getSimpleName() : attribute) + "->" + attribute.getName() + ". Wrap the optional attribute with Cast.optional()");
         }
     }
+    
+    public static final fi.solita.utils.functional.Predicate<Class<?>> ImplementsProjectWithRegularInClause = new fi.solita.utils.functional.Predicate<Class<?>>() {
+        @Override
+        public boolean accept(Class<?> candidate) {
+            return ProjectWithRegularInClause.class.isAssignableFrom(candidate);
+        }
+    };
 
     private final Configuration config;
     
@@ -269,7 +278,16 @@ public class QueryUtils {
             }
         }, parent.getJoins());
     }
-
+    
+    public static Iterable<Fetch<?,?>> getAllFetches(FetchParent<?, ?> parent) {
+        return flatMap(new Transformer<Fetch<?,?>,Iterable<Fetch<?,?>>>() {
+            @Override
+            public Iterable<Fetch<?, ?>> transform(Fetch<?, ?> source) {
+                return cons(source, getAllFetches(source));
+            }
+        }, parent.getFetches());
+    }
+    
     public static void checkOptionalAttributes(Attribute<?,?> param) {
         boolean metaModelAttributeIsRequired = isRequiredByMetamodel(param);
         boolean queryAttributeIsRequired = isRequiredByQueryAttribute(param);
