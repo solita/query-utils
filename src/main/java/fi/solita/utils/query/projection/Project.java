@@ -196,6 +196,11 @@ public class Project {
         return makeTuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24, t25);
     }
     
+    @SuppressWarnings("unchecked")
+    public static <E, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25, T26> MetaJpaConstructor<E,Tuple26<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25, T26>,Tuple26<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25, T26>> tuple(Attribute<? super E, T1> t1, Attribute<? super E, T2> t2, Attribute<? super E, T3> t3, Attribute<? super E, T4> t4, Attribute<? super E, T5> t5, Attribute<? super E, T6> t6, Attribute<? super E, T7> t7, Attribute<? super E, T8> t8, Attribute<? super E, T9> t9, Attribute<? super E, T10> t10, Attribute<? super E, T11> t11, Attribute<? super E, T12> t12, Attribute<? super E, T13> t13, Attribute<? super E, T14> t14, Attribute<? super E, T15> t15, Attribute<? super E, T16> t16, Attribute<? super E, T17> t17, Attribute<? super E, T18> t18, Attribute<? super E, T19> t19, Attribute<? super E, T20> t20, Attribute<? super E, T21> t21, Attribute<? super E, T22> t22, Attribute<? super E, T23> t23, Attribute<? super E, T24> t24, Attribute<? super E, T25> t25, Attribute<? super E, T26> t26) {
+        return makeTuple(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26);
+    }
+    
     private static <E, T extends Tuple> MetaJpaConstructor<E,T,T> makeTuple(Attribute<? super E,?>... attributes) {
         for (Attribute<? super E, ?> a: attributes) {
             checkOptionalAttributes(a);
