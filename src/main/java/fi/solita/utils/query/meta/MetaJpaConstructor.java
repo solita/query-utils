@@ -28,6 +28,7 @@ import fi.solita.utils.functional.Tuple24;
 import fi.solita.utils.functional.Tuple25;
 import fi.solita.utils.functional.Tuple26;
 import fi.solita.utils.functional.Tuple27;
+import fi.solita.utils.functional.Tuple28;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.functional.Tuple4;
 import fi.solita.utils.functional.Tuple5;
@@ -176,6 +177,11 @@ public interface MetaJpaConstructor<OWNER,R,PARAMS> extends MetaConstructor<PARA
     }
     public static abstract class C27<OWNER,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22,T23,T24,T25,T26,T27,R> extends MetaConstructors.C27<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22,T23,T24,T25,T26,T27,R> implements MetaJpaConstructor<OWNER,R,Tuple27<? extends T1,? extends T2,? extends T3,? extends T4,? extends T5,? extends T6,? extends T7,? extends T8,? extends T9,? extends T10,? extends T11,? extends T12,? extends T13,? extends T14,? extends T15,? extends T16,? extends T17,? extends T18,? extends T19,? extends T20,? extends T21,? extends T22,? extends T23,? extends T24,? extends T25,? extends T26,? extends T27>> {
         public C27(Class<?> clazz, Class<?>... argClasses) {
+            super(clazz, argClasses);
+        }
+    }
+    public static abstract class C28<OWNER,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22,T23,T24,T25,T26,T27,T28,R> extends MetaConstructors.C28<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22,T23,T24,T25,T26,T27,T28,R> implements MetaJpaConstructor<OWNER,R,Tuple28<? extends T1,? extends T2,? extends T3,? extends T4,? extends T5,? extends T6,? extends T7,? extends T8,? extends T9,? extends T10,? extends T11,? extends T12,? extends T13,? extends T14,? extends T15,? extends T16,? extends T17,? extends T18,? extends T19,? extends T20,? extends T21,? extends T22,? extends T23,? extends T24,? extends T25,? extends T26,? extends T27,? extends T28>> {
+        public C28(Class<?> clazz, Class<?>... argClasses) {
             super(clazz, argClasses);
         }
     }

@@ -94,6 +94,8 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
             case 24: return MetaJpaConstructor.C24.class;
             case 25: return MetaJpaConstructor.C25.class;
             case 26: return MetaJpaConstructor.C26.class;
+            case 27: return MetaJpaConstructor.C27.class;
+            case 28: return MetaJpaConstructor.C28.class;
         }
         throw new RuntimeException("Not implemented: F" + argCount);
         }
