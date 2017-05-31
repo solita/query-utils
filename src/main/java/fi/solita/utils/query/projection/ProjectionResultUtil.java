@@ -120,7 +120,7 @@ class ProjectionResultUtil {
                 ret = null;
             } else {
                 if (val.size() != 1) {
-                    throw new IllegalArgumentException("Collection expected to be of size " + 1 + " but was: " + val);
+                    throw new IllegalArgumentException("Collection expected to be of size " + 1 + " but was: " + val + " for: " + attr.getName());
                 }
                 ret = head(val);
             }
