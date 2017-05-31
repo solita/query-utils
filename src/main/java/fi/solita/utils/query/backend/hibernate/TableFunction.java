@@ -23,16 +23,15 @@ public final class TableFunction implements SQLFunction {
 
     @Override
     public Type getReturnType(Type columnType, Mapping mapping) throws QueryException {
-        // "Returning an integer" since this is used by comparing equality to 1
         return StandardBasicTypes.INTEGER;
     }
 
     @Override
     public String render(Type columnType, @SuppressWarnings("rawtypes") List args, SessionFactoryImplementor factory) throws QueryException {
-        if ( args.size()!=2 ) {
-            throw new QueryException("table requires two arguments");
+        if ( args.size()!=1 ) {
+            throw new QueryException("table requires one argument");
         }
         
-        return args.get(0) + " IN (SELECT /*+ dynamic_sampling(tt 2) */ * FROM table(" + args.get(1) + ") tt) AND 1";
+        return "SELECT /*+ dynamic_sampling(tt 2) */ * FROM table(" + args.get(0) + ") tt";
     }
 }

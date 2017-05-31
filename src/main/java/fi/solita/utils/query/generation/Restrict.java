@@ -373,7 +373,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, A> CriteriaQuery<E> in(SingularAttribute<? super E, A> attribute, Iterable<A> values, CriteriaQuery<E> query) {
+    public <E, A> CriteriaQuery<E> in(SingularAttribute<? super E, A> attribute, Iterable<? super A> values, CriteriaQuery<E> query) {
         Path<E> selectionPath = resolveSelectionPath(query);
         boolean enableInClauseOptimizations = !exists(QueryUtils.ImplementsProjectWithRegularInClause, newList(attribute.getJavaType(), attribute.getDeclaringType().getJavaType()));
         Path<A> path = selectionPath.get(attribute);
@@ -387,7 +387,7 @@ public class Restrict {
      * 
      * Modifies existing query!
      */
-    public <E, A> CriteriaQuery<E> in_regularForm(SingularAttribute<? super E, A> attribute, Iterable<A> values, CriteriaQuery<E> query) {
+    public <E, A> CriteriaQuery<E> in_regularForm(SingularAttribute<? super E, A> attribute, Iterable<? super A> values, CriteriaQuery<E> query) {
         Path<A> path = resolveSelectionPath(query).get(attribute);
         Predicate predicate = queryUtils.inExpr(path, values, em.apply().getCriteriaBuilder(), false);
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);

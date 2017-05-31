@@ -18,6 +18,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -201,6 +202,7 @@ public class QueryUtils {
         return inExpr(path, values, cb, true);
     }
 
+    @SuppressWarnings("unchecked")
     public final Predicate inExpr(Expression<?> path, Iterable<?> values, CriteriaBuilder cb, boolean enableOptimizations) {
         List<?> vals = newList(values);
         if (vals.size() == 1) {
@@ -221,11 +223,11 @@ public class QueryUtils {
                 // only use table-expression for large sets since ora performs better with regular in-clause.
                 if (vals.size() > config.getMaxValuesForMemberOfRestriction()) {
                     // use 'table' for huge sets since member-of starts to perform badly
-                    preds = newList(cb.equal(cb.function("table", Boolean.class, path, cb.literal(Table.of(vals))), 1));
+                    preds = newList(path.in(cb.function("table", Collection.class, cb.literal(Table.of(vals)))));
                 } else if (vals.size() > config.getMinValuesForMemberOfRestriction()) {
                     // use member-of
                     // return type doesn't seem to make a difference, so just set to boolean...
-                    preds = newList(cb.equal(cb.function(MEMBER_OF_CAST + targetType.get()._1, Boolean.class, path, cb.literal(Table.of(vals))), 1));
+                    preds = newList(cb.isMember((Expression<Object>)path, (Expression<Collection<Object>>)(Object)cb.function(MEMBER_OF_CAST + targetType.get()._1, Collection.class, cb.literal(Table.of(vals)))));
                 }
             }
         }

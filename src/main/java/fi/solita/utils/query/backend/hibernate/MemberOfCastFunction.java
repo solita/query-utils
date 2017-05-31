@@ -32,16 +32,15 @@ public final class MemberOfCastFunction implements SQLFunction {
 
     @Override
     public Type getReturnType(Type columnType, Mapping mapping) throws QueryException {
-        // "Returning an integer" since this is used by comparing equality to 1
         return StandardBasicTypes.INTEGER;
     }
 
     @Override
     public String render(Type columnType, @SuppressWarnings("rawtypes") List args, SessionFactoryImplementor factory) throws QueryException {
         if ( args.size()!=2 ) {
-            throw new QueryException("member_of_cast requires two arguments");
+            throw new QueryException("member_of_cast requires one argument");
         }
         
-        return targetObjectType.getOrElse("") + args.get(0) + " MEMBER OF CAST(" + args.get(1) + " AS " + targetTableType + ") AND 1";
+        return "CAST(" + args.get(0) + " AS " + targetTableType + ")";
     }
 }
