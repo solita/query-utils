@@ -5,18 +5,25 @@ import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newListOfSize;
 import static fi.solita.utils.functional.Collections.newMap;
 import static fi.solita.utils.functional.Collections.newMultimap;
+import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.exists;
 import static fi.solita.utils.functional.Functional.filter;
 import static fi.solita.utils.functional.Functional.flatMap;
+import static fi.solita.utils.functional.Functional.grouped;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.isEmpty;
+import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Functional.max;
+import static fi.solita.utils.functional.Functional.repeat;
+import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.tail;
 import static fi.solita.utils.functional.Functional.transpose;
 import static fi.solita.utils.functional.Functional.zip;
 import static fi.solita.utils.functional.FunctionalM.find;
 import static fi.solita.utils.functional.FunctionalS.range;
+import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
 import static fi.solita.utils.functional.Predicates.not;
 import static fi.solita.utils.query.QueryUtils.addListAttributeOrdering;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
@@ -35,8 +42,10 @@ import static fi.solita.utils.query.projection.ProjectionUtil.isId;
 import static fi.solita.utils.query.projection.ProjectionUtil.isWrapperOfIds;
 import static fi.solita.utils.query.projection.ProjectionUtil.shouldPerformAdditionalQuery;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -204,9 +213,10 @@ public class ProjectionHelper {
         final Map<?, List<Object>> targetQueryResults = queryTargetsOfSources(attr, isId, isWrapperOfIds, isDistinctable, sourceIdsToQuery);
 
         Iterable<List<Object>> results = map(new Transformer<Object,List<Object>>() {
+            @SuppressWarnings("unchecked")
             @Override
             public List<Object> transform(Object source) {
-                return find(source, targetQueryResults).getOrElse(emptyList());
+                return find(source, (Map<Object,List<Object>>)targetQueryResults).getOrElse(emptyList());
             }
         }, sourceIdsToQuery);
         List<Object>ret = newList(map(ProjectionResultUtil_.postProcessResult.ap(projectionType, attr), results));
@@ -269,8 +279,38 @@ public class ProjectionHelper {
         return a instanceof Bindable ? ((Bindable<?>)a).getBindableJavaType() : a.getJavaType();
     }
     
-    @SuppressWarnings("unchecked")
+    private static final Collection<Object[]> RETRY_IN_PARTS = new ArrayList<Object[]>() {
+        public Iterator<Object[]> iterator() {
+            throw new RuntimeException("Should not be here!");
+        };
+    };
+    
     private <SOURCE extends IEntity<?>, SOURCE_ID> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<SOURCE_ID> sourceIds) {
+        Collection<Object[]> ret = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds, true);
+        if (ret == RETRY_IN_PARTS) {
+            int maxInClauseSize = max(config.getInClauseValuesAmounts()).get();
+            if (size(sourceIds) > maxInClauseSize) {
+                // more than max amount of ids
+                // -> perform multiple queries instead of or:ring to get rid of ridiculous (multi-minute) parse times
+                Iterable<Object[]> results = emptyList();
+                for (List<SOURCE_ID> group: grouped(maxInClauseSize, sourceIds)) {
+                    if (!config.getInClauseValuesAmounts().isEmpty() && group.size() < config.getInClauseValuesAmounts().last()) {
+                        // pad in-list to the next specified size repeating the last value, to avoid excessive hard parsing
+                        int targetSize = head(filter(greaterThanOrEqualTo(group.size()), config.getInClauseValuesAmounts()));
+                        group = newList(concat(group, repeat(last(group), targetSize-group.size())));
+                    }
+                    results = concat(results, queryTargets(target, isId, isWrapperOfIds, isDistinctable, group, false));
+                }
+                ret = newList(results);
+            } else {
+                ret = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds, false);
+            }
+        }
+        return ret;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private <SOURCE extends IEntity<?>, SOURCE_ID> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<SOURCE_ID> sourceIds, boolean firstRun) {
         logger.debug("queryTargets({},{},{},{},{})", new Object[] {sourceIds, target, isId, isWrapperOfIds, isDistinctable});
         Class<SOURCE> sourceClass = target.getDeclaringType() != null ? target.getDeclaringType().getJavaType() : ((Id<SOURCE>)head(sourceIds)).getOwningClass();
         CriteriaQuery<Object[]> query = em.apply().getCriteriaBuilder().createQuery(Object[].class);
@@ -311,6 +351,11 @@ public class ProjectionHelper {
         }
         boolean enableInClauseOptimizations = !exists(QueryUtils.ImplementsProjectWithRegularInClause, allEntities);
         logger.debug("Enable in-clause optimizations: {}", enableInClauseOptimizations);
+        
+        if (firstRun && !enableInClauseOptimizations) {
+            return RETRY_IN_PARTS;
+        }
+        
         query.where(queryUtils.inExpr(sourceId, sourceIds, em.apply().getCriteriaBuilder(), enableInClauseOptimizations));
 
         // Would this provide any benefit? Maybe only overhead...

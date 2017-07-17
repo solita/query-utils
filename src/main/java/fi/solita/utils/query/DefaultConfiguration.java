@@ -1,11 +1,13 @@
 package fi.solita.utils.query;
 
 import static fi.solita.utils.functional.Collections.emptyMap;
+import static fi.solita.utils.functional.Collections.newSortedSet;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 
 import java.sql.Connection;
 import java.util.Map;
+import java.util.SortedSet;
 
 import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Option;
@@ -25,11 +27,12 @@ public class DefaultConfiguration implements Configuration {
         return 6;
     }
     
-    public Option<Integer> getMaxInClauseValues() {
+    @Override
+    public SortedSet<Integer> getInClauseValuesAmounts() {
         // ora has a limit of 1000. Don't know of other db verndors.
-        return Some(1000);
+        return newSortedSet(Some(1000));
     }
-
+    
     public Option<String> wrapComparedNumbersWithFunction() {
         return None();
     }

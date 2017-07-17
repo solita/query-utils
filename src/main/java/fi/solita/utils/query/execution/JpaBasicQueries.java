@@ -79,6 +79,7 @@ public class JpaBasicQueries {
         em.apply().remove(toProxy(id));
     }
 
+    @SuppressWarnings("unchecked")
     public <E extends IEntity<?> & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
         @SuppressWarnings("unchecked")
         CriteriaQuery<Id<E>> q = (CriteriaQuery<Id<E>>)(Object)em.apply().getCriteriaBuilder().createQuery();
@@ -89,8 +90,8 @@ public class JpaBasicQueries {
         Collection<Id<E>> idList = queryExecutor.getMany(q, Page.NoPaging, LockModeType.NONE);
 
         Iterable<? extends Iterable<Id<E>>> grouped;
-        if (config.getMaxInClauseValues().isDefined()) {
-            grouped = grouped(config.getMaxInClauseValues().get(), idList);
+        if (!config.getInClauseValuesAmounts().isEmpty()) {
+            grouped = grouped(config.getInClauseValuesAmounts().last(), idList);
         } else {
             grouped = Arrays.asList(idList);
         }

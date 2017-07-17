@@ -45,6 +45,7 @@
                 <entry key="hibernate.generate_statistics" value="true" />
                 <entry key="hibernate.hbm2ddl.auto" value="create" />
                 <entry key="hibernate.format_sql" value="true" />
+                <!-- <entry key="hibernate.show_sql" value="true" />  -->
             </map>
         </property>
     </bean>

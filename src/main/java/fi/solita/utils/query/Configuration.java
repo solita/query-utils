@@ -2,6 +2,7 @@ package fi.solita.utils.query;
 
 import java.sql.Connection;
 import java.util.Map;
+import java.util.SortedSet;
 
 import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Option;
@@ -15,7 +16,7 @@ public interface Configuration {
 
     public int getMinValuesForMemberOfRestriction();
     
-    public Option<Integer> getMaxInClauseValues();
+    public SortedSet<Integer> getInClauseValuesAmounts();
     
     public Option<String> wrapComparedNumbersWithFunction();
 

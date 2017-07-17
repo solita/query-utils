@@ -3,13 +3,18 @@ package fi.solita.utils.query;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newListOfSize;
+import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
+import static fi.solita.utils.functional.Functional.filter;
 import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.Functional.forall;
 import static fi.solita.utils.functional.Functional.grouped;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.isEmpty;
+import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Functional.repeat;
+import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
 
 import java.lang.reflect.AnnotatedElement;
@@ -233,15 +238,22 @@ public class QueryUtils {
         }
         
         if (preds == null) {
-            // Use regular in-clause for smaller sets.
-            if (config.getMaxInClauseValues().isDefined()) {
-                groups = newList(grouped(config.getMaxInClauseValues().get(), vals));
-            } else {
+            // Use regular in-clause.
+            if (config.getInClauseValuesAmounts().isEmpty()) {
                 groups = Arrays.asList(vals);
+            } else {
+                groups = newList(grouped(config.getInClauseValuesAmounts().last(), vals));
             }
             preds = newListOfSize(groups.size());
+            
             for (List<?> g: groups) {
-                preds.add(path.in(g));
+                if (!config.getInClauseValuesAmounts().isEmpty() && g.size() < config.getInClauseValuesAmounts().last()) {
+                    // pad in-list to the next specified size repeating the last value, to avoid excessive hard parsing
+                    int targetSize = head(filter(greaterThanOrEqualTo(g.size()), config.getInClauseValuesAmounts()));
+                    preds.add(path.in(newList(concat(g, repeat(last(g), targetSize-g.size())))));
+                } else {
+                    preds.add(path.in(g));
+                }
             }
         }
         
