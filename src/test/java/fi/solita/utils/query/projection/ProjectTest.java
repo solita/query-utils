@@ -21,7 +21,6 @@ import fi.solita.utils.query.Employee;
 import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Money;
 import fi.solita.utils.query.QueryTestBase;
-import fi.solita.utils.query.execution.JpaProjectionQueries;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
@@ -157,5 +156,33 @@ public class ProjectTest extends QueryTestBase {
         persist(dep, emp);
 
         assertEquals("foo", dao.get(query.related(Department_.employees, query.all(Department.class)), Project.<Employee,String>value(Employee_.mandatoryName)));
+    }
+    
+    @Test
+    public void max() {
+        Department dep1 = new Department("a", 1);
+        Department dep2 = new Department("b", 2);
+        persist(dep1, dep2);
+
+        assertEquals(Some(2), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
+    }
+    
+    @Test
+    public void max_empty() {
+        assertEquals(None(), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
+    }
+    
+    @Test
+    public void min() {
+        Department dep1 = new Department("a", 1);
+        Department dep2 = new Department("b", 2);
+        persist(dep1, dep2);
+
+        assertEquals(Some(1), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
+    }
+    
+    @Test
+    public void min_empty() {
+        assertEquals(None(), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
     }
 }

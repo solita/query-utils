@@ -21,6 +21,8 @@ import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.tail;
 import static fi.solita.utils.functional.Functional.transpose;
 import static fi.solita.utils.functional.Functional.zip;
+import static fi.solita.utils.functional.FunctionalA.head;
+import static fi.solita.utils.functional.FunctionalA.tail;
 import static fi.solita.utils.functional.FunctionalM.find;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
@@ -85,6 +87,7 @@ import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
+import fi.solita.utils.query.projection.Constructors.ExpressionProjection;
 import fi.solita.utils.query.projection.Constructors.IdProjection;
 
 public class ProjectionHelper {
@@ -116,7 +119,7 @@ public class ProjectionHelper {
                 int index = t._1;
                 Attribute<?,?> param = t._2;
                 Class<?> constuctorParameterType = t._3;
-                ret.add(transformSelectionForQuery(param, isId(constuctorParameterType) || isWrapperOfIds(projection, index), selection));
+                ret.add(transformSelectionForQuery(param, isId(constuctorParameterType) || isWrapperOfIds(projection, index), selection, projection));
             }
         }
         
@@ -135,10 +138,10 @@ public class ProjectionHelper {
     }
     
     @SuppressWarnings("unchecked")
-    private <T> Selection<?> transformSelectionForQuery(Attribute<?,?> param, boolean constructorExpectsId, From<?,T> selection) {
+    private <T> Selection<?> transformSelectionForQuery(Attribute<?,?> param, boolean constructorExpectsId, From<?,T> selection, MetaJpaConstructor<?,?,?> projection) {
         logger.debug("transformSelectionForQuery({},{})", param, selection);
         // This check should actually have already occurred, but just in case we are missing it somewhere...
-        checkOptionalAttributes((Attribute<?, ?>) param);
+        checkOptionalAttributes(param);
         
         for (PseudoAttribute pseudo: unwrap(PseudoAttribute.class, param)) {
             for (@SuppressWarnings("unused") JoiningAttribute a: unwrap(JoiningAttribute.class, param)) {
@@ -178,6 +181,9 @@ public class ProjectionHelper {
                     logger.debug("Singular Entity attribute detected. Performing left join.");
                     return doRestrictions(selection.join(attr, JoinType.LEFT), attr);
                 }
+            } else if (projection instanceof ExpressionProjection) {
+                logger.debug("Expression detected. Wrapping singularattribute to the expression.");
+                return ((ExpressionProjection<Object>) projection).getExpression(em.apply().getCriteriaBuilder(), (Expression<Object>)selection.get(attr));
             } else {
                 return selection.get(attr);
             }
@@ -280,6 +286,7 @@ public class ProjectionHelper {
     }
     
     private static final Collection<Object[]> RETRY_IN_PARTS = new ArrayList<Object[]>() {
+        @Override
         public Iterator<Object[]> iterator() {
             throw new RuntimeException("Should not be here!");
         };

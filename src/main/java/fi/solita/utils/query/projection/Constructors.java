@@ -8,15 +8,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Collections;
+import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
+import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 public class Constructors {
@@ -25,8 +29,20 @@ public class Constructors {
         Attribute<?,?> getWrapped();
     }
     
+    public static interface ExpressionProjection<R> extends TransparentProjection {
+        Expression<R> getExpression(CriteriaBuilder cb, Expression<R> e);
+    }
+    
     static <E extends Identifiable<?>> MetaJpaConstructor<E,Id<E>,Id<E>> id() {
         return new IdProjection<E>();
+    }
+    
+    static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> max(SingularAttribute<? super E, T> attribute) {
+        return new MaxAttributeProjection<E,T>(Cast.optional(attribute));
+    }
+    
+    static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> min(SingularAttribute<? super E, T> attribute) {
+        return new MinAttributeProjection<E,T>(Cast.optional(attribute));
     }
 
     static <E, T> MetaJpaConstructor<E,T,T> value(SingularAttribute<? super E, T> attribute) {
@@ -158,7 +174,7 @@ public class Constructors {
         }
     }
     
-    private static final class ValueAttributeProjection<E,R> extends MetaJpaConstructor.C1<E,R,R> implements TransparentProjection {
+    private static class ValueAttributeProjection<E,R> extends MetaJpaConstructor.C1<E,R,R> implements TransparentProjection {
         private final Attribute<? super E,R> attribute;
 
         public ValueAttributeProjection(Attribute<? super E,R> attribute) {
@@ -199,6 +215,28 @@ public class Constructors {
         @Override
         public Attribute<?, ?> getWrapped() {
             return attribute;
+        }
+    }
+    
+    private static final class MaxAttributeProjection<E,R extends Number> extends ValueAttributeProjection<E, Option<R>> implements ExpressionProjection<R> {
+        public MaxAttributeProjection(Attribute<? super E, Option<R>> attribute) {
+            super(attribute);
+        }
+
+        @Override
+        public Expression<R> getExpression(CriteriaBuilder cb, Expression<R> e) {
+            return cb.max(e);
+        }
+    }
+    
+    private static final class MinAttributeProjection<E,R extends Number> extends ValueAttributeProjection<E, Option<R>> implements ExpressionProjection<R> {
+        public MinAttributeProjection(Attribute<? super E, Option<R>> attribute) {
+            super(attribute);
+        }
+
+        @Override
+        public Expression<R> getExpression(CriteriaBuilder cb, Expression<R> e) {
+            return cb.min(e);
         }
     }
 }

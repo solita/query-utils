@@ -12,7 +12,39 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import fi.solita.utils.functional.*;
+import fi.solita.utils.functional.Function;
+import fi.solita.utils.functional.Function0;
+import fi.solita.utils.functional.Option;
+import fi.solita.utils.functional.Pair;
+import fi.solita.utils.functional.Tuple;
+import fi.solita.utils.functional.Tuple1;
+import fi.solita.utils.functional.Tuple10;
+import fi.solita.utils.functional.Tuple11;
+import fi.solita.utils.functional.Tuple12;
+import fi.solita.utils.functional.Tuple13;
+import fi.solita.utils.functional.Tuple14;
+import fi.solita.utils.functional.Tuple15;
+import fi.solita.utils.functional.Tuple16;
+import fi.solita.utils.functional.Tuple17;
+import fi.solita.utils.functional.Tuple18;
+import fi.solita.utils.functional.Tuple19;
+import fi.solita.utils.functional.Tuple2;
+import fi.solita.utils.functional.Tuple20;
+import fi.solita.utils.functional.Tuple21;
+import fi.solita.utils.functional.Tuple22;
+import fi.solita.utils.functional.Tuple23;
+import fi.solita.utils.functional.Tuple24;
+import fi.solita.utils.functional.Tuple25;
+import fi.solita.utils.functional.Tuple26;
+import fi.solita.utils.functional.Tuple27;
+import fi.solita.utils.functional.Tuple28;
+import fi.solita.utils.functional.Tuple3;
+import fi.solita.utils.functional.Tuple4;
+import fi.solita.utils.functional.Tuple5;
+import fi.solita.utils.functional.Tuple6;
+import fi.solita.utils.functional.Tuple7;
+import fi.solita.utils.functional.Tuple8;
+import fi.solita.utils.functional.Tuple9;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
@@ -54,6 +86,16 @@ public class Project {
     public static <E extends IEntity<?> & Identifiable<?>> MetaJpaConstructor<E,Id<E>,Id<E>> id() {
         return Constructors.id();
     }
+    
+    public static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> max(SingularAttribute<? super E, T> attribute) {
+        checkOptionalAttributes(attribute);
+        return Constructors.max(attribute);
+    }
+    
+    public static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> min(SingularAttribute<? super E, T> attribute) {
+        checkOptionalAttributes(attribute);
+        return Constructors.min(attribute);
+    }
 
     public static <E, T> MetaJpaConstructor<E,T,T> value(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
@@ -64,7 +106,7 @@ public class Project {
         checkOptionalAttributes(attribute);
         return Constructors.value(attribute);
     }
-
+    
     public static <E, LEFT, RIGHT> MetaJpaConstructor<E,Pair<LEFT,RIGHT>,Map.Entry<? extends LEFT,? extends RIGHT>> pair(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
         checkOptionalAttributes(left);
         checkOptionalAttributes(right);
