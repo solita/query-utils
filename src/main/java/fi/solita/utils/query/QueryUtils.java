@@ -223,7 +223,7 @@ public class QueryUtils {
             for (TableInClauseOptimization provider: config.getTableInClauseProvider()) {
                 Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> targetType = provider.getSqlTypeAndValues(vals);
                 if (!targetType.isDefined()) {
-                    throw new IllegalArgumentException("No tabletype registered (Hacks.registerTableType) for type " + head(vals).getClass());
+                    throw new IllegalArgumentException("No tabletype registered (see fi.solita.utils.query.DefaultConfiguration.getRegisteredTableTypes()) for type " + head(vals).getClass());
                 }
                 // only use table-expression for large sets since ora performs better with regular in-clause.
                 if (vals.size() > config.getMaxValuesForMemberOfRestriction()) {

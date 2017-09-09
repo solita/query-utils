@@ -80,6 +80,7 @@ import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
+import fi.solita.utils.query.MultiColumnId;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
@@ -295,16 +296,21 @@ public class ProjectionHelper {
     private <SOURCE extends IEntity<?>, SOURCE_ID> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<SOURCE_ID> sourceIds) {
         Collection<Object[]> ret = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds, true);
         if (ret == RETRY_IN_PARTS) {
-            int maxInClauseSize = max(config.getInClauseValuesAmounts()).get();
+            SortedSet<Integer> amounts = config.getInClauseValuesAmounts();
+            if (head(sourceIds) instanceof MultiColumnId) {
+                // if there are multiple columns (usually just two), leave out amounts that more than half of the original max value.
+                amounts = newSortedSet(filter(lessThanOrEqualTo(amounts.last() / 2), amounts));
+            }
+            int maxInClauseSize = max(amounts).get();
             if (size(sourceIds) > maxInClauseSize) {
                 // more than max amount of ids
                 // -> perform multiple queries instead of or:ring to get rid of ridiculous (multi-minute) parse times
                 Iterable<Object[]> results = emptyList();
                 for (List<SOURCE_ID> group: grouped(maxInClauseSize, sourceIds)) {
-                    if (!config.getInClauseValuesAmounts().isEmpty() && group.size() < config.getInClauseValuesAmounts().last()) {
+                    if (group.size() < maxInClauseSize) {
                         // pad in-list to the next specified size repeating the last value, to avoid excessive hard parsing
-                        int targetSize = head(filter(greaterThanOrEqualTo(group.size()), config.getInClauseValuesAmounts()));
-                        group = newList(concat(group, repeat(last(group), targetSize-group.size())));
+                        int targetSize = head(filter(greaterThanOrEqualTo(group.size()), amounts));
+                        group = newSet(concat(group, repeat(last(group), targetSize-group.size())));
                     }
                     results = concat(results, queryTargets(target, isId, isWrapperOfIds, isDistinctable, group, false));
                 }
