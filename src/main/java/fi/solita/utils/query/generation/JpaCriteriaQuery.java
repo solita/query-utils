@@ -2,6 +2,8 @@ package fi.solita.utils.query.generation;
 
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
+import java.util.Set;
+
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -108,12 +110,12 @@ public class JpaCriteriaQuery {
     }
 
     @SuppressWarnings("unchecked")
-    public <E> CriteriaQuery<E> ofIds(Iterable<? extends Id<? super E>> ids, Class<E> entityClass) {
+    public <E> CriteriaQuery<E> ofIds(Set<? extends Id<? super E>> ids, Class<E> entityClass) {
         CriteriaQuery<Object> query = em.apply().getCriteriaBuilder().createQuery();
         if (ids.iterator().hasNext()) {
             Root<E> root = query.from(entityClass);
             Path<Id<E>> idPath = root.get(QueryUtils.<E,Id<E>>id(entityClass, em.apply()));
-            query.where(queryUtils.inExpr(idPath, (Iterable<Id<E>>)ids, em.apply().getCriteriaBuilder()));
+            query.where(queryUtils.inExpr(idPath, (Set<Id<E>>)ids, em.apply().getCriteriaBuilder()));
             query.select(root);
             return (CriteriaQuery<E>)(Object)query;
         } else {

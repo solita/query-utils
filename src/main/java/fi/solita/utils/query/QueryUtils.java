@@ -3,6 +3,7 @@ package fi.solita.utils.query;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newListOfSize;
+import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.filter;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -203,13 +205,13 @@ public class QueryUtils {
         return query;
     }
     
-    public final Predicate inExpr(Expression<?> path, Iterable<?> values, CriteriaBuilder cb) {
+    public final Predicate inExpr(Expression<?> path, Set<?> values, CriteriaBuilder cb) {
         return inExpr(path, values, cb, true);
     }
 
     @SuppressWarnings("unchecked")
-    public final Predicate inExpr(Expression<?> path, Iterable<?> values, CriteriaBuilder cb, boolean enableOptimizations) {
-        List<?> vals = newList(values);
+    public final Predicate inExpr(Expression<?> path, Set<?> values, CriteriaBuilder cb, boolean enableOptimizations) {
+        Set<?> vals = newSet(values);
         if (vals.size() == 1) {
             return cb.equal(path, head(values));
         } else if (vals.isEmpty()) {
@@ -240,7 +242,7 @@ public class QueryUtils {
         if (preds == null) {
             // Use regular in-clause.
             if (config.getInClauseValuesAmounts().isEmpty()) {
-                groups = Arrays.asList(vals);
+                groups = Arrays.asList(newList(vals));
             } else {
                 groups = newList(grouped(config.getInClauseValuesAmounts().last(), vals));
             }

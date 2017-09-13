@@ -5,6 +5,8 @@ import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newListOfSize;
 import static fi.solita.utils.functional.Collections.newMap;
 import static fi.solita.utils.functional.Collections.newMultimap;
+import static fi.solita.utils.functional.Collections.newSet;
+import static fi.solita.utils.functional.Collections.newSortedSet;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.exists;
@@ -26,6 +28,7 @@ import static fi.solita.utils.functional.FunctionalA.tail;
 import static fi.solita.utils.functional.FunctionalM.find;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
+import static fi.solita.utils.functional.Predicates.lessThanOrEqualTo;
 import static fi.solita.utils.functional.Predicates.not;
 import static fi.solita.utils.query.QueryUtils.addListAttributeOrdering;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
@@ -50,6 +53,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
@@ -215,9 +220,9 @@ public class ProjectionHelper {
         return ret;
     }
 
-    private <SOURCE extends IEntity<?>> List<Object> doAdditionalQuery(Class<?> projectionType, Attribute<SOURCE, ?> attr, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<Id<SOURCE>> sourceIdsToQuery) {
+    private <SOURCE extends IEntity<?>> List<Object> doAdditionalQuery(Class<?> projectionType, Attribute<SOURCE, ?> attr, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, List<Id<SOURCE>> sourceIdsToQuery) {
         logger.debug("doAdditionalQuery({},{},{},{},{},{})", new Object[] {projectionType, attr, isId, isWrapperOfIds, isDistinctable, sourceIdsToQuery});
-        final Map<?, List<Object>> targetQueryResults = queryTargetsOfSources(attr, isId, isWrapperOfIds, isDistinctable, sourceIdsToQuery);
+        final Map<?, List<Object>> targetQueryResults = queryTargetsOfSources(attr, isId, isWrapperOfIds, isDistinctable, newSet(sourceIdsToQuery));
 
         Iterable<List<Object>> results = map(new Transformer<Object,List<Object>>() {
             @SuppressWarnings("unchecked")
@@ -231,7 +236,7 @@ public class ProjectionHelper {
         return ret;
     }
     
-    private <SOURCE extends IEntity<?>> Map<Id<SOURCE>,List<Object>> queryTargetsOfSources(final Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<Id<SOURCE>> sourceIds) {
+    private <SOURCE extends IEntity<?>> Map<Id<SOURCE>,List<Object>> queryTargetsOfSources(final Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Set<Id<SOURCE>> sourceIds) {
         logger.debug("queryTargetsOfSources({},{},{},{},{})", new Object[] {target, isId, isWrapperOfIds, isDistinctable, sourceIds});
         Collection<Object[]> results = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds);
         
@@ -293,7 +298,7 @@ public class ProjectionHelper {
         };
     };
     
-    private <SOURCE extends IEntity<?>, SOURCE_ID> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<SOURCE_ID> sourceIds) {
+    private <SOURCE extends IEntity<?>, SOURCE_ID> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Set<SOURCE_ID> sourceIds) {
         Collection<Object[]> ret = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds, true);
         if (ret == RETRY_IN_PARTS) {
             SortedSet<Integer> amounts = config.getInClauseValuesAmounts();
@@ -306,7 +311,8 @@ public class ProjectionHelper {
                 // more than max amount of ids
                 // -> perform multiple queries instead of or:ring to get rid of ridiculous (multi-minute) parse times
                 Iterable<Object[]> results = emptyList();
-                for (List<SOURCE_ID> group: grouped(maxInClauseSize, sourceIds)) {
+                for (List<SOURCE_ID> grp: grouped(maxInClauseSize, sourceIds)) {
+                    Set<SOURCE_ID> group = newSet(grp);
                     if (group.size() < maxInClauseSize) {
                         // pad in-list to the next specified size repeating the last value, to avoid excessive hard parsing
                         int targetSize = head(filter(greaterThanOrEqualTo(group.size()), amounts));
@@ -323,7 +329,7 @@ public class ProjectionHelper {
     }
     
     @SuppressWarnings("unchecked")
-    private <SOURCE extends IEntity<?>, SOURCE_ID> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Iterable<SOURCE_ID> sourceIds, boolean firstRun) {
+    private <SOURCE extends IEntity<?>, SOURCE_ID> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Set<SOURCE_ID> sourceIds, boolean firstRun) {
         logger.debug("queryTargets({},{},{},{},{})", new Object[] {sourceIds, target, isId, isWrapperOfIds, isDistinctable});
         Class<SOURCE> sourceClass = target.getDeclaringType() != null ? target.getDeclaringType().getJavaType() : ((Id<SOURCE>)head(sourceIds)).getOwningClass();
         CriteriaQuery<Object[]> query = em.apply().getCriteriaBuilder().createQuery(Object[].class);

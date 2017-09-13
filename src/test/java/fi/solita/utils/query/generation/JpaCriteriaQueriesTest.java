@@ -1,6 +1,5 @@
 package fi.solita.utils.query.generation;
 
-import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.Some;
@@ -22,7 +21,6 @@ import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Municipality;
 import fi.solita.utils.query.Municipality_;
 import fi.solita.utils.query.QueryTestBase;
-import fi.solita.utils.query.execution.JpaCriteriaQueries;
 
 
 public class JpaCriteriaQueriesTest extends QueryTestBase {
@@ -63,13 +61,13 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
         Department dep2 = new Department();
         persist(dep1, dep2);
 
-        assertEquals("find by single id", dep1.getId(), dao.get(query.ofIds(newList(dep1.getId()), Department.class)).getId());
-        assertEquals("find by multiple ids", newSet(dep1.getId(), dep2.getId()), newSet(map(Department_.getId, dao.getMany(query.ofIds(newList(dep1.getId(), dep2.getId()), Department.class)))));
+        assertEquals("find by single id", dep1.getId(), dao.get(query.ofIds(newSet(dep1.getId()), Department.class)).getId());
+        assertEquals("find by multiple ids", newSet(dep1.getId(), dep2.getId()), newSet(map(Department_.getId, dao.getMany(query.ofIds(newSet(dep1.getId(), dep2.getId()), Department.class)))));
     }
 
     @Test(expected = NoResultException.class)
     public void ofIds_empty() {
-        dao.get(query.ofIds(Collections.<Id<Department>>emptyList(), Department.class));
+        dao.get(query.ofIds(Collections.<Id<Department>>emptySet(), Department.class));
     }
 
     @Test
