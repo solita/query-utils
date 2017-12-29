@@ -3,6 +3,7 @@ package fi.solita.utils.query.meta;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.mkString;
+import static fi.solita.utils.functional.Functional.remove;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -15,6 +16,7 @@ import javax.persistence.MappedSuperclass;
 
 import fi.solita.utils.meta.CommonMetadataProcessor;
 import fi.solita.utils.meta.generators.Generator;
+import fi.solita.utils.meta.generators.InstanceFieldsAsTuple;
 import fi.solita.utils.query.meta.JpaMetamodelProcessor.ExtendedGeneratorOptions;
 import fi.solita.utils.query.meta.generators.JpaMetamodel;
 
@@ -84,6 +86,7 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
     }
 
     public List<Generator<? super ExtendedGeneratorOptions>> generators() {
-        return newList(cons(JpaMetamodel.instance, super.generators()));
+        return newList(remove(InstanceFieldsAsTuple.instance, // doesn't work with inheritance in java8
+                       cons(JpaMetamodel.instance, super.generators())));
     }
 }
