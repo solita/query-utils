@@ -208,6 +208,18 @@ public class QueryUtils {
     public final Predicate inExpr(Expression<?> path, Set<?> values, CriteriaBuilder cb) {
         return inExpr(path, values, cb, true);
     }
+    
+    public final boolean useTableForInClause(Set<?> vals) {
+        return vals.size() > config.getMaxValuesForMemberOfRestriction();
+    }
+    
+    public final boolean useMemberOfForInClause(Set<?> vals) {
+        return vals.size() > config.getMinValuesForMemberOfRestriction();
+    }
+    
+    public final boolean wouldUseInClauseOptimizations(Set<?> vals) {
+        return config.getTableInClauseProvider().isDefined() && (useTableForInClause(vals) || useMemberOfForInClause(vals));
+    }
 
     @SuppressWarnings("unchecked")
     public final Predicate inExpr(Expression<?> path, Set<?> values, CriteriaBuilder cb, boolean enableOptimizations) {
@@ -228,10 +240,10 @@ public class QueryUtils {
                     throw new IllegalArgumentException("No tabletype registered (see fi.solita.utils.query.DefaultConfiguration.getRegisteredTableTypes()) for type " + head(vals).getClass());
                 }
                 // only use table-expression for large sets since ora performs better with regular in-clause.
-                if (vals.size() > config.getMaxValuesForMemberOfRestriction()) {
+                if (useTableForInClause(vals)) {
                     // use 'table' for huge sets since member-of starts to perform badly
                     preds = newList(path.in(cb.function("table", Collection.class, cb.literal(Table.of(vals)))));
-                } else if (vals.size() > config.getMinValuesForMemberOfRestriction()) {
+                } else if (useMemberOfForInClause(vals)) {
                     // use member-of
                     // return type doesn't seem to make a difference, so just set to boolean...
                     preds = newList(cb.isMember((Expression<Object>)path, (Expression<Collection<Object>>)(Object)cb.function(MEMBER_OF_CAST + targetType.get()._1, Collection.class, cb.literal(Table.of(vals)))));

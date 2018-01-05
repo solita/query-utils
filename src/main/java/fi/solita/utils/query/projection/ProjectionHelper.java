@@ -23,8 +23,6 @@ import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.tail;
 import static fi.solita.utils.functional.Functional.transpose;
 import static fi.solita.utils.functional.Functional.zip;
-import static fi.solita.utils.functional.FunctionalA.head;
-import static fi.solita.utils.functional.FunctionalA.tail;
 import static fi.solita.utils.functional.FunctionalM.find;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
@@ -371,7 +369,8 @@ public class ProjectionHelper {
         boolean enableInClauseOptimizations = !exists(QueryUtils.ImplementsProjectWithRegularInClause, allEntities);
         logger.debug("Enable in-clause optimizations: {}", enableInClauseOptimizations);
         
-        if (firstRun && !enableInClauseOptimizations) {
+        // execute in parts only if optimizations are not enabled or would not be used
+        if (firstRun && (!enableInClauseOptimizations || !queryUtils.wouldUseInClauseOptimizations(sourceIds))) {
             return RETRY_IN_PARTS;
         }
         
