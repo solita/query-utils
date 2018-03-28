@@ -149,10 +149,10 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
             
             String typeSignature = "<" + ownerType + "," + attributeType + ">";
             for (Pair<String, String> param: classTypeParameters) {
-                typeSignature = typeSignature.replaceAll("(?<=[,< ])" + Pattern.quote(param.left) + "(?=[,> ])", Matcher.quoteReplacement(param.right));
+                typeSignature = typeSignature.replaceAll("(?<=[,< ])" + Pattern.quote(param.left()) + "(?=[,> ])", Matcher.quoteReplacement(param.right()));
             }
             for (Pair<String, String> param: classTypeParameters) {
-                typeSignature = typeSignature.replaceAll("(?<=[,< ])" + Pattern.quote(param.left) + "(?=[,> ])", "?");
+                typeSignature = typeSignature.replaceAll("(?<=[,< ])" + Pattern.quote(param.left()) + "(?=[,> ])", "?");
             }
             
             String type = "javax.persistence.metamodel." + attributeClass + "Attribute" + typeSignature;
