@@ -5,7 +5,8 @@ import java.lang.reflect.Constructor;
 import java.util.Properties;
 
 import org.hibernate.HibernateException;
-import org.hibernate.dialect.Dialect;
+import org.hibernate.boot.model.relational.QualifiedName;
+import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.enhanced.DatabaseStructure;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
@@ -37,7 +38,7 @@ public class IdGenerator extends SequenceStyleGenerator {
     }
 
     @Override
-    protected DatabaseStructure buildDatabaseStructure(Type type, Properties params, Dialect dialect, boolean forceTableUse, String sequenceName, int initialValue, int incrementSize) {
-        return super.buildDatabaseStructure(LongId.class.isAssignableFrom(type.getReturnedClass()) ? StandardBasicTypes.LONG : type, params, dialect, forceTableUse, sequenceName, initialValue, incrementSize);
+    protected DatabaseStructure buildDatabaseStructure(Type type, Properties params, JdbcEnvironment jdbcEnvironment, boolean forceTableUse, QualifiedName sequenceName, int initialValue, int incrementSize) {
+        return super.buildDatabaseStructure(LongId.class.isAssignableFrom(type.getReturnedClass()) ? StandardBasicTypes.LONG : type, params, jdbcEnvironment, forceTableUse, sequenceName, initialValue, incrementSize);
     }
 }

@@ -13,11 +13,9 @@ import fi.solita.utils.functional.Option;
 
 public final class MemberOfCastFunction implements SQLFunction {
     private final String targetTableType;
-    private final Option<String> targetObjectType;
     
     public MemberOfCastFunction(String targetTableType, Option<String> targetObjectType) {
         this.targetTableType = targetTableType;
-        this.targetObjectType = targetObjectType;
     }
     
     @Override
