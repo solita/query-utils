@@ -19,6 +19,8 @@ public final class Page implements Serializable {
 
     public static final Page NoPaging = FIRST.withSize(Integer.MAX_VALUE);
     
+    public static final Page SINGLE_ROW = Page.FIRST.withSize(1);
+    
     /**
      * @param pageNumber
      *            Zero-based
