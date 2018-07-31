@@ -73,9 +73,9 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Either;
-import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Predicates;
 import fi.solita.utils.functional.Transformer;
@@ -98,12 +98,12 @@ public class ProjectionHelper {
     
     private static final Logger logger = LoggerFactory.getLogger(ProjectionHelper.class);
 
-    private final Function0<EntityManager> em;
+    private final ApplyZero<EntityManager> em;
     private final JpaCriteriaQueryExecutor queryExecutor;
     private final Configuration config;
     private final QueryUtils queryUtils;
     
-    public ProjectionHelper(Function0<EntityManager> em, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
+    public ProjectionHelper(ApplyZero<EntityManager> em, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.em = em;
         this.queryExecutor = queryExecutor;
         this.config = config;
@@ -116,7 +116,7 @@ public class ProjectionHelper {
         List<Selection<?>> ret;
         if (projection instanceof IdProjection) {
             logger.debug("IdProjection. Replacing selection {} with just Id.", selection);
-            ret = Collections.<Selection<?>>newList(selection.get(QueryUtils.<E,Object>id(selection.getJavaType(), em.apply())));
+            ret = Collections.<Selection<?>>newList(selection.get(QueryUtils.<E,Object>id(selection.getJavaType(), em.get())));
         } else {
             ret = newListOfSize(projection.getParameters().size());
             for (Tuple3<Integer, Attribute<?,?>, Class<?>> t: zip(range(0), projection.getParameters(), projection.getConstructorParameterTypes())) {
@@ -154,19 +154,19 @@ public class ProjectionHelper {
             }
             
             logger.debug("PseudoAttribute detected: {}", pseudo);
-            Expression<?> s = pseudo.getSelectionForQuery(em.apply(), selection);
+            Expression<?> s = pseudo.getSelectionForQuery(em.get(), selection);
             doRestrictions(selection, param); // to restrict e.g. SelfAttribute, if so wanted.
-            return unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined() || constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity<?>>)s).get(id((Class<IEntity<?>>)s.getJavaType(), em.apply())) : s;
+            return unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined() || constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity<?>>)s).get(id((Class<IEntity<?>>)s.getJavaType(), em.get())) : s;
         }
         
         if (unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined()) {
-            SingularAttribute<T,Id<T>> replacement = id(selection.getJavaType(), em.apply());
+            SingularAttribute<T,Id<T>> replacement = id(selection.getJavaType(), em.get());
             logger.debug("AdditionalQueryPerformingAttribute detected. Replacing selection {} with source Id {}", selection.getJavaType().getSimpleName(), replacement.getName());
             return selection.get(replacement);
         }
 
         if (unwrap(PluralAttribute.class, param).isDefined()) {
-            SingularAttribute<T,Id<T>> replacement = id(selection.getJavaType(), em.apply());
+            SingularAttribute<T,Id<T>> replacement = id(selection.getJavaType(), em.get());
             logger.debug("PluralAttribute detected. Replacing parameter with source Id.");
             return selection.get(replacement);
         }
@@ -180,14 +180,14 @@ public class ProjectionHelper {
             if (IEntity.class.isAssignableFrom(attr.getJavaType())) {
                 if (constructorExpectsId) {
                     logger.debug("Singular Entity attribute detected, but constructor expects Id. Replacing parameter with Id.");
-                    return selection.get(attr).get(id(attr.getBindableJavaType(), em.apply()));
+                    return selection.get(attr).get(id(attr.getBindableJavaType(), em.get()));
                 } else {
                     logger.debug("Singular Entity attribute detected. Performing left join.");
                     return doRestrictions(selection.join(attr, JoinType.LEFT), attr);
                 }
             } else if (projection instanceof ExpressionProjection) {
                 logger.debug("Expression detected. Wrapping singularattribute to the expression.");
-                return ((ExpressionProjection<Object>) projection).getExpression(em.apply().getCriteriaBuilder(), (Expression<Object>)selection.get(attr));
+                return ((ExpressionProjection<Object>) projection).getExpression(em.get().getCriteriaBuilder(), (Expression<Object>)selection.get(attr));
             } else {
                 return selection.get(attr);
             }
@@ -255,7 +255,7 @@ public class ProjectionHelper {
         Iterable<? extends Object> result;
         if (isCollectionOfEmbeddables(target)) {
             logger.debug("Target is a collection of Embeddables. Picking embeddable parts manually.");
-            result = map(EmbeddableUtil_.collectEmbeddableFromParts.ap(em.apply().getMetamodel(), (Bindable<?>)target), actualResultRows);
+            result = map(EmbeddableUtil_.collectEmbeddableFromParts.ap(em.get().getMetamodel(), (Bindable<?>)target), actualResultRows);
         } else {
             // for AdditionalQueryPerformingAttribute, replace the result object array with the actual object, performing additional queries if needed
             Option<AdditionalQueryPerformingAttribute> rel = unwrap(AdditionalQueryPerformingAttribute.class, target);
@@ -330,9 +330,9 @@ public class ProjectionHelper {
     private <SOURCE extends IEntity<?>, SOURCE_ID> Collection<Object[]> queryTargets(Attribute<SOURCE, ?> target, boolean isId, boolean isWrapperOfIds, boolean isDistinctable, Set<SOURCE_ID> sourceIds, boolean firstRun) {
         logger.debug("queryTargets({},{},{},{},{})", new Object[] {sourceIds, target, isId, isWrapperOfIds, isDistinctable});
         Class<SOURCE> sourceClass = target.getDeclaringType() != null ? target.getDeclaringType().getJavaType() : ((Id<SOURCE>)head(sourceIds)).getOwningClass();
-        CriteriaQuery<Object[]> query = em.apply().getCriteriaBuilder().createQuery(Object[].class);
+        CriteriaQuery<Object[]> query = em.get().getCriteriaBuilder().createQuery(Object[].class);
         Root<SOURCE> source = query.from(sourceClass);
-        Path<SOURCE_ID> sourceId = source.get(QueryUtils.<SOURCE,SOURCE_ID>id(sourceClass, em.apply()));
+        Path<SOURCE_ID> sourceId = source.get(QueryUtils.<SOURCE,SOURCE_ID>id(sourceClass, em.get()));
         
         Either<From<SOURCE,Object>,Attribute<?,?>> relationOrAdditionalGet;
         Map<Attribute<?, ?>, From<?, ?>> actualJoins = newMap();
@@ -374,7 +374,7 @@ public class ProjectionHelper {
             return RETRY_IN_PARTS;
         }
         
-        query.where(queryUtils.inExpr(sourceId, sourceIds, em.apply().getCriteriaBuilder(), enableInClauseOptimizations));
+        query.where(queryUtils.inExpr(sourceId, sourceIds, em.get().getCriteriaBuilder(), enableInClauseOptimizations));
 
         // Would this provide any benefit? Maybe only overhead...
         if (isDistinctable && config.makeProjectionQueriesDistinct()) {
@@ -390,7 +390,7 @@ public class ProjectionHelper {
             // parentid (of the embeddable) in the select clause, but tries to read
             // all fields from the resultset
             logger.debug("Target is a collection of embeddables. Breaking embeddable fields manually for the query.");
-            query.multiselect(newList(cons(sourceId, breakEmbeddableToParts(em.apply().getMetamodel(), (Bindable<?>)target, relationOrAdditionalGet.left.get()))));
+            query.multiselect(newList(cons(sourceId, breakEmbeddableToParts(em.get().getMetamodel(), (Bindable<?>)target, relationOrAdditionalGet.left.get()))));
         } else if (rel.isDefined()) {
             logger.debug("Target is AdditionalQueryPerformingAttribute. Preparing.");
             List<Selection<?>> selections = prepareProjectingQuery((MetaJpaConstructor<Object,?,?>)rel.get().getConstructor(), relationOrAdditionalGet.left.get());
@@ -400,7 +400,7 @@ public class ProjectionHelper {
                     throw new RuntimeException("whoops");
                 }
                 Path<Object> sel = ((Path<Object>)head(selections));
-                query.multiselect(sourceId, sel.get(id(sel.getJavaType(), em.apply())));
+                query.multiselect(sourceId, sel.get(id(sel.getJavaType(), em.get())));
             } else {
                 query.multiselect(newList(cons(sourceId, selections)));
             }
@@ -408,7 +408,7 @@ public class ProjectionHelper {
             Path<Object> r = (Path<Object>) (relationOrAdditionalGet.isRight() ? QueryUtils.get(last, relationOrAdditionalGet.right.get()) : relationOrAdditionalGet.left.get());
             if ((isId || isWrapperOfIds) && !isId(r.getJavaType())) {
                 logger.debug("Constructor expects Ids but the query was not for Ids. Projection to Ids.");
-                query.multiselect(sourceId, r.get(id(r.getJavaType(), em.apply())));
+                query.multiselect(sourceId, r.get(id(r.getJavaType(), em.get())));
             } else {
                 query.multiselect(sourceId, r);
             }
@@ -433,7 +433,7 @@ public class ProjectionHelper {
                 setListAttributeOrderings(a, query, actualJoins);
             }
         } else if (target instanceof ListAttribute) {
-            addListAttributeOrdering(query, actualJoins.get(target), resolveOrderColumn((ListAttribute<?,?>)target), em.apply().getCriteriaBuilder());
+            addListAttributeOrdering(query, actualJoins.get(target), resolveOrderColumn((ListAttribute<?,?>)target), em.get().getCriteriaBuilder());
         }
     }
     
