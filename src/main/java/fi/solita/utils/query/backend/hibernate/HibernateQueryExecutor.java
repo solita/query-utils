@@ -21,7 +21,7 @@ import org.hibernate.Session;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.transform.ResultTransformer;
 
-import fi.solita.utils.functional.Function0;
+import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Transformers;
@@ -38,11 +38,11 @@ import fi.solita.utils.query.generation.QLQuery;
 
 public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQueryExecutor, QLQueryExecutor {
 
-    private final Function0<EntityManager> em;
+    private final ApplyZero<EntityManager> em;
     private final TypeProvider typeProvider;
     private final JpaCriteriaCopy jpaCriteriaCopy;
     
-    public HibernateQueryExecutor(Function0<EntityManager> em, TypeProvider typeProvider, Configuration config) {
+    public HibernateQueryExecutor(ApplyZero<EntityManager> em, TypeProvider typeProvider, Configuration config) {
         this.em = em;
         this.typeProvider = typeProvider;
         this.jpaCriteriaCopy = new JpaCriteriaCopy(config);
@@ -51,14 +51,14 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @Override
     public <T> T get(CriteriaQuery<T> query, LockModeType lock) {
         jpaCriteriaCopy.createMissingAliases(query);
-        return replaceProxy(em.apply().createQuery(query).setLockMode(lock).getSingleResult());
+        return replaceProxy(em.get().createQuery(query).setLockMode(lock).getSingleResult());
     }
 
     @Override
     public <T> List<T> getMany(CriteriaQuery<T> query, Page page, LockModeType lock) {
         jpaCriteriaCopy.createMissingAliases(query);
         
-        TypedQuery<T> q = em.apply().createQuery(query).setLockMode(lock);
+        TypedQuery<T> q = em.get().createQuery(query).setLockMode(lock);
         int originalFirstResult = q.getFirstResult();
         int originalMaxResults = q.getMaxResults();
         
@@ -86,7 +86,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
 
     @Override
     public int execute(NativeQuery<Void> query) {
-        SQLQuery q = em.apply().unwrap(Session.class).createSQLQuery(query.query);
+        SQLQuery q = em.get().unwrap(Session.class).createSQLQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -96,7 +96,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> Option<T> find(NativeQuery<? extends T> query) {
-        SQLQuery q = em.apply().unwrap(Session.class).createSQLQuery(query.query);
+        SQLQuery q = em.get().unwrap(Session.class).createSQLQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -106,7 +106,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> List<T> getMany(NativeQuery<? extends T> query, Page page) {
-        SQLQuery q = em.apply().unwrap(Session.class).createSQLQuery(query.query);
+        SQLQuery q = em.get().unwrap(Session.class).createSQLQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -116,7 +116,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> Option<T> find(QLQuery<T> query) {
-        Query q = em.apply().unwrap(Session.class).createQuery(query.query);
+        Query q = em.get().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
         return Option.of(replaceProxy((T)q.uniqueResult()));
     }
@@ -124,7 +124,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> List<T> getMany(QLQuery<T> query, Page page) {
-        Query q = em.apply().unwrap(Session.class).createQuery(query.query);
+        Query q = em.get().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
         return newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
     }

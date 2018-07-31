@@ -12,8 +12,8 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
+import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Function;
-import fi.solita.utils.functional.Function0;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple;
@@ -54,33 +54,33 @@ import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 public class Project {
     
-    public static final <S,T,P> MetaJpaConstructor<S, T, P> recurse(final Function0<? extends MetaJpaConstructor<S, T, P>> f) {
+    public static final <S,T,P> MetaJpaConstructor<S, T, P> recurse(final ApplyZero<? extends MetaJpaConstructor<S, T, P>> f) {
         return new MetaJpaConstructor<S, T, P>() {
-            private final Function0<? extends MetaJpaConstructor<S, T, P>> c = Function.memoize(f);
+            private final ApplyZero<? extends MetaJpaConstructor<S, T, P>> c = Function.memoize(f);
             
             @Override
             public List<Class<?>> getConstructorParameterTypes() {
-                return c.apply().getConstructorParameterTypes();
+                return c.get().getConstructorParameterTypes();
             }
 
             @Override
             public Constructor<T> getMember() {
-                return c.apply().getMember();
+                return c.get().getMember();
             }
 
             @Override
             public T apply(P t) {
-                return c.apply().apply(t);
+                return c.get().apply(t);
             }
 
             @Override
             public List<Attribute<?, ?>> getParameters() {
-                return c.apply().getParameters();
+                return c.get().getParameters();
             }
             @Override
 
             public List<Integer> getIndexesOfIdWrappingParameters() {
-                return c.apply().getIndexesOfIdWrappingParameters();
+                return c.get().getIndexesOfIdWrappingParameters();
             }
         };
     }
