@@ -738,20 +738,32 @@ public abstract class NativeQuery<T> {
         }
 
         public THIS setParameter(String name, Object val) {
+            if (val == null || val instanceof Option && !((Option<?>)val).isDefined()) {
+                throw new UnsupportedOperationException("Need an explicit type with a null/None value for: " + name);
+            }
             return create(query, retvals, newMap(cons(Pair.of(name, Pair.of(val, Option.<Type<?>>None())), params.entrySet())));
         }
 
         @SuppressWarnings("unchecked")
         public <C> THIS setParameter(String name, C val, Type<? extends C> type) {
+            if (type == null) {
+                throw new NullPointerException("Type was null for param: " + name);
+            }
             return create(query, retvals, newMap(cons(Pair.of(name, Pair.of(val, (Option<Type<?>>)(Object)Some(type))), params.entrySet())));
         }
 
         public THIS setParameterList(String name, Collection<?> val) {
+            if (val == null || val.isEmpty()) {
+                throw new UnsupportedOperationException("Need an explicit type with a null/empty value for: " + name);
+            }
             return create(query, retvals, newMap(cons(Pair.of(name, Pair.of(val, Option.<Type<?>>None())), params.entrySet())));
         }
 
         @SuppressWarnings("unchecked")
         public <C> THIS setParameterList(String name, Collection<C> val, Type<? extends C> type) {
+            if (type == null) {
+                throw new NullPointerException("Type was null for param: " + name);
+            }
             return create(query, retvals, newMap(cons(Pair.of(name, Pair.of(val, (Option<Type<?>>)(Object)Some(type))), params.entrySet())));
         }
 
@@ -761,6 +773,9 @@ public abstract class NativeQuery<T> {
 
         @SuppressWarnings("unchecked")
         protected List<Pair<String, Option<Type<?>>>> withRetval(String alias, Type<?> type) {
+            if (type == null) {
+                throw new NullPointerException("Type was null for return value: " + alias);
+            }
             return newList(concat(retvals, newSet(Pair.of(alias, (Option<Type<?>>)(Object)Some(type)))));
         }
         
