@@ -2,6 +2,7 @@ package fi.solita.utils.query.execution;
 
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.headOption;
+import static fi.solita.utils.functional.Functional.isEmpty;
 import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.query.QueryUtils.applyOrder;
@@ -50,8 +51,10 @@ public class JpaCriteriaQueries {
     }
 
     public boolean exists(CriteriaQuery<?> query, LockModeType lock) {
-        // XXX: optimize?
-        return count(query, lock) > 0;
+        CriteriaQuery<Integer> q = em.get().getCriteriaBuilder().createQuery(Integer.class);
+        jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.get().getCriteriaBuilder());
+        q.select(em.get().getCriteriaBuilder().literal(1));
+        return !isEmpty(queryExecutor.getMany(query, Page.SINGLE_ROW, lock));
     }
 
     public <T> T get(CriteriaQuery<T> query, LockModeType lock) throws NoResultException, NonUniqueResultException {
