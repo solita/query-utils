@@ -3,6 +3,7 @@ package fi.solita.utils.query.execution;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.grouped;
+import static fi.solita.utils.functional.Functional.headOption;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
@@ -81,7 +82,6 @@ public class JpaBasicQueries {
 
     @SuppressWarnings("unchecked")
     public <E extends IEntity<?> & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
-        @SuppressWarnings("unchecked")
         CriteriaQuery<Id<E>> q = (CriteriaQuery<Id<E>>)(Object)em.get().getCriteriaBuilder().createQuery();
         jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.get().getCriteriaBuilder());
         From<?,E> selection = resolveSelection(query, q);
@@ -101,11 +101,11 @@ public class JpaBasicQueries {
     }
 
     public <E extends IEntity<?>> E get(Id<E> id) {
-        E ret = em.get().find(id.getOwningClass(), id);
-        if (ret == null) {
+        Option<E> ret = find(id);
+        if (!ret.isDefined()) {
             throw new EntityNotFoundException("Entity of type " + id.getOwningClass().getName() + " with id " + id + " not found.");
         }
-        return ret;
+        return ret.get();
     }
 
     public <E extends IEntity<?>> E toProxy(Id<E> id) {
@@ -117,7 +117,19 @@ public class JpaBasicQueries {
     }
 
     public <E extends IEntity<?>> Option<E> find(Id<E> id) {
-        return Option.of(em.get().find(id.getOwningClass(), id));
+        CriteriaQuery<E> query = em.get().getCriteriaBuilder().createQuery(id.getOwningClass());
+        Root<E> root = query.from(id.getOwningClass());
+        query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(id.getOwningClass(), em.get())), id));
+        
+        List<E> ret = queryExecutor.getMany(query, Page.NoPaging, LockModeType.NONE);
+        if (ret.size() > 1) {
+            throw new RuntimeException("Found multiple entities with key: " + id);
+        } else {
+            return headOption(ret);
+        }
+        // replaced with a criteria query, since Hibernate 5 started to return base class instances instead of subclasses 
+        // when queried with a base class id... 
+        //return Option.of(em.get().find(id.getOwningClass(), id));
     }
 
     /**
