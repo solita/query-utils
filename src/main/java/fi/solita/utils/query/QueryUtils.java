@@ -262,9 +262,10 @@ public class QueryUtils {
             
             for (List<?> g: groups) {
                 if (!config.getInClauseValuesAmounts().isEmpty() && g.size() < config.getInClauseValuesAmounts().last()) {
-                    // pad in-list to the next specified size repeating the last value, to avoid excessive hard parsing
+                    // pad in-list to the next specified size, to avoid excessive hard parsing
                     int targetSize = head(filter(greaterThanOrEqualTo(g.size()), config.getInClauseValuesAmounts()));
-                    preds.add(path.in(newList(concat(g, repeat(last(g), targetSize-g.size())))));
+                    Object valueToRepeat = config.getInListPadValue(last(g).getClass()).getOrElse(last(g));
+                    preds.add(path.in(newList(concat(g, repeat(valueToRepeat, targetSize-g.size())))));
                 } else {
                     preds.add(path.in(g));
                 }

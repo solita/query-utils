@@ -25,4 +25,9 @@ public interface Configuration {
     public Map<Class<?>, Tuple3<String, Option<String>, ? extends Function2<Connection,?,?>>> getRegisteredTableTypes();
     
     public Option<TableInClauseOptimization> getTableInClauseProvider();
+
+    /**
+     * @return Value used to pad in-lists to reduce hard-parsing. Return None to pad with the last real value in the list.
+     */
+    public <T> Option<T> getInListPadValue(Class<?> valueType);
 }

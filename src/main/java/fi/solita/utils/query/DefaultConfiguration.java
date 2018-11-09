@@ -48,4 +48,9 @@ public class DefaultConfiguration implements Configuration {
     public Option<TableInClauseOptimization> getTableInClauseProvider() {
         return None();
     }
+    
+    @Override
+    public <T> Option<T> getInListPadValue(Class<?> valueType) {
+        return None();
+    }
 }
