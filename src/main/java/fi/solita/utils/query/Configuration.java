@@ -29,5 +29,5 @@ public interface Configuration {
     /**
      * @return Value used to pad in-lists to reduce hard-parsing. Return None to pad with the last real value in the list.
      */
-    public <T> Option<T> getInListPadValue(Class<?> valueType);
+    public Option<Object> getInListPadValue(Class<?> valueType);
 }

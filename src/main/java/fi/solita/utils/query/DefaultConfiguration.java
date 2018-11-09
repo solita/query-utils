@@ -50,7 +50,7 @@ public class DefaultConfiguration implements Configuration {
     }
     
     @Override
-    public <T> Option<T> getInListPadValue(Class<?> valueType) {
+    public Option<Object> getInListPadValue(Class<?> valueType) {
         return None();
     }
 }
