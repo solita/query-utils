@@ -54,7 +54,7 @@ public class JpaCriteriaQueries {
         CriteriaQuery<Integer> q = em.get().getCriteriaBuilder().createQuery(Integer.class);
         jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.get().getCriteriaBuilder());
         q.select(em.get().getCriteriaBuilder().literal(1));
-        return !isEmpty(queryExecutor.getMany(query, Page.SINGLE_ROW, lock));
+        return !isEmpty(queryExecutor.getMany(q, Page.SINGLE_ROW, lock));
     }
 
     public <T> T get(CriteriaQuery<T> query, LockModeType lock) throws NoResultException, NonUniqueResultException {

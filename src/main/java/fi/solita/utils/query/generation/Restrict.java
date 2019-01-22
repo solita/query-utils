@@ -307,6 +307,31 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
+    public <E> CriteriaQuery<E> by(Predicate predicate, CriteriaQuery<E> query) {
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E, T> CriteriaQuery<E> isDefined(SingularAttribute<? super E, T> attribute, CriteriaQuery<E> query) {
+        Path<E> selection = resolveSelectionPath(query);
+        Predicate predicate = cb().isNotNull(selection.get(attribute));
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E, T> CriteriaQuery<E> isNotDefined(SingularAttribute<? super E, T> attribute, CriteriaQuery<E> query) {
+        Path<E> selection = resolveSelectionPath(query);
+        Predicate predicate = cb().isNull(selection.get(attribute));
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Modifies existing query!
+     */
     public <E, T> CriteriaQuery<E> equals(SingularAttribute<? super E, T> attribute, Option<T> value, CriteriaQuery<E> query) {
         Path<E> selection = resolveSelectionPath(query);
         Predicate predicate;
