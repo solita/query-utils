@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.usertype.UserType;
 
@@ -84,7 +84,7 @@ public class Money implements Comparable<Money> {
 
 
         @Override
-        public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object owner) throws HibernateException, SQLException {
+        public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
             Object value = StandardBasicTypes.LONG.nullSafeGet(rs, names, session, owner);
             if (value == null) {
                 return null;
@@ -93,7 +93,7 @@ public class Money implements Comparable<Money> {
         }
 
         @Override
-        public void nullSafeSet(PreparedStatement st, Object value, int index, SessionImplementor session) throws HibernateException, SQLException {
+        public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
             StandardBasicTypes.LONG.nullSafeSet(st, value == null ? null : ((Money)value).euros, index, session);
         }
 
