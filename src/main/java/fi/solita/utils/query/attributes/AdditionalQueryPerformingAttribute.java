@@ -16,19 +16,19 @@ public interface AdditionalQueryPerformingAttribute {
      */
     public static class Constructors {
         public static <E, E2, R> SingularAttribute<E,R> relation(SingularAttribute<? super E, ? super E2> attribute, MetaJpaConstructor<? super E2, R, ?> constructor) {
-            return new RelationSingularAttribute<E,R>(attribute, constructor);
+            return new RelationSingularAttribute<E,R>((SingularAttribute<E, E2>) (Object) attribute, (MetaJpaConstructor<E2, R, ?>) (Object) constructor);
         }
         
         public static <E, E2, R> CollectionAttribute<E,R> relation(CollectionAttribute<? super E, ? super E2> attribute, MetaJpaConstructor<? super E2, R, ?> constructor) {
-            return new RelationCollectionAttribute<E,R,CollectionAttribute<E, R>>(attribute, constructor);
+            return new RelationCollectionAttribute<E,R,CollectionAttribute<E, R>>((CollectionAttribute<E, E2>) (Object) attribute, (MetaJpaConstructor<E2, R, ?>) (Object) constructor);
         }
         
         public static <E, E2, R> SetAttribute<E,R> relation(SetAttribute<? super E, ? super E2> attribute, MetaJpaConstructor<? super E2, R, ?> constructor) {
-            return new RelationSetAttribute<E,R,SetAttribute<E,R>>(attribute, constructor);
+            return new RelationSetAttribute<E,R,SetAttribute<E,R>>((SetAttribute<E, E2>) (Object) attribute, (MetaJpaConstructor<E2, R, ?>) (Object) constructor);
         }
         
         public static <E, E2, R> ListAttribute<E,R> relation(ListAttribute<? super E, ? super E2> attribute, MetaJpaConstructor<? super E2, R, ?> constructor) {
-            return new RelationListAttribute<E,R,ListAttribute<E,R>>(attribute, constructor);
+            return new RelationListAttribute<E,R,ListAttribute<E,R>>((ListAttribute<E, E2>) (Object) attribute, (MetaJpaConstructor<E2, R, ?>) (Object) constructor);
         }
     }
 }
