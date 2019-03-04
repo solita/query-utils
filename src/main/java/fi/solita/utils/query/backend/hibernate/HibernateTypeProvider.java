@@ -19,6 +19,8 @@ import javax.persistence.EntityManager;
 import org.hibernate.Session;
 import org.hibernate.TypeHelper;
 import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.metamodel.spi.MetamodelImplementor;
+import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxyHelper;
 import org.hibernate.usertype.CompositeUserType;
 import org.hibernate.usertype.UserType;
@@ -64,7 +66,8 @@ public class HibernateTypeProvider implements TypeProvider {
     private Map<Class<?>,String> typesByUniqueReturnedClassCache;
     private Map<Class<?>,String> typesByUniqueReturnedClass() {
         if (typesByUniqueReturnedClassCache == null) {
-            Iterable<ClassMetadata>                    allClassMetadata           = em.get().unwrap(Session.class).getSessionFactory().getAllClassMetadata().values();
+            MetamodelImplementor                       metamodelImpl              = (MetamodelImplementor) em.get().unwrap(Session.class).getSessionFactory().getMetamodel();
+            Iterable<ClassMetadata>                    allClassMetadata           = map(HibernateTypeProvider_.entityPersister2ClassMetadata, metamodelImpl.entityPersisters().values());
             Map<String, List<org.hibernate.type.Type>> allPropertyTypesByName     = groupBy(HibernateTypeProvider_.type2Name, flatMap(HibernateTypeProvider_.classMetadata2propertyTypes, allClassMetadata));
             Iterable<org.hibernate.type.Type>          allDifferentPropertyTypes  = map(head, allPropertyTypesByName.values());
             Iterable<List<org.hibernate.type.Type>>    typesByReturnedClass       = groupBy(HibernateTypeProvider_.type2ReturnedClass, allDifferentPropertyTypes).values();
@@ -77,7 +80,11 @@ public class HibernateTypeProvider implements TypeProvider {
     public HibernateTypeProvider(ApplyZero<EntityManager> em) {
         this.em = em;
     }
-    
+
+    static ClassMetadata entityPersister2ClassMetadata(EntityPersister ep) {
+        return (ClassMetadata) ep;
+    }
+
     static List<org.hibernate.type.Type> classMetadata2propertyTypes(ClassMetadata c) {
         return newList(c.getPropertyTypes());
     }
