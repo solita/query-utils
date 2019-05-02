@@ -52,16 +52,18 @@ class ProjectionResultUtil {
         private final Class<?> argumentType;
         private final int argumentIndex;
         private final Class<?> constructor;
+        private final List<Object> row;
     
-        public NullValueButNonOptionConstructorArgumentException(Class<?> constructor, Class<?> argumentType, int argumentIndex) {
+        public NullValueButNonOptionConstructorArgumentException(Class<?> constructor, Class<?> argumentType, int argumentIndex, List<Object> row) {
             this.constructor = constructor;
             this.argumentType = argumentType;
             this.argumentIndex = argumentIndex;
+            this.row = row;
         }
     
         @Override
         public String getMessage() {
-            return "Constructor " + constructor.getName() + " had a non-Option argument of type " + argumentType.getName() + " at position " + argumentIndex + " which was tried to supply with a null";
+            return "Constructor " + constructor.getName() + " had a non-Option argument of type " + argumentType.getName() + " at position " + argumentIndex + " which was tried to supply with a null while fetching row: " + row;
         }
     }
     
@@ -101,7 +103,7 @@ class ProjectionResultUtil {
         // at this point there should be no nulls, except explicit null-literals
         for (Tuple2<Object, Integer> result: zip(r, range(0))) {
             if (result._1 == null && !(projection.getParameters().get(result._2) instanceof PseudoAttribute)) {
-                throw new ProjectionResultUtil.NullValueButNonOptionConstructorArgumentException(projection.getClass(), projection.getConstructorParameterTypes().get(result._2), result._2);
+                throw new ProjectionResultUtil.NullValueButNonOptionConstructorArgumentException(projection.getClass(), projection.getConstructorParameterTypes().get(result._2), result._2, r);
             }
         }
         
