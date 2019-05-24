@@ -421,6 +421,29 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
+    public <E, A> CriteriaQuery<E> notIn(SingularAttribute<? super E, A> attribute, Set<? super A> values, CriteriaQuery<E> query) {
+        Path<E> selectionPath = resolveSelectionPath(query);
+        boolean enableInClauseOptimizations = !exists(QueryUtils.ImplementsProjectWithRegularInClause, newList(attribute.getJavaType(), attribute.getDeclaringType().getJavaType()));
+        Path<A> path = selectionPath.get(attribute);
+        Predicate predicate = queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), enableInClauseOptimizations).not();
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Like {@link #notIn(SingularAttribute, Iterable, CriteriaQuery)}
+     * but always explodes arguments to an ordinary in-clause. So doesn't use table/collection optimizations.
+     * 
+     * Modifies existing query!
+     */
+    public <E, A> CriteriaQuery<E> notIn_regularForm(SingularAttribute<? super E, A> attribute, Set<? super A> values, CriteriaQuery<E> query) {
+        Path<A> path = resolveSelectionPath(query).get(attribute);
+        Predicate predicate = queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), false).not();
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Modifies existing query!
+     */
     public <E, A> CriteriaQuery<E> inIds(SingularAttribute<? super E, A> attribute, Set<? extends Id<A>> values, CriteriaQuery<E> query) {
         Path<A> path = resolveSelectionPath(query).get(attribute);
         Predicate predicate = queryUtils.inExpr(path.get(id(path.getJavaType(), em.get())), values, em.get().getCriteriaBuilder());

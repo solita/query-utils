@@ -222,10 +222,9 @@ public class QueryUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public final Predicate inExpr(Expression<?> path, Set<?> values, CriteriaBuilder cb, boolean enableOptimizations) {
-        Set<?> vals = newSet(values);
+    public final Predicate inExpr(Expression<?> path, Set<?> vals, CriteriaBuilder cb, boolean enableOptimizations) {
         if (vals.size() == 1) {
-            return cb.equal(path, head(values));
+            return cb.equal(path, head(vals));
         } else if (vals.isEmpty()) {
             return cb.or();
         }
