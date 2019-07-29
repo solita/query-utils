@@ -179,7 +179,7 @@ public class QueryUtils {
     }
 
     public static <T> void checkOrdering(CriteriaQuery<T> query, Page page) throws NoOrderingSpecifiedException {
-        if (page != Page.NoPaging && query.getOrderList().isEmpty()) {
+        if ((page.getFirstResult() != Page.NoPaging.getFirstResult() || page.getMaxResults() != Page.NoPaging.getMaxResults()) && query.getOrderList().isEmpty()) {
             throw new NoOrderingSpecifiedException();
         }
     }

@@ -1,6 +1,10 @@
 package fi.solita.utils.query;
 
+import static fi.solita.utils.functional.Option.Some;
+
 import java.io.Serializable;
+
+import fi.solita.utils.functional.Option;
 
 
 /**
@@ -14,6 +18,7 @@ public final class Page implements Serializable {
 
     private final int pageNumber;
     private final int pageSize;
+    private final Option<Integer> fetchSizeHint;
 
     public static final Page FIRST = Page.of(0);
 
@@ -34,7 +39,7 @@ public final class Page implements Serializable {
      *            Zero-based
      */
     public static Page of(int pageNumber, int pageSize) {
-        Page ret = new Page(pageNumber, pageSize);
+        Page ret = new Page(pageNumber, pageSize, Option.<Integer>None());
         return ret.equals(NoPaging) ? NoPaging : ret;
     }
 
@@ -45,17 +50,22 @@ public final class Page implements Serializable {
     public Page withSize(int pageSize) {
         return of(pageNumber, pageSize);
     }
+    
+    public Page withFetchSizeHint(int fetchSizeHint) {
+        return new Page(pageNumber, pageSize, Some(fetchSizeHint));
+    }
 
-    private Page(int pageNumber, int pageSize) {
+    private Page(int pageNumber, int pageSize, Option<Integer> fetchSizeHint) {
         if (pageNumber < 0 || pageSize < 0) {
             throw new IllegalArgumentException("arguments must be nonnegative");
         }
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
+        this.fetchSizeHint = fetchSizeHint;
     }
 
     public Page nextPage() {
-        return new Page(pageNumber + 1, pageSize);
+        return new Page(pageNumber + 1, pageSize, fetchSizeHint);
     }
 
     public int getFirstResult() {
@@ -65,11 +75,16 @@ public final class Page implements Serializable {
     public int getMaxResults() {
         return pageSize;
     }
+    
+    public Option<Integer> getFetchSizeHint() {
+        return fetchSizeHint;
+    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((fetchSizeHint == null) ? 0 : fetchSizeHint.hashCode());
         result = prime * result + pageNumber;
         result = prime * result + pageSize;
         return result;
@@ -77,22 +92,24 @@ public final class Page implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null) {
+        if (obj == null)
             return false;
-        }
-        if (!(obj instanceof Page)) {
+        if (getClass() != obj.getClass())
             return false;
-        }
         Page other = (Page) obj;
-        if (pageNumber != other.pageNumber) {
+        if (fetchSizeHint == null) {
+            if (other.fetchSizeHint != null)
+                return false;
+        } else if (!fetchSizeHint.equals(other.fetchSizeHint))
             return false;
-        }
-        if (pageSize != other.pageSize) {
+        if (pageNumber != other.pageNumber)
             return false;
-        }
+        if (pageSize != other.pageSize)
+            return false;
         return true;
     }
+
+    
 }
