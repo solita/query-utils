@@ -394,6 +394,18 @@ public class Restrict {
         
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E> CriteriaQuery<E> startsWithIgnoreCaseOption(SingularAttribute<? super E, Option<String>> attribute, String value, CriteriaQuery<E> query) {
+        Path<E> selection = resolveSelectionPath(query);
+        
+        Expression<Integer> locateExpr = cb().locate(cb().lower(selection.get(attribute).as(String.class)), value.toLowerCase());
+        Predicate predicate = cb().and(cb().isNotNull(selection.get(attribute)), cb().equal(locateExpr, 1));
+        
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
 
     /**
      * Modifies existing query!
