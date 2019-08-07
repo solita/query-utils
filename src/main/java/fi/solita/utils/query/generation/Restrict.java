@@ -394,6 +394,18 @@ public class Restrict {
         
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E> CriteriaQuery<E> startsWithIgnoreCaseOption(SingularAttribute<? super E, Option<String>> attribute, String value, CriteriaQuery<E> query) {
+        Path<E> selection = resolveSelectionPath(query);
+        
+        Expression<Integer> locateExpr = cb().locate(cb().lower(selection.get(attribute).as(String.class)), value.toLowerCase());
+        Predicate predicate = cb().and(cb().isNotNull(selection.get(attribute)), cb().equal(locateExpr, 1));
+        
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
 
     /**
      * Modifies existing query!
@@ -415,6 +427,29 @@ public class Restrict {
     public <E, A> CriteriaQuery<E> in_regularForm(SingularAttribute<? super E, A> attribute, Set<? super A> values, CriteriaQuery<E> query) {
         Path<A> path = resolveSelectionPath(query).get(attribute);
         Predicate predicate = queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), false);
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E, A> CriteriaQuery<E> notIn(SingularAttribute<? super E, A> attribute, Set<? super A> values, CriteriaQuery<E> query) {
+        Path<E> selectionPath = resolveSelectionPath(query);
+        boolean enableInClauseOptimizations = !exists(QueryUtils.ImplementsProjectWithRegularInClause, newList(attribute.getJavaType(), attribute.getDeclaringType().getJavaType()));
+        Path<A> path = selectionPath.get(attribute);
+        Predicate predicate = queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), enableInClauseOptimizations).not();
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Like {@link #notIn(SingularAttribute, Iterable, CriteriaQuery)}
+     * but always explodes arguments to an ordinary in-clause. So doesn't use table/collection optimizations.
+     * 
+     * Modifies existing query!
+     */
+    public <E, A> CriteriaQuery<E> notIn_regularForm(SingularAttribute<? super E, A> attribute, Set<? super A> values, CriteriaQuery<E> query) {
+        Path<A> path = resolveSelectionPath(query).get(attribute);
+        Predicate predicate = queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), false).not();
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
     

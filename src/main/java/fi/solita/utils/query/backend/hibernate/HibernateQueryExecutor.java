@@ -4,6 +4,7 @@ import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Functional.min;
 
 import java.util.Collection;
 import java.util.List;
@@ -37,6 +38,9 @@ import fi.solita.utils.query.generation.NativeQuery;
 import fi.solita.utils.query.generation.QLQuery;
 
 public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQueryExecutor, QLQueryExecutor {
+    
+    public static final String HINT_FETCH_SIZE = "org.hibernate.fetchSize";
+    public static final int MAX_FETCH_SIZE = 500;
 
     private final ApplyZero<EntityManager> em;
     private final TypeProvider typeProvider;
@@ -51,7 +55,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @Override
     public <T> T get(CriteriaQuery<T> query, LockModeType lock) {
         jpaCriteriaCopy.createMissingAliases(query);
-        return replaceProxy(em.get().createQuery(query).setLockMode(lock).getSingleResult());
+        return replaceProxy(em.get().createQuery(query).setLockMode(lock).setHint(HINT_FETCH_SIZE, 1).getSingleResult());
     }
 
     @Override
@@ -67,6 +71,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
                 q.setFirstResult(page.getFirstResult());
             }
             if (page.getMaxResults() != Integer.MAX_VALUE) {
+                q.setHint(HINT_FETCH_SIZE, page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE)).get()));
                 q.setMaxResults(page.getMaxResults());
             }
         }
@@ -90,6 +95,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
+        q.setFetchSize(1);
         return q.executeUpdate();
     }
 
@@ -100,6 +106,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
+        q.setFetchSize(1);
         return Option.of(replaceProxy((T)q.uniqueResult()));
     }
 
@@ -110,6 +117,9 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
+        if (page != Page.NoPaging) {
+            q.setFetchSize(page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE)).get()));
+        }
         return newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
     }
 
@@ -118,6 +128,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     public <T> Option<T> find(QLQuery<T> query) {
         Query q = em.get().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
+        q.setFetchSize(1);
         return Option.of(replaceProxy((T)q.uniqueResult()));
     }
 
@@ -126,6 +137,9 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     public <T> List<T> getMany(QLQuery<T> query, Page page) {
         Query q = em.get().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
+        if (page != Page.NoPaging) {
+            q.setFetchSize(page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE)).get()));
+        }
         return newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
     }
     

@@ -47,8 +47,20 @@ public class OracleSupport implements TableInClauseOptimization {
             t = res._1;
             o = res._2;
             v = res._3;
+        } else if (h.get().getClass().getSuperclass() != null && regTypes.containsKey(h.get().getClass().getSuperclass())) {
+            final Tuple3<String,Option<String>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass().getSuperclass());
+            Tuple3<String,Option<String>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
+            t = res._1;
+            o = res._2;
+            v = res._3;
+        } else if (h.get().getClass().getSuperclass().getSuperclass() != null && regTypes.containsKey(h.get().getClass().getSuperclass().getSuperclass())) {
+            final Tuple3<String,Option<String>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass().getSuperclass().getSuperclass());
+            Tuple3<String,Option<String>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
+            t = res._1;
+            o = res._2;
+            v = res._3;
         } else {
-            // if no exact type found, try some registered for a superclass
+            // if no exact type found, try some registered for another superclass/interface
             for (Entry<Class<?>, Tuple3<String,Option<String>, ? extends Function2<Connection, ?, ?>>> entry: regTypes.entrySet()) {
                 if (entry.getKey().isAssignableFrom(h.get().getClass())) {
                     return Some(foo(entry.getValue(), values));

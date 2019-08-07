@@ -3,7 +3,6 @@ package fi.solita.utils.query;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newListOfSize;
-import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.filter;
@@ -180,7 +179,7 @@ public class QueryUtils {
     }
 
     public static <T> void checkOrdering(CriteriaQuery<T> query, Page page) throws NoOrderingSpecifiedException {
-        if (page != Page.NoPaging && query.getOrderList().isEmpty()) {
+        if ((page.getFirstResult() != Page.NoPaging.getFirstResult() || page.getMaxResults() != Page.NoPaging.getMaxResults()) && query.getOrderList().isEmpty()) {
             throw new NoOrderingSpecifiedException();
         }
     }
@@ -222,10 +221,9 @@ public class QueryUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public final Predicate inExpr(Expression<?> path, Set<?> values, CriteriaBuilder cb, boolean enableOptimizations) {
-        Set<?> vals = newSet(values);
+    public final Predicate inExpr(Expression<?> path, Set<?> vals, CriteriaBuilder cb, boolean enableOptimizations) {
         if (vals.size() == 1) {
-            return cb.equal(path, head(values));
+            return cb.equal(path, head(vals));
         } else if (vals.isEmpty()) {
             return cb.or();
         }
@@ -235,15 +233,15 @@ public class QueryUtils {
         
         if (enableOptimizations) {
             for (TableInClauseOptimization provider: config.getTableInClauseProvider()) {
-                Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> targetType = provider.getSqlTypeAndValues(vals);
-                if (!targetType.isDefined()) {
-                    throw new IllegalArgumentException("No tabletype registered (see fi.solita.utils.query.DefaultConfiguration.getRegisteredTableTypes()) for type " + head(vals).getClass());
-                }
                 // only use table-expression for large sets since ora performs better with regular in-clause.
                 if (useTableForInClause(vals)) {
                     // use 'table' for huge sets since member-of starts to perform badly
                     preds = newList(path.in(cb.function("table", Collection.class, cb.literal(Table.of(vals)))));
                 } else if (useMemberOfForInClause(vals)) {
+                    Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> targetType = provider.getSqlTypeAndValues(vals);
+                    if (!targetType.isDefined()) {
+                        throw new IllegalArgumentException("No tabletype registered (see fi.solita.utils.query.DefaultConfiguration.getRegisteredTableTypes()) for type " + head(vals).getClass());
+                    }
                     // use member-of
                     // return type doesn't seem to make a difference, so just set to boolean...
                     preds = newList(cb.isMember((Expression<Object>)path, (Expression<Collection<Object>>)(Object)cb.function(MEMBER_OF_CAST + targetType.get()._1, Collection.class, cb.literal(Table.of(vals)))));
@@ -261,14 +259,7 @@ public class QueryUtils {
             preds = newListOfSize(groups.size());
             
             for (List<?> g: groups) {
-                if (!config.getInClauseValuesAmounts().isEmpty() && g.size() < config.getInClauseValuesAmounts().last()) {
-                    // pad in-list to the next specified size, to avoid excessive hard parsing
-                    int targetSize = head(filter(greaterThanOrEqualTo(g.size()), config.getInClauseValuesAmounts()));
-                    Object valueToRepeat = config.getInListPadValue(last(g).getClass()).getOrElse(last(g));
-                    preds.add(path.in(newList(concat(g, repeat(valueToRepeat, targetSize-g.size())))));
-                } else {
-                    preds.add(path.in(g));
-                }
+                preds.add(path.in(padInListIfNeeded(g)));
             }
         }
         
@@ -276,6 +267,20 @@ public class QueryUtils {
             return head(preds);
         } else {
             return cb.or(newArray(Predicate.class, preds));
+        }
+    }
+    
+    public <T> List<T> padInListIfNeeded(List<T> list) {
+        if (list.isEmpty()) {
+            return list;
+        } else if (!config.getInClauseValuesAmounts().isEmpty() && list.size() < config.getInClauseValuesAmounts().last()) {
+            // pad in-list to the next specified size, to avoid excessive hard parsing
+            int targetSize = head(filter(greaterThanOrEqualTo(list.size()), config.getInClauseValuesAmounts()));
+            @SuppressWarnings("unchecked")
+            T valueToRepeat = (T) config.getInListPadValue(last(list).getClass()).getOrElse(last(list));
+            return newList(concat(list, repeat(valueToRepeat, targetSize-list.size())));
+        } else {
+            return list;
         }
     }
     
