@@ -104,7 +104,7 @@ public class HibernateTypeProvider implements TypeProvider {
 
     @Override
     public <ID extends Serializable, T extends Identifiable<ID>> Type<ID> idType(Class<T> entityType) {
-        return new HibernateType<ID>(em.get().unwrap(Session.class).getSessionFactory().getClassMetadata(entityType).getIdentifierType());
+        return new HibernateType<ID>(((MetamodelImplementor) em.get().unwrap(Session.class).getSessionFactory().getMetamodel()).entityPersister(entityType).getIdentifierType());
     }
     
     @SuppressWarnings("unchecked")

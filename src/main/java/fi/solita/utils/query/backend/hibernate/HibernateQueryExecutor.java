@@ -16,8 +16,7 @@ import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.transform.ResultTransformer;
@@ -91,7 +90,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
 
     @Override
     public int execute(NativeQuery<Void> query) {
-        SQLQuery q = em.get().unwrap(Session.class).createSQLQuery(query.query);
+        org.hibernate.query.NativeQuery q = em.get().unwrap(Session.class).createNativeQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -102,7 +101,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> Option<T> find(NativeQuery<? extends T> query) {
-        SQLQuery q = em.get().unwrap(Session.class).createSQLQuery(query.query);
+        org.hibernate.query.NativeQuery q = em.get().unwrap(Session.class).createNativeQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -113,7 +112,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> List<T> getMany(NativeQuery<? extends T> query, Page page) {
-        SQLQuery q = em.get().unwrap(Session.class).createSQLQuery(query.query);
+        org.hibernate.query.NativeQuery q = em.get().unwrap(Session.class).createNativeQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -157,7 +156,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return entityOrProxy;
     }
 
-    private final SQLQuery bindReturnValues(SQLQuery q, List<Pair<String, Option<Type<?>>>> retvals) {
+    private final org.hibernate.query.NativeQuery bindReturnValues(org.hibernate.query.NativeQuery q, List<Pair<String, Option<Type<?>>>> retvals) {
         for (Entry<String, Option<Type<?>>> param: retvals) {
             if (param.getValue().isDefined()) {
                 Type<?> type = param.getValue().get();
@@ -181,7 +180,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return q;
     }
 
-    private static final SQLQuery bindTransformer(SQLQuery q, NativeQuery<?> query) {
+    private static final org.hibernate.query.NativeQuery bindTransformer(org.hibernate.query.NativeQuery q, NativeQuery<?> query) {
         String[] retvals = newArray(String.class, map(Transformers.<String>left(), query.retvals));
         final OptionResultTransformer resultTransformer = new OptionResultTransformer(query.retvals);
         if (query instanceof NativeQuery.NativeQuerySingleEntity ||
