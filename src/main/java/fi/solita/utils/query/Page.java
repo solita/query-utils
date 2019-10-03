@@ -16,6 +16,7 @@ import fi.solita.utils.functional.Option;
 public final class Page implements Serializable {
     public static final int DEFAULT_PAGE_SIZE = 10;
 
+    private final int offset;
     private final int pageNumber;
     private final int pageSize;
     private final Option<Integer> fetchSizeHint;
@@ -39,7 +40,7 @@ public final class Page implements Serializable {
      *            Zero-based
      */
     public static Page of(int pageNumber, int pageSize) {
-        Page ret = new Page(pageNumber, pageSize, Option.<Integer>None());
+        Page ret = new Page(pageNumber, pageSize, Option.<Integer>None(), 0);
         return ret.equals(NoPaging) ? NoPaging : ret;
     }
 
@@ -52,24 +53,29 @@ public final class Page implements Serializable {
     }
     
     public Page withFetchSizeHint(int fetchSizeHint) {
-        return new Page(pageNumber, pageSize, Some(fetchSizeHint));
+        return new Page(pageNumber, pageSize, Some(fetchSizeHint), offset);
+    }
+    
+    public Page withOffset(int offset) {
+        return new Page(pageNumber, pageSize, fetchSizeHint, offset);
     }
 
-    private Page(int pageNumber, int pageSize, Option<Integer> fetchSizeHint) {
-        if (pageNumber < 0 || pageSize < 0) {
+    private Page(int pageNumber, int pageSize, Option<Integer> fetchSizeHint, int offset) {
+        if (pageNumber < 0 || pageSize < 0 || offset < 0) {
             throw new IllegalArgumentException("arguments must be nonnegative");
         }
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
         this.fetchSizeHint = fetchSizeHint;
+        this.offset = offset;
     }
 
     public Page nextPage() {
-        return new Page(pageNumber + 1, pageSize, fetchSizeHint);
+        return new Page(pageNumber + 1, pageSize, fetchSizeHint, offset);
     }
 
     public int getFirstResult() {
-        return pageNumber * pageSize;
+        return offset + pageNumber * pageSize;
     }
 
     public int getMaxResults() {
@@ -85,6 +91,7 @@ public final class Page implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((fetchSizeHint == null) ? 0 : fetchSizeHint.hashCode());
+        result = prime * result + offset;
         result = prime * result + pageNumber;
         result = prime * result + pageSize;
         return result;
@@ -104,12 +111,12 @@ public final class Page implements Serializable {
                 return false;
         } else if (!fetchSizeHint.equals(other.fetchSizeHint))
             return false;
+        if (offset != other.offset)
+            return false;
         if (pageNumber != other.pageNumber)
             return false;
         if (pageSize != other.pageSize)
             return false;
         return true;
     }
-
-    
 }
