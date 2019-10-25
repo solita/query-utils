@@ -610,4 +610,58 @@ public class Restrict {
         Predicate predicate = cb().between(selection.get(a), wrap(value1), wrap(value2));
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     };
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> notBetween(T value, SingularAttribute<? super E, T> a1, SingularAttribute<? super E, T> a2, CriteriaQuery<E> query) {
+        Path<E> selection = resolveSelectionPath(query);
+        Predicate predicate = cb().between(wrap(value), selection.get(a1), selection.get(a2)).not();
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    };
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E, T extends Comparable<? super T>> CriteriaQuery<E> notBetween(SingularAttribute<? super E, T> a, T value1, T value2, CriteriaQuery<E> query) {
+        Path<E> selection = resolveSelectionPath(query);
+        Predicate predicate = cb().between(selection.get(a), wrap(value1), wrap(value2)).not();
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    };
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E> CriteriaQuery<E> like(SingularAttribute<? super E, String> a, String pattern, CriteriaQuery<E> query) {
+        Path<E> selection = resolveSelectionPath(query);
+        Predicate predicate = cb().like(selection.get(a), pattern);
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    };
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E> CriteriaQuery<E> notLike(SingularAttribute<? super E, String> a, String pattern, CriteriaQuery<E> query) {
+        Path<E> selection = resolveSelectionPath(query);
+        Predicate predicate = cb().notLike(selection.get(a), pattern);
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    };
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E> CriteriaQuery<E> likeIgnoreCase(SingularAttribute<? super E, String> a, String pattern, CriteriaQuery<E> query) {
+        Path<E> selection = resolveSelectionPath(query);
+        Predicate predicate = cb().like(cb().lower(selection.get(a)), pattern.toLowerCase());
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    };
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E> CriteriaQuery<E> notLikeIgnoreCase(SingularAttribute<? super E, String> a, String pattern, CriteriaQuery<E> query) {
+        Path<E> selection = resolveSelectionPath(query);
+        Predicate predicate = cb().like(cb().lower(selection.get(a)), pattern.toLowerCase()).not();
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    };
 }
