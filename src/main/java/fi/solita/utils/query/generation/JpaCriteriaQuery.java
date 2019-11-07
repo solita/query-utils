@@ -1,5 +1,6 @@
 package fi.solita.utils.query.generation;
 
+import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
 import java.util.Set;
@@ -109,20 +110,19 @@ public class JpaCriteriaQuery {
         return query;
     }
 
-    @SuppressWarnings("unchecked")
     public <E> CriteriaQuery<E> ofIds(Set<? extends Id<? super E>> ids, Class<E> entityClass) {
-        CriteriaQuery<Object> query = em.get().getCriteriaBuilder().createQuery();
+        CriteriaQuery<E> query = em.get().getCriteriaBuilder().createQuery(entityClass);
         if (ids.iterator().hasNext()) {
             Root<E> root = query.from(entityClass);
             Path<Id<E>> idPath = root.get(QueryUtils.<E,Id<E>>id(entityClass, em.get()));
-            query.where(queryUtils.inExpr(idPath, (Set<Id<E>>)ids, em.get().getCriteriaBuilder()));
+            query.where(queryUtils.inExpr(idPath, ids, em.get().getCriteriaBuilder()));
             query.select(root);
-            return (CriteriaQuery<E>)(Object)query;
+            return query;
         } else {
             query.where(em.get().getCriteriaBuilder().or());
             Root<E> root = query.from(entityClass);
             query.select(root);
-            return (CriteriaQuery<E>)(Object)query;
+            return query;
         }
     }
 
@@ -167,9 +167,9 @@ public class JpaCriteriaQuery {
     }
 
 
+    @SuppressWarnings("unchecked")
     private <E extends IEntity<?> & Identifiable<?>, R> CriteriaQuery<R> doRelated(E entity, Attribute<?, ?>... attributes) {
-        CriteriaQuery<Object> query = em.get().getCriteriaBuilder().createQuery();
-        @SuppressWarnings("unchecked")
+        CriteriaQuery<Object> query = (CriteriaQuery<Object>) em.get().getCriteriaBuilder().createQuery(last(attributes).getJavaType());
         Root<E> root = (Root<E>) query.from(typeProvider.getEntityClass(entity));
         query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em.get())), entity.getId()));
         From<?, ?> join = root;
@@ -177,9 +177,7 @@ public class JpaCriteriaQuery {
             join = QueryUtils.join(join, attr, JoinType.INNER);
         }
 
-        @SuppressWarnings("unchecked")
-        CriteriaQuery<R> ret = (CriteriaQuery<R>) query.select(join);
-        return ret;
+        return (CriteriaQuery<R>) query.select(join);
     }
 
     public <E, A1 extends Attribute<? super E, ?> & Bindable<R1>, R1 extends IEntity<?>>
@@ -222,9 +220,10 @@ public class JpaCriteriaQuery {
         return doRelated(query, r1, r2, r3, r4, r5, r6, r7, r8);
     }
 
+    @SuppressWarnings("unchecked")
     private <E, R>
     CriteriaQuery<R> doRelated(CriteriaQuery<E> query, Attribute<?,?>... attributes) {
-        CriteriaQuery<Object> q = em.get().getCriteriaBuilder().createQuery();
+        CriteriaQuery<Object> q = (CriteriaQuery<Object>) em.get().getCriteriaBuilder().createQuery(last(attributes).getJavaType());
 
         jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.get().getCriteriaBuilder());
         From<?,?> join = resolveSelection(query, q);
@@ -232,7 +231,6 @@ public class JpaCriteriaQuery {
             join = QueryUtils.join(join, attr, JoinType.INNER);
         }
 
-        @SuppressWarnings("unchecked")
         CriteriaQuery<R> ret = (CriteriaQuery<R>) q.select(join);
         return ret;
     }
