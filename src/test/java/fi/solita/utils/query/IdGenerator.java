@@ -7,7 +7,7 @@ import java.util.Properties;
 import org.hibernate.HibernateException;
 import org.hibernate.boot.model.relational.QualifiedName;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.enhanced.DatabaseStructure;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.persister.entity.EntityPersister;
@@ -17,7 +17,7 @@ import org.hibernate.type.Type;
 public class IdGenerator extends SequenceStyleGenerator {
 
     @Override
-    public Serializable generate(SessionImplementor session, Object object) throws HibernateException {
+    public Serializable generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
         EntityPersister persister = session.getEntityPersister(null, object);
         Class<?> idClass = persister.getIdentifierType().getReturnedClass();
 

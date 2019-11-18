@@ -15,7 +15,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.PropertyAccessException;
 import org.hibernate.PropertyNotFoundException;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.property.access.spi.Getter;
 import org.hibernate.property.access.spi.PropertyAccess;
 import org.hibernate.property.access.spi.PropertyAccessStrategy;
@@ -79,7 +79,7 @@ public class OptionAwareDirectPropertyAccessor implements PropertyAccessStrategy
             }
 
             @Override
-            public Object getForInsert(Object owner, Map mergeMap, SessionImplementor session) throws HibernateException {
+            public Object getForInsert(Object owner, Map mergeMap, SharedSessionContractImplementor session) throws HibernateException {
                 return get(owner);
             }
 

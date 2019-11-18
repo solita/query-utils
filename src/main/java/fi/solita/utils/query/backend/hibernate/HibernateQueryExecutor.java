@@ -3,24 +3,31 @@ package fi.solita.utils.query.backend.hibernate;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.head;
+import static fi.solita.utils.functional.Functional.isEmpty;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.min;
+import static fi.solita.utils.functional.Functional.size;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.query.Query;
 import org.hibernate.transform.ResultTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;
@@ -38,7 +45,8 @@ import fi.solita.utils.query.generation.NativeQuery;
 import fi.solita.utils.query.generation.QLQuery;
 
 public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQueryExecutor, QLQueryExecutor {
-    
+    private static final Logger logger = LoggerFactory.getLogger(HibernateQueryExecutor.class);
+
     public static final String HINT_FETCH_SIZE = "org.hibernate.fetchSize";
     public static final int MAX_FETCH_SIZE = 500;
 
@@ -55,8 +63,19 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @Override
     public <T> T get(CriteriaQuery<T> query, LockModeType lock) {
         jpaCriteriaCopy.createMissingAliases(query);
-        return replaceProxy(em.get().createQuery(query).setLockMode(lock).setHint(HINT_FETCH_SIZE, 1).getSingleResult());
-    }
+        List<T> list = em.get().createQuery(query).setLockMode(lock).setHint(HINT_FETCH_SIZE, 1).getResultList();
+        if (isEmpty(list)) {
+            throw new NoResultException("No entity found for query");
+        } else if (size(list) > 1) {
+            // NOTE: This is the logic that is used in Hibernate 5.0.
+            final Set<T> uniqueResult = new HashSet<T>(list);
+            if (size(uniqueResult) > 1) {
+                throw new NonUniqueResultException("result returns more than one elements");
+            }
+            logger.warn("Query produced multiple identical items. This will result in an error in a future version. " +
+                    "Please fix the query to produce only a single item.", new RuntimeException());
+        }
+        return replaceProxy(head(list));    }
 
     @Override
     public <T> List<T> getMany(CriteriaQuery<T> query, Page page, LockModeType lock) {
@@ -91,7 +110,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
 
     @Override
     public int execute(NativeQuery<Void> query) {
-        SQLQuery q = em.get().unwrap(Session.class).createSQLQuery(query.query);
+        org.hibernate.query.NativeQuery q = em.get().unwrap(Session.class).createNativeQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -102,7 +121,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> Option<T> find(NativeQuery<? extends T> query) {
-        SQLQuery q = em.get().unwrap(Session.class).createSQLQuery(query.query);
+        org.hibernate.query.NativeQuery q = em.get().unwrap(Session.class).createNativeQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -113,7 +132,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> List<T> getMany(NativeQuery<? extends T> query, Page page) {
-        SQLQuery q = em.get().unwrap(Session.class).createSQLQuery(query.query);
+        org.hibernate.query.NativeQuery q = em.get().unwrap(Session.class).createNativeQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -157,7 +176,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return entityOrProxy;
     }
 
-    private final SQLQuery bindReturnValues(SQLQuery q, List<Pair<String, Option<Type<?>>>> retvals) {
+    private final org.hibernate.query.NativeQuery bindReturnValues(org.hibernate.query.NativeQuery q, List<Pair<String, Option<Type<?>>>> retvals) {
         for (Entry<String, Option<Type<?>>> param: retvals) {
             if (param.getValue().isDefined()) {
                 Type<?> type = param.getValue().get();
@@ -181,7 +200,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return q;
     }
 
-    private static final SQLQuery bindTransformer(SQLQuery q, NativeQuery<?> query) {
+    private static final org.hibernate.query.NativeQuery bindTransformer(org.hibernate.query.NativeQuery q, NativeQuery<?> query) {
         String[] retvals = newArray(String.class, map(Transformers.<String>left(), query.retvals));
         final OptionResultTransformer resultTransformer = new OptionResultTransformer(query.retvals);
         if (query instanceof NativeQuery.NativeQuerySingleEntity ||

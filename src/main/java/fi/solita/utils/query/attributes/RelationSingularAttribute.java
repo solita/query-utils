@@ -10,7 +10,7 @@ class RelationSingularAttribute<E, R> extends SingularAttributeProxy<E, R> imple
 
     @SuppressWarnings("unchecked")
     public <E2 extends IEntity<?>> RelationSingularAttribute(SingularAttribute<? super E, ? super E2> attribute, MetaJpaConstructor<? super E2, R, ?> constructor) {
-        super((SingularAttribute<E, R>) attribute);
+        super((SingularAttribute<E, R>) (Object) attribute);
         this.constructor = (MetaJpaConstructor<? extends IEntity<?>, R, ?>) constructor;
     }
 
