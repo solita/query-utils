@@ -19,7 +19,6 @@ import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 import fi.solita.utils.query.generation.Restrict;
-import fi.solita.utils.query.projection.Project;
 
 public class CriteriaQueriesTest extends QueryTestBase {
 
@@ -69,13 +68,6 @@ public class CriteriaQueriesTest extends QueryTestBase {
         persist(new Department(), new Department());
 
         dao.get(query.all(Department.class));
-    }
-
-    @Test
-    public void get_multipleIdenticalItems() {
-        persist(new Department("duplicate name"), new Department("duplicate name"));
-
-        dao.get(query.all(Department.class), Project.value(Department_.mandatoryDepName));
     }
 
     @Test
