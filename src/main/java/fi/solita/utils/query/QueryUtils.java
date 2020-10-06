@@ -2,7 +2,8 @@ package fi.solita.utils.query;
 
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Collections.newListOfSize;
+import static fi.solita.utils.functional.Collections.newMutableList;
+import static fi.solita.utils.functional.Collections.newMutableListOfSize;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.filter;
@@ -71,6 +72,7 @@ import fi.solita.utils.query.db.TableInClauseOptimization;
 import fi.solita.utils.query.entities.Table;
 import fi.solita.utils.query.entities.Table_;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
+import fi.solita.utils.query.projection.Constructors.ExpressionProjection;
 import fi.solita.utils.query.projection.Constructors.TransparentProjection;
 
 public class QueryUtils {
@@ -85,13 +87,13 @@ public class QueryUtils {
 
     public static final class RequiredAttributeMustNotHaveOptionTypeException extends RuntimeException {
         public RequiredAttributeMustNotHaveOptionTypeException(Attribute<?,?> attribute) {
-            super((attribute.getDeclaringType() != null ? attribute.getDeclaringType().getJavaType().getSimpleName() : attribute) + "->" + attribute.getName() + ". Remove Cast.optional() wrapping from a mandatory attribute");
+            super(attribute + ". Remove Cast.optional() wrapping from a mandatory attribute");
         }
     }
 
     public static final class OptionalAttributeNeedOptionTypeException extends RuntimeException {
         public OptionalAttributeNeedOptionTypeException(Attribute<?,?> attribute) {
-            super((attribute.getDeclaringType() != null ? attribute.getDeclaringType().getJavaType().getSimpleName() : attribute) + "->" + attribute.getName() + ". Wrap the optional attribute with Cast.optional()");
+            super(attribute + ". Wrap the optional attribute with Cast.optional()");
         }
     }
     
@@ -121,7 +123,7 @@ public class QueryUtils {
     }
 
     public static void addListAttributeOrdering(CriteriaQuery<?> query, Expression<?> listAttributePath, String orderColumn, CriteriaBuilder cb) {
-        List<Order> orders = newList();
+        List<Order> orders = newMutableList();
         if (query.getOrderList() != null) {
             orders.addAll(query.getOrderList());
         }
@@ -256,7 +258,7 @@ public class QueryUtils {
             } else {
                 groups = newList(grouped(config.getInClauseValuesAmounts().last(), vals));
             }
-            preds = newListOfSize(groups.size());
+            preds = newMutableListOfSize(groups.size());
             
             for (List<?> g: groups) {
                 preds.add(path.in(padInListIfNeeded(g)));
@@ -376,7 +378,7 @@ public class QueryUtils {
             ret = param.isCollection();
         }
         
-        if (param instanceof AdditionalQueryPerformingAttribute && param instanceof SingularAttribute) {
+        if (param instanceof AdditionalQueryPerformingAttribute) {
             MetaJpaConstructor<?,?,?> c = ((AdditionalQueryPerformingAttribute)param).getConstructor();
             if (c instanceof TransparentProjection) {
                 // optionality of a TransparentProjection propagates

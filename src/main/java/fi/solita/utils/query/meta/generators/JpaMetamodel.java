@@ -10,6 +10,7 @@ import static fi.solita.utils.meta.Helpers.typeParameter2String;
 import static fi.solita.utils.meta.Helpers.withAnnotations;
 import static fi.solita.utils.meta.generators.Content.EmptyLine;
 import static fi.solita.utils.functional.Collections.newList;
+import static fi.solita.utils.functional.Collections.newMutableList;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.filter;
 import static fi.solita.utils.functional.Functional.flatMap;
@@ -76,7 +77,7 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
     @Override
     public Iterable<String> apply(ProcessingEnvironment processingEnv, Options options, TypeElement source) {
         if (!isPersistentClass.apply(source)) {
-            return newList();
+            return newMutableList();
         }
         
         Access classAccess = source.getAnnotation(Access.class);

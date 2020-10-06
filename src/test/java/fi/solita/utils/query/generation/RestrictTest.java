@@ -1,5 +1,6 @@
 package fi.solita.utils.query.generation;
 
+import static fi.solita.utils.functional.Collections.newMutableSet;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.Some;
@@ -133,7 +134,7 @@ public class RestrictTest extends QueryTestBase {
         Set<Department.ID> d1 = newSet(dep1.getId());
         Set<Department.ID> d2 = newSet(dep2.getId());
         Set<Department.ID> both = newSet(dep1.getId(), dep2.getId());
-        Set<Department.ID> neither = newSet();
+        Set<Department.ID> neither = newMutableSet();
 
         assertEquals(both,    newSet(map(Department_.getId, dao.getMany(query.all(Department.class)))));
 
@@ -162,7 +163,7 @@ public class RestrictTest extends QueryTestBase {
         Set<Employee.ID> e1 = newSet(emp1.getId());
         Set<Employee.ID> e2 = newSet(emp2.getId());
         Set<Employee.ID> both = newSet(emp1.getId(), emp2.getId());
-        Set<Employee.ID> neither = newSet();
+        Set<Employee.ID> neither = newMutableSet();
 
         assertEquals(both,    newSet(map(Employee_.getId, dao.getMany(query.all(Employee.class)))));
 

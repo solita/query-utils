@@ -2,9 +2,10 @@ package fi.solita.utils.query.projection;
 
 import static fi.solita.utils.functional.Collections.emptyList;
 import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Collections.newListOfSize;
 import static fi.solita.utils.functional.Collections.newMap;
 import static fi.solita.utils.functional.Collections.newMultimap;
+import static fi.solita.utils.functional.Collections.newMutableListOfSize;
+import static fi.solita.utils.functional.Collections.newMutableMap;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Collections.newSortedSet;
 import static fi.solita.utils.functional.Functional.concat;
@@ -118,7 +119,7 @@ public class ProjectionHelper {
             logger.debug("IdProjection. Replacing selection {} with just Id.", selection);
             ret = Collections.<Selection<?>>newList(selection.get(QueryUtils.<E,Object>id(selection.getJavaType(), em.get())));
         } else {
-            ret = newListOfSize(projection.getParameters().size());
+            ret = newMutableListOfSize(projection.getParameters().size());
             for (Tuple3<Integer, Attribute<?,?>, Class<?>> t: zip(range(0), projection.getParameters(), projection.getConstructorParameterTypes())) {
                 int index = t._1;
                 Attribute<?,?> param = t._2;
@@ -335,7 +336,7 @@ public class ProjectionHelper {
         Path<SOURCE_ID> sourceId = source.get(QueryUtils.<SOURCE,SOURCE_ID>id(sourceClass, em.get()));
         
         Either<From<SOURCE,Object>,Attribute<?,?>> relationOrAdditionalGet;
-        Map<Attribute<?, ?>, From<?, ?>> actualJoins = newMap();
+        Map<Attribute<?, ?>, From<?, ?>> actualJoins = newMutableMap();
         From<?,?> last;
         if (!unwrap(PseudoAttribute.class, target).isDefined()) { 
             logger.debug("Inner joining from {} to {}", source, target);
@@ -403,6 +404,10 @@ public class ProjectionHelper {
                 query.multiselect(sourceId, sel.get(id(sel.getJavaType(), em.get())));
             } else {
                 query.multiselect(newList(cons(sourceId, selections)));
+            }
+            if (selections.size() == 1 && rel.get().getConstructor() instanceof ExpressionProjection) {
+                logger.debug("single value expression projection -> adding explicit group-by for sourceId to make it a legal query");
+                query.groupBy(sourceId);
             }
         } else {
             Path<Object> r = (Path<Object>) (relationOrAdditionalGet.isRight() ? QueryUtils.get(last, relationOrAdditionalGet.right.get()) : relationOrAdditionalGet.left.get());

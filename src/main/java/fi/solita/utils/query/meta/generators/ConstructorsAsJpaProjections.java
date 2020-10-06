@@ -1,6 +1,7 @@
 package fi.solita.utils.query.meta.generators;
 
 import static fi.solita.utils.functional.Collections.newList;
+import static fi.solita.utils.functional.Collections.newMutableList;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.filter;
 import static fi.solita.utils.functional.Functional.flatMap;
@@ -85,7 +86,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
     @Override
     public Iterable<String> apply(ProcessingEnvironment processingEnv, ConstructorsAsJpaProjections.Options options, TypeElement source) {
         if (source.getModifiers().contains(Modifier.ABSTRACT)) {
-            return newList();
+            return newMutableList();
         }
         
         Iterable<ExecutableElement> elements = element2Constructors.apply(source);
@@ -114,8 +115,8 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             String enclosingElementQualifiedName = qualifiedName.apply(enclosingElement);
             int index = entry.getKey();
 
-            List<String> attributeTypes = newList();
-            List<Integer> idIndexes = newList();
+            List<String> attributeTypes = newMutableList();
+            List<Integer> idIndexes = newMutableList();
             for (Map.Entry<Integer, ? extends VariableElement> e: zipWithIndex(constructor.getParameters())) {
                 int paramIndex = e.getKey();
                 VariableElement argument = e.getValue();
@@ -198,8 +199,8 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             String returnTypeImported = importTypes(elementGenericQualifiedName(enclosingElement));
 
             List<String> argumentTypes = newList(map(qualifiedName.andThen(boxed).andThen(helpersImportTypes), constructor.getParameters()));
-            List<String> argumentNames = argCount == 0 ? Collections.<String>newList() : newList(map(toString.andThen(prepend("$p")), range(1, argCount)));
-            List<String> attributeNames = argCount == 0 ? Collections.<String>newList() : newList(map(toString.andThen(prepend("$a")), range(1, argCount)));
+            List<String> argumentNames = argCount == 0 ? Collections.<String>newMutableList() : newList(map(toString.andThen(prepend("$p")), range(1, argCount)));
+            List<String> attributeNames = argCount == 0 ? Collections.<String>newMutableList() : newList(map(toString.andThen(prepend("$a")), range(1, argCount)));
             List<? extends TypeParameterElement> relevantTypeParamsForConstructor = newList(relevantTypeParams(constructor));
             List<String> relevantTypeParams = newList(map(typeParameter2String, relevantTypeParamsForConstructor));
             

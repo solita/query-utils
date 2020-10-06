@@ -1,6 +1,6 @@
 package fi.solita.utils.query;
 
-import static fi.solita.utils.functional.Collections.newSet;
+import static fi.solita.utils.functional.Collections.newMutableSet;
 
 import java.util.Set;
 
@@ -34,7 +34,7 @@ public class Municipality implements IEntity<Municipality>, Identifiable<Municip
     private ID id;
     
     @ElementCollection
-    private Set<Integer> postalCodes = newSet();
+    private Set<Integer> postalCodes = newMutableSet();
     
     private String optionalArea;
 

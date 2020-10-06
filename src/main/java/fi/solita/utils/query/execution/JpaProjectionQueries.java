@@ -1,6 +1,7 @@
 package fi.solita.utils.query.execution;
 
 import static fi.solita.utils.functional.Collections.newList;
+import static fi.solita.utils.functional.Collections.newMutableList;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.headOption;
 import static fi.solita.utils.functional.Functional.map;
@@ -54,7 +55,7 @@ public class JpaProjectionQueries {
         From<?,E> selection = QueryUtils.resolveSelection(query, q);
         q.multiselect(projectionSupport.prepareProjectingQuery(constructor, selection));
         
-        List<Iterable<Object>> res = newList();
+        List<Iterable<Object>> res = newMutableList();
         res.add(ProjectionUtil.objectToObjectList(queryExecutor.get(q, lock)));
         return head(projectionSupport.finalizeProjectingQuery(constructor, res));
     }
