@@ -100,6 +100,16 @@ public class Project {
         checkOptionalAttributes(attribute);
         return Constructors.min(attribute);
     }
+    
+    public static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Option<T>,Option<T>> greatest(SingularAttribute<? super E, T> attribute) {
+        checkOptionalAttributes(attribute);
+        return Constructors.greatest(attribute);
+    }
+    
+    public static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Option<T>,Option<T>> least(SingularAttribute<? super E, T> attribute) {
+        checkOptionalAttributes(attribute);
+        return Constructors.least(attribute);
+    }
 
     public static <E, T> MetaJpaConstructor<E,T,T> value(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);

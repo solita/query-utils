@@ -44,6 +44,14 @@ public class Constructors {
     static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> min(SingularAttribute<? super E, T> attribute) {
         return new MinAttributeProjection<E,T>(Cast.optional(attribute));
     }
+    
+    static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Option<T>,Option<T>> greatest(SingularAttribute<? super E, T> attribute) {
+        return new GreatestAttributeProjection<E,T>(Cast.optional(attribute));
+    }
+    
+    static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Option<T>,Option<T>> least(SingularAttribute<? super E, T> attribute) {
+        return new LeastAttributeProjection<E,T>(Cast.optional(attribute));
+    }
 
     static <E, T> MetaJpaConstructor<E,T,T> value(SingularAttribute<? super E, T> attribute) {
         return new ValueAttributeProjection<E,T>(attribute);
@@ -237,6 +245,28 @@ public class Constructors {
         @Override
         public Expression<R> getExpression(CriteriaBuilder cb, Expression<R> e) {
             return cb.min(e);
+        }
+    }
+    
+    private static final class GreatestAttributeProjection<E,R extends Comparable<? super R>> extends ValueAttributeProjection<E, Option<R>> implements ExpressionProjection<R> {
+        public GreatestAttributeProjection(Attribute<? super E, Option<R>> attribute) {
+            super(attribute);
+        }
+
+        @Override
+        public Expression<R> getExpression(CriteriaBuilder cb, Expression<R> e) {
+            return cb.greatest(e);
+        }
+    }
+    
+    private static final class LeastAttributeProjection<E,R extends Comparable<? super R>> extends ValueAttributeProjection<E, Option<R>> implements ExpressionProjection<R> {
+        public LeastAttributeProjection(Attribute<? super E, Option<R>> attribute) {
+            super(attribute);
+        }
+
+        @Override
+        public Expression<R> getExpression(CriteriaBuilder cb, Expression<R> e) {
+            return cb.least(e);
         }
     }
 }
