@@ -11,6 +11,7 @@ import org.hibernate.transform.ResultTransformer;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
+import fi.solita.utils.functional.SemiGroups;
 import fi.solita.utils.query.backend.Type;
 import fi.solita.utils.query.generation.NativeQuery;
 
@@ -19,7 +20,7 @@ public class OptionResultTransformer implements ResultTransformer {
     private Map<String, Option<Type<?>>> retvals;
 
     public OptionResultTransformer(List<Pair<String, Option<Type<?>>>> retvals) {
-        this.retvals = newMap(retvals);
+        this.retvals = newMap(SemiGroups.<Option<Type<?>>>fail(), retvals);
     }
     
     @SuppressWarnings("rawtypes")

@@ -2,10 +2,9 @@ package fi.solita.utils.query.generation;
 
 
 import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Collections.newMap;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.concat;
-import static fi.solita.utils.functional.Functional.cons;
+import static fi.solita.utils.functional.FunctionalM.with;
 import static fi.solita.utils.functional.Option.Some;
 
 import java.util.Collection;
@@ -15,6 +14,7 @@ import java.util.Map;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
+import fi.solita.utils.functional.SemiGroups;
 import fi.solita.utils.functional.Tuple10;
 import fi.solita.utils.functional.Tuple11;
 import fi.solita.utils.functional.Tuple12;
@@ -741,7 +741,7 @@ public abstract class NativeQuery<T> {
             if (val == null || val instanceof Option && !((Option<?>)val).isDefined()) {
                 throw new UnsupportedOperationException("Need an explicit type with a null/None value for: " + name);
             }
-            return create(query, retvals, newMap(cons(Pair.of(name, Pair.of(val, Option.<Type<?>>None())), params.entrySet())));
+            return create(query, retvals, with(SemiGroups.<Pair<?,Option<Type<?>>>>fail(), name, Pair.of(val, Option.<Type<?>>None()), params));
         }
 
         @SuppressWarnings("unchecked")
@@ -749,14 +749,14 @@ public abstract class NativeQuery<T> {
             if (type == null) {
                 throw new NullPointerException("Type was null for param: " + name);
             }
-            return create(query, retvals, newMap(cons(Pair.of(name, Pair.of(val, (Option<Type<?>>)(Object)Some(type))), params.entrySet())));
+            return create(query, retvals, with(SemiGroups.<Pair<?,Option<Type<?>>>>fail(), name, Pair.of(val, (Option<Type<?>>)(Object)Some(type)), params));
         }
 
         public THIS setParameterList(String name, Collection<?> val) {
             if (val == null || val.isEmpty()) {
                 throw new UnsupportedOperationException("Need an explicit type with a null/empty value for: " + name);
             }
-            return create(query, retvals, newMap(cons(Pair.of(name, Pair.of(val, Option.<Type<?>>None())), params.entrySet())));
+            return create(query, retvals, with(SemiGroups.<Pair<?,Option<Type<?>>>>fail(), name, Pair.of(val, Option.<Type<?>>None()), params));
         }
 
         @SuppressWarnings("unchecked")
@@ -764,7 +764,7 @@ public abstract class NativeQuery<T> {
             if (type == null) {
                 throw new NullPointerException("Type was null for param: " + name);
             }
-            return create(query, retvals, newMap(cons(Pair.of(name, Pair.of(val, (Option<Type<?>>)(Object)Some(type))), params.entrySet())));
+            return create(query, retvals, with(SemiGroups.<Pair<?,Option<Type<?>>>>fail(), name, Pair.of(val, (Option<Type<?>>)(Object)Some(type)), params));
         }
 
         protected List<Pair<String, Option<Type<?>>>> withRetval(String alias) {

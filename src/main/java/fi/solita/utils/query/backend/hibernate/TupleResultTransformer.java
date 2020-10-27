@@ -11,6 +11,7 @@ import java.util.Map;
 import org.hibernate.transform.ResultTransformer;
 
 import fi.solita.utils.functional.Pair;
+import fi.solita.utils.functional.SemiGroups;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple;
 
@@ -29,7 +30,7 @@ public final class TupleResultTransformer implements ResultTransformer {
 
     @Override
     public Object transformTuple(Object[] tuple, String[] aliases) {
-        Map<String, Object> m = newMap(zip(aliases, tuple));
+        Map<String, Object> m = newMap(SemiGroups.fail(), zip(aliases, tuple));
         if (aliases.length == 2) {
             return Pair.of(m.get(a[0]), m.get(a[1]));
         } else {

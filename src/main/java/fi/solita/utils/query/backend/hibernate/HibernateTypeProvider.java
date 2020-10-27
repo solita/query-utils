@@ -30,6 +30,7 @@ import fi.solita.utils.functional.Functional;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Predicates;
+import fi.solita.utils.functional.SemiGroups;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Identifiable;
@@ -72,7 +73,7 @@ public class HibernateTypeProvider implements TypeProvider {
             Iterable<org.hibernate.type.Type>          allDifferentPropertyTypes  = map(head, allPropertyTypesByName.values());
             Iterable<List<org.hibernate.type.Type>>    typesByReturnedClass       = groupBy(HibernateTypeProvider_.type2ReturnedClass, allDifferentPropertyTypes).values();
             Iterable<List<org.hibernate.type.Type>>    typesUniqueByReturnedClass = filter(size.andThen(Predicates.equalTo(1l)), typesByReturnedClass);
-            typesByUniqueReturnedClassCache = newMap(map(head.andThen(HibernateTypeProvider_.type2ReturnedClassAndNamePair), typesUniqueByReturnedClass));
+            typesByUniqueReturnedClassCache = newMap(SemiGroups.<String>fail(), map(head.andThen(HibernateTypeProvider_.type2ReturnedClassAndNamePair), typesUniqueByReturnedClass));
         }
         return typesByUniqueReturnedClassCache;
     }
