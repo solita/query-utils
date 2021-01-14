@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fi.solita.utils</groupId>
     <artifactId>query-utils</artifactId>
-    <version>0.12.4</version>
+    <version>0.12.5</version>
     <build>
         <resources>
                 <resource>
@@ -42,8 +42,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <encoding>UTF-8</encoding>
                     <optimize>true</optimize>
                     <debug>false</debug>
@@ -73,7 +73,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <compilerArguments>-source 1.6 -target 1.6</compilerArguments>
+                    <compilerArguments>-source 1.7 -target 1.7</compilerArguments>
                     <encoding>UTF-8</encoding>
                     <optionMap>
                         <CommonMetadataProcessor.excludesRegex>.*_|fi.solita.utils.query.(Department|Employee|PartTimeEmployee|Municipality|Report|entities.Table|backend.hibernate.TableValueType|.*Dto)</CommonMetadataProcessor.excludesRegex>
@@ -115,13 +115,13 @@
         <dependency>
             <groupId>fi.solita.utils</groupId>
             <artifactId>functional-utils</artifactId>
-            <version>0.12.4</version>
+            <version>0.12.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>fi.solita.utils</groupId>
             <artifactId>meta-utils</artifactId>
-            <version>0.12.4</version>
+            <version>0.12.5</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -133,13 +133,13 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>5.2.17.Final</version>
+            <version>5.4.22.Final</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>5.2.17.Final</version>
+            <version>5.4.22.Final</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -164,7 +164,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>5.0.11.RELEASE</version>
+            <version>5.2.10.RELEASE</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -176,13 +176,13 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>5.0.11.RELEASE</version>
+            <version>5.2.10.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>5.0.11.RELEASE</version>
+            <version>5.2.10.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>

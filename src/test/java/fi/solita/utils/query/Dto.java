@@ -8,26 +8,26 @@ import fi.solita.utils.functional.Option;
 
 public class Dto {
     // some placeholder to separate metaconstructors a bit more clearly
-    public enum ID {_}
-    public enum VALUE {_}
-    public enum ENTITY {_}
-    public enum EMBEDDABLE {_}
-    public enum OPTIONAL_ID {_}
-    public enum OPTIONAL_VALUE {_}
-    public enum OPTIONAL_ENTITY {_}
-    public enum OPTIONAL_EMBEDDABLE {_}
-    public enum COLLECTION_OF_IDS {_}
-    public enum COLLECTION_OF_VALUES {_}
-    public enum COLLECTION_OF_ENTITIES {_}
-    public enum COLLECTION_OF_EMBEDDABLES {_}
-    public enum SET_OF_IDS {_}
-    public enum SET_OF_VALUES {_}
-    public enum SET_OF_ENTITIES {_}
-    public enum SET_OF_EMBEDDABLES {_}
-    public enum LIST_OF_IDS {_}
-    public enum LIST_OF_VALUES {_}
-    public enum LIST_OF_ENTITIES {_}
-    public enum LIST_OF_EMBEDDABLES {_}
+    public enum ID {a}
+    public enum VALUE {a}
+    public enum ENTITY {a}
+    public enum EMBEDDABLE {a}
+    public enum OPTIONAL_ID {a}
+    public enum OPTIONAL_VALUE {a}
+    public enum OPTIONAL_ENTITY {a}
+    public enum OPTIONAL_EMBEDDABLE {a}
+    public enum COLLECTION_OF_IDS {a}
+    public enum COLLECTION_OF_VALUES {a}
+    public enum COLLECTION_OF_ENTITIES {a}
+    public enum COLLECTION_OF_EMBEDDABLES {a}
+    public enum SET_OF_IDS {a}
+    public enum SET_OF_VALUES {a}
+    public enum SET_OF_ENTITIES {a}
+    public enum SET_OF_EMBEDDABLES {a}
+    public enum LIST_OF_IDS {a}
+    public enum LIST_OF_VALUES {a}
+    public enum LIST_OF_ENTITIES {a}
+    public enum LIST_OF_EMBEDDABLES {a}
     
     public final Object value;
     

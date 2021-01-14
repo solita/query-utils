@@ -254,6 +254,6 @@ public class QueryUtilsTest extends QueryTestBase {
     public void queryAttribute_relationOptionWithinProjectionIsRequired() {
         assertTrue("option", isRequiredByQueryAttribute(Related.projection(Department_.optionalManager, Project.pair(Employee_.mandatoryName, Employee_.optionAge))));
         assertTrue("option", isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.pair(Department_.mandatoryDepName, Department_.optionSize))));
-        assertTrue("option", isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Dto_.c2(Select.literal(Dto.VALUE._), Department_.optionSize))));
+        assertTrue("option", isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Dto_.c2(Select.literal(Dto.VALUE.a), Department_.optionSize))));
     }
 }

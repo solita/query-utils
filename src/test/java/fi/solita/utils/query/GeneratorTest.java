@@ -31,14 +31,14 @@ class FooId implements Id<Foo> {
 }
 
 class _ {
-    enum A {_}
-    enum B {_}
-    enum C {_}
-    enum D {_}
-    enum E {_}
-    enum F {_}
-    enum G {_}
-    enum H {_}
+    enum A {a}
+    enum B {b}
+    enum C {c}
+    enum D {d}
+    enum E {e}
+    enum F {f}
+    enum G {g}
+    enum H {h}
 }
 
 class FooDto {
@@ -64,13 +64,13 @@ public class GeneratorTest {
     
     @Test
     public void generatedConstructorAcceptsIdRegardlessOfWhetherUsingInterfaceOrConcreteClass() {
-         FooDto_.c1(Select.literal(A._), Select.literal(new Foo()));
-         FooDto_.c2(Select.literal(B._), Select.literal(new Foo()));
-         FooDto_.c3(Select.literal(C._), Select.literal(Some(new Foo())));
-         FooDto_.c4(Select.literal(D._), Select.literal(Some(new Foo())));
-         FooDto_.c5(Select.literal(E._), Select.literal(Some(new Foo())));
-         FooDto_.c6(Select.literal(F._), Select.literal(new Foo()));
-         FooDto_.c7(Select.literal(G._), Select.literal(Some(new Foo())));
-         FooDto_.c8(Select.literal(H._), Select.literal(Some(new Foo())));
+         FooDto_.c1(Select.literal(A.a), Select.literal(new Foo()));
+         FooDto_.c2(Select.literal(B.b), Select.literal(new Foo()));
+         FooDto_.c3(Select.literal(C.c), Select.literal(Some(new Foo())));
+         FooDto_.c4(Select.literal(D.d), Select.literal(Some(new Foo())));
+         FooDto_.c5(Select.literal(E.e), Select.literal(Some(new Foo())));
+         FooDto_.c6(Select.literal(F.f), Select.literal(new Foo()));
+         FooDto_.c7(Select.literal(G.g), Select.literal(Some(new Foo())));
+         FooDto_.c8(Select.literal(H.h), Select.literal(Some(new Foo())));
     }
 }
