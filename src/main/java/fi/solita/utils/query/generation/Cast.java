@@ -63,42 +63,42 @@ public class Cast {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?> & Identifiable<?>, T> SingularAttribute<E, T> castSuper(SingularAttribute<? extends E, T> attribute) {
+    public static <E extends IEntity<?>, T> SingularAttribute<E, T> castSuper(SingularAttribute<? extends E, T> attribute) {
         return (SingularAttribute<E, T>) attribute;
     }
     
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?> & Identifiable<?>, T> CollectionAttribute<E, T> castSuper(CollectionAttribute<? extends E, T> attribute) {
+    public static <E extends IEntity<?>, T> CollectionAttribute<E, T> castSuper(CollectionAttribute<? extends E, T> attribute) {
         return (CollectionAttribute<E, T>) attribute;
     }
     
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?> & Identifiable<?>, T> SetAttribute<E, T> castSuper(SetAttribute<? extends E, T> attribute) {
+    public static <E extends IEntity<?>, T> SetAttribute<E, T> castSuper(SetAttribute<? extends E, T> attribute) {
         return (SetAttribute<E, T>) attribute;
     }
     
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?> & Identifiable<?>, T> ListAttribute<E, T> castSuper(ListAttribute<? extends E, T> attribute) {
+    public static <E extends IEntity<?>, T> ListAttribute<E, T> castSuper(ListAttribute<? extends E, T> attribute) {
         return (ListAttribute<E, T>) attribute;
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?> & Identifiable<?>, T> SingularAttribute<E, T> cast(SingularAttribute<? super E, ? super T> attribute) {
+    public static <E extends IEntity<?>, T> SingularAttribute<E, T> cast(SingularAttribute<? super E, ? super T> attribute) {
         return (SingularAttribute<E, T>) attribute;
     }
     
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?> & Identifiable<?>, T> CollectionAttribute<E, T> cast(CollectionAttribute<? super E, ? super T> attribute) {
+    public static <E extends IEntity<?>, T> CollectionAttribute<E, T> cast(CollectionAttribute<? super E, ? super T> attribute) {
         return (CollectionAttribute<E, T>) attribute;
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?> & Identifiable<?>, T> SetAttribute<E, T> cast(SetAttribute<? super E, ? super T> attribute) {
+    public static <E extends IEntity<?>, T> SetAttribute<E, T> cast(SetAttribute<? super E, ? super T> attribute) {
         return (SetAttribute<E, T>) attribute;
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?> & Identifiable<?>, T> ListAttribute<E, T> cast(ListAttribute<? super E, ? super T> attribute) {
+    public static <E extends IEntity<?>, T> ListAttribute<E, T> cast(ListAttribute<? super E, ? super T> attribute) {
         return (ListAttribute<E, T>) attribute;
     }
 }
