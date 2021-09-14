@@ -37,6 +37,10 @@ public class Constructors {
         return new IdProjection<E>();
     }
     
+    static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> sum(SingularAttribute<? super E, T> attribute) {
+        return new SumAttributeProjection<E,T>(Cast.optional(attribute));
+    }
+    
     static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> max(SingularAttribute<? super E, T> attribute) {
         return new MaxAttributeProjection<E,T>(Cast.optional(attribute));
     }
@@ -223,6 +227,17 @@ public class Constructors {
         @Override
         public Attribute<?, ?> getWrapped() {
             return attribute;
+        }
+    }
+    
+    private static final class SumAttributeProjection<E,R extends Number> extends ValueAttributeProjection<E, Option<R>> implements ExpressionProjection<R> {
+        public SumAttributeProjection(Attribute<? super E, Option<R>> attribute) {
+            super(attribute);
+        }
+
+        @Override
+        public Expression<R> getExpression(CriteriaBuilder cb, Expression<R> e) {
+            return cb.sum(e);
         }
     }
     

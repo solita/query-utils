@@ -91,6 +91,11 @@ public class Project {
         return Constructors.id();
     }
     
+    public static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> sum(SingularAttribute<? super E, T> attribute) {
+        checkOptionalAttributes(attribute);
+        return Constructors.sum(attribute);
+    }
+    
     public static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> max(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.max(attribute);
