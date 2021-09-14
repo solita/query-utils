@@ -197,7 +197,7 @@ public class Restrict {
     }
     
     @SuppressWarnings("unchecked")
-    private <T> Expression<T> wrap(T value) {
+    public <T> Expression<T> wrap(T value) {
         if (value instanceof Number) {
             for (String unwrappingFunctionName: config.wrapComparedNumbersWithFunction()) {
                 return (Expression<T>) cb().function(unwrappingFunctionName, value.getClass(), cb().literal(value.toString())); 
@@ -511,6 +511,16 @@ public class Restrict {
         Predicate predicate = cb().equal(path.type(), type);
         return (CriteriaQuery<E>) (query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate));
     }
+    
+    /**
+     * Modifies existing query!
+     */
+    @SuppressWarnings("unchecked")
+    public <E> CriteriaQuery<E> typeIsNot(Class<E> type, CriteriaQuery<? super E> query) {
+        Path<? super E> path = resolveSelectionPath(query);
+        Predicate predicate = cb().notEqual(path.type(), type);
+        return (CriteriaQuery<E>) (query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate));
+    }
 
     /**
      * Modifies existing query!
@@ -518,6 +528,15 @@ public class Restrict {
     public <E> CriteriaQuery<E> typeIn(Set<Class<? extends E>> classes, CriteriaQuery<E> query) {
         Path<E> path = resolveSelectionPath(query);
         Predicate predicate = path.type().in(classes);
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E> CriteriaQuery<E> typeNotIn(Set<Class<? extends E>> classes, CriteriaQuery<E> query) {
+        Path<E> path = resolveSelectionPath(query);
+        Predicate predicate = path.type().in(classes).not();
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
     }
 
