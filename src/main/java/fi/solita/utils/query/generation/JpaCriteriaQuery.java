@@ -1,5 +1,6 @@
 package fi.solita.utils.query.generation;
 
+import static fi.solita.utils.functional.Functional.init;
 import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
@@ -8,15 +9,18 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.ApplyZero;
+import fi.solita.utils.functional.Pair;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
@@ -233,5 +237,64 @@ public class JpaCriteriaQuery {
 
         CriteriaQuery<R> ret = (CriteriaQuery<R>) q.select(join);
         return ret;
+    }
+
+    public <R,E extends Identifiable<?>, R1, A1 extends Attribute<? super E, ?> & Bindable<R1>>
+    CriteriaQuery<Pair<R,R1>> relatedSingular(SingularAttribute<E,R> key, A1 r1) {
+        return doRelatedSingular(key, r1);
+    }
+    
+    public <R,E extends Identifiable<?>, R1, R2, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>>
+    CriteriaQuery<Pair<R,R2>> relatedSingular(SingularAttribute<E,R> key, A1 r1, A2 r2) {
+        return doRelatedSingular(key, r1, r2);
+    }
+    
+    public <R,E extends Identifiable<?>, R1, R2, R3, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>>
+    CriteriaQuery<Pair<R,R3>> relatedSingular(SingularAttribute<E,R> key, A1 r1, A2 r2, A3 r3) {
+        return doRelatedSingular(key, r1, r2, r3);
+    }
+    
+    public <R,E extends Identifiable<?>, R1, R2, R3, R4, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>>
+    CriteriaQuery<Pair<R,R4>> relatedSingular(SingularAttribute<E,R> key, A1 r1, A2 r2, A3 r3, A4 r4) {
+        return doRelatedSingular(key, r1, r2, r3, r4);
+    }
+    
+    public <R,E extends Identifiable<?>, R1, R2, R3, R4, R5, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>>
+    CriteriaQuery<Pair<R,R5>> relatedSingular(SingularAttribute<E,R> key, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5) {
+        return doRelatedSingular(key, r1, r2, r3, r4, r5);
+    }
+    
+    public <R,E extends Identifiable<?>, R1, R2, R3, R4, R5, R6, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>>
+    CriteriaQuery<Pair<R,R6>> relatedSingular(SingularAttribute<E,R> key, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6) {
+        return doRelatedSingular(key, r1, r2, r3, r4, r5, r6);
+    }
+    
+    public <R,E extends Identifiable<?>, R1, R2, R3, R4, R5, R6, R7, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>>
+    CriteriaQuery<Pair<R,R7>> relatedSingular(SingularAttribute<E,R> key, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6, A7 r7) {
+        return doRelatedSingular(key, r1, r2, r3, r4, r5, r6, r7);
+    }
+    
+    public <R,E extends Identifiable<?>, R1, R2, R3, R4, R5, R6, R7, R8, A1 extends Attribute<? super E, ?> & Bindable<R1>, A2 extends Attribute<? super R1, ?> & Bindable<R2>, A3 extends Attribute<? super R2, ?> & Bindable<R3>, A4 extends Attribute<? super R3, ?> & Bindable<R4>, A5 extends Attribute<? super R4, ?> & Bindable<R5>, A6 extends Attribute<? super R5, ?> & Bindable<R6>, A7 extends Attribute<? super R6, ?> & Bindable<R7>, A8 extends Attribute<? super R7, ?> & Bindable<R8>>
+    CriteriaQuery<Pair<R,R8>> relatedSingular(SingularAttribute<E,R> key, A1 r1, A2 r2, A3 r3, A4 r4, A5 r5, A6 r6, A7 r7, A8 r8) {
+        return doRelatedSingular(key, r1, r2, r3, r4, r5, r6, r7, r8);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private <E, K, V>
+    CriteriaQuery<Pair<K,V>> doRelatedSingular(SingularAttribute<E,K> key, Attribute<?,?>... attributes) {
+        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaQuery<Pair<K, V>> q = (CriteriaQuery<Pair<K, V>>)(Object)cb.createQuery(Pair.class);
+        Root<E> root = q.from(key.getDeclaringType().getJavaType());
+        
+        Subquery<V> subq = (Subquery<V>) q.subquery(last(attributes).getJavaType());
+        Root<E> from = subq.from(key.getDeclaringType().getJavaType());
+        From<?,?> join = from;
+        for (Attribute<?, ?> attr : init(attributes)) {
+            join = QueryUtils.join(join, attr, JoinType.INNER);
+        }
+        subq.where(cb.equal(cb.function("rownum", long.class), 1),
+                   cb.equal(from.get(key), root.get(key)));
+        
+        return q.multiselect(root.get(key), subq.select((Expression<V>)QueryUtils.get(join, last(attributes))));
     }
 }
