@@ -456,7 +456,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, A> CriteriaQuery<E> inIds(SingularAttribute<? super E, A> attribute, Set<? extends Id<A>> values, CriteriaQuery<E> query) {
+    public <E, A> CriteriaQuery<E> inIds(SingularAttribute<? super E, A> attribute, Set<? extends Id<? super A>> values, CriteriaQuery<E> query) {
         Path<A> path = resolveSelectionPath(query).get(attribute);
         Predicate predicate = queryUtils.inExpr(path.get(id(path.getJavaType(), em.get())), values, em.get().getCriteriaBuilder());
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);

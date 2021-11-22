@@ -13,7 +13,6 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.IEntity;
-import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.OptionalAttribute;

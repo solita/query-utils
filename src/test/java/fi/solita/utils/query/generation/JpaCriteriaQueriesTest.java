@@ -74,6 +74,11 @@ public class JpaCriteriaQueriesTest extends QueryTestBase {
     public void cast() {
         assertEquals(Department_.employees, Cast.cast(Department_.employees));
         assertEquals(Employee_.mandatoryDepartment, Cast.cast(Employee_.mandatoryDepartment));
+    }
+    
+    @Test
+    public void castSuper() {
+        assertEquals(Department_.employees, Cast.castSuper(Department_.employees));
         assertEquals(Employee_.mandatoryDepartment, Cast.castSuper(Employee_.mandatoryDepartment));
     }
 

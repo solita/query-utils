@@ -57,15 +57,15 @@ public class Constructors {
         return new LeastAttributeProjection<E,T>(Cast.optional(attribute));
     }
 
-    static <E, T> MetaJpaConstructor<E,T,T> value(SingularAttribute<? super E, T> attribute) {
+    static <E, T> MetaJpaConstructor<E,T,T> value(SingularAttribute<? super E, ? extends T> attribute) {
         return new ValueAttributeProjection<E,T>(attribute);
     }
 
-    static <E, T> MetaJpaConstructor<E,T,T> value(PluralAttribute<? super E, T, ?> attribute) {
+    static <E, T> MetaJpaConstructor<E,T,T> value(PluralAttribute<? super E, ? extends T, ?> attribute) {
         return new ValueAttributeProjection<E,T>(attribute);
     }
 
-    static <E, LEFT, RIGHT> MetaJpaConstructor<E,Pair<LEFT,RIGHT>,Map.Entry<? extends LEFT,? extends RIGHT>> pair(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
+    static <E, LEFT, RIGHT> MetaJpaConstructor<E,Pair<LEFT,RIGHT>,Map.Entry<? extends LEFT,? extends RIGHT>> pair(Attribute<? super E, ? extends LEFT> left, Attribute<? super E, ? extends RIGHT> right) {
         return new PairProjection<E,LEFT,RIGHT>(left, right);
     }
     
@@ -106,10 +106,10 @@ public class Constructors {
     }
     
     private static final class PairProjection<E,LEFT,RIGHT> extends MetaJpaConstructor.C2<E,LEFT,RIGHT,Pair<LEFT,RIGHT>> {
-        private final Attribute<? super E, LEFT> left;
-        private final Attribute<? super E, RIGHT> right;
+        private final Attribute<? super E, ? extends LEFT> left;
+        private final Attribute<? super E, ? extends RIGHT> right;
 
-        public PairProjection(Attribute<? super E, LEFT> left, Attribute<? super E, RIGHT> right) {
+        public PairProjection(Attribute<? super E, ? extends LEFT> left, Attribute<? super E, ? extends RIGHT> right) {
             super(null, (Class<?>[])null);
             this.left = left;
             this.right = right;
@@ -187,9 +187,9 @@ public class Constructors {
     }
     
     private static class ValueAttributeProjection<E,R> extends MetaJpaConstructor.C1<E,R,R> implements TransparentProjection {
-        private final Attribute<? super E,R> attribute;
+        private final Attribute<? super E,? extends R> attribute;
 
-        public ValueAttributeProjection(Attribute<? super E,R> attribute) {
+        public ValueAttributeProjection(Attribute<? super E,? extends R> attribute) {
             super(null, (Class<?>[])null);
             this.attribute = attribute;
         }
