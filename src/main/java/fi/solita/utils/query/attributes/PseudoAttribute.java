@@ -2,6 +2,7 @@ package fi.solita.utils.query.attributes;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -9,6 +10,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ListAttribute;
+import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
@@ -32,6 +34,10 @@ public interface PseudoAttribute {
     
         public static <E, T> ListAttribute<E, T> literal(List<T> value) {
             return new LiteralListAttribute<E, T, ListAttribute<E, T>>(value);
+        }
+        
+        public static <E, K, T> MapAttribute<E, K, T> literal(Map<K,T> value) {
+            return new LiteralMapAttribute<E, K, T, MapAttribute<E, K, T>>(value);
         }
 
         public static <T> SingularAttribute<T, T> self() {

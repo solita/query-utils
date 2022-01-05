@@ -9,11 +9,11 @@ import static fi.solita.utils.meta.Helpers.typeMirror2GenericQualifiedName;
 import static fi.solita.utils.meta.Helpers.typeParameter2String;
 import static fi.solita.utils.meta.Helpers.withAnnotations;
 import static fi.solita.utils.meta.generators.Content.EmptyLine;
-import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newMutableList;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.filter;
 import static fi.solita.utils.functional.Functional.flatMap;
+import static fi.solita.utils.functional.Functional.init;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.zipWithIndex;
 import static fi.solita.utils.functional.Option.Some;
@@ -147,6 +147,9 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
             
             String ownerType = typeMirror2GenericQualifiedName.apply(enclosingElement.asType());
             String attributeType = isCollection ? containedType(member) : typeMirror2GenericQualifiedName.andThen(boxed).apply(returnType);
+            if (isMap) {
+                attributeType = init(attributeType.replace("java.util.Map<", ""));
+            }
             
             String typeSignature = "<" + ownerType + "," + attributeType + ">";
             for (Pair<String, String> param: classTypeParameters) {

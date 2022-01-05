@@ -5,6 +5,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ListAttribute;
+import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
@@ -436,6 +437,11 @@ public abstract class Related {
     
     public static <E, E2, R>
     ListAttribute<E, R> projection(ListAttribute<? super E, E2> relation, MetaJpaConstructor<? super E2, R, ?> constructor) {
+        return AdditionalQueryPerformingAttribute.Constructors.relation(relation, constructor);
+    }
+    
+    public static <E, E2, K, R>
+    MapAttribute<E, K, R> projection(MapAttribute<? super E, K, E2> relation, MetaJpaConstructor<? super E2, R, ?> constructor) {
         return AdditionalQueryPerformingAttribute.Constructors.relation(relation, constructor);
     }
 }

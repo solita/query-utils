@@ -2,10 +2,12 @@ package fi.solita.utils.query.projection;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ListAttribute;
+import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
@@ -51,5 +53,9 @@ public abstract class Select {
 
     public static <E, T> ListAttribute<E, T> listNull() {
         return PseudoAttribute.Constructors.literal((List<T>)null);
+    }
+    
+    public static <E, K, T> MapAttribute<E, K, T> mapNull() {
+        return PseudoAttribute.Constructors.literal((Map<K,T>)null);
     }
 }
