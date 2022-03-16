@@ -79,10 +79,26 @@ public class Dao {
     }
     
     /**
+     * Convert <i>id</i> to a proxy instance without hitting the database.
+     * Use this if E has inheritance and you get an exception trying to cast the proxy to E.
+     */
+    public <E extends IEntity<?>> E toProxy(Class<E> clazz, Id<? super E> id) {
+        return jpaBasicQueries.toProxy(clazz, id);
+    }
+    
+    /**
      * Convert <i>ids</i> to a proxy instances without hitting the database
      */
     public <E extends IEntity<?>> Iterable<E> toProxies(Iterable<? extends Id<E>> ids) {
         return jpaBasicQueries.toProxies(ids);
+    }
+    
+    /**
+     * Convert <i>ids</i> to a proxy instances without hitting the database.
+     * Use this if E has inheritance and you get an exception trying to cast the proxy to E.
+     */
+    public <E extends IEntity<?>> Iterable<E> toProxies(Class<E> clazz, Iterable<? extends Id<? super E>> ids) {
+        return jpaBasicQueries.toProxies(clazz, ids);
     }
 
     public <E extends IEntity<?>> Option<E> find(Id<E> id) {

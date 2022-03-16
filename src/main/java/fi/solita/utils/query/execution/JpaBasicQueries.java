@@ -109,11 +109,19 @@ public class JpaBasicQueries {
     }
 
     public <E extends IEntity<?>> E toProxy(Id<E> id) {
-        return em.get().getReference(id.getOwningClass(), id);
+        return toProxy(id.getOwningClass(), id);
+    }
+    
+    public <E extends IEntity<?>> E toProxy(Class<E> clazz, Id<? super E> id) {
+        return em.get().getReference(clazz, id);
     }
     
     public <E extends IEntity<?>> Iterable<E> toProxies(Iterable<? extends Id<E>> ids) {
         return map(JpaBasicQueries_.<E>toProxy().ap(this), ids);
+    }
+    
+    public <E extends IEntity<?>> Iterable<E> toProxies(Class<E> clazz, Iterable<? extends Id<? super E>> ids) {
+        return map(JpaBasicQueries_.<E>toProxy1().ap(this, clazz), ids);
     }
 
     public <E extends IEntity<?>> Option<E> find(Id<E> id) {
