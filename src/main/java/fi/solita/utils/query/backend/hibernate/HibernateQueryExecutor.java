@@ -221,7 +221,13 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
                 }
             } else {
                 if (param.getValue()._2.isDefined()) {
-                    q.setParameter(param.getKey(), param.getValue()._1, ((HibernateTypeProvider.HibernateType<?>)param.getValue()._2.get()).type);
+                    Type<?> type = param.getValue()._2.get();
+                    Object value = param.getValue()._1;
+                    if (type instanceof Type.Optional) {
+                        type = ((Type.Optional<?>) type).type;
+                        value = ((Option<?>)value).getOrElse(null);
+                    }
+                    q.setParameter(param.getKey(), value, ((HibernateTypeProvider.HibernateType<?>)type).type);
                 } else {
                     // try to find a type
                     org.hibernate.type.Type t = ((HibernateTypeProvider.HibernateType<?>)typeProvider.type(param.getValue()._1.getClass())).type;
