@@ -44,9 +44,11 @@ public class JpaCriteriaQuery {
         this.queryUtils = new QueryUtils(config);
     }
 
-    public <E extends IEntity<?>> CriteriaQuery<E> single(Id<E> id) {
-        CriteriaQuery<E> query = em.get().getCriteriaBuilder().createQuery(id.getOwningClass());
-        Root<E> root = query.from(id.getOwningClass());
+    public <E extends IEntity<?>> CriteriaQuery<E> single(Id<? super E> id) {
+    	@SuppressWarnings("unchecked")
+		Class<E> owningClass = (Class<E>) id.getOwningClass();
+        CriteriaQuery<E> query = em.get().getCriteriaBuilder().createQuery(owningClass);
+        Root<E> root = query.from(owningClass);
         return query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(id.getOwningClass(), em.get())), id));
     }
 
