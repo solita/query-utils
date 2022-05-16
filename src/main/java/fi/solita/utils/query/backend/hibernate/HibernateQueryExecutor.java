@@ -94,7 +94,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
-        q.setFetchSize(1);
+        q.setFetchSize(2);
         return q.executeUpdate();
     }
 
@@ -105,7 +105,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
-        q.setFetchSize(1);
+        q.setFetchSize(2);
         return Option.of(replaceProxy((T)q.uniqueResult()));
     }
 
@@ -127,7 +127,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     public <T> Option<T> find(QLQuery<T> query) {
         Query q = em.get().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
-        q.setFetchSize(1);
+        q.setFetchSize(2);
         return Option.of(replaceProxy((T)q.uniqueResult()));
     }
 

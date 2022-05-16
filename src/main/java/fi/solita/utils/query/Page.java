@@ -1,5 +1,6 @@
 package fi.solita.utils.query;
 
+import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 
 import java.io.Serializable;
@@ -66,7 +67,7 @@ public final class Page implements Serializable {
         }
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
-        this.fetchSizeHint = fetchSizeHint;
+        this.fetchSizeHint = !fetchSizeHint.isDefined() && pageSize == 1 ? Some(1) : fetchSizeHint;
         this.offset = offset;
     }
 
