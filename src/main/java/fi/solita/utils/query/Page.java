@@ -67,7 +67,7 @@ public final class Page implements Serializable {
         }
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
-        this.fetchSizeHint = !fetchSizeHint.isDefined() && pageSize == 1 ? Some(1) : fetchSizeHint;
+        this.fetchSizeHint = !fetchSizeHint.isDefined() && pageSize == 1 ? Some(2) : fetchSizeHint;
         this.offset = offset;
     }
 
