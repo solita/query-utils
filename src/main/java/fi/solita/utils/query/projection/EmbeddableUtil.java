@@ -46,7 +46,6 @@ public class EmbeddableUtil {
     }
     
     static Object instantiate(Class<?> clazz) {
-        logger.debug("instantiate({})", clazz);
         try {
             Constructor<?> constructor = clazz.getDeclaredConstructor();
             constructor.setAccessible(true);
@@ -59,7 +58,6 @@ public class EmbeddableUtil {
     }
     
     static Object collectEmbeddableFromParts(Metamodel metamodel, Bindable<?> attr, Iterable<Object> columns) {
-        logger.debug("collectEmbeddableFromParts({},{},{})", new Object[] {metamodel, attr, columns});
         List<Object> cols = newList(columns);
         List<? extends Attribute<?, ?>> embeddableAttributes = getEmbeddableAttributes(attr, metamodel);
         if (embeddableAttributes.size() != cols.size()) {
@@ -84,7 +82,6 @@ public class EmbeddableUtil {
                     }
                 }
             }
-            logger.debug("collectEmbeddableFromParts -> {}", ret);
             return ret;
         } catch (Exception e)  {
             throw new RuntimeException(e);
@@ -92,17 +89,15 @@ public class EmbeddableUtil {
     }
     
     static Option<? extends Attribute<?,?>> unwrapEmbeddableAttribute(Attribute<?,?> attribute) {
-        logger.debug("unwrapEmbeddableAttribute({})", attribute);
-        
         Option<? extends Attribute<?,?>> ret = None();
         if (attribute == null || attribute instanceof PseudoAttribute) {
             ret = None();
+        } else if (attribute.getPersistentAttributeType() == PersistentAttributeType.EMBEDDED) {
+            ret = Some(attribute);
         } else if (AttributeProxy.unwrap(PseudoAttribute.class, attribute).isDefined()) {
             ret = None();
         } else if (attribute instanceof JoiningAttribute && last(((JoiningAttribute) attribute).getAttributes()) instanceof PseudoAttribute) {
             ret = None();
-        } else if (attribute.getPersistentAttributeType() == PersistentAttributeType.EMBEDDED) {
-            ret = Some(attribute);
         } else if (attribute instanceof AdditionalQueryPerformingAttribute) {
             List<Attribute<?, ?>> params = ((AdditionalQueryPerformingAttribute)attribute).getConstructor().getParameters();
             if (params.size() == 1) {
@@ -110,30 +105,23 @@ public class EmbeddableUtil {
             }
         }
         
-        logger.debug("unwrapEmbeddableAttribute -> {}", ret);
         return ret;
     }
 
     static boolean isCollectionOfEmbeddables(Attribute<?, ?> attribute) {
-        logger.debug("isCollectionOfEmbeddables({})", attribute);
         boolean ret = attribute.getPersistentAttributeType() == PersistentAttributeType.ELEMENT_COLLECTION &&
                attribute instanceof PluralAttribute &&
                ((PluralAttribute<?,?,?>)attribute).getElementType().getPersistenceType() == PersistenceType.EMBEDDABLE;
-        logger.debug("isCollectionOfEmbeddables -> {}", ret);
         return ret;
     }
 
     static <T> EmbeddableType<T> getEmbeddableType(Bindable<T> attribute, Metamodel metamodel) {
-        logger.debug("getEmbeddableType({},{})", attribute, metamodel);
         EmbeddableType<T> ret = metamodel.embeddable(attribute.getBindableJavaType());
-        logger.debug("getEmbeddableType -> {}", ret);
         return ret;
     }
     
     static List<? extends Attribute<?,?>> getEmbeddableAttributes(Bindable<?> attribute, Metamodel metamodel) {
-        logger.debug("getEmbeddableAttributes({},{})", attribute, metamodel);
         List<? extends Attribute<?,?>> ret = newList(sort(attributeByName, EmbeddableUtil.getEmbeddableType(attribute, metamodel).getAttributes()));
-        logger.debug("getEmbeddableAttributes -> {}", ret);
         return ret;
     }
     
