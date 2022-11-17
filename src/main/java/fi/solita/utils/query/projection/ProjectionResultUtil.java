@@ -10,7 +10,6 @@ import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.zip;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Predicates.*;
-import static fi.solita.utils.functional.Transformers.*;
 import static fi.solita.utils.query.QueryUtils.isRequiredByMetamodel;
 import static fi.solita.utils.query.QueryUtils.isRequiredByQueryAttribute;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
@@ -85,21 +84,16 @@ class ProjectionResultUtil {
     }
     
     static Iterable<Object> postProcessRow(List<Attribute<?,?>> projectionParameters, Iterable<Object> row) {
-        logger.debug("postProcessRow({},{})", projectionParameters, row);
         Iterable<Object> ret = map(postProcessValue, zip(projectionParameters, row));
-        logger.debug("postProcessRow -> {}", ret);
         return ret;
     }
 
     static <R> Iterable<R> transformAllRows(MetaJpaConstructor<?, R, ?> projection, Iterable<Iterable<Object>> rows) {
-        logger.debug("transformAllRows({},{})", projection, rows);
         Iterable<R> ret = map(ProjectionResultUtil_.<R>transformRow().ap(projection), rows);
-        logger.debug("transformAllRows -> {}", ret);
         return ret;
     }
     
     static <T> T transformRow(MetaJpaConstructor<?,T,?> projection, Iterable<Object> row) {
-        logger.debug("transformRow({},{})", projection, row);
         List<Object> r = newList(postProcessRow(projection.getParameters(), row));
         // at this point there should be no nulls, except explicit null-literals
         for (Tuple2<Object, Integer> result: zip(r, range(0))) {
@@ -110,16 +104,13 @@ class ProjectionResultUtil {
         
         @SuppressWarnings("unchecked")
         T ret = ((MetaJpaConstructor<?,T,Object>)projection).apply(size(r) == 1 ? head(r) : Tuple.of(newArray(Object.class, r)));
-        logger.debug("transformRow -> {}", ret);
         return ret;
     }
     
     static Object postProcessResult(Class<?> constructorParameterType, Attribute<?, ?> attr, List<Object> val) {
-        logger.debug("postProcessResult({},{},{})", new Object[] {constructorParameterType, attr, val});
         Object ret;
         if (attr instanceof SingularAttribute) {
             if (!isRequiredByQueryAttribute(attr) && val.isEmpty()) {
-                logger.debug("Optional SingularAttribute and empty resultList, returning null to be later replaced by None()");
                 ret = null;
             } else {
                 if (val.size() != 1) {
@@ -151,24 +142,19 @@ class ProjectionResultUtil {
                 logger.debug("size of a Set/SortedSet... stack: ", new Exception());
             }
         }
-        logger.debug("postProcessResult -> {}", ret);
         return ret;
     }
 
     static Object transformPseudoResultToActualValue(Attribute<?,?> attribute, Object resultFromDb) {
-        logger.debug("transformPseudoResultToActualValue({},{})", attribute, resultFromDb);
         Object ret = resultFromDb;
         for (PseudoAttribute pseudo: unwrap(PseudoAttribute.class, attribute)) {
-            logger.debug("Replacing pseudo placeholder with actual value");
             ret = pseudo.getValueToReplaceResult(resultFromDb);
         }
-        logger.debug("transformPseudoResultToActualValue -> {}", ret);
         return ret;
     }
 
     /** Wraps values to Some and nulls to None for optional parameters, leave others as is */
     static Object wrapNullsToOptionsWhereAppropriate(Attribute<?,?> attribute, Object resultFromDb) {
-        logger.debug("wrapNullsToOptionsWhereAppropriate({},{})", attribute, resultFromDb);
         Object ret;
         if (attribute.isCollection()) {
             if (!(resultFromDb instanceof Collection) && isOption(attribute)) {
@@ -181,14 +167,12 @@ class ProjectionResultUtil {
         } else {
             ret = Option.of(resultFromDb);
         }
-        logger.debug("wrapNullsToOptionsWhereAppropriate -> {}", ret);
         return ret;
     }
     
     /** Hibern cannot handle embeddables with all-null values correctly, since it doesn't separate a missing embeddable and an existing all-null embeddable.
      *  So we instantiate the empty embeddable if the result has been left null but the attribute is required */
     static Object convertNullsToEmbeddableWhereRequired(Attribute<?,?> attribute, Object resultFromDb) {
-        logger.debug("convertNullsToEmbeddableWhereRequired({},{})", attribute, resultFromDb);
         Object ret = resultFromDb;
         Option<? extends Attribute<?, ?>> embeddable = EmbeddableUtil.unwrapEmbeddableAttribute(attribute);
         if (embeddable.isDefined() && resultFromDb == null && isRequiredByMetamodel(attribute)) {
@@ -196,7 +180,6 @@ class ProjectionResultUtil {
             logger.debug("Instantiating an empty Embeddable {} in place of a null result", clazz);
             ret = EmbeddableUtil.instantiate(clazz);
         }
-        logger.debug("convertNullsToEmbeddableWhereRequired -> {}", ret);
         return ret;
     }
     
@@ -212,7 +195,6 @@ class ProjectionResultUtil {
      * Removes all Option.None, and unwrap Option.Some from collections
      */
     static Object removeNonesAndSomesFromCollections(Attribute<?,?> attribute, Object resultFromDb) {
-        logger.debug("removeNonesAndSomesFromCollections({},{})", attribute, resultFromDb);
         Object ret;
         if (isOption(attribute)) {
             return resultFromDb;
@@ -226,7 +208,6 @@ class ProjectionResultUtil {
         } else {
             ret = resultFromDb;
         }
-        logger.debug("removeNonesAndSomesFromCollections -> {}", ret);
         return ret;
     }
     
