@@ -2,7 +2,6 @@ package fi.solita.utils.query.projection;
 
 import static fi.solita.utils.functional.Collections.emptyList;
 import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Collections.newMap;
 import static fi.solita.utils.functional.Collections.newMultimap;
 import static fi.solita.utils.functional.Collections.newMutableListOfSize;
 import static fi.solita.utils.functional.Collections.newMutableMap;

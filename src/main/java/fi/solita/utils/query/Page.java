@@ -1,6 +1,5 @@
 package fi.solita.utils.query;
 
-import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 
 import java.io.Serializable;

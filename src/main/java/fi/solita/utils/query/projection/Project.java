@@ -90,66 +90,105 @@ public class Project {
         };
     }
 
+    /**
+     * Project the query result to the entity identifier.
+     */
     public static <E extends IEntity<?> & Identifiable<?>> MetaJpaConstructor<E,Id<E>,Id<E>> id() {
         return Constructors.id();
     }
     
+    /**
+     * Project the query result to the aggregate sum of <i>attribute</i>.
+     */
     public static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> sum(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.sum(attribute);
     }
     
+    /**
+     * Project the query result to the aggregate max of <i>attribute</i>.
+     */
     public static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> max(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.max(attribute);
     }
     
+    /**
+     * Project the query result to the aggregate min of <i>attribute</i>.
+     */
     public static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> min(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.min(attribute);
     }
     
+    /**
+     * Project the query result to the aggregate max of <i>attribute</i>.
+     */
     public static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Option<T>,Option<T>> greatest(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.greatest(attribute);
     }
     
+    /**
+     * Project the query result to the aggregate min of <i>attribute</i>.
+     */
     public static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Option<T>,Option<T>> least(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.least(attribute);
     }
 
+    /**
+     * Project the query result to the value of <i>attribute</i>.
+     */
     public static <E, T> MetaJpaConstructor<E,T,T> value(SingularAttribute<? super E, ? extends T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.value(attribute);
     }
 
+    /**
+     * Project the query result to the value of <i>attribute</i>.
+     */
     public static <E, T> MetaJpaConstructor<E,T,T> value(PluralAttribute<? super E, ? extends T, ?> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.value(attribute);
     }
     
+    /**
+     * Project the query result to the pair value of values <i>left</i> and <i>right</i>.
+     */
     public static <E, LEFT, RIGHT> MetaJpaConstructor<E,Pair<LEFT,RIGHT>,Map.Entry<? extends LEFT,? extends RIGHT>> pair(Attribute<? super E, ? extends LEFT> left, Attribute<? super E, ? extends RIGHT> right) {
         checkOptionalAttributes(left);
         checkOptionalAttributes(right);
         return Constructors.pair(left, right);
     }
 
+    /**
+     * Project the query result to the value of <i>t1</i>.
+     */
     @SuppressWarnings("unchecked")
     public static <E, T1> MetaJpaConstructor<E,Tuple1<T1>,Tuple1<T1>> tuple(Attribute<? super E, ? extends T1> t1) {
         return makeTuple(t1);
     }
 
+    /**
+     * Project the query result to the values <i>t1</i> and <i>t2</i>.
+     */
     @SuppressWarnings("unchecked")
     public static <E, T1, T2> MetaJpaConstructor<E,Tuple2<T1, T2>,Tuple2<T1,T2>> tuple(Attribute<? super E, ? extends T1> t1, Attribute<? super E, ? extends T2> t2) {
         return makeTuple(t1, t2);
     }
 
+    /**
+     * Project the query result to the values <i>t1</i> and <i>t2</i> and <i>t3</i>.
+     */
     @SuppressWarnings("unchecked")
     public static <E, T1, T2, T3> MetaJpaConstructor<E,Tuple3<T1, T2, T3>,Tuple3<T1, T2, T3>> tuple(Attribute<? super E, ? extends T1> t1, Attribute<? super E, ? extends T2> t2, Attribute<? super E, ? extends T3> t3) {
         return makeTuple(t1, t2, t3);
     }
 
+    /**
+     * Project the query result to the values <i>t1</i> and <i>t2</i> and <i>t3</i> and <i>t4</i>.
+     */
     @SuppressWarnings("unchecked")
     public static <E, T1, T2, T3, T4> MetaJpaConstructor<E,Tuple4<T1, T2, T3, T4>,Tuple4<T1, T2, T3, T4>> tuple(Attribute<? super E, ? extends T1> t1, Attribute<? super E, ? extends T2> t2, Attribute<? super E, ? extends T3> t3, Attribute<? super E, ? extends T4> t4) {
         return makeTuple(t1, t2, t3, t4);

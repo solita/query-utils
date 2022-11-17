@@ -23,38 +23,65 @@ public abstract class Select {
         return PseudoAttribute.Constructors.self();
     }
 
+    /**
+     * Select a literal value (will not go through the database).
+     */
     public static <E, T> SingularAttribute<E, T> literal(T value) {
         return PseudoAttribute.Constructors.literal(value);
     }
     
+    /**
+     * Select a literal Collection value (will not go through the database).
+     */
     public static <E, T> CollectionAttribute<E, T> literal(Collection<T> value) {
         return PseudoAttribute.Constructors.literal(value);
     }
 
+    /**
+     * Select a literal Set value (will not go through the database).
+     */
     public static <E, T> SetAttribute<E, T> literal(Set<T> value) {
         return PseudoAttribute.Constructors.literal(value);
     }
 
+    /**
+     * Select a literal List value (will not go through the database).
+     */
     public static <E, T> ListAttribute<E, T> literal(List<T> value) {
         return PseudoAttribute.Constructors.literal(value);
     }
     
+    /**
+     * Select a null value.
+     */
     public static <E, T> SingularAttribute<E, T> singularNull() {
         return PseudoAttribute.Constructors.literal((T)null);
     }
     
+    /**
+     * Select a null value.
+     */
     public static <E, T> CollectionAttribute<E, T> collectionNull() {
         return PseudoAttribute.Constructors.literal((Collection<T>)null);
     }
     
+    /**
+     * Select a null value.
+     */
     public static <E, T> SetAttribute<E, T> setNull() {
         return PseudoAttribute.Constructors.literal((Set<T>)null);
     }
 
+    /**
+     * Select a null value.
+     */
     public static <E, T> ListAttribute<E, T> listNull() {
         return PseudoAttribute.Constructors.literal((List<T>)null);
     }
     
+    /**
+     * Select a null value.
+     */
     public static <E, K, T> MapAttribute<E, K, T> mapNull() {
         return PseudoAttribute.Constructors.literal((Map<K,T>)null);
     }

@@ -21,6 +21,9 @@ import fi.solita.utils.query.backend.Type;
 
 public class Cast {
 
+    /**
+     * Type cast for the actually optional <i>attribute</i>.
+     */
     public static <E, T> SingularAttribute<E, Option<T>> optional(SingularAttribute<E, T> attribute) throws IllegalArgumentException, QueryUtils.RequiredAttributeMustNotHaveOptionTypeException {
         if (attribute instanceof PseudoAttribute) {
             throw new IllegalArgumentException("No reason to wrap a PseudoAttribute. Right?");
@@ -45,6 +48,9 @@ public class Cast {
         return new Type.Optional<T>(type);
     }
 
+    /**
+     * Create an attribute for the parent entity <i>E</i>. The value will be Optional since due to inheritance it might not exist for the whole hierarchy.
+     */
     public static <PARENT, VALUE> SingularAttribute<PARENT, Option<VALUE>> optionalSubtype(SingularAttribute<? extends PARENT, VALUE> attribute) throws IllegalArgumentException {
         if (attribute instanceof PseudoAttribute) {
             throw new IllegalArgumentException("No reason to wrap a PseudoAttribute. Right?");
@@ -61,41 +67,65 @@ public class Cast {
         return OptionalAttribute.Constructors.optional(attribute);
     }
 
+    /**
+     * Type cast <i>attribute</i> to be one of its parent entity. Note that this only works in a query if the rows returned are all instance of the particular child entity, since the value might not exist for the parent.
+     */
     @SuppressWarnings("unchecked")
     public static <PARENT extends IEntity<?>, VALUE> SingularAttribute<PARENT, VALUE> castSuper(SingularAttribute<? extends PARENT, VALUE> attribute) {
         return (SingularAttribute<PARENT, VALUE>) attribute;
     }
     
+    /**
+     * Type cast <i>attribute</i> to be one of its parent entity. Note that this only works in a query if the rows returned are all instance of the particular child entity, since the value might not exist for the parent.
+     */
     @SuppressWarnings("unchecked")
     public static <PARENT extends IEntity<?>, VALUE> CollectionAttribute<PARENT, VALUE> castSuper(CollectionAttribute<? extends PARENT, VALUE> attribute) {
         return (CollectionAttribute<PARENT, VALUE>) attribute;
     }
     
+    /**
+     * Type cast <i>attribute</i> to be one of its parent entity. Note that this only works in a query if the rows returned are all instance of the particular child entity, since the value might not exist for the parent.
+     */
     @SuppressWarnings("unchecked")
     public static <PARENT extends IEntity<?>, VALUE> SetAttribute<PARENT, VALUE> castSuper(SetAttribute<? extends PARENT, VALUE> attribute) {
         return (SetAttribute<PARENT, VALUE>) attribute;
     }
     
+    /**
+     * Type cast <i>attribute</i> to be one of its parent entity. Note that this only works in a query if the rows returned are all instance of the particular child entity, since the value might not exist for the parent.
+     */
     @SuppressWarnings("unchecked")
     public static <PARENT extends IEntity<?>, VALUE> ListAttribute<PARENT, VALUE> castSuper(ListAttribute<? extends PARENT, VALUE> attribute) {
         return (ListAttribute<PARENT, VALUE>) attribute;
     }
 
+    /**
+     * Type cast <i>attribute</i> to be one of its child entity. Note that this only works in a query if the rows returned are all instance of the particular child entity, since the value might not exist for the other child.
+     */
     @SuppressWarnings("unchecked")
     public static <CHILD extends IEntity<?>, VALUE> SingularAttribute<CHILD, VALUE> cast(SingularAttribute<? super CHILD, ? super VALUE> attribute) {
         return (SingularAttribute<CHILD, VALUE>) attribute;
     }
     
+    /**
+     * Type cast <i>attribute</i> to be one of its child entity. Note that this only works in a query if the rows returned are all instance of the particular child entity, since the value might not exist for the other child.
+     */
     @SuppressWarnings("unchecked")
     public static <CHILD extends IEntity<?>, VALUE> CollectionAttribute<CHILD, VALUE> cast(CollectionAttribute<? super CHILD, ? super VALUE> attribute) {
         return (CollectionAttribute<CHILD, VALUE>) attribute;
     }
 
+    /**
+     * Type cast <i>attribute</i> to be one of its child entity. Note that this only works in a query if the rows returned are all instance of the particular child entity, since the value might not exist for the other child.
+     */
     @SuppressWarnings("unchecked")
     public static <CHILD extends IEntity<?>, VALUE> SetAttribute<CHILD, VALUE> cast(SetAttribute<? super CHILD, ? super VALUE> attribute) {
         return (SetAttribute<CHILD, VALUE>) attribute;
     }
 
+    /**
+     * Type cast <i>attribute</i> to be one of its child entity. Note that this only works in a query if the rows returned are all instance of the particular child entity, since the value might not exist for the other child.
+     */
     @SuppressWarnings("unchecked")
     public static <CHILD extends IEntity<?>, VALUE> ListAttribute<CHILD, VALUE> cast(ListAttribute<? super CHILD, ? super VALUE> attribute) {
         return (ListAttribute<CHILD, VALUE>) attribute;

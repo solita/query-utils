@@ -32,17 +32,14 @@ public class Order<X,T> implements Iterable<Order<X,T>> {
         return Collections.<Order<? super X,?>>singletonList(order);
     }
 
-    @SuppressWarnings("unchecked")
     public static <X> List<Order<? super X,?>> of(Order<? super X,?> order1, Order<? super X,?> order2) {
         return Arrays.<Order<? super X,?>>asList(order1, order2);
     }
 
-    @SuppressWarnings("unchecked")
     public static <X> List<Order<? super X,?>> of(Order<? super X,?> order1, Order<? super X,?> order2, Order<? super X,?> order3) {
         return Arrays.<Order<? super X,?>>asList(order1, order2, order3);
     }
 
-    @SuppressWarnings("unchecked")
     public static <X> List<Order<? super X,?>> of(Order<? super X,?> order1, Order<? super X,?> order2, Order<? super X,?> order3, Order<? super X,?> order4) {
         return Arrays.<Order<? super X,?>>asList(order1, order2, order3, order4);
     }
@@ -55,7 +52,6 @@ public class Order<X,T> implements Iterable<Order<X,T>> {
         return direction;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Iterator<Order<X, T>> iterator() {
         return Arrays.asList(this).iterator();

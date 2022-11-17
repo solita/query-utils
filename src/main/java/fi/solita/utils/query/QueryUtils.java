@@ -72,7 +72,6 @@ import fi.solita.utils.query.db.TableInClauseOptimization;
 import fi.solita.utils.query.entities.Table;
 import fi.solita.utils.query.entities.Table_;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
-import fi.solita.utils.query.projection.Constructors.ExpressionProjection;
 import fi.solita.utils.query.projection.Constructors.TransparentProjection;
 
 public class QueryUtils {

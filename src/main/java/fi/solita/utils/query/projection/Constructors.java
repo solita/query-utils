@@ -69,6 +69,7 @@ public class Constructors {
         return new PairProjection<E,LEFT,RIGHT>(left, right);
     }
     
+    @SafeVarargs
     static <E, T extends Tuple> MetaJpaConstructor<E,T,T> tuple(Attribute<? super E,?>... attributes) {
         return new TupleProjection<E,T>(attributes);
     }
