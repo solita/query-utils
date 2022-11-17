@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -67,7 +68,7 @@ public class Dao {
     /**
      * Get the entity corresponding to <i>id</i>. Fails if not found.
      */
-    public <E extends IEntity<?>> E get(Id<E> id) {
+    public <E extends IEntity<?>> E get(Id<E> id) throws EntityNotFoundException {
         return jpaBasicQueries.get(id);
     }
 
@@ -190,7 +191,7 @@ public class Dao {
         return jpaCriteriaQueries.findFirst(query, ordering, lock);
     }
 
-    public <T> Collection<T> getMany(CriteriaQuery<T> query) throws NoOrderingSpecifiedException {
+    public <T> Collection<T> getMany(CriteriaQuery<T> query) {
         return getMany(query, Page.NoPaging, LockModeType.NONE);
     }
     public <T> Collection<T> getMany(CriteriaQuery<T> query, LockModeType lock) {
@@ -252,7 +253,7 @@ public class Dao {
     public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NoOrderingSpecifiedException {
         return findFirst(query, constructor, LockModeType.NONE);
     }
-    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, LockModeType lock) {
+    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, LockModeType lock) throws NoOrderingSpecifiedException {
         return jpaProjectionQueries.findFirst(query, projection, lock);
     }
 
@@ -269,7 +270,7 @@ public class Dao {
     /**
      * Get all rows of <i>query</i>, projecting the results
      */
-    public <E,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NoOrderingSpecifiedException {
+    public <E,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) {
         return getMany(query, constructor, LockModeType.NONE);
     }
     public <E,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, LockModeType lock) {
@@ -360,7 +361,7 @@ public class Dao {
         return nativeQueries.getMany(query);
     }
 
-    public <T, P> List<P> getMany(NativeQuery<? extends T> query, Apply<T, P> constructor) {
+    public <T, P> Collection<P> getMany(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         return nativeQueries.getMany(query, constructor);
     }
     
@@ -424,7 +425,7 @@ public class Dao {
         return qlQueries.getMany(query);
     }
     
-    public <T, P> List<P> getMany(QLQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Collection<P> getMany(QLQuery<T> query, Apply<T, P> constructor) {
         return qlQueries.getMany(query, constructor);
     }
 

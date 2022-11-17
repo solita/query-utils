@@ -77,7 +77,7 @@ public class NativeQueries {
         return getMany(query, Page.NoPaging);
     }
 
-    public <T, P> List<P> getMany(NativeQuery<? extends T> query, Apply<T, P> constructor) {
+    public <T, P> Collection<P> getMany(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         return getMany(query, Page.NoPaging, constructor);
     }
 

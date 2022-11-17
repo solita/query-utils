@@ -66,7 +66,7 @@ public class QLQueries {
         return getMany(query, Page.NoPaging);
     }
 
-    public <T, P> List<P> getMany(QLQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Collection<P> getMany(QLQuery<T> query, Apply<T, P> constructor) {
         return getMany(query, Page.NoPaging, constructor);
     }
 

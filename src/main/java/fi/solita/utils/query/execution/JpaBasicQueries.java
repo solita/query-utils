@@ -100,7 +100,7 @@ public class JpaBasicQueries {
         }
     }
 
-    public <E extends IEntity<?>> E get(Id<E> id) {
+    public <E extends IEntity<?>> E get(Id<E> id) throws EntityNotFoundException {
         Option<E> ret = find(id);
         if (!ret.isDefined()) {
             throw new EntityNotFoundException("Entity of type " + id.getOwningClass().getName() + " with id " + id + " not found.");

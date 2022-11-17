@@ -45,7 +45,7 @@ public class Cast {
         return new Type.Optional<T>(type);
     }
 
-    public static <E, T> SingularAttribute<E, Option<T>> optionalSubtype(SingularAttribute<? extends E, T> attribute) throws IllegalArgumentException {
+    public static <PARENT, VALUE> SingularAttribute<PARENT, Option<VALUE>> optionalSubtype(SingularAttribute<? extends PARENT, VALUE> attribute) throws IllegalArgumentException {
         if (attribute instanceof PseudoAttribute) {
             throw new IllegalArgumentException("No reason to wrap a PseudoAttribute. Right?");
         }
@@ -62,42 +62,42 @@ public class Cast {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?>, T> SingularAttribute<E, T> castSuper(SingularAttribute<? extends E, T> attribute) {
-        return (SingularAttribute<E, T>) attribute;
+    public static <PARENT extends IEntity<?>, VALUE> SingularAttribute<PARENT, VALUE> castSuper(SingularAttribute<? extends PARENT, VALUE> attribute) {
+        return (SingularAttribute<PARENT, VALUE>) attribute;
     }
     
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?>, T> CollectionAttribute<E, T> castSuper(CollectionAttribute<? extends E, T> attribute) {
-        return (CollectionAttribute<E, T>) attribute;
+    public static <PARENT extends IEntity<?>, VALUE> CollectionAttribute<PARENT, VALUE> castSuper(CollectionAttribute<? extends PARENT, VALUE> attribute) {
+        return (CollectionAttribute<PARENT, VALUE>) attribute;
     }
     
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?>, T> SetAttribute<E, T> castSuper(SetAttribute<? extends E, T> attribute) {
-        return (SetAttribute<E, T>) attribute;
+    public static <PARENT extends IEntity<?>, VALUE> SetAttribute<PARENT, VALUE> castSuper(SetAttribute<? extends PARENT, VALUE> attribute) {
+        return (SetAttribute<PARENT, VALUE>) attribute;
     }
     
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?>, T> ListAttribute<E, T> castSuper(ListAttribute<? extends E, T> attribute) {
-        return (ListAttribute<E, T>) attribute;
+    public static <PARENT extends IEntity<?>, VALUE> ListAttribute<PARENT, VALUE> castSuper(ListAttribute<? extends PARENT, VALUE> attribute) {
+        return (ListAttribute<PARENT, VALUE>) attribute;
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?>, T> SingularAttribute<E, T> cast(SingularAttribute<? super E, ? super T> attribute) {
-        return (SingularAttribute<E, T>) attribute;
+    public static <CHILD extends IEntity<?>, VALUE> SingularAttribute<CHILD, VALUE> cast(SingularAttribute<? super CHILD, ? super VALUE> attribute) {
+        return (SingularAttribute<CHILD, VALUE>) attribute;
     }
     
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?>, T> CollectionAttribute<E, T> cast(CollectionAttribute<? super E, ? super T> attribute) {
-        return (CollectionAttribute<E, T>) attribute;
+    public static <CHILD extends IEntity<?>, VALUE> CollectionAttribute<CHILD, VALUE> cast(CollectionAttribute<? super CHILD, ? super VALUE> attribute) {
+        return (CollectionAttribute<CHILD, VALUE>) attribute;
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?>, T> SetAttribute<E, T> cast(SetAttribute<? super E, ? super T> attribute) {
-        return (SetAttribute<E, T>) attribute;
+    public static <CHILD extends IEntity<?>, VALUE> SetAttribute<CHILD, VALUE> cast(SetAttribute<? super CHILD, ? super VALUE> attribute) {
+        return (SetAttribute<CHILD, VALUE>) attribute;
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends IEntity<?>, T> ListAttribute<E, T> cast(ListAttribute<? super E, ? super T> attribute) {
-        return (ListAttribute<E, T>) attribute;
+    public static <CHILD extends IEntity<?>, VALUE> ListAttribute<CHILD, VALUE> cast(ListAttribute<? super CHILD, ? super VALUE> attribute) {
+        return (ListAttribute<CHILD, VALUE>) attribute;
     }
 }

@@ -77,7 +77,7 @@ public class JpaCriteriaQueries {
         return headOption(getMany(query, Page.FIRST.withSize(1), ordering, lock));
     }
 
-    public <T> Collection<T> getMany(CriteriaQuery<T> query, LockModeType lock) throws NoOrderingSpecifiedException {
+    public <T> Collection<T> getMany(CriteriaQuery<T> query, LockModeType lock) {
         return getMany(query, Page.NoPaging, lock);
     }
 
