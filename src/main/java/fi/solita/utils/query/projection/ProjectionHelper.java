@@ -5,6 +5,7 @@ import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newMultimap;
 import static fi.solita.utils.functional.Collections.newMutableListOfSize;
 import static fi.solita.utils.functional.Collections.newMutableMap;
+import static fi.solita.utils.query.attributes.AttributeProxy.*;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Collections.newSortedSet;
 import static fi.solita.utils.functional.Functional.concat;
@@ -337,7 +338,7 @@ public class ProjectionHelper {
         Either<From<SOURCE,Object>,Attribute<?,?>> relationOrAdditionalGet;
         Map<Attribute<?, ?>, From<?, ?>> actualJoins = newMutableMap();
         From<?,?> last;
-        if (!unwrap(PseudoAttribute.class, target).isDefined()) { 
+        if (!canUnwrap(PseudoAttribute.class, target)) {
             logger.debug("Inner joining from {} to {}", source, target);
             Tuple3<Map<Attribute<?, ?>, From<?, ?>>, From<?, ?>, Attribute<?, ?>> joined = doJoins(source, target, JoinType.INNER);
             actualJoins = joined._1;

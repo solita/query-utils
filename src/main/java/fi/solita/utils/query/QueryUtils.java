@@ -16,7 +16,7 @@ import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.repeat;
 import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
-import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
+import static fi.solita.utils.query.attributes.AttributeProxy.*;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -338,7 +338,7 @@ public class QueryUtils {
         if (param == null) {
             return true;
         }
-        if (unwrap(PseudoAttribute.class, param).isDefined()) {
+        if (canUnwrap(PseudoAttribute.class, param)) {
             return true;
         }
         
@@ -401,7 +401,7 @@ public class QueryUtils {
         if (param == null) {
             return true;
         }
-        if (unwrap(PseudoAttribute.class, param).isDefined()) {
+        if (canUnwrap(PseudoAttribute.class, param)) {
             return true;
         }
         
@@ -415,7 +415,7 @@ public class QueryUtils {
             return true;
         }
         
-        if (unwrap(OptionalAttribute.class, param).isDefined()) {
+        if (canUnwrap(OptionalAttribute.class, param)) {
             return false;
         }
         

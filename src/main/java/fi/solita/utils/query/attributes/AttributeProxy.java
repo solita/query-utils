@@ -29,6 +29,20 @@ public abstract class AttributeProxy {
         }
         return None();
     }
+    
+    public static <T> boolean canUnwrap(Class<T> type, Attribute<?,?> attribute) {
+        if (type.isInstance(attribute)) {
+            return true;
+        }
+        if (attribute instanceof AbstractAttributeProxy) {
+            if (((AbstractAttributeProxy<?,?,?>) attribute).proxyTarget == null) {
+                return false;
+            }
+            return canUnwrap(type, ((AbstractAttributeProxy<?,?,?>) attribute).proxyTarget);
+        }
+        return false;
+    }
+
 }
 
 abstract class AbstractAttributeProxy<X,Y,T extends Attribute<X, Y>> implements Attribute<X, Y>, Serializable {

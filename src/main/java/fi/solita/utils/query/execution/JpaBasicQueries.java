@@ -156,7 +156,7 @@ public class JpaBasicQueries {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        if (AttributeProxy.unwrap(OptionalAttribute.class, relation).isDefined()) {
+        if (AttributeProxy.canUnwrap(OptionalAttribute.class, relation)) {
             return (T) Option.of(ret);
         } else {
             if (ret == null) {

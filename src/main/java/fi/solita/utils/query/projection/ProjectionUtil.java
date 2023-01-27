@@ -28,6 +28,7 @@ import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.attributes.RestrictingAttribute;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
+import static fi.solita.utils.query.attributes.AttributeProxy.*;
 
 public class ProjectionUtil {
     
@@ -42,8 +43,8 @@ public class ProjectionUtil {
     
     static boolean shouldPerformAdditionalQuery(Attribute<?, ?> param) {
         logger.debug("shouldPerformAdditionalQuery({})", param);
-        boolean ret = unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined() ||
-               (unwrap(PluralAttribute.class, param).isDefined() && !unwrap(PseudoAttribute.class, param).isDefined());
+        boolean ret = canUnwrap(AdditionalQueryPerformingAttribute.class, param) ||
+               (canUnwrap(PluralAttribute.class, param) && !canUnwrap(PseudoAttribute.class, param));
         logger.debug("shouldPerformAdditionalQuery -> {}", ret);
         return ret;
     }

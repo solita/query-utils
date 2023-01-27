@@ -68,19 +68,14 @@ class ProjectionResultUtil {
     }
     
     static Object postProcessValue(Attribute<?, ?> attr, Object resultFromDb) {
-        logger.debug("postProcessValue({},{})", attr, resultFromDb);
         if (attr == null) {
-            logger.debug("Skipping processing since attr was null");
             // null is used as a placeholder in SelfAttribute and Constructors.IdProjection... Yeah, should use something else...
             return resultFromDb;
         }
-        Object ret = transformPseudoResultToActualValue.ap(attr).andThen(
-               wrapNullsToOptionsWhereAppropriate.ap(attr)).andThen(
-               convertNullsToEmbeddableWhereRequired.ap(attr)).andThen(
-               removeNonesAndSomesFromCollections.ap(attr))
-               .apply(resultFromDb);
-        logger.debug("postProcessValue -> {}", ret);
-        return ret;
+        return transformPseudoResultToActualValue(attr,
+               wrapNullsToOptionsWhereAppropriate(attr,
+               convertNullsToEmbeddableWhereRequired(attr,
+               removeNonesAndSomesFromCollections(attr, resultFromDb))));
     }
     
     static Iterable<Object> postProcessRow(List<Attribute<?,?>> projectionParameters, Iterable<Object> row) {
