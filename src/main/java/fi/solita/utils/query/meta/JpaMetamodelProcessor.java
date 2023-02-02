@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -20,6 +22,7 @@ import fi.solita.utils.meta.generators.InstanceFieldsAsTuple;
 import fi.solita.utils.query.meta.JpaMetamodelProcessor.ExtendedGeneratorOptions;
 import fi.solita.utils.query.meta.generators.JpaMetamodel;
 
+@SupportedSourceVersion(SourceVersion.RELEASE_11)
 @SupportedAnnotationTypes("*")
 @SupportedOptions({"JpaMetamodelProcessor." + CommonMetadataProcessor.Options.enabled,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.generatedClassNamePattern,
