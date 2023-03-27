@@ -7,6 +7,7 @@
     <bean id="query-utils_Configuration"        class="fi.solita.utils.query.DefaultConfiguration" />
     
     <bean id="query-utils_JpaCriteriaQuery"     class="fi.solita.utils.query.generation.JpaCriteriaQuery" />
+    <bean id="query-utils_Predicates"           class="fi.solita.utils.query.generation.Predicates" />
     <bean id="query-utils_Restrict"             class="fi.solita.utils.query.generation.Restrict" />
     
     <bean id="query-utils_Project"              class="fi.solita.utils.query.projection.Project" />

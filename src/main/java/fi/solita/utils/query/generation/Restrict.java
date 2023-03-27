@@ -24,6 +24,7 @@ import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
+import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Configuration;
@@ -37,11 +38,13 @@ public class Restrict {
 
     private final Configuration config;
     private final QueryUtils queryUtils;
+    private final Predicates predicates;
     
-    public Restrict(ApplyZero<EntityManager> em, Configuration config) {
+    public Restrict(ApplyZero<EntityManager> em, Configuration config, Predicates predicates) {
         this.em = em;
         this.config = config;
         this.queryUtils = new QueryUtils(config);
+        this.predicates = predicates;
     }
     
     public static <E, R, R1, A1 extends Attribute<? super R, ?> & Bindable<R1>>
@@ -309,6 +312,13 @@ public class Restrict {
      */
     public <E> CriteriaQuery<E> by(Predicate predicate, CriteriaQuery<E> query) {
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate) : query.where(predicate);
+    }
+    
+    /**
+     * Modifies existing query!
+     */
+    public <E> CriteriaQuery<E> by(Apply<CriteriaQuery<E>,Predicate> predicate, CriteriaQuery<E> query) {
+        return query.getRestriction() != null ? query.where(query.getRestriction(), predicate.apply(query)) : query.where(predicate.apply(query));
     }
     
     /**

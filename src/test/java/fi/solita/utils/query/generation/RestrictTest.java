@@ -4,7 +4,8 @@ import static fi.solita.utils.functional.Collections.newMutableSet;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.Some;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.util.Set;
 
@@ -12,15 +13,23 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fi.solita.utils.functional.Collections;
-import fi.solita.utils.query.*;
-import fi.solita.utils.query.execution.JpaCriteriaQueries;
-import fi.solita.utils.query.generation.JpaCriteriaQuery;
-import fi.solita.utils.query.generation.Restrict;
+import fi.solita.utils.query.Dao;
+import fi.solita.utils.query.Department;
+import fi.solita.utils.query.Department_;
+import fi.solita.utils.query.Employee;
+import fi.solita.utils.query.Employee_;
+import fi.solita.utils.query.Money;
+import fi.solita.utils.query.PartTimeEmployee;
+import fi.solita.utils.query.QueryTestBase;
+import fi.solita.utils.query.projection.Project;
 
 public class RestrictTest extends QueryTestBase {
 
     @Autowired
     private Restrict restrict;
+    
+    @Autowired
+    private Predicates predicates;
 
     @Autowired
     private JpaCriteriaQuery query;
@@ -180,5 +189,33 @@ public class RestrictTest extends QueryTestBase {
         assertEquals(neither, newSet(map(Employee_.getId, dao.getMany(restrict.lessThan(Employee_.optionalSalary, new Money(1), query.all(Employee.class))))));
         assertEquals(e1,      newSet(map(Employee_.getId, dao.getMany(restrict.lessThan(Employee_.optionalSalary, new Money(2), query.all(Employee.class))))));
         assertEquals(both,    newSet(map(Employee_.getId, dao.getMany(restrict.lessThan(Employee_.optionalSalary, new Money(4), query.all(Employee.class))))));
+    }
+    
+    @Test
+    public void and() {
+        Department dep1 = new Department("a", 1);
+        Department dep2 = new Department("b", 1);
+        Department dep3 = new Department("a", 2);
+        persist(dep1, dep2, dep3);
+
+        assertEquals("and", dep1.getId(),
+            dao.get(
+                restrict.by(predicates.and(predicates.equals(Department_.mandatoryDepName, Some("a")),
+                                           predicates.equals(Department_.mandatoryNumber, Some(1))),
+                    query.all(Department.class))).getId());
+    }
+    
+    @Test
+    public void or() {
+        Department dep1 = new Department("a", 1);
+        Department dep2 = new Department("b", 1);
+        Department dep3 = new Department("a", 2);
+        persist(dep1, dep2, dep3);
+
+        assertEquals("or", newSet(dep1.getId(), dep3.getId()), newSet(
+            dao.getMany(
+                restrict.by(predicates.or(predicates.equals(Department_.mandatoryDepName, Some("a")),
+                                          predicates.equals(Department_.mandatoryNumber, Some(2))),
+                    query.all(Department.class)), Project.id())));
     }
 }
