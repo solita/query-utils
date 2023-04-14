@@ -15,7 +15,7 @@ import fi.solita.utils.meta.CommonMetadataProcessor;
 import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.query.meta.generators.ConstructorsAsJpaProjections;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes("*")
 @SupportedOptions({"JpaConstructorProcessor." + CommonMetadataProcessor.Options.enabled,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.generatedClassNamePattern,
@@ -42,6 +42,8 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
         final boolean includePrivateMembers = JpaConstructorProcessor.this.includePrivateMembers();
         final String generatedPackagePattern = JpaConstructorProcessor.this.generatedPackagePattern();
         final String generatedClassNamePattern = JpaConstructorProcessor.this.generatedClassNamePattern();
+        final boolean methodsAsFunctionsEnabled = methodsAsFunctionsEnabled();
+        final boolean constructorsAsFunctionsEnabled = constructorsAsFunctionsEnabled();
         return new ExtendedGeneratorOptions() {
             @Override
             public boolean makeFieldsPublic() {
@@ -61,6 +63,14 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
             @Override
             public String generatedClassNamePattern() {
                 return generatedClassNamePattern;
+            }
+            @Override
+            public boolean methodsAsFunctionsEnabled() {
+                return methodsAsFunctionsEnabled;
+            }
+            @Override
+            public boolean constructorsAsFunctionsEnabled() {
+                return constructorsAsFunctionsEnabled;
             }
         };
     }

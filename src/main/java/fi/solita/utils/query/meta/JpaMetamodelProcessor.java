@@ -22,7 +22,7 @@ import fi.solita.utils.meta.generators.InstanceFieldsAsTuple;
 import fi.solita.utils.query.meta.JpaMetamodelProcessor.ExtendedGeneratorOptions;
 import fi.solita.utils.query.meta.generators.JpaMetamodel;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes("*")
 @SupportedOptions({"JpaMetamodelProcessor." + CommonMetadataProcessor.Options.enabled,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.generatedClassNamePattern,
@@ -48,6 +48,8 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
         final boolean includePrivateMembers = JpaMetamodelProcessor.this.includePrivateMembers();
         final String generatedPackagePattern = JpaMetamodelProcessor.this.generatedPackagePattern();
         final String generatedClassNamePattern = JpaMetamodelProcessor.this.generatedClassNamePattern();
+        final boolean methodsAsFunctionsEnabled = methodsAsFunctionsEnabled();
+        final boolean constructorsAsFunctionsEnabled = constructorsAsFunctionsEnabled();
         return new ExtendedGeneratorOptions() {
             public boolean onlyPublicMembers() {
                 return onlyPublicMembers;
@@ -66,6 +68,14 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
             @Override
             public String generatedClassNamePattern() {
                 return generatedClassNamePattern;
+            }
+            @Override
+            public boolean methodsAsFunctionsEnabled() {
+                return methodsAsFunctionsEnabled;
+            }
+            @Override
+            public boolean constructorsAsFunctionsEnabled() {
+                return constructorsAsFunctionsEnabled;
             }
         };
     }
