@@ -15,7 +15,7 @@ class RelationCollectionAttribute<E, R, A extends Attribute<E, Collection<R>> & 
 
     @SuppressWarnings("unchecked")
     public <E2 extends IEntity<?>> RelationCollectionAttribute(CollectionAttribute<? super E, ? super E2> attribute, MetaJpaConstructor<? super E2, R, ?> constructor) {
-        super((A)(Object)attribute, CollectionType.COLLECTION, (Type<R>)attribute.getElementType());
+        super((A)(Object)attribute, CollectionType.COLLECTION, (Type<R>)(Object)attribute.getElementType());
         this.constructor = (MetaJpaConstructor<? extends IEntity<?>, R, ?>) constructor;
     }
 

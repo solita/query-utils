@@ -245,7 +245,7 @@ public class QueryUtils {
                     }
                     // use member-of
                     // return type doesn't seem to make a difference, so just set to boolean...
-                    preds = newList(cb.isMember((Expression<Object>)path, (Expression<Collection<Object>>)(Object)cb.function(MEMBER_OF_CAST + targetType.get()._1, Collection.class, cb.literal(Table.of(vals)))));
+                    preds = newList(cb.<Object,Collection<Object>>isMember(path, (Expression<Collection<Object>>)(Object)cb.function(MEMBER_OF_CAST + targetType.get()._1, Collection.class, cb.literal(Table.of(vals)))));
                 }
             }
         }

@@ -17,7 +17,7 @@ class RelationMapAttribute<E, K, R, A extends Attribute<E, Map<K,R>> & Bindable<
 
     @SuppressWarnings("unchecked")
     public <E2 extends IEntity<?>> RelationMapAttribute(MapAttribute<? super E, K, ? super E2> attribute, MetaJpaConstructor<? super E2, R, ?> constructor) {
-        super((A)(Object)attribute, CollectionType.MAP, (Type<R>)attribute.getElementType());
+        super((A)(Object)attribute, CollectionType.MAP, (Type<R>)(Object)attribute.getElementType());
         this.constructor = (MetaJpaConstructor<? extends IEntity<?>, R, ?>) constructor;
         this.keyType = attribute.getKeyType();
         this.keyJavaType = attribute.getKeyJavaType();

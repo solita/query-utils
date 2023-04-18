@@ -15,7 +15,7 @@ class RelationListAttribute<E, R, A extends Attribute<E, List<R>> & Bindable<R>>
 
     @SuppressWarnings("unchecked")
     public <E2 extends IEntity<?>> RelationListAttribute(ListAttribute<? super E, ? super E2> attribute, MetaJpaConstructor<? super E2, R, ?> constructor) {
-        super((A)(Object)attribute, CollectionType.LIST, (Type<R>)attribute.getElementType());
+        super((A)(Object)attribute, CollectionType.LIST, (Type<R>)(Object)attribute.getElementType());
         this.constructor = (MetaJpaConstructor<? extends IEntity<?>, R, ?>) constructor;
     }
 
