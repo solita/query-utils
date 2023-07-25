@@ -57,7 +57,6 @@ import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.Report;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
-import fi.solita.utils.query.generation.Restrict;
 
 public class JpaProjectionQueriesTest extends QueryTestBase {
 
@@ -70,9 +69,6 @@ public class JpaProjectionQueriesTest extends QueryTestBase {
     @Autowired
     private JpaCriteriaQuery query;
 
-    @Autowired
-    private Restrict restrict;
-    
     @Test
     public void get_dto_id() {
         Department dep = new Department();

@@ -46,7 +46,6 @@ import fi.solita.utils.query.Municipality_;
 import fi.solita.utils.query.Order;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.Report;
-import fi.solita.utils.query.execution.JpaProjectionQueries;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 

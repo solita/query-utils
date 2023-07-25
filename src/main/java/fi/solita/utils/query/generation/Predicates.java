@@ -303,7 +303,6 @@ public class Predicates {
         };
     }
 
-    @SuppressWarnings("unchecked")
     public <E> Apply<CriteriaQuery<E>,Predicate> typeIs(final Class<E> type) {
         return new Apply<CriteriaQuery<E>, Predicate>() {
             @Override
@@ -314,7 +313,6 @@ public class Predicates {
         };
     }
     
-    @SuppressWarnings("unchecked")
     public <E> Apply<CriteriaQuery<E>,Predicate> typeIsNot(final Class<E> type) {
         return new Apply<CriteriaQuery<E>, Predicate>() {
             @Override

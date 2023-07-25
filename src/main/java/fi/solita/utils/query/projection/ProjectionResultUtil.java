@@ -13,13 +13,9 @@ import static fi.solita.utils.functional.Predicates.*;
 import static fi.solita.utils.query.QueryUtils.isRequiredByMetamodel;
 import static fi.solita.utils.query.QueryUtils.isRequiredByQueryAttribute;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
-import static fi.solita.utils.query.projection.ProjectionResultUtil_.convertNullsToEmbeddableWhereRequired;
 import static fi.solita.utils.query.projection.ProjectionResultUtil_.isNoneOrNull;
 import static fi.solita.utils.query.projection.ProjectionResultUtil_.optionGet;
 import static fi.solita.utils.query.projection.ProjectionResultUtil_.postProcessValue;
-import static fi.solita.utils.query.projection.ProjectionResultUtil_.removeNonesAndSomesFromCollections;
-import static fi.solita.utils.query.projection.ProjectionResultUtil_.transformPseudoResultToActualValue;
-import static fi.solita.utils.query.projection.ProjectionResultUtil_.wrapNullsToOptionsWhereAppropriate;
 
 import java.util.ArrayList;
 import java.util.Collection;

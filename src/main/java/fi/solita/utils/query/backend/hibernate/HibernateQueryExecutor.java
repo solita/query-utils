@@ -90,7 +90,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
 
     @Override
     public int execute(NativeQuery<Void> query) {
-        org.hibernate.query.NativeQuery q = em.get().unwrap(Session.class).createNativeQuery(query.query);
+        org.hibernate.query.NativeQuery<?> q = em.get().unwrap(Session.class).createNativeQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -101,7 +101,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> Option<T> find(NativeQuery<? extends T> query) {
-        org.hibernate.query.NativeQuery q = em.get().unwrap(Session.class).createNativeQuery(query.query);
+        org.hibernate.query.NativeQuery<?> q = em.get().unwrap(Session.class).createNativeQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
@@ -112,20 +112,20 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> List<T> getMany(NativeQuery<? extends T> query, Page page) {
-        org.hibernate.query.NativeQuery q = em.get().unwrap(Session.class).createNativeQuery(query.query);
+        org.hibernate.query.NativeQuery<?> q = em.get().unwrap(Session.class).createNativeQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
         if (page != Page.NoPaging) {
             q.setFetchSize(page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults() + 1, MAX_FETCH_SIZE)).get()));
         }
-        return newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
+        return (List<T>) newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> Option<T> find(QLQuery<T> query) {
-        Query q = em.get().unwrap(Session.class).createQuery(query.query);
+        Query<?> q = em.get().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
         q.setFetchSize(2);
         return Option.of(replaceProxy((T)q.uniqueResult()));
@@ -134,12 +134,12 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     @SuppressWarnings("unchecked")
     @Override
     public <T> List<T> getMany(QLQuery<T> query, Page page) {
-        Query q = em.get().unwrap(Session.class).createQuery(query.query);
+        Query<?> q = em.get().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
         if (page != Page.NoPaging) {
             q.setFetchSize(page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults() + 1, MAX_FETCH_SIZE)).get()));
         }
-        return newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
+        return (List<T>) newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
     }
     
     /**
@@ -156,7 +156,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return entityOrProxy;
     }
 
-    private final org.hibernate.query.NativeQuery bindReturnValues(org.hibernate.query.NativeQuery q, List<Pair<String, Option<Type<?>>>> retvals) {
+    private final org.hibernate.query.NativeQuery<?> bindReturnValues(org.hibernate.query.NativeQuery<?> q, List<Pair<String, Option<Type<?>>>> retvals) {
         for (Entry<String, Option<Type<?>>> param: retvals) {
             if (param.getValue().isDefined()) {
                 Type<?> type = param.getValue().get();
@@ -180,7 +180,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return q;
     }
 
-    private static final org.hibernate.query.NativeQuery bindTransformer(org.hibernate.query.NativeQuery q, NativeQuery<?> query) {
+    private static final org.hibernate.query.NativeQuery<?> bindTransformer(org.hibernate.query.NativeQuery<?> q, NativeQuery<?> query) {
         String[] retvals = newArray(String.class, map(Transformers.<String>left(), query.retvals));
         final OptionResultTransformer resultTransformer = new OptionResultTransformer(query.retvals);
         if (query instanceof NativeQuery.NativeQuerySingleEntity ||
@@ -205,7 +205,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return q;
     }
 
-    private final <T extends Query> T bindParams(T q, Map<String, Pair<?, Option<Type<?>>>> params) {
+    private final <T extends Query<?>> T bindParams(T q, Map<String, Pair<?, Option<Type<?>>>> params) {
         for (Entry<String, Pair<?, Option<Type<?>>>> param: params.entrySet()) {
             if (param.getValue()._1 instanceof Collection) {
                 Collection<?> col = (Collection<?>)param.getValue()._1;
@@ -238,7 +238,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return q;
     }
 
-    private static final Query applyPaging(Query q, Page page) {
+    private static final Query<?> applyPaging(Query<?> q, Page page) {
         if (page != Page.NoPaging) {
             q.setFirstResult(page.getFirstResult())
              .setMaxResults(page.getMaxResults());

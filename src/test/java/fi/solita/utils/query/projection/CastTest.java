@@ -4,28 +4,18 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.query.Dao;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Municipality_;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.QueryUtils;
-import fi.solita.utils.query.execution.JpaProjectionQueries;
 import fi.solita.utils.query.generation.Cast;
-import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
 public class CastTest extends QueryTestBase {
     
     @PersistenceContext
     private EntityManager em;
-
-    @Autowired
-    private JpaCriteriaQuery query;
-
-    @Autowired
-    private Dao dao;
 
     @Test(expected = QueryUtils.OptionalAttributeNeedOptionTypeException.class)
     public void Projectvalue_needs_optional() {

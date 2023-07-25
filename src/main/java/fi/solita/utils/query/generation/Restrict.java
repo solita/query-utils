@@ -38,13 +38,11 @@ public class Restrict {
 
     private final Configuration config;
     private final QueryUtils queryUtils;
-    private final Predicates predicates;
     
-    public Restrict(ApplyZero<EntityManager> em, Configuration config, Predicates predicates) {
+    public Restrict(ApplyZero<EntityManager> em, Configuration config) {
         this.em = em;
         this.config = config;
         this.queryUtils = new QueryUtils(config);
-        this.predicates = predicates;
     }
     
     public static <E, R, R1, A1 extends Attribute<? super R, ?> & Bindable<R1>>
@@ -214,7 +212,6 @@ public class Restrict {
      */
     public <E, T1, A1 extends Attribute<? super E, ?> & Bindable<T1>> CriteriaQuery<E>
     innerJoin(A1 attribute, CriteriaQuery<E> query) {
-        @SuppressWarnings("unchecked")
         From<?, E> from = (From<?, E>) resolveSelection(query);
         join(from, attribute, JoinType.INNER);
         return query;
@@ -225,7 +222,6 @@ public class Restrict {
      */
     public <E, T1, T2, A1 extends Attribute<? super E, ?> & Bindable<T1>, A2 extends Attribute<? super T1, ?> & Bindable<T2>> CriteriaQuery<E>
     innerJoin(A1 attribute1, A2 attribute2, CriteriaQuery<E> query) {
-        @SuppressWarnings("unchecked")
         From<?, E> from = (From<?, E>) resolveSelection(query);
         join(join(from, attribute1, JoinType.INNER),
                         attribute2, JoinType.INNER);
@@ -237,7 +233,6 @@ public class Restrict {
      */
     public <E, T1, T2, T3, A1 extends Attribute<? super E, ?> & Bindable<T1>, A2 extends Attribute<? super T1, ?> & Bindable<T2>, A3 extends Attribute<? super T2, ?> & Bindable<T3>> CriteriaQuery<E> 
     innerJoin(A1 attribute1, A2 attribute2, A3 attribute3, CriteriaQuery<E> query) {
-        @SuppressWarnings("unchecked")
         From<?, E> from = (From<?, E>) resolveSelection(query);
         join(join(join(from, attribute1, JoinType.INNER),
                              attribute2, JoinType.INNER),
@@ -250,7 +245,6 @@ public class Restrict {
      */
     public <E, T1, T2, T3, T4, A1 extends Attribute<? super E, ?> & Bindable<T1>, A2 extends Attribute<? super T1, ?> & Bindable<T2>, A3 extends Attribute<? super T2, ?> & Bindable<T3>, A4 extends Attribute<? super T3, ?> & Bindable<T4>> CriteriaQuery<E> 
     innerJoin(A1 attribute1, A2 attribute2, A3 attribute3, A4 attribute4, CriteriaQuery<E> query) {
-        @SuppressWarnings("unchecked")
         From<?, E> from = (From<?, E>) resolveSelection(query);
         join(join(join(join(from, attribute1, JoinType.INNER),
                                   attribute2, JoinType.INNER),
@@ -264,7 +258,6 @@ public class Restrict {
      */
     public <E, T1, T2, T3, T4, T5, A1 extends Attribute<? super E, ?> & Bindable<T1>, A2 extends Attribute<? super T1, ?> & Bindable<T2>, A3 extends Attribute<? super T2, ?> & Bindable<T3>, A4 extends Attribute<? super T3, ?> & Bindable<T4>, A5 extends Attribute<? super T4, ?> & Bindable<T5>> CriteriaQuery<E> 
     innerJoin(A1 attribute1, A2 attribute2, A3 attribute3, A4 attribute4, A5 attribute5, CriteriaQuery<E> query) {
-        @SuppressWarnings("unchecked")
         From<?, E> from = (From<?, E>) resolveSelection(query);
         join(join(join(join(join(from, attribute1, JoinType.INNER),
                                        attribute2, JoinType.INNER),
@@ -279,7 +272,6 @@ public class Restrict {
      */
     public <E, T1, T2, T3, T4, T5, T6, A1 extends Attribute<? super E, ?> & Bindable<T1>, A2 extends Attribute<? super T1, ?> & Bindable<T2>, A3 extends Attribute<? super T2, ?> & Bindable<T3>, A4 extends Attribute<? super T3, ?> & Bindable<T4>, A5 extends Attribute<? super T4, ?> & Bindable<T5>, A6 extends Attribute<? super T5, ?> & Bindable<T6>> CriteriaQuery<E> 
     innerJoin(A1 attribute1, A2 attribute2, A3 attribute3, A4 attribute4, A5 attribute5, A6 attribute6, CriteriaQuery<E> query) {
-        @SuppressWarnings("unchecked")
         From<?, E> from = (From<?, E>) resolveSelection(query);
         join(join(join(join(join(join(from, attribute1, JoinType.INNER),
                                             attribute2, JoinType.INNER),
@@ -295,7 +287,6 @@ public class Restrict {
      */
     public <E, T1, T2, T3, T4, T5, T6, T7, A1 extends Attribute<? super E, ?> & Bindable<T1>, A2 extends Attribute<? super T1, ?> & Bindable<T2>, A3 extends Attribute<? super T2, ?> & Bindable<T3>, A4 extends Attribute<? super T3, ?> & Bindable<T4>, A5 extends Attribute<? super T4, ?> & Bindable<T5>, A6 extends Attribute<? super T5, ?> & Bindable<T6>, A7 extends Attribute<? super T6, ?> & Bindable<T7>> CriteriaQuery<E> 
     innerJoin(A1 attribute1, A2 attribute2, A3 attribute3, A4 attribute4, A5 attribute5, A6 attribute6, A7 attribute7, CriteriaQuery<E> query) {
-        @SuppressWarnings("unchecked")
         From<?, E> from = (From<?, E>) resolveSelection(query);
         join(join(join(join(join(join(join(from, attribute1, JoinType.INNER),
                                                  attribute2, JoinType.INNER),

@@ -1,6 +1,5 @@
 package fi.solita.utils.query.execution;
 
-import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newMutableList;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.headOption;

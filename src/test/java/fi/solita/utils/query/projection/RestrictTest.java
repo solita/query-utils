@@ -17,7 +17,6 @@ import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Municipality;
 import fi.solita.utils.query.Municipality_;
 import fi.solita.utils.query.QueryTestBase;
-import fi.solita.utils.query.execution.JpaProjectionQueries;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 import fi.solita.utils.query.generation.Restrict;
 

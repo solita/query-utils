@@ -18,7 +18,6 @@ import fi.solita.utils.query.*;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
-import fi.solita.utils.query.generation.Restrict;
 
 public class CriteriaQueriesTest extends QueryTestBase {
 
@@ -27,9 +26,6 @@ public class CriteriaQueriesTest extends QueryTestBase {
 
     @Autowired
     private JpaCriteriaQuery query;
-
-    @Autowired
-    private Restrict restrict;
 
     @Test
     public void count() {

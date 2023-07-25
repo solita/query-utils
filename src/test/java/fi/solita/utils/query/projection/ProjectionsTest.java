@@ -22,7 +22,6 @@ import fi.solita.utils.query.Employee;
 import fi.solita.utils.query.Order;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryTestBase;
-import fi.solita.utils.query.execution.JpaProjectionQueries;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
 public class ProjectionsTest extends QueryTestBase {

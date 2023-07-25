@@ -73,7 +73,7 @@ public class Municipality implements IEntity<Municipality>, Identifiable<Municip
         this.postalCodes = postalCodes;
     }
     
-    public Municipality(Set<Report> reports, boolean _) {
+    public Municipality(Set<Report> reports, boolean dummy) {
         this(new Report(123));
         this.reports = reports;
     }

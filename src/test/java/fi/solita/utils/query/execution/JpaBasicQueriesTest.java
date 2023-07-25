@@ -26,7 +26,6 @@ import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.QueryUtils.OptionalAttributeNeedOptionTypeException;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
-import fi.solita.utils.query.generation.Restrict;
 
 public class JpaBasicQueriesTest extends QueryTestBase {
 
@@ -35,9 +34,6 @@ public class JpaBasicQueriesTest extends QueryTestBase {
 
     @Autowired
     private JpaCriteriaQuery query;
-
-    @Autowired
-    private Restrict restrict;
 
     @Test
     public void persist() {

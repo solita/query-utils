@@ -5,14 +5,14 @@ import static fi.solita.utils.functional.Option.Some;
 import org.junit.Test;
 
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.query._.A;
-import fi.solita.utils.query._.B;
-import fi.solita.utils.query._.C;
-import fi.solita.utils.query._.D;
-import fi.solita.utils.query._.E;
-import fi.solita.utils.query._.F;
-import fi.solita.utils.query._.G;
-import fi.solita.utils.query._.H;
+import fi.solita.utils.query.X.A;
+import fi.solita.utils.query.X.B;
+import fi.solita.utils.query.X.C;
+import fi.solita.utils.query.X.D;
+import fi.solita.utils.query.X.E;
+import fi.solita.utils.query.X.F;
+import fi.solita.utils.query.X.G;
+import fi.solita.utils.query.X.H;
 import fi.solita.utils.query.projection.Select;
 
 class Foo implements IEntity<Foo> {
@@ -30,7 +30,7 @@ class FooId implements Id<Foo> {
     }
 }
 
-class _ {
+class X {
     enum A {a}
     enum B {b}
     enum C {c}
@@ -42,21 +42,21 @@ class _ {
 }
 
 class FooDto {
-    public FooDto(_.A _, Id<Foo> a) {
+    public FooDto(X.A x, Id<Foo> a) {
     }
-    public FooDto(_.B _, FooId a) {
+    public FooDto(X.B x, FooId a) {
     }
-    public FooDto(_.C _, Option<Id<Foo>> a) {
+    public FooDto(X.C x, Option<Id<Foo>> a) {
     }
-    public FooDto(_.D _, Option<FooId> a) {
+    public FooDto(X.D x, Option<FooId> a) {
     }
-    public FooDto(_.E _, Option<? extends Id<Foo>> a) {
+    public FooDto(X.E x, Option<? extends Id<Foo>> a) {
     }
-    public FooDto(_.F _, Foo a) {
+    public FooDto(X.F x, Foo a) {
     }
-    public FooDto(_.G _, Option<Foo> a) {
+    public FooDto(X.G x, Option<Foo> a) {
     }
-    public FooDto(_.H _, Option<? extends Foo> a) {
+    public FooDto(X.H x, Option<? extends Foo> a) {
     }
 }
 
