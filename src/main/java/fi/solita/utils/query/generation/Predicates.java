@@ -303,21 +303,21 @@ public class Predicates {
         };
     }
 
-    public <E> Apply<CriteriaQuery<E>,Predicate> typeIs(final Class<E> type) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <S,E extends S> Apply<CriteriaQuery<S>,Predicate> typeIs(final Class<E> type) {
+        return new Apply<CriteriaQuery<S>, Predicate>() {
             @Override
-            public Predicate apply(CriteriaQuery<E> query) {
-                Path<? super E> path = resolveSelectionPath(query);
+            public Predicate apply(CriteriaQuery<S> query) {
+                Path<S> path = resolveSelectionPath(query);
                 return cb().equal(path.type(), type);
             }
         };
     }
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> typeIsNot(final Class<E> type) {
+    public <E> Apply<CriteriaQuery<E>,Predicate> typeIsNot(final Class<? extends E> type) {
         return new Apply<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
-                Path<? super E> path = resolveSelectionPath(query);
+                Path<E> path = resolveSelectionPath(query);
                 return cb().notEqual(path.type(), type);
             }
         };
