@@ -44,6 +44,7 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
         final String generatedClassNamePattern = JpaConstructorProcessor.this.generatedClassNamePattern();
         final boolean methodsAsFunctionsEnabled = methodsAsFunctionsEnabled();
         final boolean constructorsAsFunctionsEnabled = constructorsAsFunctionsEnabled();
+        final String includesAnnotation = JpaConstructorProcessor.this.includesAnnotation();
         return new ExtendedGeneratorOptions() {
             @Override
             public boolean makeFieldsPublic() {
@@ -71,6 +72,10 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
             @Override
             public boolean constructorsAsFunctionsEnabled() {
                 return constructorsAsFunctionsEnabled;
+            }
+            @Override
+            public String includesAnnotation() {
+            	return includesAnnotation;
             }
         };
     }

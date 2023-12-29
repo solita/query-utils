@@ -67,12 +67,12 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
         };
     }
     
-    public static final Predicate<Element> isTransient = withModifier(Modifier.TRANSIENT).or(withAnnotations(Transient.class.getName()));
+    public static final Predicate<Element> isTransient = withModifier(Modifier.TRANSIENT).or(withAnnotations(Transient.class.getName(), false));
     
     public static final Predicate<Element> isPersistentClass = 
-        withAnnotations(Entity.class.getName()).or(
-        withAnnotations(MappedSuperclass.class.getName()).or(
-        withAnnotations(Embeddable.class.getName())));
+        withAnnotations(Entity.class.getName(), false).or(
+        withAnnotations(MappedSuperclass.class.getName(), false).or(
+        withAnnotations(Embeddable.class.getName(), false)));
     
     @Override
     public Iterable<String> apply(ProcessingEnvironment processingEnv, Options options, TypeElement source) {

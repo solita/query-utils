@@ -2,6 +2,7 @@ package fi.solita.utils.query.meta.generators;
 
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newMutableList;
+import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.filter;
 import static fi.solita.utils.functional.Functional.flatMap;
@@ -10,6 +11,7 @@ import static fi.solita.utils.functional.Functional.mkString;
 import static fi.solita.utils.functional.Functional.zip;
 import static fi.solita.utils.functional.Functional.zipWithIndex;
 import static fi.solita.utils.functional.FunctionalA.concat;
+import static fi.solita.utils.functional.FunctionalC.repeat;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.functional.Predicates.not;
@@ -17,6 +19,7 @@ import static fi.solita.utils.functional.Transformers.prepend;
 import static fi.solita.utils.meta.Helpers.boxed;
 import static fi.solita.utils.meta.Helpers.containedType;
 import static fi.solita.utils.meta.Helpers.element2Constructors;
+import static fi.solita.utils.meta.Helpers.element2Methods;
 import static fi.solita.utils.meta.Helpers.elementGenericQualifiedName;
 import static fi.solita.utils.meta.Helpers.importType;
 import static fi.solita.utils.meta.Helpers.importTypes;
@@ -24,13 +27,16 @@ import static fi.solita.utils.meta.Helpers.isPrivate;
 import static fi.solita.utils.meta.Helpers.joinWithSpace;
 import static fi.solita.utils.meta.Helpers.padding;
 import static fi.solita.utils.meta.Helpers.parameterTypesAsClasses;
-import static fi.solita.utils.meta.Helpers.publicElement;
 import static fi.solita.utils.meta.Helpers.privateElement;
+import static fi.solita.utils.meta.Helpers.publicElement;
 import static fi.solita.utils.meta.Helpers.qualifiedName;
 import static fi.solita.utils.meta.Helpers.relevantTypeParams;
 import static fi.solita.utils.meta.Helpers.resolveVisibility;
+import static fi.solita.utils.meta.Helpers.simpleName;
+import static fi.solita.utils.meta.Helpers.staticElement;
 import static fi.solita.utils.meta.Helpers.toString;
 import static fi.solita.utils.meta.Helpers.typeParameter2String;
+import static fi.solita.utils.meta.Helpers.withAnnotations;
 import static fi.solita.utils.meta.generators.Content.EmptyLine;
 import static fi.solita.utils.meta.generators.Content.catchBlock;
 import static fi.solita.utils.meta.generators.Content.reflectionInvokationArgs;
@@ -43,6 +49,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -64,6 +71,7 @@ import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Function1;
 import fi.solita.utils.functional.Function3;
 import fi.solita.utils.functional.Option;
+import fi.solita.utils.functional.Predicate;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.meta.Helpers;
 import fi.solita.utils.meta.generators.Generator;
@@ -79,6 +87,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
         boolean includePrivateMembers();
         @SuppressWarnings("rawtypes")
         Class<? extends Apply> getClassForJpaConstructors(int argCount);
+        public String includesAnnotation();
     }
     
     public static final ConstructorsAsJpaProjections instance = new ConstructorsAsJpaProjections();
@@ -89,14 +98,23 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             return newMutableList();
         }
         
-        Iterable<ExecutableElement> elements = element2Constructors.apply(source);
+        Iterable<ExecutableElement> elements = concat(element2Constructors.apply(source), (source.getKind().equals(ElementKind.ENUM) ? Collections.emptyList() : filter(staticElement, element2Methods.apply(source))));
         if (options.onlyPublicMembers()) {
             elements = filter(publicElement, elements);
         } else if (!options.includePrivateMembers()) {
             elements = filter(not(privateElement), elements);
         }
+        // include only constructors/methods annotated with includesAnnotation, or all of them is present on class
+        elements = filter(new Predicate<ExecutableElement>() {
+            @Override
+            public boolean accept(ExecutableElement candidate) {
+                return options.includesAnnotation().isEmpty() || // no includesAnnotation -> include all
+                       withAnnotations(options.includesAnnotation(), false).accept(source) || // annotation present on this class
+                       withAnnotations(options.includesAnnotation(), false).accept(candidate); // annotation present on this contructor
+            }
+        }, elements);
 
-        Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = constructorGen.ap(new Helpers.EnvDependent(processingEnv), options);
+        Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = elementGen.ap(new Helpers.EnvDependent(processingEnv), options);
         return flatMap(singleElementTransformer, zipWithIndex(elements));
     }
     
@@ -107,17 +125,17 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
         }
     };
 
-    public static Function3<Helpers.EnvDependent, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>> constructorGen = new Function3<Helpers.EnvDependent, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>>() {
+    public static Function3<Helpers.EnvDependent, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>> elementGen = new Function3<Helpers.EnvDependent, ConstructorsAsJpaProjections.Options, Map.Entry<Integer, ExecutableElement>, Iterable<String>>() {
         @Override
         public Iterable<String> apply(final Helpers.EnvDependent helper, ConstructorsAsJpaProjections.Options options, Map.Entry<Integer, ExecutableElement> entry) {
-            ExecutableElement constructor = entry.getValue();
-            TypeElement enclosingElement = (TypeElement) constructor.getEnclosingElement();
+            ExecutableElement element = entry.getValue();
+            TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
             String enclosingElementQualifiedName = qualifiedName.apply(enclosingElement);
             int index = entry.getKey();
 
             List<String> attributeTypes = newMutableList();
             List<Integer> idIndexes = newMutableList();
-            for (Map.Entry<Integer, ? extends VariableElement> e: zipWithIndex(constructor.getParameters())) {
+            for (Map.Entry<Integer, ? extends VariableElement> e: zipWithIndex(element.getParameters())) {
                 int paramIndex = e.getKey();
                 VariableElement argument = e.getValue();
                 Class<?> attributeClass;
@@ -195,23 +213,32 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                 attributeTypes.add(importType(attributeClass) + "<? super OWNER, " + otherTypeParams + ">");
             }
 
-            int argCount = constructor.getParameters().size();
+            int argCount = element.getParameters().size();
             String returnTypeImported = importTypes(elementGenericQualifiedName(enclosingElement));
 
-            List<String> argumentTypes = newList(map(qualifiedName.andThen(boxed).andThen(helpersImportTypes), constructor.getParameters()));
+            List<String> argumentTypes = newList(map(qualifiedName.andThen(boxed).andThen(helpersImportTypes), element.getParameters()));
             List<String> argumentNames = argCount == 0 ? Collections.<String>newMutableList() : newList(map(toString.andThen(prepend("$p")), range(1, argCount)));
             List<String> attributeNames = argCount == 0 ? Collections.<String>newMutableList() : newList(map(toString.andThen(prepend("$a")), range(1, argCount)));
-            List<? extends TypeParameterElement> relevantTypeParamsForConstructor = newList(relevantTypeParams(constructor));
+            List<? extends TypeParameterElement> relevantTypeParamsForConstructor = newList(relevantTypeParams(element));
             List<String> relevantTypeParams = newList(map(typeParameter2String, relevantTypeParamsForConstructor));
             
-            boolean isPrivate = isPrivate(constructor);
-            boolean throwsChecked = helper.throwsCheckedExceptions(constructor);
+            String methodName = element.getSimpleName().toString();
+            boolean isPrivate = isPrivate(element);
+            boolean throwsChecked = helper.throwsCheckedExceptions(element);
             String constructorClass = options.getClassForJpaConstructors(argCount).getName().replace('$', '.');
 
             String fundef = importTypes(constructorClass) + "<" + mkString(",", cons("OWNER", argumentTypes)) + "," + returnTypeImported + ">";
-            String declaration = resolveVisibility(constructor) + " static final <" + mkString(",", cons("OWNER", relevantTypeParams)) + "> " + fundef + " c" + (index+1);
+            String declaration = resolveVisibility(element) + " static final <" + mkString(",", cons("OWNER", relevantTypeParams)) + "> " + fundef + " " + ("<init>".equals(methodName) ? repeat('$', index+2) : methodName);
 
-            Iterable<String> tryBlock = isPrivate 
+            String returnClause =  "return " + (isPrivate ? "(" + returnTypeImported + ")" : "");
+            String instanceName = importTypes(enclosingElementQualifiedName);
+            List<? extends TypeParameterElement> typeParameters = element.getTypeParameters();
+            
+            Iterable<String> tryBlock = element.getKind().equals(ElementKind.METHOD)
+                    ? (isPrivate
+                        ? Some(returnClause + "getMember().invoke(" + mkString(", ", cons("null", argumentNames)) + ");")
+                        : Some(returnClause + instanceName + "." + (typeParameters.isEmpty() ? "" : "<" + mkString(", ", map(simpleName, typeParameters)) + ">") + methodName + "(" + mkString(", ", argumentNames) + ");"))
+                    : isPrivate
                     ? Some("return (" + returnTypeImported + ")getMember().newInstance(" + mkString(", ", argumentNames) + ");")
                     : Some("return new " + returnTypeImported + "(" + mkString(", ", argumentNames) + ");");
             
@@ -252,7 +279,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             return concat(
                 Some(declaration + "(" + mkString(", ", map(joinWithSpace, zip(map(prepend("final "), attributeTypes), attributeNames))) + ") {"),
                 map(padding, concat(
-                    Some("return new " + fundef + "(" + mkString(", ", cons(importTypes(enclosingElementQualifiedName) + ".class", reflectionInvokationArgs(parameterTypesAsClasses(constructor, relevantTypeParamsForConstructor)))) + ") {"),
+                    Some("return new " + fundef + "(" + mkString(", ", cons(importTypes(enclosingElementQualifiedName) + ".class", reflectionInvokationArgs(parameterTypesAsClasses(element, relevantTypeParamsForConstructor)))) + ") {"),
                     map(padding, body),
                     Some("};")
                 )),

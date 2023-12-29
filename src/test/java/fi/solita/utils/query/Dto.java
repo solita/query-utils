@@ -91,4 +91,8 @@ public class Dto {
     public Dto(LIST_OF_EMBEDDABLES x, List<Report> val) {
         this.value = val;
     }
+    
+    public static Dto projectionMethod(VALUE x, Object val) {
+        return new Dto(x, val);
+    }
 }

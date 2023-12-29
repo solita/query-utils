@@ -64,13 +64,13 @@ public class GeneratorTest {
     
     @Test
     public void generatedConstructorAcceptsIdRegardlessOfWhetherUsingInterfaceOrConcreteClass() {
-         FooDto_.c1(Select.literal(A.a), Select.literal(new Foo()));
-         FooDto_.c2(Select.literal(B.b), Select.literal(new Foo()));
-         FooDto_.c3(Select.literal(C.c), Select.literal(Some(new Foo())));
-         FooDto_.c4(Select.literal(D.d), Select.literal(Some(new Foo())));
-         FooDto_.c5(Select.literal(E.e), Select.literal(Some(new Foo())));
-         FooDto_.c6(Select.literal(F.f), Select.literal(new Foo()));
-         FooDto_.c7(Select.literal(G.g), Select.literal(Some(new Foo())));
-         FooDto_.c8(Select.literal(H.h), Select.literal(Some(new Foo())));
+         FooDto_.$$(Select.literal(A.a), Select.literal(new Foo()));
+         FooDto_.$$$(Select.literal(B.b), Select.literal(new Foo()));
+         FooDto_.$$$$(Select.literal(C.c), Select.literal(Some(new Foo())));
+         FooDto_.$$$$$(Select.literal(D.d), Select.literal(Some(new Foo())));
+         FooDto_.$$$$$$(Select.literal(E.e), Select.literal(Some(new Foo())));
+         FooDto_.$$$$$$$(Select.literal(F.f), Select.literal(new Foo()));
+         FooDto_.$$$$$$$$(Select.literal(G.g), Select.literal(Some(new Foo())));
+         FooDto_.$$$$$$$$$(Select.literal(H.h), Select.literal(Some(new Foo())));
     }
 }
