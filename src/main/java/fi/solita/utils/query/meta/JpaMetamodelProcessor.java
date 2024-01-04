@@ -50,6 +50,9 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
         final String generatedClassNamePattern = JpaMetamodelProcessor.this.generatedClassNamePattern();
         final boolean methodsAsFunctionsEnabled = methodsAsFunctionsEnabled();
         final boolean constructorsAsFunctionsEnabled = constructorsAsFunctionsEnabled();
+        final boolean instanceFieldsAsEnumEnabled = instanceFieldsAsEnumEnabled();
+        final boolean instanceFieldsAsFunctionsEnabled = instanceFieldsAsFunctionsEnabled();
+        final boolean instanceFieldsAsTupleEnabled = instanceFieldsAsTupleEnabled();
         return new ExtendedGeneratorOptions() {
             public boolean onlyPublicMembers() {
                 return onlyPublicMembers;
@@ -76,6 +79,18 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
             @Override
             public boolean constructorsAsFunctionsEnabled() {
                 return constructorsAsFunctionsEnabled;
+            }
+            @Override
+            public boolean instanceFieldsAsEnumEnabled() {
+                return instanceFieldsAsEnumEnabled;
+            }
+            @Override
+            public boolean instanceFieldsAsFunctionsEnabled() {
+                return instanceFieldsAsFunctionsEnabled;
+            }
+            @Override
+            public boolean instanceFieldsAsTupleEnabled() {
+                return instanceFieldsAsTupleEnabled;
             }
         };
     }

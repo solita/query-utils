@@ -74,6 +74,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.solita.utils.functional.Apply3;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Either;
@@ -136,7 +137,7 @@ public class ProjectionHelper {
     public <R> List<R> finalizeProjectingQuery(MetaJpaConstructor<?,? extends R,?> projection, Iterable<? extends Iterable<Object>> rows) {
         logger.debug("finalizeProjectingQuery({},{})", projection, rows);
         Iterable<Iterable<Object>> columns = transpose(rows);
-        columns = newList(map(performAdditionalQueriesForPlaceholderValues.ap(this).ap(projection), zip(range(0), projection.getParameters(), columns)));
+        columns = newList(map((Apply3<Integer, Attribute<?, ?>, Iterable<Object>, Iterable<Object>>)performAdditionalQueriesForPlaceholderValues.ap(this).ap(projection), zip(range(0), projection.getParameters(), columns)));
         List<? extends R> ret = newList(transformAllRows(projection, transpose(columns)));
         logger.debug("finalizeProjectingQuery -> {}", ret);
         return (List<R>) ret;

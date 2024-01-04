@@ -34,6 +34,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.solita.utils.functional.ApplyBi;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple2;
@@ -75,7 +76,7 @@ class ProjectionResultUtil {
     }
     
     static Iterable<Object> postProcessRow(List<Attribute<?,?>> projectionParameters, Iterable<Object> row) {
-        Iterable<Object> ret = map(postProcessValue, zip(projectionParameters, row));
+        Iterable<Object> ret = map((ApplyBi<Attribute<?, ?>, Object, Object>)postProcessValue, zip(projectionParameters, row));
         return ret;
     }
 

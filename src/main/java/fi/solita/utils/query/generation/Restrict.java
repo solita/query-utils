@@ -437,8 +437,9 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
+    @SuppressWarnings("unchecked")
     public <S,E extends S> CriteriaQuery<E> typeIs(Class<E> type, CriteriaQuery<S> query) {
-        return by(predicates.typeIs(type), (CriteriaQuery<E>)query);
+        return this.<E>by(predicates.<E,E>typeIs(type), (CriteriaQuery<E>)query);
     }
     
     /**

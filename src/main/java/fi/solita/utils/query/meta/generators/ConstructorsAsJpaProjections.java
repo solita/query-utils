@@ -93,12 +93,12 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
     public static final ConstructorsAsJpaProjections instance = new ConstructorsAsJpaProjections();
 
     @Override
-    public Iterable<String> apply(ProcessingEnvironment processingEnv, ConstructorsAsJpaProjections.Options options, TypeElement source) {
+    public Iterable<String> apply(ProcessingEnvironment processingEnv, final ConstructorsAsJpaProjections.Options options, final TypeElement source) {
         if (source.getModifiers().contains(Modifier.ABSTRACT)) {
             return newMutableList();
         }
         
-        Iterable<ExecutableElement> elements = concat(element2Constructors.apply(source), (source.getKind().equals(ElementKind.ENUM) ? Collections.emptyList() : filter(staticElement, element2Methods.apply(source))));
+        Iterable<ExecutableElement> elements = concat(element2Constructors.apply(source), (source.getKind().equals(ElementKind.ENUM) ? Collections.<ExecutableElement>emptyList() : filter(staticElement, element2Methods.apply(source))));
         if (options.onlyPublicMembers()) {
             elements = filter(publicElement, elements);
         } else if (!options.includePrivateMembers()) {

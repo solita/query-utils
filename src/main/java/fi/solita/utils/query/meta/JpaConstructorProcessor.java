@@ -44,6 +44,9 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
         final String generatedClassNamePattern = JpaConstructorProcessor.this.generatedClassNamePattern();
         final boolean methodsAsFunctionsEnabled = methodsAsFunctionsEnabled();
         final boolean constructorsAsFunctionsEnabled = constructorsAsFunctionsEnabled();
+        final boolean instanceFieldsAsEnumEnabled = instanceFieldsAsEnumEnabled();
+        final boolean instanceFieldsAsFunctionsEnabled = instanceFieldsAsFunctionsEnabled();
+        final boolean instanceFieldsAsTupleEnabled = instanceFieldsAsTupleEnabled();
         final String includesAnnotation = JpaConstructorProcessor.this.includesAnnotation();
         return new ExtendedGeneratorOptions() {
             @Override
@@ -74,8 +77,20 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
                 return constructorsAsFunctionsEnabled;
             }
             @Override
+            public boolean instanceFieldsAsEnumEnabled() {
+                return instanceFieldsAsEnumEnabled;
+            }
+            @Override
+            public boolean instanceFieldsAsFunctionsEnabled() {
+                return instanceFieldsAsFunctionsEnabled;
+            }
+            @Override
+            public boolean instanceFieldsAsTupleEnabled() {
+                return instanceFieldsAsTupleEnabled;
+            }
+            @Override
             public String includesAnnotation() {
-            	return includesAnnotation;
+                return includesAnnotation;
             }
         };
     }

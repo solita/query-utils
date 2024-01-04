@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fi.solita.utils</groupId>
     <artifactId>query-utils</artifactId>
-    <version>0.12.36</version>
+    <version>0.12.38</version>
     <build>
         <resources>
                 <resource>
@@ -42,8 +42,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <encoding>UTF-8</encoding>
                     <optimize>true</optimize>
                     <debug>false</debug>
@@ -115,13 +115,13 @@
         <dependency>
             <groupId>fi.solita.utils</groupId>
             <artifactId>functional-utils</artifactId>
-            <version>0.12.42</version>
+            <version>0.12.44</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>fi.solita.utils</groupId>
             <artifactId>meta-utils</artifactId>
-            <version>0.12.26</version>
+            <version>0.12.30</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
