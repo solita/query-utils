@@ -39,6 +39,7 @@ import fi.solita.utils.functional.Tuple34;
 import fi.solita.utils.functional.Tuple35;
 import fi.solita.utils.functional.Tuple36;
 import fi.solita.utils.functional.Tuple37;
+import fi.solita.utils.functional.Tuple38;
 import fi.solita.utils.functional.Tuple4;
 import fi.solita.utils.functional.Tuple5;
 import fi.solita.utils.functional.Tuple6;
@@ -242,6 +243,12 @@ public interface MetaJpaConstructor<OWNER,R,PARAMS> extends MetaConstructor<PARA
 
     public static abstract class C37<OWNER,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22,T23,T24,T25,T26,T27,T28,T29,T30,T31,T32,T33,T34,T35,T36,T37,R> extends MetaConstructors.C37<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22,T23,T24,T25,T26,T27,T28,T29,T30,T31,T32,T33,T34,T35,T36,T37,R> implements MetaJpaConstructor<OWNER,R,Tuple37<? extends T1,? extends T2,? extends T3,? extends T4,? extends T5,? extends T6,? extends T7,? extends T8,? extends T9,? extends T10,? extends T11,? extends T12,? extends T13,? extends T14,? extends T15,? extends T16,? extends T17,? extends T18,? extends T19,? extends T20,? extends T21,? extends T22,? extends T23,? extends T24,? extends T25,? extends T26,? extends T27,? extends T28,? extends T29,? extends T30,? extends T31,? extends T32,? extends T33,? extends T34,? extends T35,? extends T36,? extends T37>> {
         public C37(Class<?> clazz, Class<?>... argClasses) {
+            super(clazz, argClasses);
+        }
+    }
+    
+    public static abstract class C38<OWNER,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22,T23,T24,T25,T26,T27,T28,T29,T30,T31,T32,T33,T34,T35,T36,T37,T38,R> extends MetaConstructors.C38<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22,T23,T24,T25,T26,T27,T28,T29,T30,T31,T32,T33,T34,T35,T36,T37,T38,R> implements MetaJpaConstructor<OWNER,R,Tuple38<? extends T1,? extends T2,? extends T3,? extends T4,? extends T5,? extends T6,? extends T7,? extends T8,? extends T9,? extends T10,? extends T11,? extends T12,? extends T13,? extends T14,? extends T15,? extends T16,? extends T17,? extends T18,? extends T19,? extends T20,? extends T21,? extends T22,? extends T23,? extends T24,? extends T25,? extends T26,? extends T27,? extends T28,? extends T29,? extends T30,? extends T31,? extends T32,? extends T33,? extends T34,? extends T35,? extends T36,? extends T37,? extends T38>> {
+        public C38(Class<?> clazz, Class<?>... argClasses) {
             super(clazz, argClasses);
         }
     }
