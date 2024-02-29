@@ -7,10 +7,9 @@ import static fi.solita.utils.functional.FunctionalA.last;
 
 import java.util.List;
 
-import javax.persistence.metamodel.ManagedType;
-import javax.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Predicate;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 class JoiningSingularAttribute<E,R> extends SingularAttributeProxy<E,R> implements JoiningAttribute {
     

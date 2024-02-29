@@ -1,6 +1,6 @@
 package fi.solita.utils.query.attributes;
 
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.meta.MetaJpaConstructor;

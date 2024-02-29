@@ -6,18 +6,18 @@ import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;

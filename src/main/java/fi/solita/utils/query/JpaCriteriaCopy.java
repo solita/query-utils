@@ -9,25 +9,24 @@ import static fi.solita.utils.functional.Functional.sort;
 import static fi.solita.utils.query.QueryUtils.addListAttributeOrdering;
 import static fi.solita.utils.query.QueryUtils.resolveOrderColumn;
 
-import javax.persistence.TupleElement;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Fetch;
-import javax.persistence.criteria.FetchParent;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.CollectionAttribute;
-import javax.persistence.metamodel.ListAttribute;
-import javax.persistence.metamodel.MapAttribute;
-import javax.persistence.metamodel.SetAttribute;
-import javax.persistence.metamodel.SingularAttribute;
-
 import fi.solita.utils.functional.Option;
+import jakarta.persistence.TupleElement;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Fetch;
+import jakarta.persistence.criteria.FetchParent;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.CollectionAttribute;
+import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.MapAttribute;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 public class JpaCriteriaCopy {
     

@@ -11,7 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import javax.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Attribute;
 
 import org.junit.Test;
 

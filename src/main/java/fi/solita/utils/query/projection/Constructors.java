@@ -8,11 +8,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.PluralAttribute;
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.PluralAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Option;

@@ -5,8 +5,8 @@ import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 
-import javax.persistence.NoResultException;
-import javax.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.criteria.CriteriaQuery;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

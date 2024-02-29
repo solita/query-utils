@@ -2,10 +2,11 @@ package fi.solita.utils.query.attributes;
 
 import java.util.Map;
 
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.MapAttribute;
-import javax.persistence.metamodel.Type;
+
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.MapAttribute;
+import jakarta.persistence.metamodel.Type;
 
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.meta.MetaJpaConstructor;

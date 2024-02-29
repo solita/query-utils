@@ -6,11 +6,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaQuery;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

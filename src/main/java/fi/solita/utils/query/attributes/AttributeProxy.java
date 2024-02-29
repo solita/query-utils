@@ -6,14 +6,13 @@ import static fi.solita.utils.functional.Option.Some;
 import java.io.Serializable;
 import java.lang.reflect.Member;
 
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.ManagedType;
-import javax.persistence.metamodel.PluralAttribute;
-import javax.persistence.metamodel.SingularAttribute;
-import javax.persistence.metamodel.Type;
 
 import fi.solita.utils.functional.Option;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.PluralAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.metamodel.Type;
 
 public abstract class AttributeProxy {
     @SuppressWarnings("unchecked")

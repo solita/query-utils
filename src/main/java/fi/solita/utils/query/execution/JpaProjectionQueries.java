@@ -13,12 +13,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
 
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;

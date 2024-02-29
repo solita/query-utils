@@ -14,7 +14,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
 
 import org.hibernate.Session;
 import org.hibernate.TypeHelper;
@@ -36,6 +35,7 @@ import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.backend.Type;
 import fi.solita.utils.query.backend.TypeProvider;
+import jakarta.persistence.EntityManager;
 
 public class HibernateTypeProvider implements TypeProvider {
 

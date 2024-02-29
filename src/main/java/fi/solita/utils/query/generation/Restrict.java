@@ -7,9 +7,9 @@ import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.attributes.RestrictingAttribute;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.*;
-import javax.persistence.metamodel.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.*;
+import jakarta.persistence.metamodel.*;
 import java.util.Set;
 
 import static fi.solita.utils.query.QueryUtils.join;

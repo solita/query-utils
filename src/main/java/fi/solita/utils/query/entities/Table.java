@@ -2,12 +2,12 @@ package fi.solita.utils.query.entities;
 
 import java.util.Collection;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 @Entity
-@javax.persistence.Table(name = "table(/*")
+@jakarta.persistence.Table(name = "table(/*")
 public class Table {
     public static final Table.Value of(Collection<?> values) {
         return new Table.Value(values);

@@ -4,13 +4,13 @@ import static fi.solita.utils.functional.Functional.head;
 
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.MapAttribute;
-import javax.persistence.metamodel.Type;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.MapAttribute;
+import jakarta.persistence.metamodel.Type;
 
 
 class LiteralMapAttribute<X, K, Y, A extends Attribute<X, Map<K,Y>> & Bindable<Y>> extends PluralAttributeProxy<X, Map<K,Y>, Y, A> implements MapAttribute<X, K, Y>, PseudoAttribute {

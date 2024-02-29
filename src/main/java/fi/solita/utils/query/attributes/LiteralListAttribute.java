@@ -2,12 +2,12 @@ package fi.solita.utils.query.attributes;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.ListAttribute;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.ListAttribute;
 
 
 class LiteralListAttribute<X, Y, A extends Attribute<X, List<Y>> & Bindable<Y>> extends PluralAttributeProxy<X, List<Y>, Y, A> implements ListAttribute<X, Y>, PseudoAttribute {

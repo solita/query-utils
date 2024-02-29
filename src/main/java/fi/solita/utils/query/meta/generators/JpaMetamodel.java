@@ -33,12 +33,12 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 
 import fi.solita.utils.meta.Helpers;
 import fi.solita.utils.meta.generators.Generator;
@@ -159,7 +159,7 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
                 typeSignature = typeSignature.replaceAll("(?<=[,< ])" + Pattern.quote(param.left()) + "(?=[,> ])", "?");
             }
             
-            String type = "javax.persistence.metamodel." + attributeClass + "Attribute" + typeSignature;
+            String type = "jakarta.persistence.metamodel." + attributeClass + "Attribute" + typeSignature;
             
             Iterable<String> res = concat(
                 Some("public static volatile " + type + " " + attributeName + ";"),

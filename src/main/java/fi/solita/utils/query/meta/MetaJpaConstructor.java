@@ -6,7 +6,7 @@ import static fi.solita.utils.functional.Functional.mkString;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Attribute;
 
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple0;

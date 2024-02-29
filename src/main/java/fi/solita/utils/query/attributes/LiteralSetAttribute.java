@@ -3,12 +3,12 @@ package fi.solita.utils.query.attributes;
 import java.util.Set;
 import java.util.SortedSet;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.SetAttribute;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.SetAttribute;
 
 
 class LiteralSetAttribute<X, Y, A extends Attribute<X, Set<Y>> & Bindable<Y>> extends PluralAttributeProxy<X, Set<Y>, Y, A> implements SetAttribute<X, Y>, PseudoAttribute {

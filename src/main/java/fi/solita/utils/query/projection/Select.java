@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.metamodel.CollectionAttribute;
-import javax.persistence.metamodel.ListAttribute;
-import javax.persistence.metamodel.MapAttribute;
-import javax.persistence.metamodel.SetAttribute;
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.metamodel.CollectionAttribute;
+import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.MapAttribute;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.attributes.PseudoAttribute;

@@ -1,8 +1,8 @@
 package fi.solita.utils.query;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Entity;
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Entity;
 
 @Entity
 @Access(AccessType.FIELD)

@@ -3,11 +3,11 @@ package fi.solita.utils.query.attributes;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.SetAttribute;
 
 class RestrictingSetAttribute<E, R, A extends Attribute<E, Set<R>> & Bindable<R>> extends PluralAttributeProxy<E, Set<R>, R, A> implements SetAttribute<E,R>, RestrictingAttribute {
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.SetAttribute;
     
     private final List<? extends Attribute<?, ?>> attributes;
 

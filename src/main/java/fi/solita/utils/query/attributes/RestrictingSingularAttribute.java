@@ -2,8 +2,8 @@ package fi.solita.utils.query.attributes;
 
 import java.util.List;
 
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 class RestrictingSingularAttribute<E,R> extends SingularAttributeProxy<E,R> implements RestrictingAttribute {
     

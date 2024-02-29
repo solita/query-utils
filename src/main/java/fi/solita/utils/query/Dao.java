@@ -4,15 +4,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.LockModeType;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.metamodel.CollectionAttribute;
-import javax.persistence.metamodel.ListAttribute;
-import javax.persistence.metamodel.SetAttribute;
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.metamodel.CollectionAttribute;
+import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Option;

@@ -4,13 +4,6 @@ import static fi.solita.utils.functional.Functional.head;
 
 import java.util.List;
 
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.CollectionAttribute;
-import javax.persistence.metamodel.ListAttribute;
-import javax.persistence.metamodel.SetAttribute;
-import javax.persistence.metamodel.SingularAttribute;
-
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.QueryUtils;
@@ -18,6 +11,12 @@ import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.OptionalAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.backend.Type;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.CollectionAttribute;
+import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 public class Cast {
 

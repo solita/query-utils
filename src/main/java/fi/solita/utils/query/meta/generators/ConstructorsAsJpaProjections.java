@@ -60,11 +60,11 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.ListAttribute;
-import javax.persistence.metamodel.PluralAttribute;
-import javax.persistence.metamodel.SetAttribute;
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.PluralAttribute;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Collections;

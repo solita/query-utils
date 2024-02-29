@@ -6,12 +6,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.CollectionAttribute;
-import javax.persistence.metamodel.ListAttribute;
-import javax.persistence.metamodel.SetAttribute;
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.CollectionAttribute;
+import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 /**
  * 

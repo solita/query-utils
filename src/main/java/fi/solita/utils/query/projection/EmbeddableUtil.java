@@ -16,15 +16,15 @@ import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Selection;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Attribute.PersistentAttributeType;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.EmbeddableType;
-import javax.persistence.metamodel.Metamodel;
-import javax.persistence.metamodel.PluralAttribute;
-import javax.persistence.metamodel.Type.PersistenceType;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Selection;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Attribute.PersistentAttributeType;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.EmbeddableType;
+import jakarta.persistence.metamodel.Metamodel;
+import jakarta.persistence.metamodel.PluralAttribute;
+import jakarta.persistence.metamodel.Type.PersistenceType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

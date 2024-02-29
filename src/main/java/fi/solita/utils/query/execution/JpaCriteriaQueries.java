@@ -13,14 +13,6 @@ import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
 import java.util.Collection;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Selection;
-
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Configuration;
@@ -29,6 +21,11 @@ import fi.solita.utils.query.Order;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.criteria.CriteriaQuery;
 
 public class JpaCriteriaQueries {
 

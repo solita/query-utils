@@ -10,8 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import javax.persistence.MappedSuperclass;
-
 import org.hibernate.HibernateException;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;

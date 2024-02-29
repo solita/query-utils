@@ -9,11 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.PluralAttribute;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.PluralAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

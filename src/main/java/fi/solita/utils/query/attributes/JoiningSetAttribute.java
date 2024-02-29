@@ -8,12 +8,11 @@ import static fi.solita.utils.functional.Functional.last;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.ManagedType;
-import javax.persistence.metamodel.SetAttribute;
 
 import fi.solita.utils.query.QueryUtils;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.SetAttribute;
 
 @SuppressWarnings("unchecked")
 class JoiningSetAttribute<E, R, A extends Attribute<E, Set<R>> & Bindable<R>> extends PluralAttributeProxy<E,Set<R>,R,A> implements SetAttribute<E,R>, JoiningAttribute {

@@ -2,28 +2,28 @@ package fi.solita.utils.query;
 
 import java.util.List;
 
-import javax.persistence.Access;
-import javax.persistence.AttributeOverride;
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.GeneratedValue;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderColumn;
-import javax.persistence.Transient;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Tuplizer;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.backend.hibernate.OptionAwarePojoEntityTuplizer;
 
-@javax.persistence.Entity
-@Access(javax.persistence.AccessType.FIELD)
 @Tuplizer(impl = OptionAwarePojoEntityTuplizer.class)
+import jakarta.persistence.Access;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.Transient;
+
+@jakarta.persistence.Entity
+@Access(jakarta.persistence.AccessType.FIELD)
 public class Department implements IEntity<Department>, Identifiable<Department.ID>, Removable {
 
     @Embeddable
@@ -132,10 +132,10 @@ public class Department implements IEntity<Department>, Identifiable<Department.
     }
 
     @Override
-    @javax.persistence.Id
+    @jakarta.persistence.EmbeddedId
     @GeneratedValue(generator = "IdGenerator")
     @GenericGenerator(name = "IdGenerator", strategy = "fi.solita.utils.query.IdGenerator")
-    @Access(javax.persistence.AccessType.PROPERTY)
+    @Access(jakarta.persistence.AccessType.PROPERTY)
     public ID getId() {
         return id;
     }

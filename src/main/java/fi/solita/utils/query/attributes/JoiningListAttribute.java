@@ -7,12 +7,11 @@ import static fi.solita.utils.functional.Functional.last;
 
 import java.util.List;
 
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Bindable;
-import javax.persistence.metamodel.ListAttribute;
-import javax.persistence.metamodel.ManagedType;
 
 import fi.solita.utils.query.QueryUtils;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.ListAttribute;
 
 @SuppressWarnings("unchecked")
 class JoiningListAttribute<E, R, A extends Attribute<E, List<R>> & Bindable<R>> extends PluralAttributeProxy<E,List<R>,R,A> implements ListAttribute<E,R>, JoiningAttribute {

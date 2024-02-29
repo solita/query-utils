@@ -11,10 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaQuery;
 
 import org.hibernate.query.Query;
 import org.hibernate.Session;
@@ -35,6 +31,10 @@ import fi.solita.utils.query.backend.Type;
 import fi.solita.utils.query.backend.TypeProvider;
 import fi.solita.utils.query.generation.NativeQuery;
 import fi.solita.utils.query.generation.QLQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaQuery;
 
 public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQueryExecutor, QLQueryExecutor {
     

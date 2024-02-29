@@ -9,13 +9,13 @@ import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
 
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.ApplyZero;
