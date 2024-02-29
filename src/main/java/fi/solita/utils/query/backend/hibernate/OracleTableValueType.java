@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.hibernate.HibernateException;
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeRegistration;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.usertype.UserType;
@@ -23,29 +23,28 @@ import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.db.oracle.OracleSupport;
 import fi.solita.utils.query.entities.Table;
 
-@MappedSuperclass
-@TypeDef(defaultForType = Table.Value.class, typeClass = OracleTableValueType.class)
-public class OracleTableValueType implements UserType, Serializable {
+@TypeRegistration(basicClass = Table.Value.class, userType = OracleTableValueType.class)
+public class OracleTableValueType implements UserType<Table.Value>, Serializable {
     
     public static Configuration config;
-
+    
     @Override
-    public int[] sqlTypes() {
-        return new int[] { StandardBasicTypes.BLOB.sqlType() }; // not actually used
+    public int getSqlType() {
+        return StandardBasicTypes.BLOB.getSqlTypeCode(); // not actually used
     }
-
+    
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
+    public Table.Value nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws SQLException {
         throw new UnsupportedOperationException("Shouldn't be here");
     }
     
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Table.Value value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value == null) {
             throw new UnsupportedOperationException("Shouldn't be here");
         } else {
             Connection c = st.getConnection().unwrap(OracleSupport.oracleConnectionClass);
-            Collection<?> values = ((Table.Value)value).values;
+            Collection<?> values = value.values;
             
             Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
             if (sqlTypeAndValues.isDefined()) {
@@ -71,17 +70,17 @@ public class OracleTableValueType implements UserType, Serializable {
     }
 
     @Override
-    public final Object replace(Object original, Object target, Object owner) throws HibernateException {
+    public final Table.Value replace(Table.Value original, Table.Value target, Object owner) throws HibernateException {
         return original;
     }
 
     @Override
-    public final Object deepCopy(Object value) throws HibernateException {
+    public final Table.Value deepCopy(Table.Value value) throws HibernateException {
         return value;
     }
 
     @Override
-    public final boolean equals(Object x, Object y) throws HibernateException {
+    public final boolean equals(Table.Value x, Table.Value y) throws HibernateException {
         if (x == y) {
             return true;
         }
@@ -92,7 +91,7 @@ public class OracleTableValueType implements UserType, Serializable {
     }
 
     @Override
-    public final int hashCode(Object x) throws HibernateException {
+    public final int hashCode(Table.Value x) throws HibernateException {
         return (x != null) ? x.hashCode() : 0;
     }
 
@@ -102,12 +101,12 @@ public class OracleTableValueType implements UserType, Serializable {
     }
 
     @Override
-    public final Object assemble(Serializable cached, Object owner) throws HibernateException {
-        return cached;
+    public final Table.Value assemble(Serializable cached, Object owner) throws HibernateException {
+        return (Table.Value)cached;
     }
 
     @Override
-    public final Serializable disassemble(Object value) throws HibernateException {
+    public final Serializable disassemble(Table.Value value) throws HibernateException {
         return (Serializable) value;
     }
 }
