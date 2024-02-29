@@ -6,22 +6,22 @@ import static fi.solita.utils.functional.FunctionalA.map;
 import java.util.Arrays;
 import java.util.List;
 
-import org.hibernate.transform.ResultTransformer;
+import org.hibernate.query.ResultListTransformer;
+import org.hibernate.query.TupleTransformer;
 
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple;
 
-public final class TupleResultTransformer implements ResultTransformer {
+public final class TupleResultTransformer implements TupleTransformer<Object>, ResultListTransformer<Object> {
     private final String[] a;
 
     public TupleResultTransformer(String[] aliases) {
         this.a = aliases;
     }
     
-    @SuppressWarnings("rawtypes")
     @Override
-    public List transformList(List collection) {
+    public List<Object> transformList(List<Object> collection) {
         return collection;
     }
 

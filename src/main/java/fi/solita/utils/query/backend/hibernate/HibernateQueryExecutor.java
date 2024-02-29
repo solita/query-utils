@@ -180,19 +180,14 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         if (query instanceof NativeQuery.NativeQuerySingleEntity ||
             query instanceof NativeQuery.NativeQueryT1 ||
             query instanceof NativeQuery.NativeQueryVoid) {
-            q.setResultTransformer(resultTransformer);
+            q.setTupleTransformer(resultTransformer);
         } else {
             final TupleResultTransformer tupleResultTransformer = new TupleResultTransformer(retvals);
-            q.setResultTransformer(new ResultTransformer() {
+            q.setTupleTransformer(new TupleTransformer<Object>() {
                 @Override
                 public Object transformTuple(Object[] tuple, String[] aliases) {
                     Object[] ret = (Object[]) resultTransformer.transformTuple(tuple, aliases);
                     return tupleResultTransformer.transformTuple(ret, aliases);
-                }
-                @SuppressWarnings("rawtypes")
-                @Override
-                public List transformList(List collection) {
-                    return collection;
                 }
             });
         }

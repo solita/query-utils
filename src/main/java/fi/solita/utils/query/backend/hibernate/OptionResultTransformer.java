@@ -7,7 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.transform.ResultTransformer;
+import org.hibernate.query.ResultListTransformer;
+import org.hibernate.query.TupleTransformer;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
@@ -15,7 +16,7 @@ import fi.solita.utils.functional.SemiGroups;
 import fi.solita.utils.query.backend.Type;
 import fi.solita.utils.query.generation.NativeQuery;
 
-public class OptionResultTransformer implements ResultTransformer {
+public class OptionResultTransformer implements TupleTransformer<Object>, ResultListTransformer<Object> {
 
     private Map<String, Option<Type<?>>> retvals;
 
@@ -23,9 +24,8 @@ public class OptionResultTransformer implements ResultTransformer {
         this.retvals = newMap(SemiGroups.<Option<Type<?>>>fail(), retvals);
     }
     
-    @SuppressWarnings("rawtypes")
     @Override
-    public List transformList(List collection) {
+    public List<Object> transformList(List<Object> collection) {
         return collection;
     }
     
