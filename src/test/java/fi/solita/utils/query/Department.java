@@ -2,13 +2,11 @@ package fi.solita.utils.query;
 
 import java.util.List;
 
+import org.hibernate.annotations.AttributeAccessor;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Tuplizer;
 
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.query.backend.hibernate.OptionAwarePojoEntityTuplizer;
-
-@Tuplizer(impl = OptionAwarePojoEntityTuplizer.class)
+import fi.solita.utils.query.backend.hibernate.OptionAwareDirectPropertyAccessor;
 import jakarta.persistence.Access;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Basic;
@@ -43,6 +41,7 @@ public class Department implements IEntity<Department>, Identifiable<Department.
     private int mandatoryNumber;
     
     @org.hibernate.annotations.Type(type = "org.hibernate.type.IntegerType")
+    @AttributeAccessor(strategy = OptionAwareDirectPropertyAccessor.class)
     private Option<Integer> optionSize;
     
     @org.hibernate.annotations.Type(type = "fi.solita.utils.query.Money$MoneyType")

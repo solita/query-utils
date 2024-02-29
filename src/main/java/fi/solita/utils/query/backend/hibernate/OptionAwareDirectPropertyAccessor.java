@@ -14,7 +14,6 @@ import java.util.Map;
 import org.hibernate.HibernateException;
 import org.hibernate.PropertyAccessException;
 import org.hibernate.PropertyNotFoundException;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.property.access.spi.Getter;
 import org.hibernate.property.access.spi.PropertyAccess;
@@ -35,7 +34,7 @@ public class OptionAwareDirectPropertyAccessor implements PropertyAccessStrategy
     }
     
     @Override
-    public PropertyAccess buildPropertyAccess(final Class containerJavaType, final String propertyName) {
+    public PropertyAccess buildPropertyAccess(final Class containerJavaType, final String propertyName, boolean setterRequired) {
         return new PropertyAccess() {
             @Override
             public PropertyAccessStrategy getPropertyAccessStrategy() {
@@ -60,6 +59,10 @@ public class OptionAwareDirectPropertyAccessor implements PropertyAccessStrategy
         return new Getter() {
             @Override
             public Class getReturnType() {
+                return getReturnTypeClass();
+            }
+            @Override
+            public Class<?> getReturnTypeClass() {
                 return isOption ? (Class<?>)((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0] : field.getType();
             }
 
@@ -102,7 +105,7 @@ public class OptionAwareDirectPropertyAccessor implements PropertyAccessStrategy
         final boolean isOption = Option.class.isAssignableFrom(field.getType());
         return new Setter() {
             @Override
-            public void set(Object target, Object value, SessionFactoryImplementor factory) throws HibernateException {
+            public void set(Object target, Object value) throws HibernateException {
                 try {
                     field.setAccessible(true);
                     field.set(target, isOption ? Option.of(value) : value);

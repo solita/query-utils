@@ -1,11 +1,10 @@
 package fi.solita.utils.query;
 
+import org.hibernate.annotations.AttributeAccessor;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Tuplizer;
 
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.query.backend.hibernate.OptionAwarePojoEntityTuplizer;
-@Tuplizer(impl = OptionAwarePojoEntityTuplizer.class)
+import fi.solita.utils.query.backend.hibernate.OptionAwareDirectPropertyAccessor;
 import jakarta.persistence.Access;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
@@ -38,6 +37,7 @@ public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
     private Money optionalSalary;
     
     @org.hibernate.annotations.Type(type = "org.hibernate.type.IntegerType")
+    @AttributeAccessor(strategy = OptionAwareDirectPropertyAccessor.class)
     private Option<Integer> optionAge;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
