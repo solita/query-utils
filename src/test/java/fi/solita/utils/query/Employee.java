@@ -2,6 +2,8 @@ package fi.solita.utils.query;
 
 import org.hibernate.annotations.AttributeAccessor;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JavaTypeRegistration;
+import org.hibernate.annotations.JavaTypeRegistrations;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.backend.hibernate.OptionAwareDirectPropertyAccessor;
@@ -18,6 +20,10 @@ import jakarta.persistence.Transient;
 
 @jakarta.persistence.Entity
 @Access(jakarta.persistence.AccessType.FIELD)
+@JavaTypeRegistrations({
+    @JavaTypeRegistration(javaType = Money.class, descriptorClass = MoneyType.class),
+    @JavaTypeRegistration(javaType = Employee.ID.class, descriptorClass = EmployeeIdType.class)
+})
 public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
 
     @Embeddable
@@ -33,10 +39,8 @@ public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
     @Column(nullable = false)
     private String mandatoryName;
 
-    @org.hibernate.annotations.Type(type = "fi.solita.utils.query.Money$MoneyType")
     private Money optionalSalary;
     
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.IntegerType")
     @AttributeAccessor(strategy = OptionAwareDirectPropertyAccessor.class)
     private Option<Integer> optionAge;
 

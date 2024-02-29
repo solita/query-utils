@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.hibernate.annotations.AttributeAccessor;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JavaTypeRegistration;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.backend.hibernate.OptionAwareDirectPropertyAccessor;
@@ -22,6 +23,7 @@ import jakarta.persistence.Transient;
 
 @jakarta.persistence.Entity
 @Access(jakarta.persistence.AccessType.FIELD)
+@JavaTypeRegistration(javaType = Department.ID.class, descriptorClass = DepartmentIdType.class)
 public class Department implements IEntity<Department>, Identifiable<Department.ID>, Removable {
 
     @Embeddable
@@ -40,11 +42,9 @@ public class Department implements IEntity<Department>, Identifiable<Department.
     @Column(nullable = false)
     private int mandatoryNumber;
     
-    @org.hibernate.annotations.Type(type = "org.hibernate.type.IntegerType")
     @AttributeAccessor(strategy = OptionAwareDirectPropertyAccessor.class)
     private Option<Integer> optionSize;
     
-    @org.hibernate.annotations.Type(type = "fi.solita.utils.query.Money$MoneyType")
     private Money optionalBudget;
     
     @ManyToOne 

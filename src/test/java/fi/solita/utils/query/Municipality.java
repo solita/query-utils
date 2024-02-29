@@ -18,9 +18,11 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JavaTypeRegistration;
 
 @Entity
 @Access(AccessType.FIELD)
+@JavaTypeRegistration(javaType = Municipality.ID.class, descriptorClass = MunicipalityIdType.class)
 public class Municipality implements IEntity<Municipality>, Identifiable<Municipality.ID> {
 
     @Embeddable
