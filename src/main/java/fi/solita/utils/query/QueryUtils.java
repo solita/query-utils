@@ -126,9 +126,7 @@ public class QueryUtils {
         if (query.getOrderList() != null) {
             orders.addAll(query.getOrderList());
         }
-        // "index" is a "function" in HQL that is used to order by the @Indexcolumn/@OrderColumn
-        // Yes, this is Hibern-specific. Gotta figure out what to do with this...
-        orders.add(cb.asc(cb.function("index", null, listAttributePath)));
+        orders.add(cb.asc(listAttributePath));
         query.orderBy(orders);
     }
 
