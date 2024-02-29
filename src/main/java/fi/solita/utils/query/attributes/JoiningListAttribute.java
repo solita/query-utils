@@ -7,6 +7,7 @@ import static fi.solita.utils.functional.Functional.last;
 
 import java.util.List;
 
+import org.hibernate.metamodel.model.domain.ManagedDomainType;
 
 import fi.solita.utils.query.QueryUtils;
 import jakarta.persistence.metamodel.Attribute;
@@ -31,8 +32,8 @@ class JoiningListAttribute<E, R, A extends Attribute<E, List<R>> & Bindable<R>> 
     }
     
     @Override
-    public ManagedType<E> getDeclaringType() {
-        return (ManagedType<E>) head(attributes).getDeclaringType();
+    public ManagedDomainType<E> getDeclaringType() {
+        return (ManagedDomainType<E>) head(attributes).getDeclaringType();
     }
     
     @Override

@@ -7,6 +7,7 @@ import static fi.solita.utils.functional.FunctionalA.last;
 
 import java.util.List;
 
+import org.hibernate.metamodel.model.domain.ManagedDomainType;
 
 import fi.solita.utils.functional.Predicate;
 import jakarta.persistence.metamodel.SingularAttribute;
@@ -40,8 +41,8 @@ class JoiningSingularAttribute<E,R> extends SingularAttributeProxy<E,R> implemen
 
     @SuppressWarnings("unchecked")
     @Override
-    public ManagedType<E> getDeclaringType() {
-        return (ManagedType<E>) head(attributes).getDeclaringType();
+    public ManagedDomainType<E> getDeclaringType() {
+        return (ManagedDomainType<E>) head(attributes).getDeclaringType();
     }
 
     @Override
