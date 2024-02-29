@@ -73,7 +73,7 @@ public class Department implements IEntity<Department>, Identifiable<Department.
     private Report mandatoryReport;
     
     @Embedded
-    @AttributeOverride(name="year", column = @Column(name = "year2"))
+    @AttributeOverride(name="year1", column = @Column(name = "year2"))
     private Report optionalDepReport;
     
     public Department() {
