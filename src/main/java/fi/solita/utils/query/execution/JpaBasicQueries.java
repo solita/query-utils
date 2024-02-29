@@ -35,7 +35,6 @@ import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
-import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.Removable;
@@ -54,7 +53,6 @@ public class JpaBasicQueries {
     private final TypeProvider typeProvider;
     private final JpaCriteriaQueryExecutor queryExecutor;
     
-    private final JpaCriteriaCopy jpaCriteriaCopy;
     private final Configuration config;
     
     public JpaBasicQueries(ApplyZero<EntityManager> em, ProjectionHelper projectionSupport, TypeProvider typeProvider, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
@@ -62,7 +60,6 @@ public class JpaBasicQueries {
         this.projectionSupport = projectionSupport;
         this.typeProvider = typeProvider;
         this.queryExecutor = queryExecutor;
-        this.jpaCriteriaCopy = new JpaCriteriaCopy(config);
         this.config = config;
     }
 
@@ -82,8 +79,8 @@ public class JpaBasicQueries {
 
     @SuppressWarnings("unchecked")
     public <E extends IEntity<?> & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
-        CriteriaQuery<Id<E>> q = (CriteriaQuery<Id<E>>)(Object)em.get().getCriteriaBuilder().createQuery();
-        jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.get().getCriteriaBuilder());
+        CriteriaQuery<Id<E>> q = (CriteriaQuery<Id<E>>)(Object)query;
+        String entityName = resolveSelection(query).getJavaType().getName();
         From<?,E> selection = resolveSelection(query, q);
 
         q.multiselect(projectionSupport.prepareProjectingQuery(Project.id(), selection));
@@ -96,7 +93,7 @@ public class JpaBasicQueries {
             grouped = Arrays.asList(idList);
         }
         for (Iterable<Id<E>> ids: grouped) {
-            em.get().createQuery("delete from " + resolveSelection(query).getJavaType().getName() + " e where e.id in (:ids)").setParameter("ids", newList(ids)).executeUpdate();
+            em.get().createQuery("delete from " + entityName + " e where e.id in (:ids)").setParameter("ids", newList(ids)).executeUpdate();
         }
     }
 

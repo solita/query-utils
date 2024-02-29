@@ -23,7 +23,6 @@ import jakarta.persistence.criteria.From;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Configuration;
-import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Order;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils;
@@ -39,18 +38,16 @@ public class JpaProjectionQueries {
     private final ProjectionHelper projectionSupport;
     private final ApplyZero<EntityManager> em;
     private final JpaCriteriaQueryExecutor queryExecutor;
-    private final JpaCriteriaCopy jpaCriteriaCopy;
 
     public JpaProjectionQueries(ApplyZero<EntityManager> em, ProjectionHelper projectionSupport, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.em = em;
         this.projectionSupport = projectionSupport;
         this.queryExecutor = queryExecutor;
-        this.jpaCriteriaCopy = new JpaCriteriaCopy(config);
     }
     
     public <E, R> R get(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, LockModeType lock) throws NoResultException, NonUniqueResultException {
-        CriteriaQuery<Object> q = em.get().getCriteriaBuilder().createQuery();
-        jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.get().getCriteriaBuilder());
+        @SuppressWarnings("unchecked")
+        CriteriaQuery<Object> q = (CriteriaQuery<Object>) query;
         From<?,E> selection = QueryUtils.resolveSelection(query, q);
         q.multiselect(projectionSupport.prepareProjectingQuery(constructor, selection));
         
@@ -91,8 +88,8 @@ public class JpaProjectionQueries {
     }
     
     public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Page page, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
-        CriteriaQuery<Object> q = em.get().getCriteriaBuilder().createQuery();
-        jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.get().getCriteriaBuilder());
+        @SuppressWarnings("unchecked")
+        CriteriaQuery<Object> q = (CriteriaQuery<Object>) query;
         From<?,E> selection = resolveSelection(query, q);
 
         @SuppressWarnings("unchecked")

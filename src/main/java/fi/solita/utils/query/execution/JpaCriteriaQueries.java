@@ -1,6 +1,5 @@
 package fi.solita.utils.query.execution;
 
-import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.headOption;
 import static fi.solita.utils.functional.Functional.isEmpty;
 import static fi.solita.utils.functional.Option.None;
@@ -16,7 +15,6 @@ import java.util.List;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Configuration;
-import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Order;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
@@ -31,26 +29,23 @@ public class JpaCriteriaQueries {
 
     private final JpaCriteriaQueryExecutor queryExecutor;
     private final ApplyZero<EntityManager> em;
-    private final JpaCriteriaCopy jpaCriteriaCopy;
 
     public JpaCriteriaQueries(ApplyZero<EntityManager> em, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.em = em;
         this.queryExecutor = queryExecutor;
-        this.jpaCriteriaCopy = new JpaCriteriaCopy(config);
     }
 
     public long count(CriteriaQuery<?> query, LockModeType lock) {
-        CriteriaQuery<Long> q = em.get().getCriteriaBuilder().createQuery(Long.class);
-        jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.get().getCriteriaBuilder());
-        Selection<?> selection = resolveSelection(query);
-        q.select(em.get().getCriteriaBuilder().count((Expression<?>) (selection.isCompoundSelection() ? head(selection.getCompoundSelectionItems()) : selection)));
+        @SuppressWarnings("unchecked")
+        CriteriaQuery<Long> q = (CriteriaQuery<Long>)query;
+        q.multiselect(em.get().getCriteriaBuilder().count(em.get().getCriteriaBuilder().literal(1)));
         return get(q, lock);
     }
 
     public boolean exists(CriteriaQuery<?> query, LockModeType lock) {
-        CriteriaQuery<Integer> q = em.get().getCriteriaBuilder().createQuery(Integer.class);
-        jpaCriteriaCopy.copyCriteriaWithoutSelect(query, q, em.get().getCriteriaBuilder());
-        q.select(em.get().getCriteriaBuilder().literal(1));
+        @SuppressWarnings("unchecked")
+        CriteriaQuery<Integer> q = (CriteriaQuery<Integer>)query;
+        q.multiselect(em.get().getCriteriaBuilder().literal(1));
         return !isEmpty(queryExecutor.getMany(q, Page.SINGLE_ROW, lock));
     }
 

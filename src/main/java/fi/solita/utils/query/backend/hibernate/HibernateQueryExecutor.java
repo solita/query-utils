@@ -22,7 +22,6 @@ import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Transformers;
 import fi.solita.utils.query.Configuration;
-import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 import fi.solita.utils.query.backend.NativeQueryExecutor;
@@ -43,24 +42,19 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
 
     private final ApplyZero<EntityManager> em;
     private final TypeProvider typeProvider;
-    private final JpaCriteriaCopy jpaCriteriaCopy;
     
     public HibernateQueryExecutor(ApplyZero<EntityManager> em, TypeProvider typeProvider, Configuration config) {
         this.em = em;
         this.typeProvider = typeProvider;
-        this.jpaCriteriaCopy = new JpaCriteriaCopy(config);
     }
     
     @Override
     public <T> T get(CriteriaQuery<T> query, LockModeType lock) {
-        jpaCriteriaCopy.createMissingAliases(query);
         return replaceProxy(em.get().createQuery(query).setLockMode(lock).setHint(HINT_FETCH_SIZE, 2).getSingleResult());
     }
 
     @Override
     public <T> List<T> getMany(CriteriaQuery<T> query, Page page, LockModeType lock) {
-        jpaCriteriaCopy.createMissingAliases(query);
-        
         TypedQuery<T> q = em.get().createQuery(query).setLockMode(lock);
         int originalFirstResult = q.getFirstResult();
         int originalMaxResults = q.getMaxResults();
