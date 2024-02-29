@@ -1,6 +1,5 @@
 package fi.solita.utils.query.backend.hibernate;
 
-import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 
 import java.io.Serializable;
@@ -78,6 +77,11 @@ public class HibernateTypeProvider implements TypeProvider {
         SessionFactoryImplementor sf = (SessionFactoryImplementor) em.get().unwrap(Session.class).getSessionFactory();
         org.hibernate.type.Type t = ((MappingMetamodel) sf.getMappingMetamodel()).getEntityDescriptor(entityType).getIdentifierType();
         return HibernateType.javaType((Class<ID>)t.getReturnedClass());
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <T> Type<T> javaType(final Class<? extends JavaType<T>> clazz, Class<T>... phantom) {
+        return (Type<T>) HibernateType.javaType(phantom.getClass().getComponentType());
     }
 
     @Override

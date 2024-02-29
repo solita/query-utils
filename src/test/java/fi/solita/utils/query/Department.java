@@ -28,7 +28,7 @@ public class Department implements IEntity<Department>, Identifiable<Department.
 
     @Embeddable
     public static class ID extends LongId<Department> {
-        ID() {
+        public ID() {
             // for Hibernate
         }
     }

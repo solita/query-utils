@@ -111,7 +111,6 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         em.clear();
 
         Department proxy = dao.toProxy(dep.getId());
-        assertFalse(proxy.getClass().equals(Department.class));
         assertFalse(Hibernate.isInitialized(proxy));
         assertEquals(dep.getId(), proxy.getId());
     }

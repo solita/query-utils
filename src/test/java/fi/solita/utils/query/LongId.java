@@ -10,7 +10,7 @@ import jakarta.persistence.MappedSuperclass;
 @Access(AccessType.FIELD)
 class LongId<T> implements Id<T>, Serializable {
 
-    private long id;
+    long id;
 
     LongId() {
     }
