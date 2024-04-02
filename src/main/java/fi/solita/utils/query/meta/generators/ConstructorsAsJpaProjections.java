@@ -189,7 +189,6 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                                     elementType = "? super " + containedType(id);
                                 }
                             }
-                            System.err.println("BAR: " + elementType);
                             elementType = "? extends " + importType(EntityRepresentation.class) + "<" + importTypes(elementType) + ">";
                         } else {
                             elementType = elementType.startsWith("?") ? importTypes(elementType) : "? extends " + importTypes(elementType);
