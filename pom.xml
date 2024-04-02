@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fi.solita.utils</groupId>
     <artifactId>query-utils</artifactId>
-    <version>0.12.42</version>
+    <version>0.12.43</version>
     <build>
         <resources>
                 <resource>
@@ -120,7 +120,7 @@
         <dependency>
             <groupId>fi.solita.utils</groupId>
             <artifactId>meta-utils</artifactId>
-            <version>0.12.32</version>
+            <version>0.12.33</version>
         </dependency>
         <dependency>
             <groupId>javax.persistence</groupId>
