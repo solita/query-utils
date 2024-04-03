@@ -116,13 +116,11 @@
             <groupId>fi.solita.utils</groupId>
             <artifactId>functional-utils</artifactId>
             <version>0.12.47</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>fi.solita.utils</groupId>
             <artifactId>meta-utils</artifactId>
-            <version>0.12.32</version>
-            <scope>provided</scope>
+            <version>0.12.33</version>
         </dependency>
         <dependency>
             <groupId>jakarta.persistence</groupId>

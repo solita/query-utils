@@ -5,7 +5,9 @@ import static fi.solita.utils.functional.Collections.newMutableList;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.filter;
+import static fi.solita.utils.functional.Functional.find;
 import static fi.solita.utils.functional.Functional.flatMap;
+import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.mkString;
 import static fi.solita.utils.functional.Functional.zip;
@@ -146,13 +148,12 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                     otherTypeParams = "? extends " + importType(EntityRepresentation.class) + (elementType.equals("?") ? "<?>" : "<? super " + importTypes(elementType) +">");
                 } else if (helper.isSubtype(argumentType, Id.class)) {
                     attributeClass = SingularAttribute.class;
-                    // TODO: real paramerer type
-                    otherTypeParams = "? extends " + importType(EntityRepresentation.class) + "<?>";
+                    String elementType = containedType(head(helper.ancestorsInheriting(argumentType, Id.class)));
+                    otherTypeParams = "? extends " + importType(EntityRepresentation.class) + (elementType.equals("?") ? "<?>" : "<? super " + importTypes(elementType) +">");
                 } else {
                     Elements elements = helper.elementUtils;
                     Types types = helper.typeUtils;
                     
-                    boolean isEntity = helper.isSubtype(argumentType, IEntity.class);
                     boolean isExactlyOption = helper.isSameType(argumentType, Option.class);
                     boolean isList = helper.isSubtype(argumentType, List.class);
                     boolean isSet = helper.isSubtype(argumentType, Set.class);
@@ -174,33 +175,30 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                         }
                         
                         String elementType = containedType(argument);
+                        if (elementType.startsWith("? extends ")) {
+                            elementType = elementType.replace("? extends ", "");
+                        }
                         if (elementType.startsWith(Id.class.getName())) {
                             elementType = containedType(elementType);
-                        } /*else {
-                            elementType = containedType(Helpers.typeMirror2QualifiedName.apply(find(new Predicate<TypeMirror>() {
-                                    @Override
-                                    public boolean accept(TypeMirror candidate) {
-                                        return helper.isSameType(candidate, Id.class);
-                                    }
-                                }, types.directSupertypes(elements.getTypeElement(containedType(elementType)).asType())).get()));
-                        }*/
-                        if (isEntity) {
-                            elementType = elementType.startsWith("?") ? elementType : "? super " + elementType;
+                        }
+                        
+                        if (isId) {
+                            if (!elementType.startsWith("?")) {
+                                for (TypeMirror id: helper.ancestorsInheriting(elements.getTypeElement(elementType).asType(), Id.class)) {
+                                    elementType = "? super " + containedType(id);
+                                }
+                            }
                             elementType = "? extends " + importType(EntityRepresentation.class) + "<" + importTypes(elementType) + ">";
-                        } else if (isId) {
-                            // TODO: real parameter type
-                            elementType = "? extends " + importType(EntityRepresentation.class) + "<?>";
                         } else {
                             elementType = elementType.startsWith("?") ? importTypes(elementType) : "? extends " + importTypes(elementType);
                         }
                         
                         if (isExactlyCollection) {
                             otherTypeParams = "? extends " + importType(Collection.class) + "<" + elementType +  ">, " + elementType;
+                        } else if (isExactlyOption) {
+                            otherTypeParams = "? extends " + importType(Option.class) + "<" + elementType + ">";
                         } else {
                             otherTypeParams = elementType;
-                        }
-                        if (isExactlyOption) {
-                            otherTypeParams = "? extends " + importType(Option.class) + "<" + otherTypeParams + ">";
                         }
                     } else {
                         attributeClass = SingularAttribute.class;
