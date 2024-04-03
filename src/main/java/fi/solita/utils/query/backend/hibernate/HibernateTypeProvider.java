@@ -88,12 +88,6 @@ public class HibernateTypeProvider implements TypeProvider {
     public <T> Type<T> type(final Class<T> clazz) {
         TypeConfiguration typeHelper = em.get().getEntityManagerFactory().unwrap( SessionFactoryImplementor.class ).getTypeConfiguration();
         
-        // basic type?
-        org.hibernate.type.BasicType<T> basicType = typeHelper.getBasicTypeForJavaType(clazz);
-        if (basicType != null) {
-            return HibernateType.bindable(new BasicTypeReference<T>(basicType.getName(), clazz, basicType.getJdbcType().getDefaultSqlTypeCode()));
-        }
-        
         // entity?
         try {
             em.get().getMetamodel().entity(clazz);
@@ -109,6 +103,12 @@ public class HibernateTypeProvider implements TypeProvider {
         JavaType<Object> customType = typeHelper.getJavaTypeRegistry().resolveDescriptor(clazz);
         if (customType != null) {
             return HibernateType.javaType(clazz);
+        }
+        
+        // basic type?
+        org.hibernate.type.BasicType<T> basicType = typeHelper.getBasicTypeForJavaType(clazz);
+        if (basicType != null) {
+            return HibernateType.bindable(new BasicTypeReference<T>(basicType.getName(), clazz, basicType.getJdbcType().getDefaultSqlTypeCode()));
         }
         
         throw new IllegalArgumentException("Could not resolve Hibernate Type for: " + clazz + ". Please provide the type explicitly");
