@@ -29,6 +29,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.Formula;
+import org.hibernate.metamodel.model.domain.ListPersistentAttribute;
+import org.hibernate.query.sqm.tree.domain.SqmListJoin;
+import org.hibernate.query.sqm.tree.select.SqmSortSpecification;
+
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityManager;
@@ -121,12 +126,13 @@ public class QueryUtils {
         return specifiedValue != "" ? specifiedValue : attr.getName() + "_" + "ORDER";
     }
 
-    public static void addListAttributeOrdering(CriteriaQuery<?> query, Expression<?> listAttributePath, String orderColumn, CriteriaBuilder cb) {
+    public static void addListAttributeOrdering(CriteriaQuery<?> query, Path<?> listAttributePath, String orderColumn, CriteriaBuilder cb) {
         List<Order> orders = newMutableList();
         if (query.getOrderList() != null) {
             orders.addAll(query.getOrderList());
         }
-        orders.add(cb.asc(listAttributePath));
+        // hibernate-specific, ugh...
+        orders.add(new SqmSortSpecification(((SqmListJoin<?,?>)listAttributePath).index()));
         query.orderBy(orders);
     }
 
@@ -355,7 +361,7 @@ public class QueryUtils {
             } else {
                 Member member = ((SingularAttribute<?,?>)param).getJavaMember();
                 if (member instanceof AnnotatedElement) {
-                    ret = memberIsRequired(member);
+                    ret = memberIsRequiredByMetamodel(member);
                 } else {
                     ret = false;
                 }
@@ -366,7 +372,7 @@ public class QueryUtils {
             } else {
                 Member member = ((SingularAttribute<?,?>)param).getJavaMember();
                 if (member instanceof AnnotatedElement) {
-                    ret = memberIsRequired(member);
+                    ret = memberIsRequiredByMetamodel(member);
                 } else {
                     ret = false;
                 }
@@ -386,13 +392,26 @@ public class QueryUtils {
         return ret;
     }
 
-    private static boolean memberIsRequired(Member member) {
+    private static boolean memberIsRequiredByMetamodel(Member member) {
         Column column = ((AnnotatedElement)member).getAnnotation(Column.class);
+        if (column != null) {
+            return !column.nullable();
+        }
         Basic basic = ((AnnotatedElement)member).getAnnotation(Basic.class);
-        return column != null && column.nullable() == false ||
-               basic != null && basic.optional() == false ||
-               member instanceof Field && Option.class.isAssignableFrom(((Field)member).getType()) ||
-               member instanceof Method && Option.class.isAssignableFrom(((Method)member).getReturnType());
+        if (basic != null) {
+            return !basic.optional();
+        }
+        Formula formula = ((AnnotatedElement)member).getAnnotation(Formula.class);
+        if (formula != null) {
+            // hibernate doesn't seem to allow Column/Basic on Formulas anymore, so let the type determine if a Formula is optional
+            return memberIsRequiredByType(member);
+        }
+        return false;
+    }
+    
+    private static boolean memberIsRequiredByType(Member member) {
+        return member instanceof Field && !Option.class.isAssignableFrom(((Field)member).getType()) ||
+               member instanceof Method && !Option.class.isAssignableFrom(((Method)member).getReturnType());
     }
     
     public static boolean isRequiredByQueryAttribute(Attribute<?,?> param) {
@@ -417,7 +436,7 @@ public class QueryUtils {
             return false;
         }
         
-        if (param instanceof Bindable && Option.class.isAssignableFrom(((Bindable<?>) param).getBindableJavaType())) {
+        if (param instanceof Bindable && (Option.class.isAssignableFrom(((Bindable<?>) param).getBindableJavaType()) || !memberIsRequiredByType(param.getJavaMember()))) {
             return false;
         }
         

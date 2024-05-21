@@ -7,6 +7,7 @@ import static fi.solita.utils.functional.Option.Some;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Map;
@@ -102,7 +103,9 @@ public class OracleSupport implements TableInClauseOptimization {
     
     public static Class<? extends Connection> oracleConnectionClass;
     public static Class<? extends PreparedStatement> oraclePreparedStatementClass;
+    public static Class<? extends CallableStatement> oracleCallableStatementClass;
     public static Method oraclePreparedStatementMethod;
+    public static Method oracleCallableStatementMethod;
     private static Class<?> ARRAYClass;
     public static Constructor<?> ARRAYConstructor;
     public static Method arrayDescriptorMethod;
@@ -115,10 +118,14 @@ public class OracleSupport implements TableInClauseOptimization {
             @SuppressWarnings("unchecked")
             Class<? extends PreparedStatement> ps = (Class<? extends PreparedStatement>) Class.forName("oracle.jdbc.OraclePreparedStatement");
             oraclePreparedStatementClass = ps;
+            @SuppressWarnings("unchecked")
+            Class<? extends CallableStatement> cs = (Class<? extends CallableStatement>) Class.forName("oracle.jdbc.OracleCallableStatement");
+            oracleCallableStatementClass = cs;
             ARRAYClass = (Class<?>) Class.forName("oracle.sql.ARRAY");
             Class<?> arrayDescriptorClass = Class.forName("oracle.sql.ArrayDescriptor");
             ARRAYConstructor = ARRAYClass.getConstructor(arrayDescriptorClass, Connection.class, Object.class);
             oraclePreparedStatementMethod = oraclePreparedStatementClass.getMethod("setARRAY", int.class, ARRAYClass);
+            oracleCallableStatementMethod = oracleCallableStatementClass.getMethod("setARRAY", String.class, ARRAYClass);
             arrayDescriptorMethod = arrayDescriptorClass.getMethod("createDescriptor", String.class, Connection.class);
         } catch (Exception e) {
         }

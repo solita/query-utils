@@ -348,7 +348,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().lessThan(selection.get(attribute), wrap(value));
+                return cb().lessThan(selection.get(attribute), value);
             }
         };
     };
@@ -388,7 +388,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().greaterThan(selection.get(attribute), wrap(value));
+                return cb().greaterThan(selection.get(attribute), value);
             }
         };
     };

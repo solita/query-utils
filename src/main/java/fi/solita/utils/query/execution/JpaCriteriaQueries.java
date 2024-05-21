@@ -41,11 +41,10 @@ public class JpaCriteriaQueries {
         q.multiselect(em.get().getCriteriaBuilder().count(em.get().getCriteriaBuilder().literal(1)));
         return get(q, lock);
     }
-
+    
     public boolean exists(CriteriaQuery<?> query, LockModeType lock) {
         @SuppressWarnings("unchecked")
         CriteriaQuery<Integer> q = (CriteriaQuery<Integer>)query;
-        q.multiselect(em.get().getCriteriaBuilder().literal(1));
         return !isEmpty(queryExecutor.getMany(q, Page.SINGLE_ROW, lock));
     }
 

@@ -1,30 +1,36 @@
 package fi.solita.utils.query.generation;
 
+import static fi.solita.utils.query.QueryUtils.join;
+import static fi.solita.utils.query.QueryUtils.resolveSelection;
+
+import java.util.Set;
+
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.attributes.RestrictingAttribute;
-
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.*;
-import jakarta.persistence.metamodel.*;
-import java.util.Set;
-
-import static fi.solita.utils.query.QueryUtils.join;
-import static fi.solita.utils.query.QueryUtils.resolveSelection;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.CollectionAttribute;
+import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 public class Restrict {
     
     private final ApplyZero<EntityManager> em;
 
-    private final Configuration config;
     private final Predicates predicates;
     
-    public Restrict(ApplyZero<EntityManager> em, Configuration config, Predicates predicates) {
+    public Restrict(ApplyZero<EntityManager> em, Predicates predicates) {
         this.em = em;
-        this.config = config;
         this.predicates = predicates;
     }
     
@@ -180,16 +186,6 @@ public class Restrict {
         return em.get().getCriteriaBuilder();
     }
     
-    @SuppressWarnings("unchecked")
-    public <T> Expression<T> wrap(T value) {
-        if (value instanceof Number) {
-            for (String unwrappingFunctionName: config.wrapComparedNumbersWithFunction()) {
-                return (Expression<T>) cb().function(unwrappingFunctionName, value.getClass(), cb().literal(value.toString())); 
-            }
-        }
-        return cb().literal(value);
-    }
-
     /**
      * Modifies existing query!
      */

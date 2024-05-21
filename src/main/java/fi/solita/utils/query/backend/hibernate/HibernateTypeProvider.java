@@ -1,5 +1,6 @@
 package fi.solita.utils.query.backend.hibernate;
 
+import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 
 import java.io.Serializable;
@@ -75,15 +76,10 @@ public class HibernateTypeProvider implements TypeProvider {
     @Override
     public <ID extends Serializable, T extends Identifiable<ID>> Type<ID> idType(Class<T> entityType) {
         SessionFactoryImplementor sf = (SessionFactoryImplementor) em.get().unwrap(Session.class).getSessionFactory();
-        org.hibernate.type.Type t = ((MappingMetamodel) sf.getMappingMetamodel()).getEntityDescriptor(entityType).getIdentifierType();
-        return HibernateType.javaType((Class<ID>)t.getReturnedClass());
+        JavaType<?> t = ((MappingMetamodel) sf.getMappingMetamodel()).getEntityDescriptor(entityType).getIdentifierMapping().getJavaType();
+        return HibernateType.javaType((Class<ID>)t.getJavaTypeClass());
     }
     
-    @SuppressWarnings("unchecked")
-    public <T> Type<T> javaType(final Class<? extends JavaType<T>> clazz, Class<T>... phantom) {
-        return (Type<T>) HibernateType.javaType(phantom.getClass().getComponentType());
-    }
-
     @Override
     public <T> Type<T> type(final Class<T> clazz) {
         TypeConfiguration typeHelper = em.get().getEntityManagerFactory().unwrap( SessionFactoryImplementor.class ).getTypeConfiguration();
@@ -99,9 +95,9 @@ public class HibernateTypeProvider implements TypeProvider {
             // was not an entity...
         }
         
-        // custom type?
-        JavaType<Object> customType = typeHelper.getJavaTypeRegistry().resolveDescriptor(clazz);
-        if (customType != null) {
+        // javatype?
+        JavaType<Object> javaType = typeHelper.getJavaTypeRegistry().findDescriptor(clazz);
+        if (javaType != null) {
             return HibernateType.javaType(clazz);
         }
         
@@ -111,7 +107,34 @@ public class HibernateTypeProvider implements TypeProvider {
             return HibernateType.bindable(new BasicTypeReference<T>(basicType.getName(), clazz, basicType.getJdbcType().getDefaultSqlTypeCode()));
         }
         
+        for (Class<T> en: getEnumType(clazz)) {
+            // hibernate doesn't recognize enum values with class bodies as enums themselves
+            JavaType<Object> enumType = typeHelper.getJavaTypeRegistry().resolveDescriptor(en);
+            if (enumType != null) {
+                return HibernateType.javaType(en);
+            }
+        }
+        
+        if (clazz.isArray()) {
+            // array types seem to be created dynamically, so lets resolve one here
+            JavaType<Object> arrayType = typeHelper.getJavaTypeRegistry().resolveDescriptor(clazz);
+            if (arrayType != null) {
+                return HibernateType.javaType(clazz);
+            }
+        }
+        
         throw new IllegalArgumentException("Could not resolve Hibernate Type for: " + clazz + ". Please provide the type explicitly");
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <T> Option<Class<T>> getEnumType(Class<T> type) {
+        if (type.isEnum()) {
+            return Some(type);
+        }
+        if (type.getEnclosingClass() != null && type.getEnclosingClass().isEnum()) {
+            return Some((Class<T>) type.getEnclosingClass());
+        }
+        return None();
     }
 
     @Override
