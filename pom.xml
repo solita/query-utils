@@ -115,7 +115,7 @@
         <dependency>
             <groupId>fi.solita.utils</groupId>
             <artifactId>functional-utils</artifactId>
-            <version>0.12.47</version>
+            <version>0.12.50</version>
         </dependency>
         <dependency>
             <groupId>fi.solita.utils</groupId>
