@@ -9,7 +9,7 @@ import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.zip;
 import static fi.solita.utils.functional.FunctionalS.range;
-import static fi.solita.utils.functional.Predicates.*;
+import static fi.solita.utils.functional.Predicates.not;
 import static fi.solita.utils.query.QueryUtils.isRequiredByMetamodel;
 import static fi.solita.utils.query.QueryUtils.isRequiredByQueryAttribute;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
@@ -24,13 +24,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import jakarta.persistence.metamodel.Attribute;
-import jakarta.persistence.metamodel.Bindable;
-import jakarta.persistence.metamodel.CollectionAttribute;
-import jakarta.persistence.metamodel.ListAttribute;
-import jakarta.persistence.metamodel.SetAttribute;
-import jakarta.persistence.metamodel.SingularAttribute;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +31,16 @@ import fi.solita.utils.functional.ApplyBi;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple2;
+import fi.solita.utils.query.QueryUtils;
+import fi.solita.utils.query.QueryUtils_;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.CollectionAttribute;
+import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 class ProjectionResultUtil {
     
@@ -176,11 +177,7 @@ class ProjectionResultUtil {
     }
     
     static boolean isOption(Attribute<?,?> attr) {
-        if (attr instanceof Bindable) {
-            Class<?> b = ((Bindable<?>) attr).getBindableJavaType();
-            return b != null && Option.class.isAssignableFrom(b);
-        }
-        return false;
+        return attr instanceof SingularAttribute && QueryUtils.getJavaMember(attr).map(QueryUtils_.memberIsRequiredByType).getOrElse(false);
     }
     
     /**

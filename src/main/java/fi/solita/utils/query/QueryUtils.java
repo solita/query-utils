@@ -1,5 +1,7 @@
 package fi.solita.utils.query;
 
+import static fi.solita.utils.functional.Option.None;
+import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newMutableList;
@@ -16,7 +18,7 @@ import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.repeat;
 import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
-import static fi.solita.utils.query.attributes.AttributeProxy.*;
+import static fi.solita.utils.query.attributes.AttributeProxy.canUnwrap;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -30,10 +32,23 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.annotations.Formula;
-import org.hibernate.metamodel.model.domain.ListPersistentAttribute;
 import org.hibernate.query.sqm.tree.domain.SqmListJoin;
 import org.hibernate.query.sqm.tree.select.SqmSortSpecification;
 
+import fi.solita.utils.functional.Apply;
+import fi.solita.utils.functional.Option;
+import fi.solita.utils.functional.Transformer;
+import fi.solita.utils.functional.Tuple3;
+import fi.solita.utils.query.Order.Direction;
+import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
+import fi.solita.utils.query.attributes.JoiningAttribute;
+import fi.solita.utils.query.attributes.OptionalAttribute;
+import fi.solita.utils.query.attributes.PseudoAttribute;
+import fi.solita.utils.query.db.TableInClauseOptimization;
+import fi.solita.utils.query.entities.Table;
+import fi.solita.utils.query.entities.Table_;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
+import fi.solita.utils.query.projection.Constructors.TransparentProjection;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityManager;
@@ -63,21 +78,6 @@ import jakarta.persistence.metamodel.PluralAttribute;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 import jakarta.persistence.metamodel.Type;
-
-import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Option;
-import fi.solita.utils.functional.Transformer;
-import fi.solita.utils.functional.Tuple3;
-import fi.solita.utils.query.Order.Direction;
-import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
-import fi.solita.utils.query.attributes.JoiningAttribute;
-import fi.solita.utils.query.attributes.OptionalAttribute;
-import fi.solita.utils.query.attributes.PseudoAttribute;
-import fi.solita.utils.query.db.TableInClauseOptimization;
-import fi.solita.utils.query.entities.Table;
-import fi.solita.utils.query.entities.Table_;
-import fi.solita.utils.query.meta.MetaJpaConstructor;
-import fi.solita.utils.query.projection.Constructors.TransparentProjection;
 
 public class QueryUtils {
     
@@ -353,7 +353,7 @@ public class QueryUtils {
             return forall(QueryUtils_.isRequiredByMetamodel, ((JoiningAttribute) param).getAttributes());
         } else if (param instanceof JoiningAttribute) {
             return true;
-        } else if (!(param instanceof AdditionalQueryPerformingAttribute) && param instanceof Bindable && Option.class.isAssignableFrom(((Bindable<?>) param).getBindableJavaType())) {
+        } else if (!(param instanceof AdditionalQueryPerformingAttribute) && param instanceof Bindable && (Option.class.isAssignableFrom(((Bindable<?>) param).getBindableJavaType()) || !memberIsRequiredByType(param.getJavaMember()))) {
             return false;
         } else if (param instanceof SingularAttribute && ((SingularAttribute<?,?>)param).getPersistentAttributeType() == PersistentAttributeType.EMBEDDED) {
             if (!((SingularAttribute<?,?>)param).isOptional()) {
@@ -409,9 +409,18 @@ public class QueryUtils {
         return false;
     }
     
-    private static boolean memberIsRequiredByType(Member member) {
-        return member instanceof Field && !Option.class.isAssignableFrom(((Field)member).getType()) ||
-               member instanceof Method && !Option.class.isAssignableFrom(((Method)member).getReturnType());
+    public static Option<Class<?>> getJavaType(Member member) {
+        return member instanceof Field ? Some(((Field)member).getType()) :
+               member instanceof Method ? Some(((Method)member).getReturnType()) : None();
+    }
+    
+    public static Option<Member> getJavaMember(Attribute<?,?> attr) {
+        return Option.of(attr.getJavaMember());
+    }
+    
+    public static boolean memberIsRequiredByType(Member member) {
+        Option<Class<?>> memberType = getJavaType(member);
+        return !memberType.isDefined() || !Option.class.isAssignableFrom(memberType.get());
     }
     
     public static boolean isRequiredByQueryAttribute(Attribute<?,?> param) {
