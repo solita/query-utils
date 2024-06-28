@@ -31,6 +31,7 @@ import fi.solita.utils.query.meta.generators.JpaMetamodel;
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.excludesRegex,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.onlyPublicMembers,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.includePrivateMembers,
+                   "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.makeFieldsPublic,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.includesAnnotation,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.excludesAnnotation,
                    "JpaMetamodelProcessor." + JpaMetamodelProcessor.Options.extendClassNamePattern})
@@ -46,6 +47,7 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
     public ExtendedGeneratorOptions generatorOptions() {
         final boolean onlyPublicMembers = JpaMetamodelProcessor.this.onlyPublicMembers();
         final boolean includePrivateMembers = JpaMetamodelProcessor.this.includePrivateMembers();
+        final boolean makeFieldsPublic = JpaMetamodelProcessor.this.makeFieldsPublic();
         final String generatedPackagePattern = JpaMetamodelProcessor.this.generatedPackagePattern();
         final String generatedClassNamePattern = JpaMetamodelProcessor.this.generatedClassNamePattern();
         final boolean methodsAsFunctionsEnabled = methodsAsFunctionsEnabled();
@@ -61,6 +63,11 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
             @Override
             public boolean includePrivateMembers() {
                 return includePrivateMembers;
+            }
+            
+            @Override
+            public boolean makeFieldsPublic() {
+                return makeFieldsPublic;
             }
 
             @Override
