@@ -409,9 +409,11 @@ public class QueryUtils {
         return false;
     }
     
+    @SuppressWarnings("unchecked")
     public static Option<Class<?>> getJavaType(Member member) {
-        return member instanceof Field ? Some(((Field)member).getType()) :
-               member instanceof Method ? Some(((Method)member).getReturnType()) : None();
+        return (Option<Class<?>>)
+               (member instanceof Field ? Some(((Field)member).getType()) :
+                member instanceof Method ? Some(((Method)member).getReturnType()) : None());
     }
     
     public static Option<Member> getJavaMember(Attribute<?,?> attr) {
