@@ -82,6 +82,10 @@ public final class Page implements Serializable {
         return pageSize;
     }
     
+    public int getPageNumber() {
+        return pageNumber;
+    }
+    
     public Option<Integer> getFetchSizeHint() {
         return fetchSizeHint;
     }
