@@ -18,8 +18,6 @@ public interface Configuration {
     
     public SortedSet<Integer> getInClauseValuesAmounts();
     
-    public Option<String> wrapComparedNumbersWithFunction();
-
     public boolean makeProjectionQueriesDistinct();
     
     public Map<Class<?>, Tuple3<String, Option<String>, ? extends Function2<Connection,?,?>>> getRegisteredTableTypes();

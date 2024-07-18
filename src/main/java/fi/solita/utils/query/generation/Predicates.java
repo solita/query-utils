@@ -9,6 +9,12 @@ import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
 
 import java.util.Set;
 
+import fi.solita.utils.functional.Apply;
+import fi.solita.utils.functional.ApplyZero;
+import fi.solita.utils.functional.Option;
+import fi.solita.utils.query.Configuration;
+import fi.solita.utils.query.Id;
+import fi.solita.utils.query.QueryUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -17,38 +23,19 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.metamodel.SingularAttribute;
 
-import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.ApplyZero;
-import fi.solita.utils.functional.Option;
-import fi.solita.utils.query.Configuration;
-import fi.solita.utils.query.Id;
-import fi.solita.utils.query.QueryUtils;
-
 public class Predicates {
     
     private final ApplyZero<EntityManager> em;
 
-    private final Configuration config;
     private final QueryUtils queryUtils;
     
     public Predicates(ApplyZero<EntityManager> em, Configuration config) {
         this.em = em;
-        this.config = config;
         this.queryUtils = new QueryUtils(config);
     }
     
     protected CriteriaBuilder cb() {
         return em.get().getCriteriaBuilder();
-    }
-    
-    @SuppressWarnings("unchecked")
-    public <T> Expression<T> wrap(T value) {
-        if (value instanceof Number) {
-            for (String unwrappingFunctionName: config.wrapComparedNumbersWithFunction()) {
-                return (Expression<T>) cb().function(unwrappingFunctionName, value.getClass(), cb().literal(value.toString())); 
-            }
-        }
-        return cb().literal(value);
     }
     
     @SafeVarargs
@@ -358,7 +345,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().lessThan(wrap(value), selection.get(attribute));
+                return cb().greaterThanOrEqualTo(selection.get(attribute), value);
             }
         };
     };
@@ -368,7 +355,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().lessThanOrEqualTo(selection.get(attribute), wrap(value));
+                return cb().lessThanOrEqualTo(selection.get(attribute), value);
             }
         };
     };
@@ -378,7 +365,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().lessThanOrEqualTo(wrap(value), selection.get(attribute));
+                return cb().greaterThan(selection.get(attribute), value);
             }
         };
     };
@@ -398,7 +385,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().greaterThan(wrap(value), selection.get(attribute));
+                return cb().lessThanOrEqualTo(selection.get(attribute), value);
             }
         };
     };
@@ -408,7 +395,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().greaterThanOrEqualTo(selection.get(attribute), wrap(value));
+                return cb().greaterThanOrEqualTo(selection.get(attribute), value);
             }
         };
     };
@@ -418,17 +405,22 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().greaterThanOrEqualTo(wrap(value), selection.get(attribute));
+                return cb().lessThan(selection.get(attribute), value);
             }
         };
     };
+    
+    @SuppressWarnings("unchecked")
+    private <T> Expression<T> mkLiteral(T val) {
+        return (Expression<T>) cb().coalesce().value(val).value(val); // .literal doesn't seem to support type conversions at least in <= hibernate 6.5
+    }
     
     public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> between(final T value, final SingularAttribute<? super E, T> a1, final SingularAttribute<? super E, T> a2) {
         return new Apply<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().between(wrap(value), selection.get(a1), selection.get(a2));
+                return cb().between(mkLiteral(value), selection.get(a1), selection.get(a2));
             }
         };
     };
@@ -438,7 +430,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().between(selection.get(a), wrap(value1), wrap(value2));
+                return cb().between(selection.get(a), value1, value2);
             }
         };
     };
@@ -448,7 +440,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().between(wrap(value), selection.get(a1), selection.get(a2)).not();
+                return cb().between(mkLiteral(value), selection.get(a1), selection.get(a2)).not();
             }
         };
     };
@@ -458,7 +450,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                return cb().between(selection.get(a), wrap(value1), wrap(value2)).not();
+                return cb().between(selection.get(a), value1, value2).not();
             }
         };
     };
