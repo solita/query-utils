@@ -13,6 +13,7 @@ import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
+import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.backend.TypeProvider;
 import jakarta.persistence.EntityManager;
@@ -46,14 +47,14 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>)(Object)em.get().getCriteriaBuilder().createQuery();
         Root<E> root = query.from(owningClass);
-        query.multiselect(root);
+        query.select(root);
         return query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(id.getOwningClass(), em.get())), id));
     }
 
     public <E extends IEntity<?>> CriteriaQuery<E> all(Class<E> entityClass) {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>)(Object)em.get().getCriteriaBuilder().createQuery();
-        return query.multiselect(query.from(entityClass));
+        return query.select(query.from(entityClass));
     }
     
     public <E, A> CriteriaQuery<E> matching(SingularAttribute<? super E,? super A> first, Id<A> firstId) {
@@ -63,7 +64,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId));
         return query;
     }
@@ -75,7 +76,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId));
         return query;
     }
@@ -87,7 +88,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(relation), value));
         return query;
     }
@@ -99,7 +100,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(relation), value));
         return query;
     }
@@ -111,7 +112,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId),
                     cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), em.get())), secondId));
         return query;
@@ -124,7 +125,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId),
                     cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), em.get())), secondId));
         return query;
@@ -137,7 +138,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(first), firstValue),
                     cb.equal(root.get(second), secondValue));
         return query;
@@ -150,7 +151,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(first), firstValue),
                     cb.equal(root.get(second), secondValue));
         return query;
@@ -163,7 +164,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId),
                     cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), em.get())), secondId),
                     cb.equal(root.get(third).get(QueryUtils.id(third.getBindableJavaType(), em.get())), thirdId));
@@ -177,7 +178,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId),
                     cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), em.get())), secondId),
                     cb.equal(root.get(third).get(QueryUtils.id(third.getBindableJavaType(), em.get())), thirdId));
@@ -191,7 +192,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(first), firstValue),
                     cb.equal(root.get(second), secondValue),
                     cb.equal(root.get(third), thirdValue));
@@ -205,7 +206,7 @@ public class JpaCriteriaQuery {
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
-        query.multiselect(root);
+        query.select(root);
         query.where(cb.equal(root.get(first), firstValue),
                     cb.equal(root.get(second), secondValue),
                     cb.equal(root.get(third), thirdValue));
@@ -219,12 +220,12 @@ public class JpaCriteriaQuery {
             Root<E> root = query.from(entityClass);
             Path<Id<E>> idPath = root.get(QueryUtils.<E,Id<E>>id(entityClass, em.get()));
             query.where(queryUtils.inExpr(idPath, ids, em.get().getCriteriaBuilder()));
-            query.multiselect(root);
+            query.select(root);
             return query;
         } else {
             query.where(em.get().getCriteriaBuilder().or());
             Root<E> root = query.from(entityClass);
-            query.multiselect(root);
+            query.select(root);
             return query;
         }
     }
@@ -280,7 +281,7 @@ public class JpaCriteriaQuery {
             join = QueryUtils.join(join, attr, JoinType.INNER);
         }
 
-        return (CriteriaQuery<R>) query.multiselect(join);
+        return (CriteriaQuery<R>) query.select(join);
     }
 
     public <E, A1 extends Attribute<? super E, ?> & Bindable<R1>, R1 extends IEntity<?>>
@@ -326,15 +327,14 @@ public class JpaCriteriaQuery {
     @SuppressWarnings("unchecked")
     private <E, R>
     CriteriaQuery<R> doRelated(CriteriaQuery<E> query, Attribute<?,?>... attributes) {
-        CriteriaQuery<Object> q = (CriteriaQuery<Object>) query;
+        CriteriaQuery<R> q = (CriteriaQuery<R>) JpaCriteriaCopy.copyCriteria(query);
         
         From<?,?> join = resolveSelection(query, q);
         for (Attribute<?, ?> attr : attributes) {
             join = QueryUtils.join(join, attr, JoinType.INNER);
         }
 
-        CriteriaQuery<R> ret = (CriteriaQuery<R>) q.multiselect(join);
-        return ret;
+        return q.select((From<?,R>)join);
     }
 
     public <R,E extends Identifiable<?>, R1, A1 extends Attribute<? super E, ?> & Bindable<R1>>
@@ -381,7 +381,7 @@ public class JpaCriteriaQuery {
     private <E, K, V>
     CriteriaQuery<Pair<K,V>> doRelatedSingular(SingularAttribute<E,K> key, CriteriaQuery<E> query, Attribute<?,?>... attributes) {
         CriteriaBuilder cb = em.get().getCriteriaBuilder();
-        CriteriaQuery<Pair<K, V>> q = (CriteriaQuery<Pair<K, V>>) query;
+        CriteriaQuery<Pair<K, V>> q = (CriteriaQuery<Pair<K, V>>)JpaCriteriaCopy.copyCriteria(query);
         
         From<?,E> selection = resolveSelection(query, q);
         

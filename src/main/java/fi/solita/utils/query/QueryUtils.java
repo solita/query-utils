@@ -1,7 +1,5 @@
 package fi.solita.utils.query;
 
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newMutableList;
@@ -17,6 +15,8 @@ import static fi.solita.utils.functional.Functional.isEmpty;
 import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.repeat;
+import static fi.solita.utils.functional.Option.None;
+import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
 import static fi.solita.utils.query.attributes.AttributeProxy.canUnwrap;
 
@@ -33,8 +33,6 @@ import java.util.Set;
 
 import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.Formula;
-import org.hibernate.query.sqm.tree.domain.SqmListJoin;
-import org.hibernate.query.sqm.tree.select.SqmSortSpecification;
 
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Option;
@@ -132,8 +130,7 @@ public class QueryUtils {
         if (query.getOrderList() != null) {
             orders.addAll(query.getOrderList());
         }
-        // hibernate-specific, ugh...
-        orders.add(new SqmSortSpecification(((SqmListJoin<?,?>)listAttributePath).index()));
+        orders.add(JpaCriteriaCopy.createListIndexSortOrder(listAttributePath));
         query.orderBy(orders);
     }
 
@@ -190,9 +187,9 @@ public class QueryUtils {
         }
     }
     
-    public static final <E> CriteriaQuery<E> applyOrder(CriteriaQuery<E> query, final Path<E> selection, Iterable<? extends fi.solita.utils.query.Order<? super E, ?>> orderings, final CriteriaBuilder cb) {
+    public static final <E> CriteriaQuery<E> applyOrder(CriteriaQuery<E> query, final Selection<E> selection, Iterable<? extends fi.solita.utils.query.Order<? super E, ?>> orderings, final CriteriaBuilder cb) {
         if (!isEmpty(orderings)) {
-            query.orderBy(newList(map(QueryUtils_.<E>order2jpaOrder().ap(cb, selection), orderings)));
+            query.orderBy(newList(map(QueryUtils_.<E>order2jpaOrder().ap(cb, (Path<E>) selection), orderings)));
         } else {
             applyOrder(query, selection, cb);
         }

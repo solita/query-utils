@@ -35,6 +35,7 @@ import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
+import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.Removable;
@@ -52,6 +53,7 @@ public class JpaBasicQueries {
     private final ProjectionHelper projectionSupport;
     private final TypeProvider typeProvider;
     private final JpaCriteriaQueryExecutor queryExecutor;
+    private final JpaProjectionQueries jpaProjectionQueries;
     
     private final Configuration config;
     
@@ -61,6 +63,7 @@ public class JpaBasicQueries {
         this.typeProvider = typeProvider;
         this.queryExecutor = queryExecutor;
         this.config = config;
+        this.jpaProjectionQueries = new JpaProjectionQueries(em, projectionSupport, queryExecutor, config);
     }
 
     @SuppressWarnings("unchecked")
@@ -77,14 +80,9 @@ public class JpaBasicQueries {
         em.get().remove(toProxy(id));
     }
 
-    @SuppressWarnings("unchecked")
     public <E extends IEntity<?> & Identifiable<? extends Id<E>> & Removable> void removeAll(CriteriaQuery<E> query) {
-        CriteriaQuery<Id<E>> q = (CriteriaQuery<Id<E>>)(Object)query;
-        String entityName = resolveSelection(query).getJavaType().getName();
-        From<?,E> selection = resolveSelection(query, q);
-
-        q.multiselect(projectionSupport.prepareProjectingQuery(Project.id(), selection));
-        Collection<Id<E>> idList = queryExecutor.getMany(q, Page.NoPaging, LockModeType.NONE);
+        String entityName = QueryUtils.resolveSelection(query).getJavaType().getName();
+        Collection<Id<E>> idList = jpaProjectionQueries.getMany(query, Project.<E>id(), LockModeType.NONE);
 
         Iterable<? extends Iterable<Id<E>>> grouped;
         if (!config.getInClauseValuesAmounts().isEmpty()) {

@@ -7,7 +7,6 @@ import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.query.QueryUtils.applyOrder;
 import static fi.solita.utils.query.QueryUtils.checkOrdering;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
-import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,6 +14,7 @@ import java.util.List;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Configuration;
+import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Order;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
@@ -37,15 +37,13 @@ public class JpaCriteriaQueries {
 
     public long count(CriteriaQuery<?> query, LockModeType lock) {
         @SuppressWarnings("unchecked")
-        CriteriaQuery<Long> q = (CriteriaQuery<Long>)query;
-        q.multiselect(em.get().getCriteriaBuilder().count(em.get().getCriteriaBuilder().literal(1)));
+        CriteriaQuery<Long> q = (CriteriaQuery<Long>) JpaCriteriaCopy.copyCriteria(query);
+        q.select(em.get().getCriteriaBuilder().count(em.get().getCriteriaBuilder().literal(1)));
         return get(q, lock);
     }
     
     public boolean exists(CriteriaQuery<?> query, LockModeType lock) {
-        @SuppressWarnings("unchecked")
-        CriteriaQuery<Integer> q = (CriteriaQuery<Integer>)query;
-        return !isEmpty(queryExecutor.getMany(q, Page.SINGLE_ROW, lock));
+        return !isEmpty(queryExecutor.getMany(query, Page.SINGLE_ROW, lock));
     }
 
     public <T> T get(CriteriaQuery<T> query, LockModeType lock) throws NoResultException, NonUniqueResultException {
@@ -83,6 +81,6 @@ public class JpaCriteriaQueries {
     }
     
     public <E> List<E> getMany(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering, LockModeType lock) {
-        return queryExecutor.getMany(applyOrder(query, resolveSelectionPath(query), ordering, em.get().getCriteriaBuilder()), page, lock);
+        return queryExecutor.getMany(applyOrder(query, resolveSelection(query), ordering, em.get().getCriteriaBuilder()), page, lock);
     }
 }
