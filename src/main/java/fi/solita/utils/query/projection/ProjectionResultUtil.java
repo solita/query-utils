@@ -36,7 +36,6 @@ import fi.solita.utils.query.QueryUtils_;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
 import jakarta.persistence.metamodel.Attribute;
-import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.CollectionAttribute;
 import jakarta.persistence.metamodel.ListAttribute;
 import jakarta.persistence.metamodel.SetAttribute;
@@ -177,7 +176,7 @@ class ProjectionResultUtil {
     }
     
     static boolean isOption(Attribute<?,?> attr) {
-        return attr instanceof SingularAttribute && QueryUtils.getJavaMember(attr).map(QueryUtils_.memberIsRequiredByType).getOrElse(false);
+        return !QueryUtils.getJavaMember(attr).map(QueryUtils_.memberIsRequiredByType).getOrElse(true);
     }
     
     /**

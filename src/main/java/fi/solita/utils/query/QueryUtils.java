@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.Formula;
 import org.hibernate.query.sqm.tree.domain.SqmListJoin;
 import org.hibernate.query.sqm.tree.select.SqmSortSpecification;
@@ -396,6 +397,14 @@ public class QueryUtils {
         Column column = ((AnnotatedElement)member).getAnnotation(Column.class);
         if (column != null) {
             return !column.nullable();
+        }
+        Columns columns = ((AnnotatedElement)member).getAnnotation(Columns.class);
+        if (columns != null) {
+            for (Column c : columns.columns()) {
+                if (!c.nullable()) {
+                    return true;
+                }
+            }
         }
         Basic basic = ((AnnotatedElement)member).getAnnotation(Basic.class);
         if (basic != null) {
