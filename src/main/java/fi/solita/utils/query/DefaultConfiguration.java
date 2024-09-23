@@ -41,7 +41,7 @@ public class DefaultConfiguration implements Configuration {
         return false;
     }
 
-    public Map<Class<?>, Tuple3<String, Option<String>, ? extends Function2<Connection, ?, ?>>> getRegisteredTableTypes() {
+    public Map<Class<?>, Tuple3<String, Class<?>, ? extends Function2<Connection, ?, ?>>> getRegisteredTableTypes() {
         return emptyMap();
     }
 

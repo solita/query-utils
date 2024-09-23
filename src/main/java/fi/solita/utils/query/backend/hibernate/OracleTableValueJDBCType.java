@@ -78,7 +78,7 @@ public class OracleTableValueJDBCType implements JdbcType {
                 Connection c = st.getConnection().unwrap(OracleSupport.oracleConnectionClass);
                 Collection<?> values = javaType.unwrap(value, Collection.class, options);
                 
-                Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
+                Option<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
                 if (sqlTypeAndValues.isDefined()) {
                     try {
                         Object ad = OracleSupport.arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);
@@ -100,7 +100,7 @@ public class OracleTableValueJDBCType implements JdbcType {
                 Connection c = st.getConnection().unwrap(OracleSupport.oracleConnectionClass);
                 Collection<?> values = javaType.unwrap(value, Collection.class, options);
                 
-                Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
+                Option<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
                 if (sqlTypeAndValues.isDefined()) {
                     try {
                         Object ad = OracleSupport.arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);

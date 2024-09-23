@@ -7,6 +7,7 @@ import static fi.solita.utils.functional.Option.Some;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -31,38 +32,39 @@ public class OracleSupport implements TableInClauseOptimization {
         this.config = config;
     }
     
-    public Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> getSqlTypeAndValues(final Iterable<?> values) {
+    @SuppressWarnings("unchecked")
+    public Option<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> getSqlTypeAndValues(final Iterable<?> values) {
         Option<?> h = headOption(values);
         if (!h.isDefined()) {
             return None();
         }
         
-        Map<Class<?>, Tuple3<String, Option<String>, ? extends Function2<Connection, ?, ?>>> regTypes = config.getRegisteredTableTypes();
+        Map<Class<?>, Tuple3<String, Class<?>, ? extends Function2<Connection, ?, ?>>> regTypes = config.getRegisteredTableTypes();
         
         String t;
-        Option<String> o;
+        Class<?> o;
         Apply<Connection,Iterable<Object>> v;
         if (regTypes.containsKey(h.get().getClass())) {
-            final Tuple3<String,Option<String>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass());
-            Tuple3<String,Option<String>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
+            final Tuple3<String,Class<?>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass());
+            Tuple3<String,Class<?>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
             t = res._1;
             o = res._2;
             v = res._3;
         } else if (h.get().getClass().getSuperclass() != null && regTypes.containsKey(h.get().getClass().getSuperclass())) {
-            final Tuple3<String,Option<String>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass().getSuperclass());
-            Tuple3<String,Option<String>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
+            final Tuple3<String,Class<?>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass().getSuperclass());
+            Tuple3<String,Class<?>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
             t = res._1;
             o = res._2;
             v = res._3;
         } else if (h.get().getClass().getSuperclass().getSuperclass() != null && regTypes.containsKey(h.get().getClass().getSuperclass().getSuperclass())) {
-            final Tuple3<String,Option<String>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass().getSuperclass().getSuperclass());
-            Tuple3<String,Option<String>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
+            final Tuple3<String,Class<?>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass().getSuperclass().getSuperclass());
+            Tuple3<String,Class<?>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
             t = res._1;
             o = res._2;
             v = res._3;
         } else {
             // if no exact type found, try some registered for another superclass/interface
-            for (Entry<Class<?>, Tuple3<String,Option<String>, ? extends Function2<Connection, ?, ?>>> entry: regTypes.entrySet()) {
+            for (Entry<Class<?>, Tuple3<String,Class<?>, ? extends Function2<Connection, ?, ?>>> entry: regTypes.entrySet()) {
                 if (entry.getKey().isAssignableFrom(h.get().getClass())) {
                     return Some(foo(entry.getValue(), values));
                 }
@@ -70,14 +72,12 @@ public class OracleSupport implements TableInClauseOptimization {
             
             if (h.get() instanceof CharSequence) {
                 t = "SYS.ODCIVARCHAR2LIST";
-                o = None();
-                @SuppressWarnings("unchecked")
+                o = String.class;
                 Iterable<Object> m = (Iterable<Object>)(Object)map(OracleSupport_.toStr, (Iterable<CharSequence>)values);
                 v = Function.constant(m);
             } else if (h.get() instanceof Number) {
                 t = "SYS.ODCINUMBERLIST";
-                o = None();
-                @SuppressWarnings("unchecked")
+                o = Number.class;
                 Iterable<Object> m = (Iterable<Object>)values;
                 if (h.get() instanceof Short) {
                     m = map(OracleSupport_.castShortToLong, m);
@@ -87,18 +87,18 @@ public class OracleSupport implements TableInClauseOptimization {
                 return None();
             }
         }
-        return Some(Tuple.of(t, o, v));
+        return Some((Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>)(Object)Tuple.of(t, o, v));
     }
 
-    public static Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>> foo(final Tuple3<String,Option<String>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter, final Iterable<?> values) {
+    @SuppressWarnings("unchecked")
+    public static Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>> foo(final Tuple3<String,Class<?>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter, final Iterable<?> values) {
         Apply<Connection,Iterable<Object>> v = new Function1<Connection, Iterable<Object>>() {
             @Override
-            @SuppressWarnings("unchecked")
             public Iterable<Object> apply(Connection t) {
                 return map((Apply<Object,Object>)tabletypeAndConverter._3.ap(t), (Iterable<Object>)values);
             }
         };
-        return Tuple.of(tabletypeAndConverter._1, tabletypeAndConverter._2, v); 
+        return (Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>)(Object)Tuple.of(tabletypeAndConverter._1, tabletypeAndConverter._2, v); 
     }
     
     public static Class<? extends Connection> oracleConnectionClass;

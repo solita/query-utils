@@ -46,7 +46,7 @@ public class OracleTableValueType implements UserType<Table.Value>, Serializable
             Connection c = st.getConnection().unwrap(OracleSupport.oracleConnectionClass);
             Collection<?> values = value.values;
             
-            Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
+            Option<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
             if (sqlTypeAndValues.isDefined()) {
                 try {
                     Object ad = OracleSupport.arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);

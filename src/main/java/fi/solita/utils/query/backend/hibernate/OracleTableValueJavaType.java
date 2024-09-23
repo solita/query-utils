@@ -34,6 +34,12 @@ public class OracleTableValueJavaType extends AbstractClassJavaType<Table.Value>
 
     @Override
     public final <X> Table.Value wrap(X value, WrapperOptions options) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Table.Value) {
+            return (Table.Value) value;
+        }
         throw new UnsupportedOperationException("Shouldn't be here");
     }
     

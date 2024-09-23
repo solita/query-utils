@@ -33,6 +33,8 @@ import java.util.Set;
 
 import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.Formula;
+import org.hibernate.query.sqm.internal.SqmCriteriaNodeBuilder;
+import org.hibernate.query.sqm.tree.expression.SqmExpression;
 
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Option;
@@ -222,6 +224,16 @@ public class QueryUtils {
     public final boolean wouldUseInClauseOptimizations(Set<?> vals) {
         return config.getTableInClauseProvider().isDefined() && (useTableForInClause(vals) || useMemberOfForInClause(vals));
     }
+    
+    private <V, T> Expression<?> mkLiteral(CriteriaBuilder cb, Expression<?> path, V val) {
+        if (cb instanceof SqmCriteriaNodeBuilder) {
+            // Hibernate specific. literal doesn't work at least with Hibernate <= 6.6.0
+            return ((SqmCriteriaNodeBuilder)cb).value(val, (SqmExpression<?>)path); // .literal ei toimi ainakaan hibernate <=6.6.0
+        } else {
+            // fallback to how it _should_ work 
+            return cb.literal(val);
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public final Predicate inExpr(Expression<?> path, Set<?> vals, CriteriaBuilder cb, boolean enableOptimizations) {
@@ -236,15 +248,17 @@ public class QueryUtils {
         
         if (enableOptimizations) {
             for (TableInClauseOptimization provider: config.getTableInClauseProvider()) {
+                Option<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> targetType = provider.getSqlTypeAndValues(vals);
+                if (!targetType.isDefined()) {
+                    throw new IllegalArgumentException("No tabletype registered (see fi.solita.utils.query.DefaultConfiguration.getRegisteredTableTypes()) for type " + head(vals).getClass());
+                }
+                
                 // only use table-expression for large sets since ora performs better with regular in-clause.
                 if (useTableForInClause(vals)) {
+                    Class<?> dbType = targetType.get()._2;
                     // use 'table' for huge sets since member-of starts to perform badly
-                    preds = newList(path.in(cb.function("table", Collection.class, cb.literal(Table.of(vals)))));
+                    preds = newList(path.as(dbType).in(cb.function("table", path.getJavaType(), mkLiteral(cb, path, Table.of(vals)))));
                 } else if (useMemberOfForInClause(vals)) {
-                    Option<Tuple3<String,Option<String>,Apply<Connection,Iterable<Object>>>> targetType = provider.getSqlTypeAndValues(vals);
-                    if (!targetType.isDefined()) {
-                        throw new IllegalArgumentException("No tabletype registered (see fi.solita.utils.query.DefaultConfiguration.getRegisteredTableTypes()) for type " + head(vals).getClass());
-                    }
                     // use member-of
                     // return type doesn't seem to make a difference, so just set to boolean...
                     preds = newList(cb.<Object,Collection<Object>>isMember(path, (Expression<Collection<Object>>)(Object)cb.function(MEMBER_OF_CAST + targetType.get()._1, Collection.class, cb.literal(Table.of(vals)))));

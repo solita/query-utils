@@ -20,7 +20,7 @@ public interface Configuration {
     
     public boolean makeProjectionQueriesDistinct();
     
-    public Map<Class<?>, Tuple3<String, Option<String>, ? extends Function2<Connection,?,?>>> getRegisteredTableTypes();
+    public Map<Class<?>, Tuple3<String, Class<?>, ? extends Function2<Connection,?,?>>> getRegisteredTableTypes();
     
     public Option<TableInClauseOptimization> getTableInClauseProvider();
 

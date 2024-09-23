@@ -2,13 +2,13 @@ package fi.solita.utils.query.backend.hibernate;
 
 import java.util.List;
 
+import org.hibernate.dialect.function.array.ArrayViaArgumentReturnTypeResolver;
 import org.hibernate.query.ReturnableType;
 import org.hibernate.query.sqm.function.AbstractSqmSelfRenderingFunctionDescriptor;
 import org.hibernate.query.sqm.produce.function.ArgumentTypesValidator;
 import org.hibernate.query.sqm.produce.function.FunctionParameterType;
 import org.hibernate.query.sqm.produce.function.StandardArgumentsValidators;
 import org.hibernate.query.sqm.produce.function.StandardFunctionArgumentTypeResolvers;
-import org.hibernate.query.sqm.produce.function.StandardFunctionReturnTypeResolvers;
 import org.hibernate.sql.ast.SqlAstTranslator;
 import org.hibernate.sql.ast.spi.SqlAppender;
 import org.hibernate.sql.ast.tree.SqlAstNode;
@@ -24,8 +24,8 @@ public final class TableFunction extends AbstractSqmSelfRenderingFunctionDescrip
                         StandardArgumentsValidators.exactly( 1 ),
                         FunctionParameterType.ANY
                 ),
-                StandardFunctionReturnTypeResolvers.useFirstNonNull(),
-                StandardFunctionArgumentTypeResolvers.invariant(typeConfiguration, FunctionParameterType.INTEGER )
+                ArrayViaArgumentReturnTypeResolver.DEFAULT_INSTANCE,
+                StandardFunctionArgumentTypeResolvers.IMPLIED_RESULT_TYPE
         );
     }
 
@@ -38,7 +38,7 @@ public final class TableFunction extends AbstractSqmSelfRenderingFunctionDescrip
         final Expression expression = (Expression) sqlAstArguments.get( 0 );
         sqlAppender.appendSql("SELECT /*+ dynamic_sampling(tt 2) */ * FROM table(");
         expression.accept(walker);
-        sqlAppender.appendSql(" ) tt");
+        sqlAppender.appendSql(") tt");
     }
 
     @Override
