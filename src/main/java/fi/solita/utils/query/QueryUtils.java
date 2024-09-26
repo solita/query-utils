@@ -248,20 +248,19 @@ public class QueryUtils {
         
         if (enableOptimizations) {
             for (TableInClauseOptimization provider: config.getTableInClauseProvider()) {
-                Option<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> targetType = provider.getSqlTypeAndValues(vals);
-                if (!targetType.isDefined()) {
-                    throw new IllegalArgumentException("No tabletype registered (see fi.solita.utils.query.DefaultConfiguration.getRegisteredTableTypes()) for type " + head(vals).getClass());
-                }
-                
-                // only use table-expression for large sets since ora performs better with regular in-clause.
-                if (useTableForInClause(vals)) {
-                    Class<?> dbType = targetType.get()._2;
-                    // use 'table' for huge sets since member-of starts to perform badly
-                    preds = newList(path.as(dbType).in(cb.function("table", path.getJavaType(), mkLiteral(cb, path, Table.of(vals)))));
-                } else if (useMemberOfForInClause(vals)) {
-                    // use member-of
-                    // return type doesn't seem to make a difference, so just set to boolean...
-                    preds = newList(cb.<Object,Collection<Object>>isMember(path, (Expression<Collection<Object>>)(Object)cb.function(MEMBER_OF_CAST + targetType.get()._1, Collection.class, cb.literal(Table.of(vals)))));
+                for (Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>> targetType: provider.getSqlTypeAndValues(vals)) {
+                    // cannot make hibernate 6.6 work with composite types here anymore, so only optimize if a registration exists :(
+                    
+                    // only use table-expression for large sets since ora performs better with regular in-clause.
+                    if (useTableForInClause(vals)) {
+                        Class<?> dbType = targetType._2;
+                        // use 'table' for huge sets since member-of starts to perform badly
+                        preds = newList(path.as(dbType).in(cb.function("table", path.getJavaType(), mkLiteral(cb, path, Table.of(vals)))));
+                    } else if (useMemberOfForInClause(vals)) {
+                        // use member-of
+                        // return type doesn't seem to make a difference, so just set to boolean...
+                        preds = newList(cb.<Object,Collection<Object>>isMember(path, (Expression<Collection<Object>>)(Object)cb.function(MEMBER_OF_CAST + targetType._1, Collection.class, cb.literal(Table.of(vals)))));
+                    }
                 }
             }
         }
