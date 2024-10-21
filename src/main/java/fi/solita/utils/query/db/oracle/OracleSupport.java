@@ -7,7 +7,6 @@ import static fi.solita.utils.functional.Option.Some;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

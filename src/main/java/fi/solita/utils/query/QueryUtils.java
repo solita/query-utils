@@ -21,6 +21,7 @@ import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
 import static fi.solita.utils.query.attributes.AttributeProxy.canUnwrap;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -228,7 +229,7 @@ public class QueryUtils {
     private <V, T> Expression<?> mkLiteral(CriteriaBuilder cb, Expression<?> path, V val) {
         if (cb instanceof SqmCriteriaNodeBuilder) {
             // Hibernate specific. literal doesn't work at least with Hibernate <= 6.6.0
-            return ((SqmCriteriaNodeBuilder)cb).value(val, (SqmExpression<?>)path); // .literal ei toimi ainakaan hibernate <=6.6.0
+            return ((SqmCriteriaNodeBuilder)cb).value(val, ((SqmExpression<?>)path).cast(Array.newInstance(path.getJavaType(), 0).getClass())); // .literal ei toimi ainakaan hibernate <=6.6.0
         } else {
             // fallback to how it _should_ work 
             return cb.literal(val);
