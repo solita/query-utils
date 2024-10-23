@@ -256,7 +256,7 @@ public class QueryUtils {
                     if (useTableForInClause(vals)) {
                         Class<?> dbType = targetType._2;
                         // use 'table' for huge sets since member-of starts to perform badly
-                        preds = newList(path.as(dbType).in(cb.function("table", path.getJavaType(), mkLiteral(cb, path, Table.of(vals)))));
+                        preds = newList(path.as(dbType).in(cb.function("table", path.as(dbType).getJavaType(), mkLiteral(cb, path.as(dbType), Table.of(vals)))));
                     } else if (useMemberOfForInClause(vals)) {
                         // use member-of
                         // return type doesn't seem to make a difference, so just set to boolean...
