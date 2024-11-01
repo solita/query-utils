@@ -440,6 +440,10 @@ public class QueryUtils {
         return Option.of(attr.getJavaMember());
     }
     
+    public static Option<Member> getBindableJavaType(Attribute<?,?> attr) {
+        return Option.of(attr.getJavaMember());
+    }
+    
     public static boolean memberIsRequiredByType(Member member) {
         Option<Class<?>> memberType = getJavaType(member);
         return !memberType.isDefined() || !Option.class.isAssignableFrom(memberType.get());

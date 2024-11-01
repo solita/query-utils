@@ -288,6 +288,10 @@ public class ProjectionHelper {
         return ret;
     }
     
+    public static Class<?> javaType(Attribute<?,?> a) {
+        return a instanceof Bindable ? ((Bindable<?>)a).getBindableJavaType() : a.getJavaType();
+    }
+    
     private static final Collection<Object[]> RETRY_IN_PARTS = new ArrayList<Object[]>() {
         @Override
         public Iterator<Object[]> iterator() {
@@ -360,7 +364,7 @@ public class ProjectionHelper {
             ProjectionUtil.doRestrictions(r, target);
         }
         
-        Iterable<Class<?>> allEntities = filter(not(Predicates.isNull()), flatMap(QueryUtils_.getJavaType, flatMap(QueryUtils_.getJavaMember, actualJoins.keySet())));
+        Iterable<Class<?>> allEntities = filter(not(Predicates.isNull()), map(ProjectionHelper_.javaType, actualJoins.keySet()));
         if (logger.isDebugEnabled()) {
             allEntities = newList(allEntities);
             logger.debug("All entities: {}", allEntities);
