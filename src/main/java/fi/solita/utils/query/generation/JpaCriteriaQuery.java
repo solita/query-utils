@@ -9,6 +9,11 @@ import java.util.Set;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
+import fi.solita.utils.functional.Tuple1;
+import fi.solita.utils.functional.Tuple2;
+import fi.solita.utils.functional.Tuple3;
+import fi.solita.utils.functional.Tuple4;
+import fi.solita.utils.functional.Tuple5;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
@@ -17,6 +22,7 @@ import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.backend.TypeProvider;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CompoundSelection;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -24,6 +30,7 @@ import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
 import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.Bindable;
@@ -39,6 +46,56 @@ public class JpaCriteriaQuery {
         this.em = em;
         this.typeProvider = typeProvider;
         this.queryUtils = new QueryUtils(config);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <A,T extends Tuple1<A>> CriteriaQuery<T> createQuery1() {
+        return (CriteriaQuery<T>)(Object)em.get().getCriteriaBuilder().createQuery(Tuple1.class);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <A,B,T extends Tuple2<A,B>> CriteriaQuery<T> createQuery2() {
+        return (CriteriaQuery<T>)(Object)em.get().getCriteriaBuilder().createQuery(Tuple2.class);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <A,B,C,T extends Tuple3<A,B,C>> CriteriaQuery<T> createQuery3() {
+        return (CriteriaQuery<T>)(Object)em.get().getCriteriaBuilder().createQuery(Tuple3.class);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <A,B,C,D,T extends Tuple4<A,B,C,D>> CriteriaQuery<T> createQuery4() {
+        return (CriteriaQuery<T>)(Object)em.get().getCriteriaBuilder().createQuery(Tuple4.class);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <A,B,C,D,E,T extends Tuple5<A,B,C,D,E>> CriteriaQuery<T> createQuery5() {
+        return (CriteriaQuery<T>)(Object)em.get().getCriteriaBuilder().createQuery(Tuple5.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <A,T extends Tuple1<A>> CompoundSelection<T> construct(Selection<A> a) {
+        return (CompoundSelection<T>)(Object)em.get().getCriteriaBuilder().construct(Tuple1.class, a);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <A,B,T extends Tuple2<A,B>> CompoundSelection<T> construct(Selection<A> a, Selection<B> b) {
+        return (CompoundSelection<T>)(Object)em.get().getCriteriaBuilder().construct(Tuple2.class, a, b);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <A,B,C,T extends Tuple3<A,B,C>> CompoundSelection<T> construct(Selection<A> a, Selection<B> b, Selection<C> c) {
+        return (CompoundSelection<T>)(Object)em.get().getCriteriaBuilder().construct(Tuple3.class, a, b, c);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <A,B,C,D,T extends Tuple4<A,B,C,D>> CompoundSelection<T> construct(Selection<A> a, Selection<B> b, Selection<C> c, Selection<D> d) {
+        return (CompoundSelection<T>)(Object)em.get().getCriteriaBuilder().construct(Tuple4.class, a, b, c, d);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <A,B,C,D,E,T extends Tuple5<A,B,C,D,E>> CompoundSelection<T> construct(Selection<A> a, Selection<B> b, Selection<C> c, Selection<D> d, Selection<E> e) {
+        return (CompoundSelection<T>)(Object)em.get().getCriteriaBuilder().construct(Tuple5.class, a, b, c, d, e);
     }
 
     public <E extends IEntity<?>> CriteriaQuery<E> single(Id<? super E> id) {
