@@ -8,6 +8,7 @@ import static fi.solita.utils.functional.Functional.last;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.metamodel.model.domain.BagPersistentAttribute;
 import org.hibernate.metamodel.model.domain.ManagedDomainType;
 
 import fi.solita.utils.query.QueryUtils;
@@ -16,7 +17,7 @@ import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.CollectionAttribute;
 
 @SuppressWarnings("unchecked")
-class JoiningCollectionAttribute<E, R, A extends Attribute<E, Collection<R>> & Bindable<R>> extends PluralAttributeProxy<E,Collection<R>,R,A> implements CollectionAttribute<E,R>, JoiningAttribute {
+class JoiningCollectionAttribute<E, R, A extends Attribute<E, Collection<R>> & Bindable<R>> extends PluralAttributeProxy<E,Collection<R>,R,A> implements CollectionAttribute<E,R>, JoiningAttribute, BagPersistentAttribute<E,R> {
     
     private final List<? extends Attribute<?, ?>> attributes;
 

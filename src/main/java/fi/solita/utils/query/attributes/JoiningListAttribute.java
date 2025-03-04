@@ -7,7 +7,9 @@ import static fi.solita.utils.functional.Functional.last;
 
 import java.util.List;
 
+import org.hibernate.metamodel.model.domain.ListPersistentAttribute;
 import org.hibernate.metamodel.model.domain.ManagedDomainType;
+import org.hibernate.query.sqm.SqmPathSource;
 
 import fi.solita.utils.query.QueryUtils;
 import jakarta.persistence.metamodel.Attribute;
@@ -15,7 +17,7 @@ import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.ListAttribute;
 
 @SuppressWarnings("unchecked")
-class JoiningListAttribute<E, R, A extends Attribute<E, List<R>> & Bindable<R>> extends PluralAttributeProxy<E,List<R>,R,A> implements ListAttribute<E,R>, JoiningAttribute {
+class JoiningListAttribute<E, R, A extends Attribute<E, List<R>> & Bindable<R>> extends PluralAttributeProxy<E,List<R>,R,A> implements ListAttribute<E,R>, JoiningAttribute, ListPersistentAttribute<E,R> {
     
     private final List<? extends Attribute<?, ?>> attributes;
 
@@ -54,5 +56,10 @@ class JoiningListAttribute<E, R, A extends Attribute<E, List<R>> & Bindable<R>> 
     @Override
     public String toString() {
         return JoiningAttribute.Constructors.joiningAttributeToString(this);
+    }
+    
+    @Override
+    public SqmPathSource<Integer> getIndexPathSource() {
+        return proxyTarget == null ? null :  ((ListPersistentAttribute<E,E>)(Object)proxyTarget).getIndexPathSource();
     }
 }

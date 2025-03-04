@@ -8,11 +8,12 @@ import static fi.solita.utils.functional.FunctionalA.last;
 import java.util.List;
 
 import org.hibernate.metamodel.model.domain.ManagedDomainType;
+import org.hibernate.metamodel.model.domain.SingularPersistentAttribute;
 
 import fi.solita.utils.functional.Predicate;
 import jakarta.persistence.metamodel.SingularAttribute;
 
-class JoiningSingularAttribute<E,R> extends SingularAttributeProxy<E,R> implements JoiningAttribute {
+class JoiningSingularAttribute<E,R> extends SingularAttributeProxy<E,R> implements JoiningAttribute, SingularPersistentAttribute<E,R> {
     
     private final List<? extends SingularAttribute<?, ?>> attributes;
 

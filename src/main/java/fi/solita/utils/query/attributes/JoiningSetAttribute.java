@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.metamodel.model.domain.ManagedDomainType;
+import org.hibernate.metamodel.model.domain.SetPersistentAttribute;
 
 import fi.solita.utils.query.QueryUtils;
 import jakarta.persistence.metamodel.Attribute;
@@ -16,7 +17,7 @@ import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.SetAttribute;
 
 @SuppressWarnings("unchecked")
-class JoiningSetAttribute<E, R, A extends Attribute<E, Set<R>> & Bindable<R>> extends PluralAttributeProxy<E,Set<R>,R,A> implements SetAttribute<E,R>, JoiningAttribute {
+class JoiningSetAttribute<E, R, A extends Attribute<E, Set<R>> & Bindable<R>> extends PluralAttributeProxy<E,Set<R>,R,A> implements SetAttribute<E,R>, JoiningAttribute, SetPersistentAttribute<E,R> {
     
     private final List<? extends Attribute<?, ?>> attributes;
 
