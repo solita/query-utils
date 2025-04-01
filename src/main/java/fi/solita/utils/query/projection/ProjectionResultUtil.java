@@ -38,6 +38,7 @@ import fi.solita.utils.query.meta.MetaJpaConstructor;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.CollectionAttribute;
 import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.PluralAttribute;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 
@@ -170,7 +171,7 @@ class ProjectionResultUtil {
     static Object convertNullsToEmbeddableWhereRequired(Attribute<?,?> attribute, Object resultFromDb) {
         Object ret = resultFromDb;
         Option<? extends Attribute<?, ?>> embeddable = EmbeddableUtil.unwrapEmbeddableAttribute(attribute);
-        if (embeddable.isDefined() && resultFromDb == null && isRequiredByMetamodel(attribute)) {
+        if (embeddable.isDefined() && resultFromDb == null && isRequiredByMetamodel(attribute) && !(attribute instanceof PluralAttribute)) {
             Class<?> clazz = embeddable.get().getJavaType();
             logger.debug("Instantiating an empty Embeddable {} in place of a null result", clazz);
             ret = EmbeddableUtil.instantiate(clazz);
