@@ -211,7 +211,7 @@ public class QueryUtils {
     }
     
     public final Predicate inExpr(Expression<?> path, Set<?> values, CriteriaBuilder cb) {
-        return inExpr(path, values, cb, true);
+        return inExpr(path, values, cb, Optimization.ENABLED);
     }
     
     public final boolean useTableForInClause(Set<?> vals) {
@@ -235,9 +235,16 @@ public class QueryUtils {
             return cb.literal(val);
         }
     }
+    
+    public enum Optimization {
+        DISABLED,
+        ENABLED,
+        FORCE_TABLE,
+        FORCE_MEMBEROF
+    }
 
     @SuppressWarnings("unchecked")
-    public final Predicate inExpr(Expression<?> path, Set<?> vals, CriteriaBuilder cb, boolean enableOptimizations) {
+    public final Predicate inExpr(Expression<?> path, Set<?> vals, CriteriaBuilder cb, Optimization optimizations) {
         if (vals.size() == 1) {
             return cb.equal(path, head(vals));
         } else if (vals.isEmpty()) {
@@ -247,17 +254,17 @@ public class QueryUtils {
         List<? extends List<?>> groups;
         List<Predicate> preds = null;
         
-        if (enableOptimizations) {
+        if (optimizations != Optimization.DISABLED) {
             for (TableInClauseOptimization provider: config.getTableInClauseProvider()) {
                 for (Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>> targetType: provider.getSqlTypeAndValues(vals)) {
                     // cannot make hibernate 6.6 work with composite types here anymore, so only optimize if a registration exists :(
                     
                     // only use table-expression for large sets since ora performs better with regular in-clause.
-                    if (useTableForInClause(vals)) {
+                    if (optimizations == Optimization.FORCE_TABLE || useTableForInClause(vals)) {
                         Class<?> dbType = targetType._2;
                         // use 'table' for huge sets since member-of starts to perform badly
                         preds = newList(path.as(dbType).in(cb.function("table", path.as(dbType).getJavaType(), mkLiteral(cb, path.as(dbType), Table.of(vals)))));
-                    } else if (useMemberOfForInClause(vals)) {
+                    } else if (optimizations == Optimization.FORCE_MEMBEROF || useMemberOfForInClause(vals)) {
                         // use member-of
                         // return type doesn't seem to make a difference, so just set to boolean...
                         preds = newList(cb.<Object,Collection<Object>>isMember(path, (Expression<Collection<Object>>)(Object)cb.function(MEMBER_OF_CAST + targetType._1, Collection.class, cb.literal(Table.of(vals)))));

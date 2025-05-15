@@ -133,9 +133,13 @@ class ProjectionResultUtil {
             } else {
                 ret = val;
             }
-            if (((Collection<?>)ret).size() != val.size()) {
-                logger.info("size of a Set/SortedSet was different from the size of the originating data! Have you maybe suboptimally implemented equals/compareTo? Enable debug logging for stack trace. Attribute: {}, List: {}, Set: {}", attr, val, ret);
-                logger.debug("size of a Set/SortedSet... stack: ", new Exception());
+            if (logger.isDebugEnabled()) {
+                if (((Collection<?>)ret).size() != val.size()) {
+                    logger.debug("size of a Set/SortedSet was different from the size of the originating data! Have you maybe suboptimally implemented equals/compareTo? Enable trace logging for stack trace. Attribute: {}, List: {}, Set: {}", attr, val, ret);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("size of a Set/SortedSet... stack: ", new Exception());
+                    }
+                }
             }
         }
         return ret;

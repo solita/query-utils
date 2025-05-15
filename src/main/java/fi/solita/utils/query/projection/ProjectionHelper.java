@@ -89,6 +89,7 @@ import fi.solita.utils.query.MultiColumnId;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.QueryUtils_;
+import fi.solita.utils.query.QueryUtils.Optimization;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
@@ -377,7 +378,7 @@ public class ProjectionHelper {
             return RETRY_IN_PARTS;
         }
         
-        query.where(queryUtils.inExpr(sourceId, sourceIds, em.get().getCriteriaBuilder(), enableInClauseOptimizations));
+        query.where(queryUtils.inExpr(sourceId, sourceIds, em.get().getCriteriaBuilder(), enableInClauseOptimizations ? Optimization.ENABLED : Optimization.DISABLED));
 
         // Would this provide any benefit? Maybe only overhead...
         if (isDistinctable && config.makeProjectionQueriesDistinct()) {

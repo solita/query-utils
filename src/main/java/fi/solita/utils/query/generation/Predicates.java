@@ -15,6 +15,7 @@ import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.QueryUtils;
+import fi.solita.utils.query.QueryUtils.Optimization;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -191,7 +192,7 @@ public class Predicates {
                 Path<E> selectionPath = resolveSelectionPath(query);
                 boolean enableInClauseOptimizations = !exists(QueryUtils.ImplementsProjectWithRegularInClause, newList(attribute.getJavaType(), attribute.getDeclaringType().getJavaType()));
                 Path<A> path = selectionPath.get(attribute);
-                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), enableInClauseOptimizations);
+                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), enableInClauseOptimizations ? Optimization.ENABLED : Optimization.DISABLED);
             }
         };
     }
@@ -205,7 +206,21 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<A> path = resolveSelectionPath(query).get(attribute);
-                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), false);
+                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), Optimization.DISABLED);
+            }
+        };
+    }
+    
+    /**
+     * Like {@link #in(SingularAttribute, Iterable, CriteriaQuery)}
+     * but always use table in-clause.
+     */
+    public <E, A> Apply<CriteriaQuery<E>,Predicate> in_tableForm(final SingularAttribute<? super E, A> attribute, final Set<? super A> values) {
+        return new Apply<CriteriaQuery<E>, Predicate>() {
+            @Override
+            public Predicate apply(CriteriaQuery<E> query) {
+                Path<A> path = resolveSelectionPath(query).get(attribute);
+                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), Optimization.FORCE_TABLE);
             }
         };
     }
@@ -217,7 +232,7 @@ public class Predicates {
                 Path<E> selectionPath = resolveSelectionPath(query);
                 boolean enableInClauseOptimizations = !exists(QueryUtils.ImplementsProjectWithRegularInClause, newList(attribute.getJavaType(), attribute.getDeclaringType().getJavaType()));
                 Path<A> path = selectionPath.get(attribute);
-                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), enableInClauseOptimizations).not();
+                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), enableInClauseOptimizations ? Optimization.ENABLED : Optimization.DISABLED).not();
             }
         };
     }
@@ -231,7 +246,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<A> path = resolveSelectionPath(query).get(attribute);
-                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), false).not();
+                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), Optimization.DISABLED).not();
             }
         };
     }

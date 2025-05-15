@@ -379,6 +379,16 @@ public class Restrict {
     }
     
     /**
+     * Like {@link #in(SingularAttribute, Iterable, CriteriaQuery)}
+     * but always but always use table in-clause.
+     * 
+     * Modifies existing query!
+     */
+    public <E, A> CriteriaQuery<E> in_tableForm(SingularAttribute<? super E, A> attribute, Set<? super A> values, CriteriaQuery<E> query) {
+        return by(predicates.in_tableForm(attribute, values), query);
+    }
+    
+    /**
      * Modifies existing query!
      */
     public <E, A> CriteriaQuery<E> notIn(SingularAttribute<? super E, A> attribute, Set<? super A> values, CriteriaQuery<E> query) {
