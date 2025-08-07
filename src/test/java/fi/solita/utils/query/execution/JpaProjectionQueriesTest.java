@@ -16,9 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -59,9 +56,6 @@ import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
 public class JpaProjectionQueriesTest extends QueryTestBase {
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Autowired
     private Dao dao;

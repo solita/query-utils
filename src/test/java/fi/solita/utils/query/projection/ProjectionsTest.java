@@ -6,10 +6,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaQuery;
 
 import org.junit.Test;
@@ -25,9 +23,6 @@ import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
 public class ProjectionsTest extends QueryTestBase {
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Autowired
     private Dao dao;

@@ -16,7 +16,7 @@ import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.QueryUtils.Optimization;
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -26,17 +26,17 @@ import jakarta.persistence.metamodel.SingularAttribute;
 
 public class Predicates {
     
-    private final ApplyZero<EntityManager> em;
+    private final ApplyZero<EntityManagerFactory> emf;
 
     private final QueryUtils queryUtils;
     
-    public Predicates(ApplyZero<EntityManager> em, Configuration config) {
-        this.em = em;
+    public Predicates(ApplyZero<EntityManagerFactory> emf, Configuration config) {
+        this.emf = emf;
         this.queryUtils = new QueryUtils(config);
     }
     
     protected CriteriaBuilder cb() {
-        return em.get().getCriteriaBuilder();
+        return emf.get().getCriteriaBuilder();
     }
     
     @SafeVarargs
@@ -192,7 +192,7 @@ public class Predicates {
                 Path<E> selectionPath = resolveSelectionPath(query);
                 boolean enableInClauseOptimizations = !exists(QueryUtils.ImplementsProjectWithRegularInClause, newList(attribute.getJavaType(), attribute.getDeclaringType().getJavaType()));
                 Path<A> path = selectionPath.get(attribute);
-                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), enableInClauseOptimizations ? Optimization.ENABLED : Optimization.DISABLED);
+                return queryUtils.inExpr(path, values, emf.get().getCriteriaBuilder(), enableInClauseOptimizations ? Optimization.ENABLED : Optimization.DISABLED);
             }
         };
     }
@@ -206,7 +206,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<A> path = resolveSelectionPath(query).get(attribute);
-                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), Optimization.DISABLED);
+                return queryUtils.inExpr(path, values, emf.get().getCriteriaBuilder(), Optimization.DISABLED);
             }
         };
     }
@@ -220,7 +220,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<A> path = resolveSelectionPath(query).get(attribute);
-                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), Optimization.FORCE_TABLE);
+                return queryUtils.inExpr(path, values, emf.get().getCriteriaBuilder(), Optimization.FORCE_TABLE);
             }
         };
     }
@@ -232,7 +232,7 @@ public class Predicates {
                 Path<E> selectionPath = resolveSelectionPath(query);
                 boolean enableInClauseOptimizations = !exists(QueryUtils.ImplementsProjectWithRegularInClause, newList(attribute.getJavaType(), attribute.getDeclaringType().getJavaType()));
                 Path<A> path = selectionPath.get(attribute);
-                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), enableInClauseOptimizations ? Optimization.ENABLED : Optimization.DISABLED).not();
+                return queryUtils.inExpr(path, values, emf.get().getCriteriaBuilder(), enableInClauseOptimizations ? Optimization.ENABLED : Optimization.DISABLED).not();
             }
         };
     }
@@ -246,7 +246,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<A> path = resolveSelectionPath(query).get(attribute);
-                return queryUtils.inExpr(path, values, em.get().getCriteriaBuilder(), Optimization.DISABLED).not();
+                return queryUtils.inExpr(path, values, emf.get().getCriteriaBuilder(), Optimization.DISABLED).not();
             }
         };
     }
@@ -256,7 +256,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<A> path = resolveSelectionPath(query).get(attribute);
-                return queryUtils.inExpr(path.get(id(path.getJavaType(), em.get())), values, em.get().getCriteriaBuilder());
+                return queryUtils.inExpr(path.get(id(path.getJavaType(), emf.get())), values, emf.get().getCriteriaBuilder());
             }
         };
     }
@@ -266,7 +266,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selectionPath = resolveSelectionPath(query);
-                Path<?> idPath = selectionPath.get(id(selectionPath.getJavaType(), em.get()));
+                Path<?> idPath = selectionPath.get(id(selectionPath.getJavaType(), emf.get()));
                 return cb().notEqual(idPath, idToExclude);
             }
         };
@@ -277,8 +277,8 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selectionPath = resolveSelectionPath(query);
-                Path<Id<E>> idPath = selectionPath.get(QueryUtils.<E,Id<E>>id(selectionPath.getJavaType(), em.get()));
-                return cb().not(queryUtils.inExpr(idPath, idsToExclude, em.get().getCriteriaBuilder()));
+                Path<Id<E>> idPath = selectionPath.get(QueryUtils.<E,Id<E>>id(selectionPath.getJavaType(), emf.get()));
+                return cb().not(queryUtils.inExpr(idPath, idsToExclude, emf.get().getCriteriaBuilder()));
             }
         };
     }
@@ -288,7 +288,7 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selectionPath = resolveSelectionPath(query);
-                Path<?> idPath = selectionPath.get(id(selectionPath.getJavaType(), em.get()));
+                Path<?> idPath = selectionPath.get(id(selectionPath.getJavaType(), emf.get()));
                 return cb().equal(idPath, idToInclude);
             }
         };
@@ -299,8 +299,8 @@ public class Predicates {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selectionPath = resolveSelectionPath(query);
-                Path<Id<E>> idPath = selectionPath.get(QueryUtils.<E,Id<E>>id(selectionPath.getJavaType(), em.get()));
-                return queryUtils.inExpr(idPath, idsToInclude, em.get().getCriteriaBuilder());
+                Path<Id<E>> idPath = selectionPath.get(QueryUtils.<E,Id<E>>id(selectionPath.getJavaType(), emf.get()));
+                return queryUtils.inExpr(idPath, idsToInclude, emf.get().getCriteriaBuilder());
             }
         };
     }

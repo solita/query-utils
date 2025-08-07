@@ -5,9 +5,6 @@ import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,9 +22,6 @@ import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
 public class ProjectTest extends QueryTestBase {
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Autowired
     private JpaCriteriaQuery query;

@@ -2,7 +2,7 @@ package fi.solita.utils.query.attributes;
 
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.metamodel.Attribute;
@@ -26,8 +26,8 @@ class LiteralListAttribute<X, Y, A extends Attribute<X, List<Y>> & Bindable<Y>> 
     }
 
     @Override
-    public Expression<?> getSelectionForQuery(EntityManager em, Path<?> currentSelection) {
-        return em.getCriteriaBuilder().literal(PseudoAttribute.QUERY_PLACEHOLDER);
+    public Expression<?> getSelectionForQuery(CriteriaBuilder cb, Path<?> currentSelection) {
+        return cb.literal(PseudoAttribute.QUERY_PLACEHOLDER);
     }
 
     @Override

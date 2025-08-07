@@ -1,8 +1,5 @@
 package fi.solita.utils.query.projection;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-
 import org.junit.Test;
 
 import fi.solita.utils.query.Department_;
@@ -14,9 +11,6 @@ import fi.solita.utils.query.generation.Cast;
 
 public class CastTest extends QueryTestBase {
     
-    @PersistenceContext
-    private EntityManager em;
-
     @Test(expected = QueryUtils.OptionalAttributeNeedOptionTypeException.class)
     public void Projectvalue_needs_optional() {
         Project.value(Employee_.optionalSalary);

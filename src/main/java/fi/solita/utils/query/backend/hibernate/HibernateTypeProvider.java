@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.hibernate.Hibernate;
-import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.metamodel.MappingMetamodel;
 import org.hibernate.query.BindableType;
@@ -23,7 +22,7 @@ import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.backend.Type;
 import fi.solita.utils.query.backend.TypeProvider;
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 public class HibernateTypeProvider implements TypeProvider {
 
@@ -52,7 +51,7 @@ public class HibernateTypeProvider implements TypeProvider {
         }
     }
 
-    private final ApplyZero<EntityManager> em;
+    private final ApplyZero<EntityManagerFactory> emf;
     
     static Transformer<List<org.hibernate.type.Type>, org.hibernate.type.Type> head = new Transformer<List<org.hibernate.type.Type>,org.hibernate.type.Type>() {
         @Override
@@ -68,25 +67,25 @@ public class HibernateTypeProvider implements TypeProvider {
         }
     };
     
-    public HibernateTypeProvider(ApplyZero<EntityManager> em) {
-        this.em = em;
+    public HibernateTypeProvider(ApplyZero<EntityManagerFactory> emf) {
+        this.emf = emf;
     }
     
     @SuppressWarnings("unchecked")
     @Override
     public <ID extends Serializable, T extends Identifiable<ID>> Type<ID> idType(Class<T> entityType) {
-        SessionFactoryImplementor sf = (SessionFactoryImplementor) em.get().unwrap(Session.class).getSessionFactory();
+        SessionFactoryImplementor sf = (SessionFactoryImplementor) emf.get().unwrap(SessionFactoryImplementor.class);
         JavaType<?> t = ((MappingMetamodel) sf.getMappingMetamodel()).getEntityDescriptor(entityType).getIdentifierMapping().getJavaType();
         return HibernateType.javaType((Class<ID>)t.getJavaTypeClass());
     }
     
     @Override
     public <T> Type<T> type(final Class<T> clazz) {
-        TypeConfiguration typeHelper = em.get().getEntityManagerFactory().unwrap( SessionFactoryImplementor.class ).getTypeConfiguration();
+        TypeConfiguration typeHelper = emf.get().unwrap(SessionFactoryImplementor.class).getTypeConfiguration();
         
         // entity?
         try {
-            em.get().getMetamodel().entity(clazz);
+            emf.get().getMetamodel().entity(clazz);
             JavaType<T> entityType = typeHelper.getJavaTypeRegistry().resolveEntityTypeDescriptor(clazz);
             if (entityType != null) {
                 return HibernateType.entity(clazz);

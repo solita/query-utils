@@ -16,6 +16,7 @@
            http://www.springframework.org/schema/util/spring-util-3.1.xsd">
     
     <bean class="fi.solita.utils.query.EntityManagerProvider" />
+    <bean class="fi.solita.utils.query.EntityManagerFactoryProvider" />
     <import resource="classpath:applicationContext_query-utils_hibernate.xml" />
 
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.metamodel.CollectionAttribute;
@@ -47,7 +47,7 @@ public interface PseudoAttribute {
 
     public static final String QUERY_PLACEHOLDER = "<>";
 
-    public Expression<?> getSelectionForQuery(EntityManager em, Path<?> currentSelection);
+    public Expression<?> getSelectionForQuery(CriteriaBuilder cb, Path<?> currentSelection);
 
     public Object getValueToReplaceResult(Object resultFromDb);
 }

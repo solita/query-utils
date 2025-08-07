@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
@@ -37,11 +37,11 @@ import fi.solita.utils.query.projection.ProjectionUtil_;
 public class JpaProjectionQueries {
 
     private final ProjectionHelper projectionSupport;
-    private final ApplyZero<EntityManager> em;
+    private final ApplyZero<EntityManagerFactory> emf;
     private final JpaCriteriaQueryExecutor queryExecutor;
 
-    public JpaProjectionQueries(ApplyZero<EntityManager> em, ProjectionHelper projectionSupport, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
-        this.em = em;
+    public JpaProjectionQueries(ApplyZero<EntityManagerFactory> emf, ProjectionHelper projectionSupport, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
+        this.emf = emf;
         this.projectionSupport = projectionSupport;
         this.queryExecutor = queryExecutor;
     }
@@ -77,7 +77,7 @@ public class JpaProjectionQueries {
     }
 
     public <E,R> List<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Page page, LockModeType lock) throws NoOrderingSpecifiedException {
-        QueryUtils.applyOrder(query, resolveSelection(query), em.get().getCriteriaBuilder());
+        QueryUtils.applyOrder(query, resolveSelection(query), emf.get().getCriteriaBuilder());
         QueryUtils.checkOrdering(query, page);
         List<Order<? super E,?>> noOrdering = Collections.emptyList();
         return getMany(query, constructor, page, noOrdering, lock);
@@ -92,7 +92,7 @@ public class JpaProjectionQueries {
         From<?,E> selection = resolveSelection(query, q);
 
         @SuppressWarnings("unchecked")
-        CriteriaQuery<Object> ordered = (CriteriaQuery<Object>)(Object)applyOrder((CriteriaQuery<E>)(Object)q, selection, ordering, em.get().getCriteriaBuilder());
+        CriteriaQuery<Object> ordered = (CriteriaQuery<Object>)(Object)applyOrder((CriteriaQuery<E>)(Object)q, selection, ordering, emf.get().getCriteriaBuilder());
 
         q.multiselect(projectionSupport.prepareProjectingQuery(constructor, selection));
         

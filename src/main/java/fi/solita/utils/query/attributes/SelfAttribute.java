@@ -1,6 +1,6 @@
 package fi.solita.utils.query.attributes;
 
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 
@@ -21,7 +21,7 @@ class SelfAttribute<X, T> extends SingularAttributeProxy<X, T> implements Pseudo
     }
 
     @Override
-    public Expression<?> getSelectionForQuery(EntityManager em, Path<?> currentSelection) {
+    public Expression<?> getSelectionForQuery(CriteriaBuilder cb, Path<?> currentSelection) {
         return currentSelection;
     }
 

@@ -6,7 +6,6 @@ import static fi.solita.utils.functional.Functional.grouped;
 import static fi.solita.utils.functional.Functional.headOption;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
-import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -15,10 +14,10 @@ import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
@@ -35,7 +34,6 @@ import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
-import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.Removable;
@@ -49,21 +47,21 @@ import fi.solita.utils.query.projection.ProjectionHelper;
 public class JpaBasicQueries {
 
     private final ApplyZero<EntityManager> em;
+    private final ApplyZero<EntityManagerFactory> emf;
 
-    private final ProjectionHelper projectionSupport;
     private final TypeProvider typeProvider;
     private final JpaCriteriaQueryExecutor queryExecutor;
     private final JpaProjectionQueries jpaProjectionQueries;
     
     private final Configuration config;
     
-    public JpaBasicQueries(ApplyZero<EntityManager> em, ProjectionHelper projectionSupport, TypeProvider typeProvider, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
+    public JpaBasicQueries(ApplyZero<EntityManagerFactory> emf, ApplyZero<EntityManager> em, ProjectionHelper projectionSupport, TypeProvider typeProvider, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.em = em;
-        this.projectionSupport = projectionSupport;
+        this.emf = emf;
         this.typeProvider = typeProvider;
         this.queryExecutor = queryExecutor;
         this.config = config;
-        this.jpaProjectionQueries = new JpaProjectionQueries(em, projectionSupport, queryExecutor, config);
+        this.jpaProjectionQueries = new JpaProjectionQueries(emf, projectionSupport, queryExecutor, config);
     }
 
     @SuppressWarnings("unchecked")
@@ -122,7 +120,7 @@ public class JpaBasicQueries {
     public <E extends IEntity<?>> Option<E> find(Id<E> id) {
         CriteriaQuery<E> query = em.get().getCriteriaBuilder().createQuery(id.getOwningClass());
         Root<E> root = query.from(id.getOwningClass());
-        query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(id.getOwningClass(), em.get())), id));
+        query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(id.getOwningClass(), emf.get())), id));
         
         List<E> ret = queryExecutor.getMany(query, Page.NoPaging, LockModeType.NONE);
         if (ret.size() > 1) {
@@ -175,10 +173,10 @@ public class JpaBasicQueries {
     
     @SuppressWarnings("unchecked")
     private <E extends IEntity<?> & Identifiable<? extends Id<? super E>>, T extends IEntity<?>, C extends Collection<T>> Iterable<T> getProxiesIt(E entity, PluralAttribute<? super E, C, T> relation) {
-        SingularAttribute<T, Id<T>> id = QueryUtils.id(relation.getBindableJavaType(), em.get());
+        SingularAttribute<T, Id<T>> id = QueryUtils.id(relation.getBindableJavaType(), emf.get());
         CriteriaQuery<Id<T>> query = em.get().getCriteriaBuilder().createQuery(id.getBindableJavaType());
         Root<E> root = (Root<E>) query.from(typeProvider.getEntityClass(entity));
-        query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em.get())), entity.getId()));
+        query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), emf.get())), entity.getId()));
         query.select(((Join<?,T>)QueryUtils.join((Root<?>)root, (Attribute<?,?>)relation, JoinType.INNER)).get(id));
         
         return map(JpaBasicQueries_.<T>toProxy().ap(this), queryExecutor.getMany(query, Page.NoPaging, LockModeType.NONE));

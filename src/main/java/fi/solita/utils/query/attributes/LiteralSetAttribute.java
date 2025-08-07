@@ -3,7 +3,7 @@ package fi.solita.utils.query.attributes;
 import java.util.Set;
 import java.util.SortedSet;
 
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.metamodel.Attribute;
@@ -27,8 +27,8 @@ class LiteralSetAttribute<X, Y, A extends Attribute<X, Set<Y>> & Bindable<Y>> ex
     }
 
     @Override
-    public Expression<?> getSelectionForQuery(EntityManager em, Path<?> currentSelection) {
-        return em.getCriteriaBuilder().literal(PseudoAttribute.QUERY_PLACEHOLDER);
+    public Expression<?> getSelectionForQuery(CriteriaBuilder cb, Path<?> currentSelection) {
+        return cb.literal(PseudoAttribute.QUERY_PLACEHOLDER);
     }
     
     @Override

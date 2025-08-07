@@ -19,7 +19,7 @@ import fi.solita.utils.query.Order;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
@@ -28,17 +28,17 @@ import jakarta.persistence.criteria.CriteriaQuery;
 public class JpaCriteriaQueries {
 
     private final JpaCriteriaQueryExecutor queryExecutor;
-    private final ApplyZero<EntityManager> em;
+    private final ApplyZero<EntityManagerFactory> emf;
 
-    public JpaCriteriaQueries(ApplyZero<EntityManager> em, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
-        this.em = em;
+    public JpaCriteriaQueries(ApplyZero<EntityManagerFactory> emf, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
+        this.emf = emf;
         this.queryExecutor = queryExecutor;
     }
 
     public long count(CriteriaQuery<?> query, LockModeType lock) {
         @SuppressWarnings("unchecked")
         CriteriaQuery<Long> q = (CriteriaQuery<Long>) JpaCriteriaCopy.copyCriteria(query);
-        q.select(em.get().getCriteriaBuilder().count(em.get().getCriteriaBuilder().literal(1)));
+        q.select(emf.get().getCriteriaBuilder().count(emf.get().getCriteriaBuilder().literal(1)));
         return get(q, lock);
     }
     
@@ -71,7 +71,7 @@ public class JpaCriteriaQueries {
     }
 
     public <T> List<T> getMany(CriteriaQuery<T> query, Page page, LockModeType lock) throws NoOrderingSpecifiedException {
-        applyOrder(query, resolveSelection(query), em.get().getCriteriaBuilder());
+        applyOrder(query, resolveSelection(query), emf.get().getCriteriaBuilder());
         checkOrdering(query, page);
         return queryExecutor.getMany(query, page, lock);
     }
@@ -81,6 +81,6 @@ public class JpaCriteriaQueries {
     }
     
     public <E> List<E> getMany(CriteriaQuery<E> query, Page page, Iterable<? extends Order<? super E, ?>> ordering, LockModeType lock) {
-        return queryExecutor.getMany(applyOrder(query, resolveSelection(query), ordering, em.get().getCriteriaBuilder()), page, lock);
+        return queryExecutor.getMany(applyOrder(query, resolveSelection(query), ordering, emf.get().getCriteriaBuilder()), page, lock);
     }
 }

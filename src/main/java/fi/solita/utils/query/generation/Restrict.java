@@ -6,12 +6,9 @@ import static fi.solita.utils.query.QueryUtils.resolveSelection;
 import java.util.Set;
 
 import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.attributes.RestrictingAttribute;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.JoinType;
@@ -25,12 +22,9 @@ import jakarta.persistence.metamodel.SingularAttribute;
 
 public class Restrict {
     
-    private final ApplyZero<EntityManager> em;
-
     private final Predicates predicates;
     
-    public Restrict(ApplyZero<EntityManager> em, Predicates predicates) {
-        this.em = em;
+    public Restrict(Predicates predicates) {
         this.predicates = predicates;
     }
     
@@ -181,11 +175,7 @@ public class Restrict {
     }
     
     
-    
-    protected CriteriaBuilder cb() {
-        return em.get().getCriteriaBuilder();
-    }
-    
+
     /**
      * Modifies existing query!
      */

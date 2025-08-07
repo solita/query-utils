@@ -21,7 +21,7 @@ import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.backend.TypeProvider;
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.criteria.CompoundSelection;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -38,108 +38,110 @@ import jakarta.persistence.metamodel.SingularAttribute;
 
 public class JpaCriteriaQuery {
 
-    private final ApplyZero<EntityManager> em;
+    private final ApplyZero<EntityManagerFactory> emf;
     private final TypeProvider typeProvider;
     private final QueryUtils queryUtils;
     
-    public JpaCriteriaQuery(ApplyZero<EntityManager> em, TypeProvider typeProvider, Configuration config) {
-        this.em = em;
+    public JpaCriteriaQuery(ApplyZero<EntityManagerFactory> emf, TypeProvider typeProvider, Configuration config) {
+        this.emf = emf;
         this.typeProvider = typeProvider;
         this.queryUtils = new QueryUtils(config);
     }
     
     @SuppressWarnings("unchecked")
     public <A,T extends Tuple1<A>> CriteriaQuery<T> createQuery1() {
-        return (CriteriaQuery<T>)(Object)em.get().getCriteriaBuilder().createQuery(Tuple1.class);
+        return (CriteriaQuery<T>)(Object)emf.get().getCriteriaBuilder().createQuery(Tuple1.class);
     }
     
     @SuppressWarnings("unchecked")
     public <A,B,T extends Tuple2<A,B>> CriteriaQuery<T> createQuery2() {
-        return (CriteriaQuery<T>)(Object)em.get().getCriteriaBuilder().createQuery(Tuple2.class);
+        return (CriteriaQuery<T>)(Object)emf.get().getCriteriaBuilder().createQuery(Tuple2.class);
     }
     
     @SuppressWarnings("unchecked")
     public <A,B,C,T extends Tuple3<A,B,C>> CriteriaQuery<T> createQuery3() {
-        return (CriteriaQuery<T>)(Object)em.get().getCriteriaBuilder().createQuery(Tuple3.class);
+        return (CriteriaQuery<T>)(Object)emf.get().getCriteriaBuilder().createQuery(Tuple3.class);
     }
     
     @SuppressWarnings("unchecked")
     public <A,B,C,D,T extends Tuple4<A,B,C,D>> CriteriaQuery<T> createQuery4() {
-        return (CriteriaQuery<T>)(Object)em.get().getCriteriaBuilder().createQuery(Tuple4.class);
+        return (CriteriaQuery<T>)(Object)emf.get().getCriteriaBuilder().createQuery(Tuple4.class);
     }
     
     @SuppressWarnings("unchecked")
     public <A,B,C,D,E,T extends Tuple5<A,B,C,D,E>> CriteriaQuery<T> createQuery5() {
-        return (CriteriaQuery<T>)(Object)em.get().getCriteriaBuilder().createQuery(Tuple5.class);
+        return (CriteriaQuery<T>)(Object)emf.get().getCriteriaBuilder().createQuery(Tuple5.class);
     }
 
     @SuppressWarnings("unchecked")
     public <A,T extends Tuple1<A>> CompoundSelection<T> construct(Selection<A> a) {
-        return (CompoundSelection<T>)(Object)em.get().getCriteriaBuilder().construct(Tuple1.class, a);
+        return (CompoundSelection<T>)(Object)emf.get().getCriteriaBuilder().construct(Tuple1.class, a);
     }
     
     @SuppressWarnings("unchecked")
     public <A,B,T extends Tuple2<A,B>> CompoundSelection<T> construct(Selection<A> a, Selection<B> b) {
-        return (CompoundSelection<T>)(Object)em.get().getCriteriaBuilder().construct(Tuple2.class, a, b);
+        return (CompoundSelection<T>)(Object)emf.get().getCriteriaBuilder().construct(Tuple2.class, a, b);
     }
     
     @SuppressWarnings("unchecked")
     public <A,B,C,T extends Tuple3<A,B,C>> CompoundSelection<T> construct(Selection<A> a, Selection<B> b, Selection<C> c) {
-        return (CompoundSelection<T>)(Object)em.get().getCriteriaBuilder().construct(Tuple3.class, a, b, c);
+        return (CompoundSelection<T>)(Object)emf.get().getCriteriaBuilder().construct(Tuple3.class, a, b, c);
     }
     
     @SuppressWarnings("unchecked")
     public <A,B,C,D,T extends Tuple4<A,B,C,D>> CompoundSelection<T> construct(Selection<A> a, Selection<B> b, Selection<C> c, Selection<D> d) {
-        return (CompoundSelection<T>)(Object)em.get().getCriteriaBuilder().construct(Tuple4.class, a, b, c, d);
+        return (CompoundSelection<T>)(Object)emf.get().getCriteriaBuilder().construct(Tuple4.class, a, b, c, d);
     }
     
     @SuppressWarnings("unchecked")
     public <A,B,C,D,E,T extends Tuple5<A,B,C,D,E>> CompoundSelection<T> construct(Selection<A> a, Selection<B> b, Selection<C> c, Selection<D> d, Selection<E> e) {
-        return (CompoundSelection<T>)(Object)em.get().getCriteriaBuilder().construct(Tuple5.class, a, b, c, d, e);
+        return (CompoundSelection<T>)(Object)emf.get().getCriteriaBuilder().construct(Tuple5.class, a, b, c, d, e);
     }
 
     public <E extends IEntity<?>> CriteriaQuery<E> single(Id<? super E> id) {
         @SuppressWarnings("unchecked")
         Class<E> owningClass = (Class<E>) id.getOwningClass();
         @SuppressWarnings("unchecked")
-        CriteriaQuery<E> query = (CriteriaQuery<E>)(Object)em.get().getCriteriaBuilder().createQuery();
+        CriteriaQuery<E> query = (CriteriaQuery<E>)(Object)emf.get().getCriteriaBuilder().createQuery();
         Root<E> root = query.from(owningClass);
         query.select(root);
-        return query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(id.getOwningClass(), em.get())), id));
+        return query.where(emf.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(owningClass, emf.get())), id));
     }
 
     public <E extends IEntity<?>> CriteriaQuery<E> all(Class<E> entityClass) {
         @SuppressWarnings("unchecked")
-        CriteriaQuery<E> query = (CriteriaQuery<E>)(Object)em.get().getCriteriaBuilder().createQuery();
+        CriteriaQuery<E> query = (CriteriaQuery<E>)(Object)emf.get().getCriteriaBuilder().createQuery();
         return query.select(query.from(entityClass));
     }
     
     public <E, A> CriteriaQuery<E> matching(SingularAttribute<? super E,? super A> first, Id<A> firstId) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
+        @SuppressWarnings("unchecked")
+        Class<A> bindable = (Class<A>)first.getBindableJavaType();
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
-        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId));
+        query.where(cb.equal(root.get(first).get(QueryUtils.id(bindable, emf.get())), firstId));
         return query;
     }
     
     public <E, A> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> first, Id<A> firstId) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
-        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId));
+        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), emf.get())), firstId));
         return query;
     }
     
     public <E, A> CriteriaQuery<E> matching(SingularAttribute<? super E,? super A> relation, A value) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) relation.getDeclaringType().getJavaType();
         @SuppressWarnings("unchecked")
@@ -151,7 +153,7 @@ public class JpaCriteriaQuery {
     }
     
     public <E, A> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> relation, A value) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) relation.getDeclaringType().getJavaType();
         @SuppressWarnings("unchecked")
@@ -163,33 +165,37 @@ public class JpaCriteriaQuery {
     }
     
     public <E, A, B> CriteriaQuery<E> matching(SingularAttribute<? super E,? super A> first, SingularAttribute<? super E,? super B> second, Id<A> firstId, Id<B> secondId) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
+        @SuppressWarnings("unchecked")
+        Class<A> bindable1 = (Class<A>)first.getBindableJavaType();
+        @SuppressWarnings("unchecked")
+        Class<B> bindable2 = (Class<B>)second.getBindableJavaType();
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
-        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId),
-                    cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), em.get())), secondId));
+        query.where(cb.equal(root.get(first).get(QueryUtils.id(bindable1, emf.get())), firstId),
+                    cb.equal(root.get(second).get(QueryUtils.id(bindable2, emf.get())), secondId));
         return query;
     }
     
     public <E, A, B> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> first, SingularAttribute<? super E,? extends Option<? super B>> second, Id<A> firstId, Id<B> secondId) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
-        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId),
-                    cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), em.get())), secondId));
+        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), emf.get())), firstId),
+                    cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), emf.get())), secondId));
         return query;
     }
     
     public <E, A, B> CriteriaQuery<E> matching(SingularAttribute<? super E,? super A> first, SingularAttribute<? super E,? super B> second, A firstValue, B secondValue) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
         @SuppressWarnings("unchecked")
@@ -202,7 +208,7 @@ public class JpaCriteriaQuery {
     }
     
     public <E, A, B> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> first, SingularAttribute<? super E,? extends Option<? super B>> second, A firstValue, B secondValue) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
         @SuppressWarnings("unchecked")
@@ -215,35 +221,41 @@ public class JpaCriteriaQuery {
     }
     
     public <E, A, B, C> CriteriaQuery<E> matching(SingularAttribute<? super E,? super A> first, SingularAttribute<? super E,? super B> second, SingularAttribute<? super E,? super C> third, Id<A> firstId, Id<B> secondId, Id<C> thirdId) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
+        @SuppressWarnings("unchecked")
+        Class<A> bindable1 = (Class<A>)first.getBindableJavaType();
+        @SuppressWarnings("unchecked")
+        Class<B> bindable2 = (Class<B>)second.getBindableJavaType();
+        @SuppressWarnings("unchecked")
+        Class<C> bindable3 = (Class<C>)third.getBindableJavaType();
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
-        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId),
-                    cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), em.get())), secondId),
-                    cb.equal(root.get(third).get(QueryUtils.id(third.getBindableJavaType(), em.get())), thirdId));
+        query.where(cb.equal(root.get(first).get(QueryUtils.id(bindable1, emf.get())), firstId),
+                    cb.equal(root.get(second).get(QueryUtils.id(bindable2, emf.get())), secondId),
+                    cb.equal(root.get(third).get(QueryUtils.id(bindable3, emf.get())), thirdId));
         return query;
     }
     
     public <E, A, B, C> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> first, SingularAttribute<? super E,? extends Option<? super B>> second, SingularAttribute<? super E,? extends Option<? super C>> third, Id<A> firstId, Id<B> secondId, Id<C> thirdId) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
         @SuppressWarnings("unchecked")
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
-        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), em.get())), firstId),
-                    cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), em.get())), secondId),
-                    cb.equal(root.get(third).get(QueryUtils.id(third.getBindableJavaType(), em.get())), thirdId));
+        query.where(cb.equal(root.get(first).get(QueryUtils.id(first.getBindableJavaType(), emf.get())), firstId),
+                    cb.equal(root.get(second).get(QueryUtils.id(second.getBindableJavaType(), emf.get())), secondId),
+                    cb.equal(root.get(third).get(QueryUtils.id(third.getBindableJavaType(), emf.get())), thirdId));
         return query;
     }
     
     public <E, A, B, C> CriteriaQuery<E> matching(SingularAttribute<? super E,? super A> first, SingularAttribute<? super E,? super B> second, SingularAttribute<? super E,? super C> third, A firstValue, B secondValue, C thirdValue) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
         @SuppressWarnings("unchecked")
@@ -257,7 +269,7 @@ public class JpaCriteriaQuery {
     }
     
     public <E, A, B, C> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> first, SingularAttribute<? super E,? extends Option<? super B>> second, SingularAttribute<? super E,? extends Option<? super C>> third, A firstValue, B secondValue, C thirdValue) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
         @SuppressWarnings("unchecked")
@@ -272,15 +284,15 @@ public class JpaCriteriaQuery {
 
     public <E> CriteriaQuery<E> ofIds(Set<? extends Id<? super E>> ids, Class<E> entityClass) {
         @SuppressWarnings("unchecked")
-        CriteriaQuery<E> query = (CriteriaQuery<E>) em.get().getCriteriaBuilder().createQuery();
+        CriteriaQuery<E> query = (CriteriaQuery<E>) emf.get().getCriteriaBuilder().createQuery();
         if (ids.iterator().hasNext()) {
             Root<E> root = query.from(entityClass);
-            Path<Id<E>> idPath = root.get(QueryUtils.<E,Id<E>>id(entityClass, em.get()));
-            query.where(queryUtils.inExpr(idPath, ids, em.get().getCriteriaBuilder()));
+            Path<Id<E>> idPath = root.get(QueryUtils.<E,Id<E>>id(entityClass, emf.get()));
+            query.where(queryUtils.inExpr(idPath, ids, emf.get().getCriteriaBuilder()));
             query.select(root);
             return query;
         } else {
-            query.where(em.get().getCriteriaBuilder().or());
+            query.where(emf.get().getCriteriaBuilder().or());
             Root<E> root = query.from(entityClass);
             query.select(root);
             return query;
@@ -330,9 +342,9 @@ public class JpaCriteriaQuery {
 
     @SuppressWarnings("unchecked")
     private <E extends IEntity<?> & Identifiable<?>, R> CriteriaQuery<R> doRelated(E entity, Attribute<?, ?>... attributes) {
-        CriteriaQuery<Object> query = (CriteriaQuery<Object>) em.get().getCriteriaBuilder().createQuery();
+        CriteriaQuery<Object> query = (CriteriaQuery<Object>) emf.get().getCriteriaBuilder().createQuery();
         Root<E> root = (Root<E>) query.from(typeProvider.getEntityClass(entity));
-        query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), em.get())), entity.getId()));
+        query.where(emf.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), emf.get())), entity.getId()));
         From<?, ?> join = root;
         for (Attribute<?, ?> attr : attributes) {
             join = QueryUtils.join(join, attr, JoinType.INNER);
@@ -437,7 +449,7 @@ public class JpaCriteriaQuery {
     @SuppressWarnings("unchecked")
     private <E, K, V>
     CriteriaQuery<Pair<K,V>> doRelatedSingular(SingularAttribute<E,K> key, CriteriaQuery<E> query, Attribute<?,?>... attributes) {
-        CriteriaBuilder cb = em.get().getCriteriaBuilder();
+        CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         CriteriaQuery<Pair<K, V>> q = (CriteriaQuery<Pair<K, V>>)JpaCriteriaCopy.copyCriteria(query);
         
         From<?,E> selection = resolveSelection(query, q);

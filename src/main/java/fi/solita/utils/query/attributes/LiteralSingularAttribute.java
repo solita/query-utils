@@ -1,6 +1,6 @@
 package fi.solita.utils.query.attributes;
 
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 
@@ -19,8 +19,8 @@ class LiteralSingularAttribute<X, T> extends SingularAttributeProxy<X, T> implem
     }
     
     @Override
-    public Expression<?> getSelectionForQuery(EntityManager em, Path<?> currentSelection) {
-        return em.getCriteriaBuilder().literal(PseudoAttribute.QUERY_PLACEHOLDER);
+    public Expression<?> getSelectionForQuery(CriteriaBuilder cb, Path<?> currentSelection) {
+        return cb.literal(PseudoAttribute.QUERY_PLACEHOLDER);
     }
     
     @Override

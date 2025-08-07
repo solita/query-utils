@@ -53,7 +53,7 @@ import fi.solita.utils.query.meta.MetaJpaConstructor;
 import fi.solita.utils.query.projection.Constructors.TransparentProjection;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -117,8 +117,8 @@ public class QueryUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E,ID_E> SingularAttribute<E, ID_E> id(Class<? extends E> entityClass, EntityManager em) {
-        EntityType<?> e = em.getMetamodel().entity(entityClass);
+    public static <E,ID_E> SingularAttribute<E, ID_E> id(Class<? extends E> entityClass, EntityManagerFactory emf) {
+        EntityType<?> e = emf.getMetamodel().entity(entityClass);
         return (SingularAttribute<E, ID_E>) e.getId(e.getIdType().getJavaType());
     }
     
