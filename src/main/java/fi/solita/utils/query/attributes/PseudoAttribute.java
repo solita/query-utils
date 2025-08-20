@@ -45,7 +45,13 @@ public interface PseudoAttribute {
         }
     }
 
-    public static final String QUERY_PLACEHOLDER = "<>";
+    public static final class Placeholder {
+        public static final String PLACEHOLDER_VALUE = "<>";
+        private Placeholder() {
+            // Prevent instantiation
+        }
+    }
+    public static final Placeholder QUERY_PLACEHOLDER = new Placeholder();
 
     public Expression<?> getSelectionForQuery(CriteriaBuilder cb, Path<?> currentSelection);
 

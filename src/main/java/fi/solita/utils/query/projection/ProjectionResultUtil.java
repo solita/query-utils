@@ -66,9 +66,6 @@ class ProjectionResultUtil {
     }
     
     static Object postProcessValue(Attribute<?, ?> attr, Object resultFromDb) {
-        if (PseudoAttribute.QUERY_PLACEHOLDER.equals(resultFromDb)) {
-            resultFromDb = PseudoAttribute.QUERY_PLACEHOLDER; // intern
-        }
         if (attr == null) {
             // null is used as a placeholder in SelfAttribute and Constructors.IdProjection... Yeah, should use something else...
             return resultFromDb;
