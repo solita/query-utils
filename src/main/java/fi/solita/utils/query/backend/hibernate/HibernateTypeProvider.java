@@ -9,6 +9,7 @@ import java.util.List;
 import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.metamodel.MappingMetamodel;
+import org.hibernate.metamodel.model.domain.JpaMetamodel;
 import org.hibernate.query.BindableType;
 import org.hibernate.type.BasicTypeReference;
 import org.hibernate.type.descriptor.java.JavaType;
@@ -84,14 +85,9 @@ public class HibernateTypeProvider implements TypeProvider {
         TypeConfiguration typeHelper = emf.get().unwrap(SessionFactoryImplementor.class).getTypeConfiguration();
         
         // entity?
-        try {
-            emf.get().getMetamodel().entity(clazz);
-            JavaType<T> entityType = typeHelper.getJavaTypeRegistry().resolveEntityTypeDescriptor(clazz);
-            if (entityType != null) {
-                return HibernateType.entity(clazz);
-            }
-        } catch (IllegalArgumentException e) {
-            // was not an entity...
+        Object e = ((JpaMetamodel)emf.get().getMetamodel()).findEntityType(clazz);
+        if (e != null && typeHelper.getJavaTypeRegistry().resolveEntityTypeDescriptor(clazz) != null) {
+            return HibernateType.entity(clazz);
         }
         
         // javatype?

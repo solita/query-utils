@@ -124,7 +124,8 @@ public class JpaCriteriaQuery {
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
-        query.where(cb.equal(root.get(first).get(QueryUtils.id(bindable, emf.get())), firstId));
+        Path<A> path = (Path<A>)root.get(first);
+        query.where(cb.equal(path.get(QueryUtils.id(bindable, emf.get())), firstId));
         return query;
     }
     
@@ -176,8 +177,10 @@ public class JpaCriteriaQuery {
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
-        query.where(cb.equal(root.get(first).get(QueryUtils.id(bindable1, emf.get())), firstId),
-                    cb.equal(root.get(second).get(QueryUtils.id(bindable2, emf.get())), secondId));
+        Path<A> a = (Path<A>)root.get(first);
+        Path<B> b = (Path<B>)root.get(second);
+        query.where(cb.equal(a.get(QueryUtils.id(bindable1, emf.get())), firstId),
+                    cb.equal(b.get(QueryUtils.id(bindable2, emf.get())), secondId));
         return query;
     }
     
@@ -234,9 +237,12 @@ public class JpaCriteriaQuery {
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
-        query.where(cb.equal(root.get(first).get(QueryUtils.id(bindable1, emf.get())), firstId),
-                    cb.equal(root.get(second).get(QueryUtils.id(bindable2, emf.get())), secondId),
-                    cb.equal(root.get(third).get(QueryUtils.id(bindable3, emf.get())), thirdId));
+        Path<A> a = (Path<A>)root.get(first);
+        Path<B> b = (Path<B>)root.get(second);
+        Path<C> c = (Path<C>)root.get(third);
+        query.where(cb.equal(a.get(QueryUtils.id(bindable1, emf.get())), firstId),
+                    cb.equal(b.get(QueryUtils.id(bindable2, emf.get())), secondId),
+                    cb.equal(c.get(QueryUtils.id(bindable3, emf.get())), thirdId));
         return query;
     }
     

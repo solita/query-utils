@@ -47,4 +47,8 @@ public class LiteralPlaceholderType extends AbstractClassJavaType<PseudoAttribut
         }
         throw new IllegalArgumentException("Expected placeholder value, but was: " + value);
     }
+    
+    public PseudoAttribute.Placeholder fromString(CharSequence string) {
+        throw new UnsupportedOperationException();
+    };
 }
