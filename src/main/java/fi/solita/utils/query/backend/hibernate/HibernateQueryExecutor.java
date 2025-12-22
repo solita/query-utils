@@ -68,7 +68,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
                 q.setFirstResult(page.getFirstResult());
             }
             if (page.getMaxResults() != Integer.MAX_VALUE) {
-                q.setHint(HINT_FETCH_SIZE, page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults() + 1, MAX_FETCH_SIZE)).get()));
+                q.setHint(HINT_FETCH_SIZE, page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE-1)).get() + 1));
                 q.setMaxResults(page.getMaxResults());
             }
         }
@@ -115,7 +115,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
         if (page != Page.NoPaging) {
-            q.setFetchSize(page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults() + 1, MAX_FETCH_SIZE)).get()));
+            q.setFetchSize(page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE-1)).get() + 1));
         }
         return (List<T>) newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
     }
@@ -135,7 +135,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         Query<?> q = em.get().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
         if (page != Page.NoPaging) {
-            q.setFetchSize(page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults() + 1, MAX_FETCH_SIZE)).get()));
+            q.setFetchSize(page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE-1)).get() + 1));
         }
         return (List<T>) newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
     }
