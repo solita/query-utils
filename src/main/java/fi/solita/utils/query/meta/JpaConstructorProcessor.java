@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 
 import fi.solita.utils.functional.Apply;
@@ -15,7 +14,6 @@ import fi.solita.utils.meta.CommonMetadataProcessor;
 import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.query.meta.generators.ConstructorsAsJpaProjections;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes("*")
 @SupportedOptions({"JpaConstructorProcessor." + CommonMetadataProcessor.Options.enabled,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.generatedClassNamePattern,
@@ -31,6 +29,11 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
 
     public static class Options {
         public static final String makeFieldsPublic = "makeFieldsPublic";
+    }
+    
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
     }
     
     public boolean makeFieldsPublic() { return Boolean.parseBoolean(findOption(Options.makeFieldsPublic, "false")); }

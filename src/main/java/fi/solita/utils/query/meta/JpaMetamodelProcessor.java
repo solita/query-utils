@@ -10,19 +10,17 @@ import java.util.regex.Pattern;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Entity;
-import jakarta.persistence.MappedSuperclass;
 
 import fi.solita.utils.meta.CommonMetadataProcessor;
 import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.meta.generators.InstanceFieldsAsTuple;
 import fi.solita.utils.query.meta.JpaMetamodelProcessor.ExtendedGeneratorOptions;
 import fi.solita.utils.query.meta.generators.JpaMetamodel;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.MappedSuperclass;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes("*")
 @SupportedOptions({"JpaMetamodelProcessor." + CommonMetadataProcessor.Options.enabled,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.generatedClassNamePattern,
@@ -42,6 +40,11 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
     }
     
     public Pattern extendClassNamePattern() { return Pattern.compile(findOption(Options.extendClassNamePattern, "<>")); }
+    
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
     
     @Override
     public ExtendedGeneratorOptions generatorOptions() {
