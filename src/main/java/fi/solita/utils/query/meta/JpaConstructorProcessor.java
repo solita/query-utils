@@ -24,7 +24,12 @@ import fi.solita.utils.query.meta.generators.ConstructorsAsJpaProjections;
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.includePrivateMembers,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.includesAnnotation,
                    "JpaConstructorProcessor." + CommonMetadataProcessor.Options.excludesAnnotation,
-                   "JpaConstructorProcessor." + JpaConstructorProcessor.Options.makeFieldsPublic})
+                   "JpaConstructorProcessor." + JpaConstructorProcessor.Options.makeFieldsPublic,
+                   "JpaConstructorProcessor." + CommonMetadataProcessor.Options.methodsAsFunctionsEnabled,
+                   "JpaConstructorProcessor." + CommonMetadataProcessor.Options.constructorsAsFunctionsEnabled,
+                   "JpaConstructorProcessor." + CommonMetadataProcessor.Options.instanceFieldsAsEnumEnabled,
+                   "JpaConstructorProcessor." + CommonMetadataProcessor.Options.instanceFieldsAsFunctionsEnabled,
+                   "JpaConstructorProcessor." + CommonMetadataProcessor.Options.instanceFieldsAsTupleEnabled})
 public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstructorProcessor.ExtendedGeneratorOptions> {
 
     public static class Options {

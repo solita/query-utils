@@ -32,7 +32,12 @@ import jakarta.persistence.MappedSuperclass;
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.makeFieldsPublic,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.includesAnnotation,
                    "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.excludesAnnotation,
-                   "JpaMetamodelProcessor." + JpaMetamodelProcessor.Options.extendClassNamePattern})
+                   "JpaMetamodelProcessor." + JpaMetamodelProcessor.Options.extendClassNamePattern,
+                   "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.methodsAsFunctionsEnabled,
+                   "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.constructorsAsFunctionsEnabled,
+                   "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.instanceFieldsAsEnumEnabled,
+                   "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.instanceFieldsAsFunctionsEnabled,
+                   "JpaMetamodelProcessor." + CommonMetadataProcessor.Options.instanceFieldsAsTupleEnabled})
 public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGeneratorOptions> {
     
     public static class Options {
