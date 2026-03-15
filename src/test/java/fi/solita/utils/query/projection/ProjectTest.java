@@ -10,7 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
+import fi.solita.utils.functional.Tuple;
+import fi.solita.utils.functional.Tuple1;
+import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.functional.Tuple3;
+import fi.solita.utils.functional.Tuple4;
 import fi.solita.utils.query.Dao;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
@@ -178,5 +182,86 @@ public class ProjectTest extends QueryTestBase {
     @Test
     public void min_empty() {
         assertEquals(None(), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
+    }
+
+    @Test
+    public void sum() {
+        Department dep1 = new Department("a", 1);
+        Department dep2 = new Department("b", 2);
+        persist(dep1, dep2);
+
+        assertEquals(Some(3), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
+    }
+
+    @Test
+    public void sum_empty() {
+        assertEquals(None(), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
+    }
+
+    @Test
+    public void greatest() {
+        Department dep1 = new Department("aaa");
+        Department dep2 = new Department("bbb");
+        persist(dep1, dep2);
+
+        assertEquals(Some("bbb"), dao.get(query.all(Department.class), Project.greatest(Department_.mandatoryDepName)));
+    }
+
+    @Test
+    public void greatest_empty() {
+        assertEquals(None(), dao.get(query.all(Department.class), Project.greatest(Department_.mandatoryDepName)));
+    }
+
+    @Test
+    public void least() {
+        Department dep1 = new Department("aaa");
+        Department dep2 = new Department("bbb");
+        persist(dep1, dep2);
+
+        assertEquals(Some("aaa"), dao.get(query.all(Department.class), Project.least(Department_.mandatoryDepName)));
+    }
+
+    @Test
+    public void least_empty() {
+        assertEquals(None(), dao.get(query.all(Department.class), Project.least(Department_.mandatoryDepName)));
+    }
+
+    @Test
+    public void tuple1() {
+        Department dep = new Department("foo");
+        persist(dep);
+
+        String val = dao.get(query.all(Department.class), Project.value(Department_.mandatoryDepName));
+        assertEquals("foo", val);
+    }
+
+    @Test
+    public void tuple2() {
+        Department dep = new Department("foo", 42);
+        persist(dep);
+
+        Tuple2<String, Integer> tuple = dao.get(query.all(Department.class), Project.tuple(Department_.mandatoryDepName, Department_.mandatoryNumber));
+        assertEquals(Pair.of("foo", 42), tuple);
+    }
+
+    @Test
+    public void tuple4() {
+        Department dep = new Department("dep");
+        Employee emp = new Employee("bar", new Money(2), dep);
+        persist(dep, emp);
+
+        Tuple4<Option<Money>, String, Option<Money>, String> tuple = dao.get(
+            query.all(Employee.class),
+            Project.tuple(Cast.optional(Employee_.optionalSalary), Employee_.mandatoryName, Cast.optional(Employee_.optionalSalary), Employee_.mandatoryName));
+        assertEquals(Pair.of(Some(new Money(2)), "bar", Some(new Money(2)), "bar"), tuple);
+    }
+
+    @Test
+    public void value_plural() {
+        Department dep = new Department(java.util.Arrays.asList(1, 2, 3));
+        persist(dep);
+
+        java.util.List<Integer> numbers = dao.get(query.all(Department.class), Project.value(Department_.numbers));
+        assertEquals(java.util.Arrays.asList(1, 2, 3), numbers);
     }
 }

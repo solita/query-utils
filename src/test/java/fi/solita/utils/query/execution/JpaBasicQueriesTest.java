@@ -22,10 +22,12 @@ import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Municipality;
 import fi.solita.utils.query.Municipality_;
+import fi.solita.utils.query.PartTimeEmployee;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.QueryUtils.OptionalAttributeNeedOptionTypeException;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
+import jakarta.persistence.EntityNotFoundException;
 
 public class JpaBasicQueriesTest extends QueryTestBase {
 
@@ -172,6 +174,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         dao.toProxy(v, Employee_.optionalMunicipality);
     }
     
+    @Test
     public void getProxyFromEntity_succeedsIfAdditionalOptional() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
@@ -245,5 +248,56 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         assertEquals(dep.getId(), dao.find(dep.getId()).get().getId());
         em.remove(dao.get(dep.getId()));
         assertFalse(dao.find(dep.getId()).isDefined());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void get_notFound() {
+        Department dep = new Department();
+        persist(dep);
+        Id<Department> id = dep.getId();
+        em.remove(dao.get(id));
+        em.flush();
+        em.clear();
+
+        dao.get(id);
+    }
+
+    @Test
+    public void toProxy_withClass() {
+        Department dep = new Department();
+        PartTimeEmployee emp = new PartTimeEmployee("", dep);
+        persist(dep, emp);
+        em.flush();
+        em.clear();
+
+        Employee proxy = dao.toProxy(Employee.class, emp.getId());
+        assertFalse(Hibernate.isInitialized(proxy));
+        assertEquals(emp.getId(), proxy.getId());
+    }
+
+    @Test
+    public void toProxies_iterable() {
+        Department dep = new Department();
+        Employee emp1 = new Employee("a", dep);
+        Employee emp2 = new Employee("b", dep);
+        persist(dep, emp1, emp2);
+        em.flush();
+        em.clear();
+
+        Iterable<Employee> proxies = dao.toProxies(newList(emp1.getId(), emp2.getId()));
+        assertEquals(newList(emp1.getId(), emp2.getId()), newList(map(Employee_.getId, proxies)));
+    }
+
+    @Test
+    public void toProxies_classAndIterable() {
+        Department dep = new Department();
+        PartTimeEmployee emp1 = new PartTimeEmployee("a", dep);
+        PartTimeEmployee emp2 = new PartTimeEmployee("b", dep);
+        persist(dep, emp1, emp2);
+        em.flush();
+        em.clear();
+
+        Iterable<Employee> proxies = dao.toProxies(Employee.class, newList(emp1.getId(), emp2.getId()));
+        assertEquals(newList(emp1.getId(), emp2.getId()), newList(map(Employee_.getId, proxies)));
     }
 }

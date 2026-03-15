@@ -10,14 +10,21 @@ import static fi.solita.utils.functional.Option.None;
 import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.query.projection.Select.literal;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import fi.solita.utils.functional.Option;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
 
 import fi.solita.utils.query.Dao;
 import fi.solita.utils.query.Department;
@@ -50,6 +57,7 @@ import fi.solita.utils.query.Money;
 import fi.solita.utils.query.Municipality;
 import fi.solita.utils.query.Municipality_;
 import fi.solita.utils.query.Order;
+import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.Report;
 import fi.solita.utils.query.generation.Cast;
@@ -485,4 +493,238 @@ public class JpaProjectionQueriesTest extends QueryTestBase {
         
         assertEquals(2, getQueryCount() - queryCount);
     }
+
+    // --- find (optional single result) ---
+
+    @Test
+    public void find_dto_found() {
+        Department dep = new Department("foo");
+        persist(dep);
+
+        Option<Dto> dto = dao.find(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName));
+        assertTrue(dto.isDefined());
+        assertEquals(dep.getMandatoryName(), dto.get().value);
+    }
+
+    @Test
+    public void find_dto_empty() {
+        Option<Dto> dto = dao.find(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName));
+        assertFalse(dto.isDefined());
+    }
+
+    @Test(expected = NonUniqueResultException.class)
+    public void find_dto_multiple() {
+        persist(new Department("a"), new Department("b"));
+
+        dao.find(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName));
+    }
+
+    @Test
+    public void find_dto_withLock_found() {
+        Department dep = new Department("foo");
+        persist(dep);
+
+        Option<Dto> dto = dao.find(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), LockModeType.NONE);
+        assertTrue(dto.isDefined());
+        assertEquals(dep.getMandatoryName(), dto.get().value);
+    }
+
+    @Test
+    public void find_dto_withLock_empty() {
+        Option<Dto> dto = dao.find(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), LockModeType.NONE);
+        assertFalse(dto.isDefined());
+    }
+
+    // --- findFirst ---
+
+    @Test
+    public void findFirst_dto_found() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        Option<Dto> dto = dao.findFirst(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), Order.by(Department_.mandatoryDepName));
+        assertTrue(dto.isDefined());
+        assertEquals("a", dto.get().value);
+    }
+
+    @Test
+    public void findFirst_dto_empty() {
+        Option<Dto> dto = dao.findFirst(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), Order.by(Department_.mandatoryDepName));
+        assertFalse(dto.isDefined());
+    }
+
+    @Test
+    public void findFirst_dto_ordering_desc() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        Option<Dto> dto = dao.findFirst(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), Order.by(Department_.mandatoryDepName).desc);
+        assertTrue(dto.isDefined());
+        assertEquals("b", dto.get().value);
+    }
+
+    @Test
+    public void findFirst_dto_withLock_found() {
+        Department dep = new Department("foo");
+        persist(dep);
+
+        Option<Dto> dto = dao.findFirst(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), Order.by(Department_.mandatoryDepName), LockModeType.NONE);
+        assertTrue(dto.isDefined());
+        assertEquals("foo", dto.get().value);
+    }
+
+    @Test
+    public void findFirst_dto_withLock_empty() {
+        Option<Dto> dto = dao.findFirst(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), Order.by(Department_.mandatoryDepName), LockModeType.NONE);
+        assertFalse(dto.isDefined());
+    }
+
+    // --- getMany with projections ---
+
+    @Test
+    public void getMany_dto_empty() {
+        Collection<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName));
+        assertTrue(dtos.isEmpty());
+    }
+
+    @Test
+    public void getMany_dto_multiple() {
+        persist(new Department("a"), new Department("b"));
+
+        Collection<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName));
+        assertEquals(2, dtos.size());
+    }
+
+    @Test
+    public void getMany_dto_withOrdering() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), Order.by(Department_.mandatoryDepName));
+        assertEquals(newList("a", "b"), newList(head(dtos).value, last(dtos).value));
+    }
+
+    @Test
+    public void getMany_dto_withOrdering_desc() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), Order.by(Department_.mandatoryDepName).desc);
+        assertEquals(newList("b", "a"), newList(head(dtos).value, last(dtos).value));
+    }
+
+    @Test
+    public void getMany_dto_paged_withOrdering() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        List<Dto> page1 = dao.getMany(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), Page.FIRST.withSize(1), Order.by(Department_.mandatoryDepName));
+        assertEquals(1, page1.size());
+        assertEquals("a", page1.get(0).value);
+
+        List<Dto> page2 = dao.getMany(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), Page.of(1, 1), Order.by(Department_.mandatoryDepName));
+        assertEquals(1, page2.size());
+        assertEquals("b", page2.get(0).value);
+    }
+
+    @Test
+    public void getMany_dto_withLock() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        Collection<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), LockModeType.NONE);
+        assertEquals(2, dtos.size());
+    }
+
+    @Test
+    public void getMany_dto_withOrdering_withLock() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), Order.by(Department_.mandatoryDepName), LockModeType.NONE);
+        assertEquals(newList("a", "b"), newList(head(dtos).value, last(dtos).value));
+    }
+
+    @Test
+    public void getMany_dto_paged_withOrdering_withLock() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        List<Dto> page1 = dao.getMany(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), Page.FIRST.withSize(1), Order.by(Department_.mandatoryDepName), LockModeType.NONE);
+        assertEquals(1, page1.size());
+        assertEquals("a", page1.get(0).value);
+    }
+
+    // --- get with lock mode ---
+
+    @Test
+    public void get_dto_withLock() {
+        Department dep = new Department("foo");
+        persist(dep);
+
+        Dto dto = dao.get(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), LockModeType.NONE);
+        assertEquals(dep.getMandatoryName(), dto.value);
+    }
+
+    @Test(expected = NoResultException.class)
+    public void get_dto_withLock_empty() {
+        dao.get(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), LockModeType.NONE);
+    }
+
+    @Test(expected = NonUniqueResultException.class)
+    public void get_dto_withLock_multiple() {
+        persist(new Department("a"), new Department("b"));
+
+        dao.get(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName), LockModeType.NONE);
+    }
+
+    // --- get throws on missing/multiple ---
+
+    @Test(expected = NoResultException.class)
+    public void get_dto_empty() {
+        dao.get(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName));
+    }
+
+    @Test(expected = NonUniqueResultException.class)
+    public void get_dto_multiple() {
+        persist(new Department("a"), new Department("b"));
+
+        dao.get(query.all(Department.class), Dto_.$$$(literal(VALUE.a), Department_.mandatoryDepName));
+    }
+
+    // --- getMany with id projection and ordering ---
+
+    @Test
+    public void getMany_dto_id_withOrdering() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$(literal(ID.a), Department_.id), Order.by(Department_.mandatoryDepName));
+        assertEquals(dep1.getId(), head(dtos).value);
+        assertEquals(dep2.getId(), last(dtos).value);
+    }
+
+    // --- getMany with entity projection and ordering ---
+
+    @Test
+    public void getMany_dto_entity_withOrdering() {
+        Department dep = new Department();
+        Employee emp1 = new Employee("a", dep);
+        Employee emp2 = new Employee("b", dep);
+        persist(dep, emp1, emp2);
+
+        List<Dto> dtos = dao.getMany(query.all(Employee.class), Dto_.$$$$(literal(ENTITY.a), Employee_.mandatoryDepartment), Order.by(Employee_.mandatoryName));
+        assertEquals(dep, head(dtos).value);
+        assertEquals(dep, last(dtos).value);
+    }
 }
+

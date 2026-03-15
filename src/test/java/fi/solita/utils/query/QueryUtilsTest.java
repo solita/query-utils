@@ -256,4 +256,261 @@ public class QueryUtilsTest extends QueryTestBase {
         assertTrue("option", isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Project.pair(Department_.mandatoryDepName, Department_.optionSize))));
         assertTrue("option", isRequiredByQueryAttribute(Related.projection(Employee_.mandatoryDepartment, Dto_.$$$(Select.literal(Dto.VALUE.a), Department_.optionSize))));
     }
+    
+    @Test
+    public void checkOptionalAttributes_validCombinations() {
+        // Should not throw - mandatory attribute without wrapper
+        QueryUtils.checkOptionalAttributes(Employee_.mandatoryName);
+        QueryUtils.checkOptionalAttributes(Employee_.mandatoryDepartment);
+        QueryUtils.checkOptionalAttributes(Department_.mandatoryReport);
+        
+        // Should not throw - optional attribute with wrapper
+        QueryUtils.checkOptionalAttributes(Cast.optional(Employee_.optionalSalary));
+        QueryUtils.checkOptionalAttributes(Cast.optional(Employee_.optionalMunicipality));
+        QueryUtils.checkOptionalAttributes(Cast.optional(Employee_.optionalReport));
+        
+        // Should not throw - option type attribute
+        QueryUtils.checkOptionalAttributes(Employee_.optionAge);
+    }
+    
+    @Test(expected = QueryUtils.OptionalAttributeNeedOptionTypeException.class)
+    public void checkOptionalAttributes_optionalWithoutWrapper() {
+        // Optional attribute without Cast.optional wrapper should throw
+        QueryUtils.checkOptionalAttributes(Employee_.optionalSalary);
+    }
+    
+    @Test
+    public void getJavaType_field() {
+        // Test getJavaType for field member
+        Attribute<?,?> attr = Employee_.mandatoryName;
+        fi.solita.utils.functional.Option<Class<?>> type = QueryUtils.getJavaType(attr.getJavaMember());
+        assertTrue(type.isDefined());
+    }
+    
+    @Test
+    public void getJavaMember_returnsOptionOfMember() {
+        fi.solita.utils.functional.Option<java.lang.reflect.Member> member = QueryUtils.getJavaMember(Employee_.mandatoryName);
+        assertTrue(member.isDefined());
+    }
+    
+    @Test
+    public void memberIsRequiredByType_nonOptionType() {
+        // Non-Option types should be required
+        Attribute<?,?> attr = Employee_.mandatoryName;
+        assertTrue(QueryUtils.memberIsRequiredByType(attr.getJavaMember()));
+    }
+    
+    @Test
+    public void memberIsRequiredByType_optionType() {
+        // Option types should not be required
+        assertFalse(QueryUtils.memberIsRequiredByType(Employee_.optionAge.getJavaMember()));
+    }
+    
+    @Test
+    public void getElementType_singularAttribute() {
+        // Test getElementType for singular attribute
+        jakarta.persistence.metamodel.Type<?> type = QueryUtils.getElementType(Employee_.mandatoryName);
+        assertTrue(type != null);
+    }
+    
+    @Test
+    public void getElementType_pluralAttribute() {
+        // Test getElementType for plural attribute
+        jakarta.persistence.metamodel.Type<?> type = QueryUtils.getElementType(Department_.employees);
+        assertTrue(type != null);
+    }
+    
+    @Test
+    public void getAllJoins_noJoins() {
+        // Test getAllJoins with no joins
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        
+        Iterable<jakarta.persistence.criteria.Join<?,?>> joins = QueryUtils.getAllJoins(root);
+        assertFalse(joins.iterator().hasNext());
+    }
+    
+    @Test
+    public void getAllJoins_singleJoin() {
+        // Test getAllJoins with a single join
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        root.join(Employee_.mandatoryDepartment);
+        
+        Iterable<jakarta.persistence.criteria.Join<?,?>> joins = QueryUtils.getAllJoins(root);
+        assertTrue(joins.iterator().hasNext());
+    }
+    
+    @Test
+    public void getAllJoins_nestedJoins() {
+        // Test getAllJoins with nested joins
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        jakarta.persistence.criteria.Join<Employee, Department> deptJoin = root.join(Employee_.mandatoryDepartment);
+        deptJoin.join(Department_.mandatorySelfReference);
+        
+        Iterable<jakarta.persistence.criteria.Join<?,?>> joins = QueryUtils.getAllJoins(root);
+        int count = 0;
+        for (jakarta.persistence.criteria.Join<?,?> join : joins) {
+            count++;
+        }
+        assertTrue("Should have at least 2 joins (nested)", count >= 2);
+    }
+    
+    @Test
+    public void getAllFetches_noFetches() {
+        // Test getAllFetches with no fetches
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        
+        Iterable<jakarta.persistence.criteria.Fetch<?,?>> fetches = QueryUtils.getAllFetches(root);
+        assertFalse(fetches.iterator().hasNext());
+    }
+    
+    @Test
+    public void getAllFetches_singleFetch() {
+        // Test getAllFetches with a single fetch
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        root.fetch(Employee_.mandatoryDepartment);
+        
+        Iterable<jakarta.persistence.criteria.Fetch<?,?>> fetches = QueryUtils.getAllFetches(root);
+        assertTrue(fetches.iterator().hasNext());
+    }
+    
+    @Test
+    public void getAllFetches_nestedFetches() {
+        // Test getAllFetches with nested fetches
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        jakarta.persistence.criteria.Fetch<Employee, Department> deptFetch = root.fetch(Employee_.mandatoryDepartment);
+        deptFetch.fetch(Department_.mandatorySelfReference);
+        
+        Iterable<jakarta.persistence.criteria.Fetch<?,?>> fetches = QueryUtils.getAllFetches(root);
+        int count = 0;
+        for (jakarta.persistence.criteria.Fetch<?,?> fetch : fetches) {
+            count++;
+        }
+        assertTrue("Should have at least 2 fetches (nested)", count >= 2);
+    }
+    
+    @Test
+    public void join_singularAttribute() {
+        // Test join with singular attribute
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        
+        jakarta.persistence.criteria.Join<?,?> join = QueryUtils.join(root, Employee_.mandatoryDepartment, jakarta.persistence.criteria.JoinType.INNER);
+        assertTrue(join != null);
+        assertTrue(join.getAttribute().equals(Employee_.mandatoryDepartment));
+    }
+    
+    @Test
+    public void join_pluralAttribute() {
+        // Test join with plural attribute (list)
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Department> query = cb.createQuery(Department.class);
+        jakarta.persistence.criteria.Root<Department> root = query.from(Department.class);
+        
+        jakarta.persistence.criteria.Join<?,?> join = QueryUtils.join(root, Department_.employees, jakarta.persistence.criteria.JoinType.LEFT);
+        assertTrue(join != null);
+        assertTrue(join.getAttribute().equals(Department_.employees));
+    }
+    
+    @Test
+    public void get_singularAttribute() {
+        // Test get with singular attribute
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        
+        jakarta.persistence.criteria.Expression<?> expr = QueryUtils.get(root, Employee_.mandatoryName);
+        assertTrue(expr != null);
+    }
+    
+    @Test
+    public void get_pluralAttribute() {
+        // Test get with plural attribute
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Department> query = cb.createQuery(Department.class);
+        jakarta.persistence.criteria.Root<Department> root = query.from(Department.class);
+        
+        jakarta.persistence.criteria.Expression<?> expr = QueryUtils.get(root, Department_.employees);
+        assertTrue(expr != null);
+    }
+    
+    @Test
+    public void resolveSelection_withExplicitSelection() {
+        // Test resolveSelection when selection is explicitly set
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        query.select(root);
+        
+        jakarta.persistence.criteria.Selection<Employee> selection = QueryUtils.resolveSelection(query);
+        assertTrue(selection != null);
+        assertTrue(selection.equals(root));
+    }
+    
+    @Test
+    public void resolveSelection_withImplicitSelection() {
+        // Test resolveSelection when selection is implicit (matching root type)
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        // No explicit select, should use root
+        
+        jakarta.persistence.criteria.Selection<Employee> selection = QueryUtils.resolveSelection(query);
+        assertTrue(selection != null);
+    }
+    
+    @Test(expected = QueryUtils.NoOrderingSpecifiedException.class)
+    public void checkOrdering_throwsWhenOrderingRequiredButMissing() {
+        // Test checkOrdering throws when paging is used but no ordering is specified
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        
+        Page page = Page.of(0, 10); // Request paging
+        QueryUtils.checkOrdering(query, page); // Should throw - no ordering specified
+    }
+    
+    @Test
+    public void checkOrdering_doesNotThrowWhenOrderingPresent() {
+        // Test checkOrdering doesn't throw when ordering is present
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        query.orderBy(cb.asc(root.get(Employee_.id)));
+        
+        Page page = Page.of(0, 10);
+        QueryUtils.checkOrdering(query, page); // Should not throw
+    }
+    
+    @Test
+    public void checkOrdering_doesNotThrowWhenNoPaging() {
+        // Test checkOrdering doesn't throw when no paging is used
+        jakarta.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        jakarta.persistence.criteria.CriteriaQuery<Employee> query = cb.createQuery(Employee.class);
+        jakarta.persistence.criteria.Root<Employee> root = query.from(Employee.class);
+        
+        QueryUtils.checkOrdering(query, Page.NoPaging); // Should not throw
+    }
+    
+    @Test
+    public void id_returnsIdAttribute() {
+        // Test id method returns the ID attribute for an entity
+        jakarta.persistence.metamodel.SingularAttribute<Employee, ?> idAttr = 
+            QueryUtils.id(Employee.class, em.getEntityManagerFactory());
+        
+        assertTrue(idAttr != null);
+        assertTrue(idAttr.isId());
+    }
 }

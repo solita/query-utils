@@ -4,9 +4,11 @@ import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.head;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
@@ -78,5 +80,59 @@ public class SelectTest extends QueryTestBase {
                                  Project.value(Department_.mandatoryDepName))));
 
         assertEquals(dep.getMandatoryName(), name);
+    }
+    
+    @Test
+    public void literal_collection() {
+        Department dep = new Department();
+        persist(dep);
+
+        Collection<Integer> value = dao.get(query.all(Department.class), Project.value(Select.literal((Collection<Integer>)newList(42, 43))));
+        assertEquals(newList(42, 43), value);
+    }
+    
+    @Test
+    public void singularNull() {
+        Department dep = new Department();
+        persist(dep);
+
+        Integer value = dao.get(query.all(Department.class), Project.value(Select.<Department, Integer>singularNull()));
+        assertNull(value);
+    }
+    
+    @Test
+    public void collectionNull() {
+        Department dep = new Department();
+        persist(dep);
+
+        Collection<Integer> value = dao.get(query.all(Department.class), Project.value(Select.<Department, Integer>collectionNull()));
+        assertNull(value);
+    }
+    
+    @Test
+    public void setNull() {
+        Department dep = new Department();
+        persist(dep);
+
+        Set<Integer> value = dao.get(query.all(Department.class), Project.value(Select.<Department, Integer>setNull()));
+        assertNull(value);
+    }
+    
+    @Test
+    public void listNull() {
+        Department dep = new Department();
+        persist(dep);
+
+        List<Integer> value = dao.get(query.all(Department.class), Project.value(Select.<Department, Integer>listNull()));
+        assertNull(value);
+    }
+    
+    @Test
+    public void mapNull() {
+        Department dep = new Department();
+        persist(dep);
+
+        Map<String, Integer> value = dao.get(query.all(Department.class), Project.value(Select.<Department, String, Integer>mapNull()));
+        assertNull(value);
     }
 }

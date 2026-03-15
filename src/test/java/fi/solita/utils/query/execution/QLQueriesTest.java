@@ -3,14 +3,19 @@ package fi.solita.utils.query.execution;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Collection;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import fi.solita.utils.functional.Apply;
+import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Page;
@@ -116,6 +121,103 @@ public class QLQueriesTest extends QueryTestBase {
 
         assertEquals(newList(dep1.getId()), newList(map(Department_.getId, dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1)))));
         assertEquals(newList(dep2.getId()), newList(map(Department_.getId, dao.getMany(QLQuery.<Department>of("from Department order by id"), Page.FIRST.withSize(1).nextPage()))));
+    }
+
+    @Test
+    public void count_hql() {
+        persist(new Department(), new Department());
+
+        assertEquals(2, dao.count(QLQuery.<Department>of("from Department")));
+    }
+
+    @Test
+    public void count_hql_empty() {
+        assertEquals(0, dao.count(QLQuery.<Department>of("from Department")));
+    }
+
+    @Test
+    public void exists_hql_true() {
+        persist(new Department());
+
+        assertTrue(dao.exists(QLQuery.<Department>of("from Department")));
+    }
+
+    @Test
+    public void exists_hql_false() {
+        assertFalse(dao.exists(QLQuery.<Department>of("from Department")));
+    }
+
+    @Test
+    public void get_hql_with_constructor() {
+        Department dep = new Department("foo");
+        persist(dep);
+
+        String name = dao.get(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+            public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
+        });
+        assertEquals("FOO", name);
+    }
+
+    @Test
+    public void find_hql_with_constructor() {
+        Department dep = new Department("bar");
+        persist(dep);
+
+        Option<String> name = dao.find(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+            public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
+        });
+        assertEquals(Some("BAR"), name);
+    }
+
+    @Test
+    public void find_hql_with_constructor_empty() {
+        Option<String> name = dao.find(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+            public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
+        });
+        assertFalse(name.isDefined());
+    }
+
+    @Test
+    public void findFirst_hql_with_constructor() {
+        persist(new Department("first"), new Department("second"));
+
+        Option<String> name = dao.findFirst(QLQuery.<Department>of("from Department order by mandatoryDepName"), new Apply<Department, String>() {
+            public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
+        });
+        assertEquals(Some("FIRST"), name);
+    }
+
+    @Test
+    public void findFirst_hql_with_constructor_empty() {
+        Option<String> name = dao.findFirst(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+            public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
+        });
+        assertFalse(name.isDefined());
+    }
+
+    @Test
+    public void getMany_hql_with_constructor() {
+        persist(new Department("a"), new Department("b"));
+
+        Collection<String> names = dao.getMany(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+            public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
+        });
+        assertEquals(newSet("A", "B"), newSet(names));
+    }
+
+    @Test
+    public void getMany_hql_paging_with_constructor() {
+        persist(new Department("a"), new Department("b"));
+
+        Collection<String> firstPage = dao.getMany(QLQuery.<Department>of("from Department order by mandatoryDepName"), Page.FIRST.withSize(1), new Apply<Department, String>() {
+            public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
+        });
+        assertEquals(newList("A"), newList(firstPage));
+
+        Collection<String> secondPage = dao.getMany(QLQuery.<Department>of("from Department order by mandatoryDepName"), Page.FIRST.withSize(1).nextPage(), new Apply<Department, String>() {
+            public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
+        });
+        assertEquals(newList("B"), newList(secondPage));
     }
 
 }

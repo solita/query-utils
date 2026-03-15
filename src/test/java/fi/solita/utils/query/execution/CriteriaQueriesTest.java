@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -176,6 +177,150 @@ public class CriteriaQueriesTest extends QueryTestBase {
         persist(dep, emp);
 
         assertEquals(newList(emp.getId()), newList(map(Employee_.getId, dao.getMany(query.related(dep, Department_.employees), Page.of(0, 2)))));
+    }
+
+    @Test
+    public void count_withLock() {
+        Department dep1 = new Department();
+        Department dep2 = new Department();
+        persist(dep1, dep2);
+
+        assertEquals(2, dao.count(query.all(Department.class), LockModeType.NONE));
+        assertEquals(0, dao.count(query.all(Employee.class), LockModeType.NONE));
+    }
+
+    @Test
+    public void exists_withLock() {
+        persist(new Department());
+
+        assertTrue(dao.exists(query.all(Department.class), LockModeType.NONE));
+        assertFalse(dao.exists(query.all(Employee.class), LockModeType.NONE));
+    }
+
+    @Test
+    public void get_withLock() {
+        Department dep = new Department();
+        persist(dep);
+
+        assertEquals(dep.getId(), dao.get(query.single(dep.getId()), LockModeType.NONE).getId());
+    }
+
+    @Test(expected = NoResultException.class)
+    public void get_withLock_empty() {
+        dao.get(query.all(Department.class), LockModeType.NONE);
+    }
+
+    @Test(expected = NonUniqueResultException.class)
+    public void get_withLock_multiple() {
+        persist(new Department(), new Department());
+
+        dao.get(query.all(Department.class), LockModeType.NONE);
+    }
+
+    @Test
+    public void find_withLock() {
+        Department dep = new Department();
+        persist(dep);
+
+        assertEquals(dep.getId(), dao.find(query.single(dep.getId()), LockModeType.NONE).get().getId());
+    }
+
+    @Test
+    public void find_withLock_empty() {
+        assertFalse(dao.find(query.all(Department.class), LockModeType.NONE).isDefined());
+    }
+
+    @Test(expected = NonUniqueResultException.class)
+    public void find_withLock_multiple() {
+        persist(new Department(), new Department());
+
+        dao.find(query.all(Department.class), LockModeType.NONE);
+    }
+
+    @Test
+    public void findFirst_withLock() {
+        persist(new Department());
+
+        assertTrue(dao.findFirst(allDepartmentsOrdered(), LockModeType.NONE).isDefined());
+    }
+
+    @Test
+    public void findFirst_withLock_empty() {
+        assertFalse(dao.findFirst(allDepartmentsOrdered(), LockModeType.NONE).isDefined());
+    }
+
+    @Test
+    public void findFirst_withOrdering_found() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        assertEquals(dep1.getId(), dao.findFirst(query.all(Department.class), Order.by(Department_.mandatoryDepName)).get().getId());
+        assertEquals(dep2.getId(), dao.findFirst(query.all(Department.class), Order.by(Department_.mandatoryDepName).desc).get().getId());
+    }
+
+    @Test
+    public void findFirst_withOrdering_empty() {
+        assertFalse(dao.findFirst(query.all(Department.class), Order.by(Department_.mandatoryDepName)).isDefined());
+    }
+
+    @Test
+    public void findFirst_withOrdering_withLock() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        assertEquals(dep1.getId(), dao.findFirst(query.all(Department.class), Order.by(Department_.mandatoryDepName), LockModeType.NONE).get().getId());
+        assertEquals(dep2.getId(), dao.findFirst(query.all(Department.class), Order.by(Department_.mandatoryDepName).desc, LockModeType.NONE).get().getId());
+    }
+
+    @Test
+    public void getMany_withLock() {
+        Department dep1 = new Department();
+        Department dep2 = new Department();
+        persist(dep1, dep2);
+
+        assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(map(Department_.getId, dao.getMany(query.all(Department.class), LockModeType.NONE))));
+    }
+
+    @Test
+    public void getMany_withOrdering() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        assertEquals(newList(dep1.getId(), dep2.getId()), newList(map(Department_.getId, dao.getMany(query.all(Department.class), Order.by(Department_.mandatoryDepName)))));
+        assertEquals(newList(dep2.getId(), dep1.getId()), newList(map(Department_.getId, dao.getMany(query.all(Department.class), Order.by(Department_.mandatoryDepName).desc))));
+    }
+
+    @Test
+    public void getMany_paged_withOrdering_iterable() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        assertEquals(newList(dep1.getId()), newList(map(Department_.getId, dao.getMany(query.all(Department.class), Page.FIRST.withSize(1), Order.by(Department_.mandatoryDepName)))));
+        assertEquals(newList(dep2.getId()), newList(map(Department_.getId, dao.getMany(query.all(Department.class), Page.FIRST.withSize(1), Order.by(Department_.mandatoryDepName).desc))));
+    }
+
+    @Test
+    public void getMany_withOrdering_withLock() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        assertEquals(newList(dep1.getId(), dep2.getId()), newList(map(Department_.getId, dao.getMany(query.all(Department.class), Order.by(Department_.mandatoryDepName), LockModeType.NONE))));
+        assertEquals(newList(dep2.getId(), dep1.getId()), newList(map(Department_.getId, dao.getMany(query.all(Department.class), Order.by(Department_.mandatoryDepName).desc, LockModeType.NONE))));
+    }
+
+    @Test
+    public void getMany_paged_withOrdering_withLock() {
+        Department dep1 = new Department("a");
+        Department dep2 = new Department("b");
+        persist(dep1, dep2);
+
+        assertEquals(newList(dep1.getId()), newList(map(Department_.getId, dao.getMany(query.all(Department.class), Page.FIRST.withSize(1), Order.by(Department_.mandatoryDepName), LockModeType.NONE))));
+        assertEquals(newList(dep2.getId()), newList(map(Department_.getId, dao.getMany(query.all(Department.class), Page.FIRST.withSize(1), Order.by(Department_.mandatoryDepName).desc, LockModeType.NONE))));
     }
 
     private CriteriaQuery<Department> allDepartmentsOrdered() {
