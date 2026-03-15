@@ -5,7 +5,6 @@ import static fi.solita.utils.functional.Collections.newMutableList;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.filter;
-import static fi.solita.utils.functional.Functional.find;
 import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.map;
@@ -78,7 +77,6 @@ import fi.solita.utils.meta.Helpers;
 import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.meta.generators.GeneratorOptions;
 import fi.solita.utils.query.EntityRepresentation;
-import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
 
 public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaProjections.Options> {

@@ -124,6 +124,7 @@ public class JpaCriteriaQuery {
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
+        @SuppressWarnings("unchecked")
         Path<A> path = (Path<A>)root.get(first);
         query.where(cb.equal(path.get(QueryUtils.id(bindable, emf.get())), firstId));
         return query;
@@ -177,7 +178,9 @@ public class JpaCriteriaQuery {
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
+        @SuppressWarnings("unchecked")
         Path<A> a = (Path<A>)root.get(first);
+        @SuppressWarnings("unchecked")
         Path<B> b = (Path<B>)root.get(second);
         query.where(cb.equal(a.get(QueryUtils.id(bindable1, emf.get())), firstId),
                     cb.equal(b.get(QueryUtils.id(bindable2, emf.get())), secondId));
@@ -237,8 +240,11 @@ public class JpaCriteriaQuery {
         CriteriaQuery<E> query = (CriteriaQuery<E>) cb.createQuery();
         Root<E> root = query.from(rootType);
         query.select(root);
+        @SuppressWarnings("unchecked")
         Path<A> a = (Path<A>)root.get(first);
+        @SuppressWarnings("unchecked")
         Path<B> b = (Path<B>)root.get(second);
+        @SuppressWarnings("unchecked")
         Path<C> c = (Path<C>)root.get(third);
         query.where(cb.equal(a.get(QueryUtils.id(bindable1, emf.get())), firstId),
                     cb.equal(b.get(QueryUtils.id(bindable2, emf.get())), secondId),

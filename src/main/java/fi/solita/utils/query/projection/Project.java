@@ -13,7 +13,6 @@ import fi.solita.utils.functional.Function;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple;
-import fi.solita.utils.functional.Tuple1;
 import fi.solita.utils.functional.Tuple10;
 import fi.solita.utils.functional.Tuple11;
 import fi.solita.utils.functional.Tuple12;
@@ -168,14 +167,6 @@ public class Project {
         checkOptionalAttributes(left);
         checkOptionalAttributes(right);
         return Constructors.pair(left, right);
-    }
-
-    /**
-     * Project the query result to the value of <i>t1</i>.
-     */
-    @SuppressWarnings("unchecked")
-    public static <E, T1> MetaJpaConstructor<E,Tuple1<T1>,Tuple1<T1>> tuple(Attribute<? super E, ? extends T1> t1) {
-        return makeTuple(t1);
     }
 
     /**
