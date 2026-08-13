@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fi.solita.utils</groupId>
     <artifactId>query-utils</artifactId>
-    <version>0.13.22</version>
+    <version>0.13.23</version>
     <build>
         <resources>
                 <resource>
@@ -115,12 +115,12 @@
         <dependency>
             <groupId>fi.solita.utils</groupId>
             <artifactId>functional-utils</artifactId>
-            <version>0.12.72</version>
+            <version>0.12.87</version>
         </dependency>
         <dependency>
             <groupId>fi.solita.utils</groupId>
             <artifactId>meta-utils</artifactId>
-            <version>0.12.41</version>
+            <version>0.12.43</version>
         </dependency>
         <dependency>
             <groupId>jakarta.persistence</groupId>
