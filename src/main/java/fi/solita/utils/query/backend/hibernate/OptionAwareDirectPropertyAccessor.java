@@ -3,7 +3,6 @@ package fi.solita.utils.query.backend.hibernate;
 import static fi.solita.utils.functional.Functional.find;
 import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.FunctionalA.concat;
-import static fi.solita.utils.functional.Predicates.equalTo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -54,7 +53,7 @@ public class OptionAwareDirectPropertyAccessor implements PropertyAccessStrategy
     }
     
     private static Getter getGetter(final Class theClass, final String propertyName) throws PropertyNotFoundException {
-        final Field field = find(OptionAwareDirectPropertyAccessor_.fieldName.andThen(equalTo(propertyName)), fields(theClass)).get();
+        final Field field = find(x -> fieldName(x).equals(propertyName), fields(theClass)).get();
         final boolean isOption = Option.class.isAssignableFrom(field.getType());
         return new Getter() {
             @Override
@@ -101,7 +100,7 @@ public class OptionAwareDirectPropertyAccessor implements PropertyAccessStrategy
     }
 
     private static Setter getSetter(final Class theClass, final String propertyName) throws PropertyNotFoundException {
-        final Field field = find(OptionAwareDirectPropertyAccessor_.fieldName.andThen(equalTo(propertyName)), fields(theClass)).get();
+        final Field field = find(x -> fieldName(x).equals(propertyName), fields(theClass)).get();
         final boolean isOption = Option.class.isAssignableFrom(field.getType());
         return new Setter() {
             @Override

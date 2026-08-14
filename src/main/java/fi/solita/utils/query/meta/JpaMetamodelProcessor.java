@@ -12,6 +12,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 
+import fi.solita.utils.functional.Functional;
 import fi.solita.utils.meta.CommonMetadataProcessor;
 import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.meta.generators.InstanceFieldsAsTuple;
@@ -129,7 +130,7 @@ public class JpaMetamodelProcessor extends CommonMetadataProcessor<ExtendedGener
     }
 
     public List<Generator<? super ExtendedGeneratorOptions>> generators() {
-        return newList(remove(InstanceFieldsAsTuple.instance, // doesn't work with inheritance in java8
-                       cons(JpaMetamodel.instance, super.generators())));
+        return newList(Functional.<Generator<? super ExtendedGeneratorOptions>>remove(InstanceFieldsAsTuple.instance, // doesn't work with inheritance in java8
+                                          cons(JpaMetamodel.instance, super.generators())));
     }
 }

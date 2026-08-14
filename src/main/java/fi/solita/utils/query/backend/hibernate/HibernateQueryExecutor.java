@@ -24,7 +24,6 @@ import org.hibernate.type.BasicTypeReference;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
-import fi.solita.utils.functional.Transformers;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
@@ -181,7 +180,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     }
 
     private static final org.hibernate.query.NativeQuery<?> bindTransformer(org.hibernate.query.NativeQuery<?> q, NativeQuery<?> query) {
-        String[] retvals = newArray(String.class, map(Transformers.<String>left(), query.retvals));
+        String[] retvals = newArray(String.class, map(Pair::left, query.retvals));
         final OptionResultTransformer resultTransformer = new OptionResultTransformer(query.retvals);
         if (query instanceof NativeQuery.NativeQuerySingleEntity ||
             query instanceof NativeQuery.NativeQueryT1 ||

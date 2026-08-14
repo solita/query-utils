@@ -105,7 +105,7 @@ public class QueryUtils {
     
     public static final Pred<Class<?>> ImplementsProjectWithRegularInClause = new Pred<Class<?>>() {
         @Override
-        public Boolean apply(Class<?> candidate) {
+        public boolean test(Class<?> candidate) {
             return ProjectWithRegularInClause.class.isAssignableFrom(candidate);
         }
     };

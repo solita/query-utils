@@ -28,7 +28,6 @@ import static fi.solita.utils.functional.FunctionalM.find;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
 import static fi.solita.utils.functional.Predicates.lessThanOrEqualTo;
-import static fi.solita.utils.functional.Predicates.not;
 import static fi.solita.utils.query.QueryUtils.addListAttributeOrdering;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 import static fi.solita.utils.query.QueryUtils.id;
@@ -52,6 +51,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -364,7 +364,7 @@ public class ProjectionHelper {
             ProjectionUtil.doRestrictions(r, target);
         }
         
-        Iterable<Class<?>> allEntities = filter(not(Predicates.isNull()), map(ProjectionHelper_.javaType, actualJoins.keySet()));
+        Iterable<Class<?>> allEntities = filter(Objects::nonNull, map(ProjectionHelper_.javaType, actualJoins.keySet()));
         if (logger.isDebugEnabled()) {
             allEntities = newList(allEntities);
             logger.debug("All entities: {}", allEntities);

@@ -14,8 +14,6 @@ import static fi.solita.utils.functional.Functional.zipWithIndex;
 import static fi.solita.utils.functional.FunctionalC.repeat;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Option.Some;
-import static fi.solita.utils.functional.Predicates.not;
-import static fi.solita.utils.functional.Transformers.prepend;
 import static fi.solita.utils.meta.Helpers.boxed;
 import static fi.solita.utils.meta.Helpers.containedType;
 import static fi.solita.utils.meta.Helpers.element2Constructors;
@@ -100,12 +98,12 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
         if (options.onlyPublicMembers()) {
             elements = filter(publicElement, elements);
         } else if (!options.includePrivateMembers()) {
-            elements = filter(not(privateElement), elements);
+            elements = filter(privateElement.negate()::test, elements);
         }
         // include only constructors/methods annotated with includesAnnotation, or all of them is present on class
         elements = filter(new Pred<ExecutableElement>() {
             @Override
-            public Boolean apply(ExecutableElement candidate) {
+            public boolean test(ExecutableElement candidate) {
                 return options.includesAnnotation().isEmpty() || // no includesAnnotation -> include all
                        withAnnotations(options.includesAnnotation(), false).apply(source) || // annotation present on this class
                        withAnnotations(options.includesAnnotation(), false).apply(candidate); // annotation present on this contructor
@@ -211,8 +209,8 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             String returnTypeImported = importTypes(elementGenericQualifiedName(enclosingElement));
 
             List<String> argumentTypes = newList(map(qualifiedName.andThen(boxed).andThen(helpersImportTypes), element.getParameters()));
-            List<String> argumentNames = argCount == 0 ? Collections.<String>newMutableList() : newList(map(toString.andThen(prepend("$p")), range(1, argCount)));
-            List<String> attributeNames = argCount == 0 ? Collections.<String>newMutableList() : newList(map(toString.andThen(prepend("$a")), range(1, argCount)));
+            List<String> argumentNames = argCount == 0 ? Collections.<String>newMutableList() : newList(map(x -> "$p" + x.toString(), range(1, argCount)));
+            List<String> attributeNames = argCount == 0 ? Collections.<String>newMutableList() : newList(map(x -> "$a" + x.toString(), range(1, argCount)));
             List<? extends TypeParameterElement> relevantTypeParamsForConstructor = newList(relevantTypeParams(element));
             List<String> relevantTypeParams = newList(map(typeParameter2String, relevantTypeParamsForConstructor));
             
@@ -271,7 +269,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             );
 
             return concat(
-                Some(declaration + "(" + mkString(", ", map(joinWithSpace, zip(map(prepend("final "), attributeTypes), attributeNames))) + ") {"),
+                Some(declaration + "(" + mkString(", ", map(joinWithSpace, zip(map(x -> "final " + x, attributeTypes), attributeNames))) + ") {"),
                 map(padding, concat(
                     Some("return new " + fundef + "(" + mkString(", ", cons(importTypes(enclosingElementQualifiedName) + ".class", reflectionInvokationArgs(parameterTypesAsClasses(element, relevantTypeParamsForConstructor)))) + ") {"),
                     map(padding, body),

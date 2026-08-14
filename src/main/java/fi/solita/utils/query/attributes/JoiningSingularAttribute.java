@@ -34,7 +34,7 @@ class JoiningSingularAttribute<E,R> extends SingularAttributeProxy<E,R> implemen
     public boolean isOptional() {
         return exists(new Pred<SingularAttribute<?,?>>() {
             @Override
-            public Boolean apply(SingularAttribute<?, ?> candidate) {
+            public boolean test(SingularAttribute<?, ?> candidate) {
                 return candidate.isOptional();
             }
         }, attributes);

@@ -9,7 +9,6 @@ import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.zip;
 import static fi.solita.utils.functional.FunctionalS.range;
-import static fi.solita.utils.functional.Predicates.not;
 import static fi.solita.utils.query.QueryUtils.isRequiredByMetamodel;
 import static fi.solita.utils.query.QueryUtils.isRequiredByQueryAttribute;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
@@ -193,11 +192,11 @@ class ProjectionResultUtil {
             return resultFromDb;
         }
         if (resultFromDb instanceof List) {
-            ret = newList(map(optionGet, filter(not(isNoneOrNull), (Collection<?>)resultFromDb)));
+            ret = newList(map(optionGet, filter(x -> !isNoneOrNull(x), (Collection<?>)resultFromDb)));
         } else if (resultFromDb instanceof SortedSet) {
-            ret = new TreeSet<Object>(newList(map(optionGet, filter(not(isNoneOrNull), (Collection<?>)resultFromDb))));
+            ret = new TreeSet<Object>(newList(map(optionGet, filter(x -> !isNoneOrNull(x), (Collection<?>)resultFromDb))));
         } else if (resultFromDb instanceof Set) {
-            ret = newSet(map(optionGet, filter(not(isNoneOrNull), (Collection<?>)resultFromDb)));
+            ret = newSet(map(optionGet, filter(x -> !isNoneOrNull(x), (Collection<?>)resultFromDb)));
         } else {
             ret = resultFromDb;
         }

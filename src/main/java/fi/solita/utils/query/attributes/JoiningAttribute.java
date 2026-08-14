@@ -25,7 +25,7 @@ import fi.solita.utils.functional.Pred;
 public interface JoiningAttribute {
     public static Pred<Attribute<?,?>> illegalContainedAttribute = new Pred<Attribute<?,?>>() {
         @Override
-        public Boolean apply(Attribute<?, ?> candidate) {
+        public boolean test(Attribute<?, ?> candidate) {
             return candidate instanceof PseudoAttribute ||
                    candidate instanceof AdditionalQueryPerformingAttribute ||
                    candidate instanceof RestrictingAttribute;
