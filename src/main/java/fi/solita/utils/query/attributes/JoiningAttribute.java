@@ -12,9 +12,8 @@ import jakarta.persistence.metamodel.CollectionAttribute;
 import jakarta.persistence.metamodel.ListAttribute;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
-
-import fi.solita.utils.functional.Predicate;
-import fi.solita.utils.functional.Transformer;
+import fi.solita.utils.functional.Apply;
+import fi.solita.utils.functional.Pred;
 
 /**
  * 
@@ -24,9 +23,9 @@ import fi.solita.utils.functional.Transformer;
  * attribute itself, thus changing the resulting type of the original attribute.
  */
 public interface JoiningAttribute {
-    public static Predicate<Attribute<?,?>> illegalContainedAttribute = new Predicate<Attribute<?,?>>() {
+    public static Pred<Attribute<?,?>> illegalContainedAttribute = new Pred<Attribute<?,?>>() {
         @Override
-        public boolean accept(Attribute<?, ?> candidate) {
+        public Boolean apply(Attribute<?, ?> candidate) {
             return candidate instanceof PseudoAttribute ||
                    candidate instanceof AdditionalQueryPerformingAttribute ||
                    candidate instanceof RestrictingAttribute;
@@ -139,9 +138,9 @@ public interface JoiningAttribute {
         
         
         static <A extends Attribute<?,?> & JoiningAttribute> String joiningAttributeToString(A a) {
-            return a.getClass().getSimpleName() + "(" + mkString("->", map(new Transformer<Attribute<?,?>,String>() {
+            return a.getClass().getSimpleName() + "(" + mkString("->", map(new Apply<Attribute<?,?>,String>() {
                 @Override
-                public String transform(Attribute<?,?> source) {
+                public String apply(Attribute<?,?> source) {
                     return source.getDeclaringType() == null ? "?" : source.getDeclaringType().getJavaType().getSimpleName() + "." + source.getName();
                 }
             }, a.getAttributes())) + ")";

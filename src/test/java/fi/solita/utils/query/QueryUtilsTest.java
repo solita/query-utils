@@ -11,20 +11,19 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import jakarta.persistence.metamodel.Attribute;
-
 import org.junit.Test;
 
 import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Predicate;
+import fi.solita.utils.functional.Pred;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.projection.Project;
 import fi.solita.utils.query.projection.Related;
 import fi.solita.utils.query.projection.Select;
+import jakarta.persistence.metamodel.Attribute;
 
 public class QueryUtilsTest extends QueryTestBase {
     
-    static final List<? extends Predicate<Attribute<?,?>>> bothFunctions = newList(isRequiredByMetamodel, isRequiredByQueryAttribute);
+    static final List<? extends Pred<Attribute<?,?>>> bothFunctions = newList(isRequiredByMetamodel, isRequiredByQueryAttribute);
 
     @Test
     public void selfAttributeAndLiteralAttributesAreAlwaysRequired() throws Exception {

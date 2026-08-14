@@ -71,8 +71,7 @@ import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Function1;
 import fi.solita.utils.functional.Function3;
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.functional.Predicate;
-import fi.solita.utils.functional.Transformer;
+import fi.solita.utils.functional.Pred;
 import fi.solita.utils.meta.Helpers;
 import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.meta.generators.GeneratorOptions;
@@ -104,12 +103,12 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             elements = filter(not(privateElement), elements);
         }
         // include only constructors/methods annotated with includesAnnotation, or all of them is present on class
-        elements = filter(new Predicate<ExecutableElement>() {
+        elements = filter(new Pred<ExecutableElement>() {
             @Override
-            public boolean accept(ExecutableElement candidate) {
+            public Boolean apply(ExecutableElement candidate) {
                 return options.includesAnnotation().isEmpty() || // no includesAnnotation -> include all
-                       withAnnotations(options.includesAnnotation(), false).accept(source) || // annotation present on this class
-                       withAnnotations(options.includesAnnotation(), false).accept(candidate); // annotation present on this contructor
+                       withAnnotations(options.includesAnnotation(), false).apply(source) || // annotation present on this class
+                       withAnnotations(options.includesAnnotation(), false).apply(candidate); // annotation present on this contructor
             }
         }, elements);
 
@@ -117,9 +116,9 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
         return flatMap(singleElementTransformer, zipWithIndex(elements));
     }
     
-    static Transformer<CharSequence,String> helpersImportTypes = new Transformer<CharSequence,String>() {
+    static Apply<CharSequence,String> helpersImportTypes = new Apply<CharSequence,String>() {
         @Override
-        public String transform(CharSequence source) {
+        public String apply(CharSequence source) {
             return Helpers.importTypes(source);
         }
     };

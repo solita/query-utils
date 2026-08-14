@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.persistence.metamodel.Attribute;
-
-import fi.solita.utils.functional.Transformer;
+import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Tuple0;
 import fi.solita.utils.functional.Tuple10;
 import fi.solita.utils.functional.Tuple11;
@@ -303,9 +302,9 @@ public interface MetaJpaConstructor<OWNER,R,PARAMS> extends MetaConstructor<PARA
             return className.apply(c.getClass()) + "(" + mkString(",", map(className, c.getConstructorParameterTypes())) + ")";
         }
         
-        public static final Transformer<Class<?>,String> className = new Transformer<Class<?>,String>() {
+        public static final Apply<Class<?>,String> className = new Apply<Class<?>,String>() {
             @Override
-            public String transform(Class<?> source) {
+            public String apply(Class<?> source) {
                 return source.getName().replaceAll("([^.])[^.]+\\.", "$1.");
             }
         };
