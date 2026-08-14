@@ -10,7 +10,7 @@ import java.util.List;
 import org.hibernate.metamodel.model.domain.ManagedDomainType;
 import org.hibernate.metamodel.model.domain.SingularPersistentAttribute;
 
-import fi.solita.utils.functional.Predicate;
+import fi.solita.utils.functional.Pred;
 import jakarta.persistence.metamodel.SingularAttribute;
 
 class JoiningSingularAttribute<E,R> extends SingularAttributeProxy<E,R> implements JoiningAttribute, SingularPersistentAttribute<E,R> {
@@ -32,9 +32,9 @@ class JoiningSingularAttribute<E,R> extends SingularAttributeProxy<E,R> implemen
 
     @Override
     public boolean isOptional() {
-        return exists(new Predicate<SingularAttribute<?,?>>() {
+        return exists(new Pred<SingularAttribute<?,?>>() {
             @Override
-            public boolean accept(SingularAttribute<?, ?> candidate) {
+            public Boolean apply(SingularAttribute<?, ?> candidate) {
                 return candidate.isOptional();
             }
         }, attributes);

@@ -10,8 +10,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Pair;
-import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple1;
 import fi.solita.utils.functional.Tuple3;
@@ -209,17 +209,17 @@ public class TupleResultTransformerTest {
     public void getter_returnsCorrectValue_forKnownAlias() {
         List<String> aliases = Arrays.asList("x", "y", "z");
         Object[] tuple = new Object[]{"vx", "vy", "vz"};
-        Transformer<String, Object> getter = TupleResultTransformer.getter(aliases, tuple);
-        assertEquals("vx", getter.transform("x"));
-        assertEquals("vy", getter.transform("y"));
-        assertEquals("vz", getter.transform("z"));
+        Apply<String, Object> getter = TupleResultTransformer.getter(aliases, tuple);
+        assertEquals("vx", getter.apply("x"));
+        assertEquals("vy", getter.apply("y"));
+        assertEquals("vz", getter.apply("z"));
     }
 
     @Test
     public void getter_returnsNull_whenValueIsNull() {
         List<String> aliases = Arrays.asList("a", "b");
         Object[] tuple = new Object[]{null, "v"};
-        Transformer<String, Object> getter = TupleResultTransformer.getter(aliases, tuple);
-        assertEquals(null, getter.transform("a"));
+        Apply<String, Object> getter = TupleResultTransformer.getter(aliases, tuple);
+        assertEquals(null, getter.apply("a"));
     }
 }

@@ -74,13 +74,13 @@ import jakarta.persistence.metamodel.SingularAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Apply3;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Either;
 import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Predicates;
-import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
@@ -225,10 +225,10 @@ public class ProjectionHelper {
         logger.debug("doAdditionalQuery({},{},{},{},{},{})", new Object[] {projectionType, attr, isId, isWrapperOfIds, isDistinctable, sourceIdsToQuery});
         final Map<?, List<Object>> targetQueryResults = queryTargetsOfSources(attr, isId, isWrapperOfIds, isDistinctable, newSet(sourceIdsToQuery));
 
-        Iterable<List<Object>> results = map(new Transformer<Object,List<Object>>() {
+        Iterable<List<Object>> results = map(new Apply<Object,List<Object>>() {
             @SuppressWarnings("unchecked")
             @Override
-            public List<Object> transform(Object source) {
+            public List<Object> apply(Object source) {
                 return find(source, (Map<Object,List<Object>>)targetQueryResults).getOrElse(emptyList());
             }
         }, sourceIdsToQuery);
@@ -242,15 +242,15 @@ public class ProjectionHelper {
         Collection<Object[]> results = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds);
         
         @SuppressWarnings("unchecked")
-        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(new Transformer<Object[],Object>() {
+        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(new Apply<Object[],Object>() {
             @Override
-            public Object transform(Object[] source) {
+            public Object apply(Object[] source) {
                 return head(source);
             }
         }, results);
-        Iterable<Iterable<Object>> actualResultRows = map(new Transformer<Object[],Iterable<Object>>() {
+        Iterable<Iterable<Object>> actualResultRows = map(new Apply<Object[],Iterable<Object>>() {
             @Override
-            public Iterable<Object> transform(Object[] source) {
+            public Iterable<Object> apply(Object[] source) {
                 return tail(source);
             }
         }, results);
@@ -266,17 +266,17 @@ public class ProjectionHelper {
                 logger.debug("Target is AdditionalQueryPerformingAttribute. Finalizing: {}", target);
                 result = finalizeProjectingQuery(rel.get().getConstructor(), actualResultRows);
             } else {
-                if (!isEmpty(flatMap(new Transformer<Iterable<Object>,Iterable<Object>>() {
+                if (!isEmpty(flatMap(new Apply<Iterable<Object>,Iterable<Object>>() {
                     @Override
-                    public Iterable<Object> transform(Iterable<Object> source) {
+                    public Iterable<Object> apply(Iterable<Object> source) {
                         return tail(source);
                     }
                 }, actualResultRows))) {
                     throw new RuntimeException("whoops");
                 }
-                result = map(new Transformer<Iterable<Object>,Object>() {
+                result = map(new Apply<Iterable<Object>,Object>() {
                     @Override
-                    public Object transform(Iterable<Object> source) {
+                    public Object apply(Iterable<Object> source) {
                         return ProjectionResultUtil.postProcessValue(target, head(source));
                     }
                 }, actualResultRows);
@@ -423,9 +423,9 @@ public class ProjectionHelper {
 
         Collection<Object[]> ret = queryExecutor.getMany(query, Page.NoPaging, LockModeType.NONE);
         if (logger.isDebugEnabled()) {
-            logger.debug("queryTargets -> {}", newList(map(new Transformer<Object[],String>() {
+            logger.debug("queryTargets -> {}", newList(map(new Apply<Object[],String>() {
                 @Override
-                public String transform(Object[] source) {
+                public String apply(Object[] source) {
                     return Arrays.toString(source);
                 }
             }, ret)));

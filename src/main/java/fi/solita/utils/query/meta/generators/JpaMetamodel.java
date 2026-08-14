@@ -43,10 +43,11 @@ import jakarta.persistence.Transient;
 import fi.solita.utils.meta.Helpers;
 import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.meta.generators.GeneratorOptions;
+import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Pair;
+import fi.solita.utils.functional.Pred;
 import fi.solita.utils.functional.Predicate;
-import fi.solita.utils.functional.Transformer;
 
 /**
  * Note! This implementation is not based on any spec, so it may not work correctly for all situations.
@@ -58,21 +59,21 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
     
     public static JpaMetamodel instance = new JpaMetamodel();
 
-    public static final Predicate<Element> withModifier(final Modifier modifier) {
-        return new Predicate<Element>() {
+    public static final Pred<Element> withModifier(final Modifier modifier) {
+        return new Pred<Element>() {
             @Override
-            public boolean accept(Element candidate) {
+            public Boolean apply(Element candidate) {
                 return candidate.getModifiers().contains(modifier);
             }
         };
     }
     
-    public static final Predicate<Element> isTransient = withModifier(Modifier.TRANSIENT).or(withAnnotations(Transient.class.getName(), false));
+    public static final Pred<Element> isTransient = Predicate.of(withModifier(Modifier.TRANSIENT)).or(withAnnotations(Transient.class.getName(), false));
     
-    public static final Predicate<Element> isPersistentClass = 
-        withAnnotations(Entity.class.getName(), false).or(
-        withAnnotations(MappedSuperclass.class.getName(), false).or(
-        withAnnotations(Embeddable.class.getName(), false)));
+    public static final Pred<Element> isPersistentClass = 
+        Predicate.of(withAnnotations(Entity.class.getName(), false)).or(
+        withAnnotations(MappedSuperclass.class.getName(), false)).or(
+        withAnnotations(Embeddable.class.getName(), false));
     
     @Override
     public Iterable<String> apply(ProcessingEnvironment processingEnv, Options options, TypeElement source) {
@@ -83,16 +84,16 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
         Access classAccess = source.getAnnotation(Access.class);
         final AccessType defaultAccess = classAccess == null ? resolveAccessTypeFromId(source) : classAccess.value();
         
-        Iterable<? extends Element> fields = filter(not(isTransient).and(new Predicate<Element>() {
+        Iterable<? extends Element> fields = filter(not(isTransient).and(new Pred<Element>() {
             @Override
-            public boolean accept(Element candidate) {
+            public Boolean apply(Element candidate) {
                 Access acc = candidate.getAnnotation(Access.class);
                 return defaultAccess == AccessType.FIELD && acc == null || acc != null && acc.value() == AccessType.FIELD;
             }
         }), element2Fields.apply(source));
-        Iterable<? extends Element> methods = filter(not(isTransient).and(new Predicate<Element>() {
+        Iterable<? extends Element> methods = filter(not(isTransient).and(new Pred<Element>() {
             @Override
-            public boolean accept(Element candidate) {
+            public Boolean apply(Element candidate) {
                 Access acc = candidate.getAnnotation(Access.class);
                 return defaultAccess == AccessType.PROPERTY && acc == null || acc != null && acc.value() == AccessType.PROPERTY;
             }
@@ -138,9 +139,9 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
                                    isCollection ? "Collection" :
                                    "Singular";
             
-            Iterable<Pair<String, String>> classTypeParameters = map(new Transformer<TypeParameterElement, Pair<String,String>>() {
+            Iterable<Pair<String, String>> classTypeParameters = map(new Apply<TypeParameterElement, Pair<String,String>>() {
                 @Override
-                public Pair<String, String> transform(TypeParameterElement source) {
+                public Pair<String, String> apply(TypeParameterElement source) {
                     return Pair.of(simpleName.apply(source), typeParameter2String.apply(source));
                 }
             }, enclosingElement.getTypeParameters());

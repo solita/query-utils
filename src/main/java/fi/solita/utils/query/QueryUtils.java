@@ -39,7 +39,7 @@ import org.hibernate.query.sqm.tree.expression.SqmExpression;
 
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.functional.Transformer;
+import fi.solita.utils.functional.Pred;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Order.Direction;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
@@ -103,9 +103,9 @@ public class QueryUtils {
         }
     }
     
-    public static final fi.solita.utils.functional.Predicate<Class<?>> ImplementsProjectWithRegularInClause = new fi.solita.utils.functional.Predicate<Class<?>>() {
+    public static final Pred<Class<?>> ImplementsProjectWithRegularInClause = new Pred<Class<?>>() {
         @Override
-        public boolean accept(Class<?> candidate) {
+        public Boolean apply(Class<?> candidate) {
             return ProjectWithRegularInClause.class.isAssignableFrom(candidate);
         }
     };
@@ -329,18 +329,18 @@ public class QueryUtils {
     }
     
     public static Iterable<Join<?,?>> getAllJoins(From<?, ?> parent) {
-        return flatMap(new Transformer<Join<?,?>,Iterable<Join<?,?>>>() {
+        return flatMap(new Apply<Join<?,?>,Iterable<Join<?,?>>>() {
             @Override
-            public Iterable<Join<?, ?>> transform(Join<?, ?> source) {
+            public Iterable<Join<?, ?>> apply(Join<?, ?> source) {
                 return cons(source, getAllJoins(source));
             }
         }, parent.getJoins());
     }
     
     public static Iterable<Fetch<?,?>> getAllFetches(FetchParent<?, ?> parent) {
-        return flatMap(new Transformer<Fetch<?,?>,Iterable<Fetch<?,?>>>() {
+        return flatMap(new Apply<Fetch<?,?>,Iterable<Fetch<?,?>>>() {
             @Override
-            public Iterable<Fetch<?, ?>> transform(Fetch<?, ?> source) {
+            public Iterable<Fetch<?, ?>> apply(Fetch<?, ?> source) {
                 return cons(source, getAllFetches(source));
             }
         }, parent.getFetches());

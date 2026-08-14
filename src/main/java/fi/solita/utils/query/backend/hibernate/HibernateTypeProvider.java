@@ -15,10 +15,10 @@ import org.hibernate.type.BasicTypeReference;
 import org.hibernate.type.descriptor.java.JavaType;
 import org.hibernate.type.spi.TypeConfiguration;
 
+import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Functional;
 import fi.solita.utils.functional.Option;
-import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.backend.Type;
@@ -54,16 +54,16 @@ public class HibernateTypeProvider implements TypeProvider {
 
     private final ApplyZero<EntityManagerFactory> emf;
     
-    static Transformer<List<org.hibernate.type.Type>, org.hibernate.type.Type> head = new Transformer<List<org.hibernate.type.Type>,org.hibernate.type.Type>() {
+    static Apply<List<org.hibernate.type.Type>, org.hibernate.type.Type> head = new Apply<List<org.hibernate.type.Type>,org.hibernate.type.Type>() {
         @Override
-        public org.hibernate.type.Type transform(List<org.hibernate.type.Type> source) {
+        public org.hibernate.type.Type apply(List<org.hibernate.type.Type> source) {
             return Functional.head(source);
         }
     };
     
-    static Transformer<Iterable<?>, Long> size = new Transformer<Iterable<?>,Long>() {
+    static Apply<Iterable<?>, Long> size = new Apply<Iterable<?>,Long>() {
         @Override
-        public Long transform(Iterable<?> source) {
+        public Long apply(Iterable<?> source) {
             return Functional.size(source);
         }
     };

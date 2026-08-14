@@ -9,8 +9,8 @@ import java.util.List;
 import org.hibernate.query.ResultListTransformer;
 import org.hibernate.query.TupleTransformer;
 
+import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Pair;
-import fi.solita.utils.functional.Transformer;
 import fi.solita.utils.functional.Tuple;
 
 public final class TupleResultTransformer implements TupleTransformer<Object>, ResultListTransformer<Object> {
@@ -35,10 +35,10 @@ public final class TupleResultTransformer implements TupleTransformer<Object>, R
         }
     }
     
-    static final Transformer<String,Object> getter(final List<String> aliasList, final Object[] tuple) {
-        return new Transformer<String,Object>() {
+    static final Apply<String,Object> getter(final List<String> aliasList, final Object[] tuple) {
+        return new Apply<String,Object>() {
             @Override
-            public Object transform(String source) {
+            public Object apply(String source) {
                 return tuple[aliasList.indexOf(source)];
             }
         };
