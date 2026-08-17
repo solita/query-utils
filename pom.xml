@@ -202,5 +202,10 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>fi.solita.utils</groupId>
+            <artifactId>api-utils</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 </project>
