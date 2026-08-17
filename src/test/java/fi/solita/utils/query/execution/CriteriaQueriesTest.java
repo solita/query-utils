@@ -7,18 +7,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import fi.solita.utils.query.Dao;
+import fi.solita.utils.query.Department;
+import fi.solita.utils.query.Department_;
+import fi.solita.utils.query.Employee;
+import fi.solita.utils.query.Employee_;
+import fi.solita.utils.query.Order;
+import fi.solita.utils.query.Page;
+import fi.solita.utils.query.QueryTestBase;
+import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
+import fi.solita.utils.query.generation.JpaCriteriaQuery;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.criteria.CriteriaQuery;
-
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import fi.solita.utils.query.*;
-import fi.solita.utils.query.QueryTestBase;
-import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
-import fi.solita.utils.query.generation.JpaCriteriaQuery;
 
 public class CriteriaQueriesTest extends QueryTestBase {
 
@@ -77,7 +82,7 @@ public class CriteriaQueriesTest extends QueryTestBase {
 
     @Test
     public void find_empty() {
-        assertFalse(dao.find(query.all(Department.class)).isDefined());
+        assertFalse(dao.find(query.all(Department.class)).isPresent());
     }
 
     @Test(expected = NonUniqueResultException.class)
@@ -91,19 +96,19 @@ public class CriteriaQueriesTest extends QueryTestBase {
     public void findFirst_single() {
         persist(new Department());
 
-        assertTrue(dao.findFirst(allDepartmentsOrdered()).isDefined());
+        assertTrue(dao.findFirst(allDepartmentsOrdered()).isPresent());
     }
 
     @Test
     public void findFirst_empty() {
-        assertFalse(dao.findFirst(allDepartmentsOrdered()).isDefined());
+        assertFalse(dao.findFirst(allDepartmentsOrdered()).isPresent());
     }
 
     @Test
     public void findFirst_multiple() {
         persist(new Department(), new Department());
 
-        assertTrue(dao.findFirst(allDepartmentsOrdered()).isDefined());
+        assertTrue(dao.findFirst(allDepartmentsOrdered()).isPresent());
     }
 
     @Test
@@ -227,7 +232,7 @@ public class CriteriaQueriesTest extends QueryTestBase {
 
     @Test
     public void find_withLock_empty() {
-        assertFalse(dao.find(query.all(Department.class), LockModeType.NONE).isDefined());
+        assertFalse(dao.find(query.all(Department.class), LockModeType.NONE).isPresent());
     }
 
     @Test(expected = NonUniqueResultException.class)
@@ -241,12 +246,12 @@ public class CriteriaQueriesTest extends QueryTestBase {
     public void findFirst_withLock() {
         persist(new Department());
 
-        assertTrue(dao.findFirst(allDepartmentsOrdered(), LockModeType.NONE).isDefined());
+        assertTrue(dao.findFirst(allDepartmentsOrdered(), LockModeType.NONE).isPresent());
     }
 
     @Test
     public void findFirst_withLock_empty() {
-        assertFalse(dao.findFirst(allDepartmentsOrdered(), LockModeType.NONE).isDefined());
+        assertFalse(dao.findFirst(allDepartmentsOrdered(), LockModeType.NONE).isPresent());
     }
 
     @Test
@@ -261,7 +266,7 @@ public class CriteriaQueriesTest extends QueryTestBase {
 
     @Test
     public void findFirst_withOrdering_empty() {
-        assertFalse(dao.findFirst(query.all(Department.class), Order.by(Department_.mandatoryDepName)).isDefined());
+        assertFalse(dao.findFirst(query.all(Department.class), Order.by(Department_.mandatoryDepName)).isPresent());
     }
 
     @Test

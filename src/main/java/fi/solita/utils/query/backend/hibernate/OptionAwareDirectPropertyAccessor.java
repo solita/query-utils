@@ -1,5 +1,7 @@
 package fi.solita.utils.query.backend.hibernate;
 
+import static fi.solita.utils.functional.Collections.it;
+import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.find;
 import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.FunctionalA.concat;
@@ -9,6 +11,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.Map;
+import java.util.Optional;
 
 import org.hibernate.HibernateException;
 import org.hibernate.PropertyAccessException;
@@ -18,8 +21,6 @@ import org.hibernate.property.access.spi.Getter;
 import org.hibernate.property.access.spi.PropertyAccess;
 import org.hibernate.property.access.spi.PropertyAccessStrategy;
 import org.hibernate.property.access.spi.Setter;
-
-import fi.solita.utils.functional.Option;
 
 @SuppressWarnings("rawtypes")
 public class OptionAwareDirectPropertyAccessor implements PropertyAccessStrategy {
@@ -54,7 +55,7 @@ public class OptionAwareDirectPropertyAccessor implements PropertyAccessStrategy
     
     private static Getter getGetter(final Class theClass, final String propertyName) throws PropertyNotFoundException {
         final Field field = find(x -> fieldName(x).equals(propertyName), fields(theClass)).get();
-        final boolean isOption = Option.class.isAssignableFrom(field.getType());
+        final boolean isOption = Optional.class.isAssignableFrom(field.getType());
         return new Getter() {
             @Override
             public Class getReturnType() {
@@ -90,7 +91,7 @@ public class OptionAwareDirectPropertyAccessor implements PropertyAccessStrategy
                 try {
                     field.setAccessible(true);
                     Object value = field.get(owner);
-                    return isOption && value != null ? ((Option<?>)value).getOrElse(null) : value;
+                    return isOption && value != null ? ((Optional<?>)value).orElse(null) : value;
                 }
                 catch (Exception e) {
                     throw new PropertyAccessException(e, "could not get a field value by reflection", false, theClass, propertyName);
@@ -101,13 +102,13 @@ public class OptionAwareDirectPropertyAccessor implements PropertyAccessStrategy
 
     private static Setter getSetter(final Class theClass, final String propertyName) throws PropertyNotFoundException {
         final Field field = find(x -> fieldName(x).equals(propertyName), fields(theClass)).get();
-        final boolean isOption = Option.class.isAssignableFrom(field.getType());
+        final boolean isOption = Optional.class.isAssignableFrom(field.getType());
         return new Setter() {
             @Override
             public void set(Object target, Object value) throws HibernateException {
                 try {
                     field.setAccessible(true);
-                    field.set(target, isOption ? Option.of(value) : value);
+                    field.set(target, isOption ? Optional.ofNullable(value) : value);
                 }
                 catch (Exception e) {
                     throw new PropertyAccessException(e, "could not set a field value by reflection", true, theClass, propertyName);
@@ -131,6 +132,6 @@ public class OptionAwareDirectPropertyAccessor implements PropertyAccessStrategy
     }
 
     static Iterable<Field> fields(Class<?> root) {
-        return concat(root.getDeclaredFields(), flatMap(OptionAwareDirectPropertyAccessor_.fields, Option.of(root.getSuperclass())));
+        return concat(root.getDeclaredFields(), flatMap(OptionAwareDirectPropertyAccessor_.fields, it(Optional.ofNullable(root.getSuperclass()))));
     }
 }

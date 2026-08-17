@@ -3,7 +3,7 @@ package fi.solita.utils.query.execution;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.grouped;
-import static fi.solita.utils.functional.Functional.headOption;
+import static fi.solita.utils.functional.Functional.headOptional;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 
@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.persistence.EntityManager;
@@ -29,7 +30,6 @@ import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.ApplyZero;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
@@ -94,8 +94,8 @@ public class JpaBasicQueries {
     }
 
     public <E extends IEntity<?>> E get(Id<E> id) throws EntityNotFoundException {
-        Option<E> ret = find(id);
-        if (!ret.isDefined()) {
+        Optional<E> ret = find(id);
+        if (!ret.isPresent()) {
             throw new EntityNotFoundException("Entity of type " + id.getOwningClass().getName() + " with id " + id + " not found.");
         }
         return ret.get();
@@ -117,7 +117,7 @@ public class JpaBasicQueries {
         return map(JpaBasicQueries_.<E>toProxy1().ap(this, clazz), ids);
     }
 
-    public <E extends IEntity<?>> Option<E> find(Id<E> id) {
+    public <E extends IEntity<?>> Optional<E> find(Id<E> id) {
         CriteriaQuery<E> query = em.get().getCriteriaBuilder().createQuery(id.getOwningClass());
         Root<E> root = query.from(id.getOwningClass());
         query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(id.getOwningClass(), emf.get())), id));
@@ -126,11 +126,11 @@ public class JpaBasicQueries {
         if (ret.size() > 1) {
             throw new RuntimeException("Found multiple entities with key: " + id);
         } else {
-            return headOption(ret);
+            return headOptional(ret);
         }
         // replaced with a criteria query, since Hibernate 5 started to return base class instances instead of subclasses 
         // when queried with a base class id... 
-        //return Option.of(em.get().find(id.getOwningClass(), id));
+        //return Optional.ofNullableem.get().find(id.getOwningClass(), id));
     }
 
     /**
@@ -150,7 +150,7 @@ public class JpaBasicQueries {
             throw new RuntimeException(e);
         }
         if (AttributeProxy.canUnwrap(OptionalAttribute.class, relation)) {
-            return (T) Option.of(ret);
+            return (T) Optional.ofNullable(ret);
         } else {
             if (ret == null) {
                 throw new IllegalArgumentException("Failed. Did you try to get an attribute from a proxy?");

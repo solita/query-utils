@@ -3,8 +3,8 @@ package fi.solita.utils.query.generation;
 import static fi.solita.utils.functional.Functional.head;
 
 import java.util.List;
+import java.util.Optional;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
@@ -23,17 +23,17 @@ public class Cast {
     /**
      * Type cast for the actually optional <i>attribute</i>.
      */
-    public static <E, T> SingularAttribute<E, Option<T>> optional(SingularAttribute<E, T> attribute) throws IllegalArgumentException, QueryUtils.RequiredAttributeMustNotHaveOptionTypeException {
+    public static <E, T> SingularAttribute<E, Optional<T>> optional(SingularAttribute<E, T> attribute) throws IllegalArgumentException, QueryUtils.RequiredAttributeMustNotHaveOptionTypeException {
         if (attribute instanceof PseudoAttribute) {
             throw new IllegalArgumentException("No reason to wrap a PseudoAttribute. Right?");
         }
-        if (attribute instanceof Bindable && Option.class.isAssignableFrom(((Bindable<?>) attribute).getBindableJavaType())) {
-            throw new IllegalArgumentException("No reason to wrap an Option<?> type. Right?");
+        if (attribute instanceof Bindable && Optional.class.isAssignableFrom(((Bindable<?>) attribute).getBindableJavaType())) {
+            throw new IllegalArgumentException("No reason to wrap an Optional<?> type. Right?");
         }
         if (attribute instanceof AdditionalQueryPerformingAttribute) {
             List<Attribute<?,?>> parameters = ((AdditionalQueryPerformingAttribute) attribute).getConstructor().getParameters();
-            if (parameters.size() == 1 && head(parameters) != null && Option.class.isAssignableFrom(head(parameters).getJavaType())) {
-                throw new IllegalArgumentException("No reason to wrap an Option<?> type. Right?");
+            if (parameters.size() == 1 && head(parameters) != null && Optional.class.isAssignableFrom(head(parameters).getJavaType())) {
+                throw new IllegalArgumentException("No reason to wrap an Optional<?> type. Right?");
             }
         }
         /* not checking this here allows a use case with subtyping. Any drawbacks in addition to allowing user to wrap values to Option by accident? 
@@ -43,24 +43,24 @@ public class Cast {
         return OptionalAttribute.Constructors.optional(attribute);
     }
     
-    public static <T> Type.Optional<T> optional(Type<T> type) {
-        return new Type.Optional<T>(type);
+    public static <T> Type.OptionalType<T> optional(Type<T> type) {
+        return new Type.OptionalType<T>(type);
     }
 
     /**
      * Create an attribute for the parent entity <i>E</i>. The value will be Optional since due to inheritance it might not exist for the whole hierarchy.
      */
-    public static <PARENT, VALUE> SingularAttribute<PARENT, Option<VALUE>> optionalSubtype(SingularAttribute<? extends PARENT, VALUE> attribute) throws IllegalArgumentException {
+    public static <PARENT, VALUE> SingularAttribute<PARENT, Optional<VALUE>> optionalSubtype(SingularAttribute<? extends PARENT, VALUE> attribute) throws IllegalArgumentException {
         if (attribute instanceof PseudoAttribute) {
             throw new IllegalArgumentException("No reason to wrap a PseudoAttribute. Right?");
         }
-        if (attribute instanceof Bindable && Option.class.isAssignableFrom(((Bindable<?>) attribute).getBindableJavaType())) {
-            throw new IllegalArgumentException("No reason to wrap an Option<?> type. Right?");
+        if (attribute instanceof Bindable && Optional.class.isAssignableFrom(((Bindable<?>) attribute).getBindableJavaType())) {
+            throw new IllegalArgumentException("No reason to wrap an Optional<?> type. Right?");
         }
         if (attribute instanceof AdditionalQueryPerformingAttribute) {
             List<Attribute<?,?>> parameters = ((AdditionalQueryPerformingAttribute) attribute).getConstructor().getParameters();
-            if (parameters.size() == 1 && Option.class.isAssignableFrom(head(parameters).getJavaType())) {
-                throw new IllegalArgumentException("No reason to wrap an Option<?> type. Right?");
+            if (parameters.size() == 1 && Optional.class.isAssignableFrom(head(parameters).getJavaType())) {
+                throw new IllegalArgumentException("No reason to wrap an Optional<?> type. Right?");
             }
         }
         return OptionalAttribute.Constructors.optional(attribute);

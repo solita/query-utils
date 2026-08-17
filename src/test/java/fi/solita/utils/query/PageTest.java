@@ -72,7 +72,7 @@ public class PageTest {
     
     @Test
     public void SINGLE_ROW_hasFetchSizeHintOfTwo() {
-        assertTrue(Page.SINGLE_ROW.getFetchSizeHint().isDefined());
+        assertTrue(Page.SINGLE_ROW.getFetchSizeHint().isPresent());
         assertEquals(2, Page.SINGLE_ROW.getFetchSizeHint().get().intValue());
     }
     
@@ -103,7 +103,7 @@ public class PageTest {
     public void withFetchSizeHint_setsFetchSizeHint() {
         Page page = Page.of(0).withFetchSizeHint(100);
         
-        assertTrue(page.getFetchSizeHint().isDefined());
+        assertTrue(page.getFetchSizeHint().isPresent());
         assertEquals(100, page.getFetchSizeHint().get().intValue());
     }
     
@@ -119,7 +119,7 @@ public class PageTest {
     @Test
     public void getFetchSizeHint_notDefinedByDefault() {
         Page page = Page.of(0);
-        assertFalse(page.getFetchSizeHint().isDefined());
+        assertFalse(page.getFetchSizeHint().isPresent());
     }
     
     // Error cases tests
@@ -219,7 +219,7 @@ public class PageTest {
         Page page = Page.of(0, 10).withFetchSizeHint(50);
         Page next = page.nextPage();
         
-        assertTrue(next.getFetchSizeHint().isDefined());
+        assertTrue(next.getFetchSizeHint().isPresent());
         assertEquals(50, next.getFetchSizeHint().get().intValue());
     }
     

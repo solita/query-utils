@@ -1,11 +1,11 @@
 package fi.solita.utils.query.projection;
 
 import static fi.solita.utils.functional.Collections.emptyList;
+import static fi.solita.utils.functional.Collections.it;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newMultimap;
 import static fi.solita.utils.functional.Collections.newMutableListOfSize;
 import static fi.solita.utils.functional.Collections.newMutableMap;
-import static fi.solita.utils.query.attributes.AttributeProxy.*;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Collections.newSortedSet;
 import static fi.solita.utils.functional.Functional.concat;
@@ -24,6 +24,9 @@ import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.tail;
 import static fi.solita.utils.functional.Functional.transpose;
 import static fi.solita.utils.functional.Functional.zip;
+import static fi.solita.utils.functional.FunctionalA.head;
+import static fi.solita.utils.functional.FunctionalA.tail;
+import static fi.solita.utils.functional.FunctionalC.filter;
 import static fi.solita.utils.functional.FunctionalM.find;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
@@ -33,6 +36,7 @@ import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 import static fi.solita.utils.query.QueryUtils.id;
 import static fi.solita.utils.query.QueryUtils.join;
 import static fi.solita.utils.query.QueryUtils.resolveOrderColumn;
+import static fi.solita.utils.query.attributes.AttributeProxy.canUnwrap;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
 import static fi.solita.utils.query.projection.EmbeddableUtil.breakEmbeddableToParts;
 import static fi.solita.utils.query.projection.EmbeddableUtil.isCollectionOfEmbeddables;
@@ -52,24 +56,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
-
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.LockModeType;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Selection;
-import jakarta.persistence.metamodel.Attribute;
-import jakarta.persistence.metamodel.Attribute.PersistentAttributeType;
-import jakarta.persistence.metamodel.Bindable;
-import jakarta.persistence.metamodel.ListAttribute;
-import jakarta.persistence.metamodel.PluralAttribute;
-import jakarta.persistence.metamodel.SingularAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,8 +68,6 @@ import fi.solita.utils.functional.Apply3;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Either;
-import fi.solita.utils.functional.Option;
-import fi.solita.utils.functional.Predicates;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
@@ -96,6 +83,21 @@ import fi.solita.utils.query.backend.JpaCriteriaQueryExecutor;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
 import fi.solita.utils.query.projection.Constructors.ExpressionProjection;
 import fi.solita.utils.query.projection.Constructors.IdProjection;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Attribute.PersistentAttributeType;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.PluralAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 public class ProjectionHelper {
     
@@ -150,8 +152,8 @@ public class ProjectionHelper {
         // This check should actually have already occurred, but just in case we are missing it somewhere...
         checkOptionalAttributes(param);
         
-        for (PseudoAttribute pseudo: unwrap(PseudoAttribute.class, param)) {
-            for (@SuppressWarnings("unused") JoiningAttribute a: unwrap(JoiningAttribute.class, param)) {
+        for (PseudoAttribute pseudo: it(unwrap(PseudoAttribute.class, param))) {
+            for (@SuppressWarnings("unused") JoiningAttribute a: it(unwrap(JoiningAttribute.class, param))) {
                 // use left join here, since were are modifying the existing selection which should still return all the rows
                 selection = (From<?, T>) doJoins(selection, param, JoinType.LEFT)._2;
             }
@@ -159,27 +161,27 @@ public class ProjectionHelper {
             logger.debug("PseudoAttribute detected: {}", pseudo);
             Expression<?> s = pseudo.getSelectionForQuery(emf.get().getCriteriaBuilder(), selection);
             doRestrictions(selection, param); // to restrict e.g. SelfAttribute, if so wanted.
-            return unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined() || constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity<?>>)s).get(id((Class<IEntity<?>>)s.getJavaType(), emf.get())) : s;
+            return unwrap(AdditionalQueryPerformingAttribute.class, param).isPresent() || constructorExpectsId && IEntity.class.isAssignableFrom(s.getJavaType()) ? ((Path<IEntity<?>>)s).get(id((Class<IEntity<?>>)s.getJavaType(), emf.get())) : s;
         }
         
-        if (unwrap(AdditionalQueryPerformingAttribute.class, param).isDefined()) {
+        if (unwrap(AdditionalQueryPerformingAttribute.class, param).isPresent()) {
             SingularAttribute<T,Id<T>> replacement = id(selection.getJavaType(), emf.get());
             logger.debug("AdditionalQueryPerformingAttribute detected. Replacing selection {} with source Id {}", selection.getJavaType().getSimpleName(), replacement.getName());
             return selection.get(replacement);
         }
 
-        if (unwrap(PluralAttribute.class, param).isDefined()) {
+        if (unwrap(PluralAttribute.class, param).isPresent()) {
             SingularAttribute<T,Id<T>> replacement = id(selection.getJavaType(), emf.get());
             logger.debug("PluralAttribute detected. Replacing parameter with source Id.");
             return selection.get(replacement);
         }
         
-        for (@SuppressWarnings("unused") JoiningAttribute a: unwrap(JoiningAttribute.class, param)) {
+        for (@SuppressWarnings("unused") JoiningAttribute a: it(unwrap(JoiningAttribute.class, param))) {
             // use left join here, since were are modifying the existing selection which should still return all the rows
             selection = (From<?, T>) doJoins(selection, param, JoinType.LEFT)._2;
         }
         
-        for (SingularAttribute<T,?> attr: unwrap(SingularAttribute.class, param)) {
+        for (SingularAttribute<T,?> attr: it(unwrap(SingularAttribute.class, param))) {
             if (IEntity.class.isAssignableFrom(attr.getJavaType())) {
                 if (constructorExpectsId) {
                     logger.debug("Singular Entity attribute detected, but constructor expects Id. Replacing parameter with Id.");
@@ -229,7 +231,7 @@ public class ProjectionHelper {
             @SuppressWarnings("unchecked")
             @Override
             public List<Object> apply(Object source) {
-                return find(source, (Map<Object,List<Object>>)targetQueryResults).getOrElse(emptyList());
+                return find(source, (Map<Object,List<Object>>)targetQueryResults).orElse(emptyList());
             }
         }, sourceIdsToQuery);
         List<Object>ret = newList(map(ProjectionResultUtil_.postProcessResult.ap(projectionType, attr), results));
@@ -261,8 +263,8 @@ public class ProjectionHelper {
             result = map(EmbeddableUtil_.collectEmbeddableFromParts.ap(emf.get().getMetamodel(), (Bindable<?>)target), actualResultRows);
         } else {
             // for AdditionalQueryPerformingAttribute, replace the result object array with the actual object, performing additional queries if needed
-            Option<AdditionalQueryPerformingAttribute> rel = unwrap(AdditionalQueryPerformingAttribute.class, target);
-            if (rel.isDefined()) {
+            Optional<AdditionalQueryPerformingAttribute> rel = unwrap(AdditionalQueryPerformingAttribute.class, target);
+            if (rel.isPresent()) {
                 logger.debug("Target is AdditionalQueryPerformingAttribute. Finalizing: {}", target);
                 result = finalizeProjectingQuery(rel.get().getConstructor(), actualResultRows);
             } else {
@@ -360,7 +362,7 @@ public class ProjectionHelper {
             last = source;
         }
         
-        for (From<?,?> r: relationOrAdditionalGet.left) {
+        for (From<?,?> r: it(relationOrAdditionalGet.left)) {
             ProjectionUtil.doRestrictions(r, target);
         }
         
@@ -387,14 +389,14 @@ public class ProjectionHelper {
 
         setListAttributeOrderings(target, query, actualJoins);
         
-        Option<AdditionalQueryPerformingAttribute> rel = unwrap(AdditionalQueryPerformingAttribute.class, target);
+        Optional<AdditionalQueryPerformingAttribute> rel = unwrap(AdditionalQueryPerformingAttribute.class, target);
         if (isCollectionOfEmbeddables(target)) {
             // Must handle collections of embeddables separately, since hibern seems to include only
             // parentid (of the embeddable) in the select clause, but tries to read
             // all fields from the resultset
             logger.debug("Target is a collection of embeddables. Breaking embeddable fields manually for the query.");
             query.multiselect(newList(cons(sourceId, breakEmbeddableToParts(emf.get().getMetamodel(), (Bindable<?>)target, relationOrAdditionalGet.left.get()))));
-        } else if (rel.isDefined()) {
+        } else if (rel.isPresent()) {
             logger.debug("Target is AdditionalQueryPerformingAttribute. Preparing.");
             List<Selection<?>> selections = prepareProjectingQuery((MetaJpaConstructor<Object,?,?>)rel.get().getConstructor(), relationOrAdditionalGet.left.get());
             if ((isId || isWrapperOfIds) && !Id.class.isAssignableFrom(head(selections).getJavaType())) {

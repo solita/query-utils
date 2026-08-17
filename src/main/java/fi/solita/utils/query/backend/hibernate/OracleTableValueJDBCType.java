@@ -7,7 +7,7 @@
 package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.newArray;
-import static fi.solita.utils.functional.Functional.headOption;
+import static fi.solita.utils.functional.Functional.headOptional;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
+import java.util.Optional;
 
 import org.hibernate.type.descriptor.ValueBinder;
 import org.hibernate.type.descriptor.ValueExtractor;
@@ -26,7 +27,6 @@ import org.hibernate.type.descriptor.jdbc.JdbcType;
 import org.hibernate.type.spi.TypeConfiguration;
 
 import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.db.oracle.OracleSupport;
@@ -78,8 +78,8 @@ public class OracleTableValueJDBCType implements JdbcType {
                 Connection c = st.getConnection().unwrap(OracleSupport.oracleConnectionClass);
                 Collection<?> values = javaType.unwrap(value, Collection.class, options);
                 
-                Option<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
-                if (sqlTypeAndValues.isDefined()) {
+                Optional<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
+                if (sqlTypeAndValues.isPresent()) {
                     try {
                         Object ad = OracleSupport.arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);
                         OracleSupport.oraclePreparedStatementMethod.invoke(st.unwrap(OracleSupport.oraclePreparedStatementClass), index, OracleSupport.ARRAYConstructor.newInstance(ad, c, newArray(Object.class, sqlTypeAndValues.get()._3.apply(c))));
@@ -87,7 +87,7 @@ public class OracleTableValueJDBCType implements JdbcType {
                         throw new RuntimeException(e);
                     }
                 } else {
-                    throw new UnsupportedOperationException("type not implemented: " + headOption(values).map(OracleTableValueType_.className));
+                    throw new UnsupportedOperationException("type not implemented: " + headOptional(values).map(OracleTableValueType_.className));
                 }
             }
         }
@@ -100,8 +100,8 @@ public class OracleTableValueJDBCType implements JdbcType {
                 Connection c = st.getConnection().unwrap(OracleSupport.oracleConnectionClass);
                 Collection<?> values = javaType.unwrap(value, Collection.class, options);
                 
-                Option<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
-                if (sqlTypeAndValues.isDefined()) {
+                Optional<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
+                if (sqlTypeAndValues.isPresent()) {
                     try {
                         Object ad = OracleSupport.arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);
                         OracleSupport.oracleCallableStatementMethod.invoke(st.unwrap(OracleSupport.oracleCallableStatementClass), name, OracleSupport.ARRAYConstructor.newInstance(ad, c, newArray(Object.class, sqlTypeAndValues.get()._3.apply(c))));
@@ -109,7 +109,7 @@ public class OracleTableValueJDBCType implements JdbcType {
                         throw new RuntimeException(e);
                     }
                 } else {
-                    throw new UnsupportedOperationException("type not implemented: " + headOption(values).map(OracleTableValueType_.className));
+                    throw new UnsupportedOperationException("type not implemented: " + headOptional(values).map(OracleTableValueType_.className));
                 }
             }
         }

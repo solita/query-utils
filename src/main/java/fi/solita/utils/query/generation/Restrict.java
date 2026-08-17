@@ -3,10 +3,10 @@ package fi.solita.utils.query.generation;
 import static fi.solita.utils.query.QueryUtils.join;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
+import java.util.Optional;
 import java.util.Set;
 
 import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.attributes.RestrictingAttribute;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -298,35 +298,35 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E, T> CriteriaQuery<E> equals(SingularAttribute<? super E, T> attribute, Option<T> value, CriteriaQuery<E> query) {
+    public <E, T> CriteriaQuery<E> equals(SingularAttribute<? super E, T> attribute, Optional<T> value, CriteriaQuery<E> query) {
         return by(predicates.equals(attribute, value), query);
     }
     
     /**
      * Modifies existing query!
      */
-    public <E, T> CriteriaQuery<E> equalsOption(SingularAttribute<? super E, Option<T>> attribute, Option<T> value, CriteriaQuery<E> query) {
+    public <E, T> CriteriaQuery<E> equalsOption(SingularAttribute<? super E, Optional<T>> attribute, Optional<T> value, CriteriaQuery<E> query) {
         return by(predicates.equalsOption(attribute, value), query);
     }
     
     /**
      * Modifies existing query!
      */
-    public <E, T> CriteriaQuery<E> notEquals(SingularAttribute<? super E, T> attribute, Option<T> value, CriteriaQuery<E> query) {
+    public <E, T> CriteriaQuery<E> notEquals(SingularAttribute<? super E, T> attribute, Optional<T> value, CriteriaQuery<E> query) {
         return by(predicates.notEquals(attribute, value), query);
     }
     
     /**
      * Modifies existing query!
      */
-    public <E, T> CriteriaQuery<E> notEqualsOption(SingularAttribute<? super E, Option<T>> attribute, Option<T> value, CriteriaQuery<E> query) {
+    public <E, T> CriteriaQuery<E> notEqualsOption(SingularAttribute<? super E, Optional<T>> attribute, Optional<T> value, CriteriaQuery<E> query) {
         return by(predicates.notEqualsOption(attribute, value), query);
     }
     
     /**
      * Modifies existing query!
      */
-    public <E> CriteriaQuery<E> equalsIgnoreCase(SingularAttribute<? super E, String> attribute, Option<String> value, CriteriaQuery<E> query) {
+    public <E> CriteriaQuery<E> equalsIgnoreCase(SingularAttribute<? super E, String> attribute, Optional<String> value, CriteriaQuery<E> query) {
         return by(predicates.equalsIgnoreCase(attribute, value), query);
     }
     
@@ -347,7 +347,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E> CriteriaQuery<E> startsWithIgnoreCaseOption(SingularAttribute<? super E, Option<String>> attribute, String value, CriteriaQuery<E> query) {
+    public <E> CriteriaQuery<E> startsWithIgnoreCaseOption(SingularAttribute<? super E, Optional<String>> attribute, String value, CriteriaQuery<E> query) {
         return by(predicates.startsWithIgnoreCaseOption(attribute, value), query);
     }
 

@@ -2,20 +2,10 @@ package fi.solita.utils.query;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.LockModeType;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.NonUniqueResultException;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.metamodel.CollectionAttribute;
-import jakarta.persistence.metamodel.ListAttribute;
-import jakarta.persistence.metamodel.SetAttribute;
-import jakarta.persistence.metamodel.SingularAttribute;
-
 import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
 import fi.solita.utils.query.execution.JpaBasicQueries;
 import fi.solita.utils.query.execution.JpaCriteriaQueries;
@@ -25,6 +15,15 @@ import fi.solita.utils.query.execution.QLQueries;
 import fi.solita.utils.query.generation.NativeQuery;
 import fi.solita.utils.query.generation.QLQuery;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.metamodel.CollectionAttribute;
+import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 public class Dao {
 
@@ -78,7 +77,7 @@ public class Dao {
     /**
      * Get the entity corresponding to <i>id</i>, if one exists.
      */
-    public <E extends IEntity<?>> Option<E> find(Id<E> id) {
+    public <E extends IEntity<?>> Optional<E> find(Id<E> id) {
         return jpaBasicQueries.find(id);
     }
 
@@ -185,42 +184,42 @@ public class Dao {
     /**
      * Get the only row of <i>query</i>, if any. Fails with NonUniqueResultException if multiple rows found.
      */
-    public <T> Option<T> find(CriteriaQuery<T> query) throws NonUniqueResultException {
+    public <T> Optional<T> find(CriteriaQuery<T> query) throws NonUniqueResultException {
         return find(query, LockModeType.NONE);
     }
     
     /**
      * Get the only row of <i>query</i>, if any. Fails with NonUniqueResultException if multiple rows found.
      */
-    public <T> Option<T> find(CriteriaQuery<T> query, LockModeType lock) throws NonUniqueResultException {
+    public <T> Optional<T> find(CriteriaQuery<T> query, LockModeType lock) throws NonUniqueResultException {
         return jpaCriteriaQueries.find(query, lock);
     }
 
     /**
      * Get the first row of <i>query</i>, if any. Requires <i>query</i> to have ordering defined.
      */
-    public <T> Option<T> findFirst(CriteriaQuery<T> query) throws NoOrderingSpecifiedException {
+    public <T> Optional<T> findFirst(CriteriaQuery<T> query) throws NoOrderingSpecifiedException {
         return findFirst(query, LockModeType.NONE);
     }
     
     /**
      * Get the first row of <i>query</i>, if any. Requires <i>query</i> to have ordering defined.
      */
-    public <T> Option<T> findFirst(CriteriaQuery<T> query, LockModeType lock) throws NoOrderingSpecifiedException {
+    public <T> Optional<T> findFirst(CriteriaQuery<T> query, LockModeType lock) throws NoOrderingSpecifiedException {
         return jpaCriteriaQueries.findFirst(query, lock);
     }
 
     /**
      * Get the first row of <i>query</i>, if any
      */
-    public <E> Option<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering) {
+    public <E> Optional<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering) {
         return findFirst(query, ordering, LockModeType.NONE);
     }
     
     /**
      * Get the first row of <i>query</i>, if any
      */
-    public <E> Option<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
+    public <E> Optional<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
         return jpaCriteriaQueries.findFirst(query, ordering, lock);
     }
 
@@ -299,42 +298,42 @@ public class Dao {
     /**
      * Get the only row of <i>query</i>, if any, projecting the result. Fails with NonUniqueResultException if multiple rows found.
      */
-    public <E, R> Option<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NonUniqueResultException {
+    public <E, R> Optional<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NonUniqueResultException {
         return find(query, constructor, LockModeType.NONE);
     }
     
     /**
      * Get the only row of <i>query</i>, if any, projecting the result. Fails NonUniqueResultException if multiple rows found.
      */
-    public <E, R> Option<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, LockModeType lock) throws NonUniqueResultException {
+    public <E, R> Optional<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, LockModeType lock) throws NonUniqueResultException {
         return jpaProjectionQueries.find(query, projection, lock);
     }
 
     /**
      * Get the first row of <i>query</i>, if any, projecting the result. Requires <i>query</i> to have ordering.
      */
-    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NoOrderingSpecifiedException {
+    public <E,R> Optional<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor) throws NoOrderingSpecifiedException {
         return findFirst(query, constructor, LockModeType.NONE);
     }
     
     /**
      * Get the first row of <i>query</i>, if any, projecting the result. Requires <i>query</i> to have ordering.
      */
-    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, LockModeType lock) throws NoOrderingSpecifiedException {
+    public <E,R> Optional<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, LockModeType lock) throws NoOrderingSpecifiedException {
         return jpaProjectionQueries.findFirst(query, projection, lock);
     }
 
     /**
      * Get the first row of <i>query</i>, if any, projecting the result
      */
-    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
+    public <E,R> Optional<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering) {
         return findFirst(query, constructor, ordering, LockModeType.NONE);
     }
     
     /**
      * Get the first row of <i>query</i>, if any, projecting the result
      */
-    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
+    public <E,R> Optional<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> projection, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
         return jpaProjectionQueries.findFirst(query, projection, ordering, lock);
     }
 
@@ -434,28 +433,28 @@ public class Dao {
     /**
      * Get the only row of <i>query</i>, if any. Fails if multiple rows found.
      */
-    public <T> Option<T> find(NativeQuery<T> query) {
+    public <T> Optional<T> find(NativeQuery<T> query) {
         return nativeQueries.find(query);
     }
     
     /**
      * Get the only row of <i>query</i>, if any, projecting the result. Fails if multiple rows found.
      */
-    public <T, P> Option<P> find(NativeQuery<? extends T> query, Apply<T, P> constructor) {
+    public <T, P> Optional<P> find(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         return nativeQueries.find(query, constructor);
     }
 
     /**
      * Get the first row of <i>query</i>, if any. Remember that the query should have an ordering, although this is not checked.
      */
-    public <T> Option<T> findFirst(NativeQuery<T> query) {
+    public <T> Optional<T> findFirst(NativeQuery<T> query) {
         return nativeQueries.findFirst(query);
     }
     
     /**
      * Get the first row of <i>query</i>, if any, projecting the result. Remember that the query should have an ordering, although this is not checked.
      */
-    public <T, P> Option<P> findFirst(NativeQuery<? extends T> query, Apply<T, P> constructor) {
+    public <T, P> Optional<P> findFirst(NativeQuery<? extends T> query, Apply<T, P> constructor) {
         return nativeQueries.findFirst(query, constructor);
     }
 
@@ -519,28 +518,28 @@ public class Dao {
     /**
      * Get the only row of <i>query</i>, if any. Fails if multiple rows found.
      */
-    public <T> Option<T> find(QLQuery<T> query) {
+    public <T> Optional<T> find(QLQuery<T> query) {
         return qlQueries.find(query);
     }
     
     /**
      * Get the only row of <i>query</i>, if any, projecting the result. Fails if multiple rows found.
      */
-    public <T, P> Option<P> find(QLQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Optional<P> find(QLQuery<T> query, Apply<T, P> constructor) {
         return qlQueries.find(query, constructor);
     }
 
     /**
      * Get the first row of <i>query</i>, if any. Remember that the query should have an ordering, although this is not checked.
      */
-    public <T> Option<T> findFirst(QLQuery<T> query) {
+    public <T> Optional<T> findFirst(QLQuery<T> query) {
         return qlQueries.findFirst(query);
     }
     
     /**
      * Get the first row of <i>query</i>, if any, projecting the result. Remember that the query should have an ordering, although this is not checked.
      */
-    public <T, P> Option<P> findFirst(QLQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Optional<P> findFirst(QLQuery<T> query, Apply<T, P> constructor) {
         return qlQueries.find(query, constructor);
     }
 

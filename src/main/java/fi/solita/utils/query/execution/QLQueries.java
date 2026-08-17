@@ -2,16 +2,14 @@ package fi.solita.utils.query.execution;
 
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.head;
-import static fi.solita.utils.functional.Functional.headOption;
+import static fi.solita.utils.functional.Functional.headOptional;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.backend.QLQueryExecutor;
 import fi.solita.utils.query.generation.QLQuery;
@@ -39,27 +37,27 @@ public class QLQueries {
     }
 
     public <T, P> P get(QLQuery<T> query, Apply<T, P> constructor) {
-        return head(map(constructor, find(query)));
+        return find(query).map(constructor).get();
     }
 
-    public <T> Option<T> find(QLQuery<T> query) {
+    public <T> Optional<T> find(QLQuery<T> query) {
         return queryExecutor.find(query);
     }
 
-    public <T, P> Option<P> find(QLQuery<T> query, Apply<T, P> constructor) {
-        return headOption(map(constructor, queryExecutor.find(query)));
+    public <T, P> Optional<P> find(QLQuery<T> query, Apply<T, P> constructor) {
+        return queryExecutor.find(query).map(constructor);
     }
 
-    public <T> Option<T> findFirst(QLQuery<T> query) {
-        return headOption(getMany(query, Page.FIRST.withSize(1)));
+    public <T> Optional<T> findFirst(QLQuery<T> query) {
+        return headOptional(getMany(query, Page.FIRST.withSize(1)));
     }
     
-    public <T, P> Option<P> findFirst(QLQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Optional<P> findFirst(QLQuery<T> query, Apply<T, P> constructor) {
         List<T> t = getMany(query, Page.FIRST.withSize(1));
         if (t.isEmpty()) {
-            return None();
+            return Optional.empty();
         }
-        return Some(constructor.apply(head(t)));
+        return Optional.of(constructor.apply(head(t)));
     }
 
     public <T> Collection<T> getMany(QLQuery<T> query) {

@@ -1,17 +1,14 @@
 package fi.solita.utils.query.projection;
 
 import static fi.solita.utils.functional.Collections.newSet;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
+
+import java.util.Optional;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
-import fi.solita.utils.functional.Tuple;
-import fi.solita.utils.functional.Tuple1;
 import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.functional.Tuple4;
@@ -39,18 +36,18 @@ public class ProjectTest extends QueryTestBase {
         Employee emp = new Employee("", new Money(1), dep);
         persist(dep, emp);
 
-        Option<Money> ret = dao.get(query.all(Employee.class), Project.value(Cast.optional(Employee_.optionalSalary)));
-        assertEquals(Some(new Money(1)), ret);
+        Optional<Money> ret = dao.get(query.all(Employee.class), Project.value(Cast.optional(Employee_.optionalSalary)));
+        assertEquals(Optional.of(new Money(1)), ret);
     }
 
     @Test
-    public void option_get_none() {
+    public void option_getNone() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
         persist(dep, emp);
 
-        Option<Money> ret = dao.get(query.all(Employee.class), Project.value(Cast.optional(Employee_.optionalSalary)));
-        assertEquals(None(), ret);
+        Optional<Money> ret = dao.get(query.all(Employee.class), Project.value(Cast.optional(Employee_.optionalSalary)));
+        assertEquals(Optional.empty(), ret);
     }
 
     @Test
@@ -59,18 +56,18 @@ public class ProjectTest extends QueryTestBase {
         Employee emp = new Employee("", new Money(1), dep);
         persist(dep, emp);
 
-        Option<Option<Money>> ret = dao.find(query.all(Employee.class), Project.value(Cast.optional(Employee_.optionalSalary)));
-        assertEquals("should be wrapped inside additional option", Some(Some(new Money(1))), ret);
+        Optional<Optional<Money>> ret = dao.find(query.all(Employee.class), Project.value(Cast.optional(Employee_.optionalSalary)));
+        assertEquals("should be wrapped inside additional option", Optional.of(Optional.of(new Money(1))), ret);
     }
 
     @Test
-    public void option_find_none() {
+    public void option_findNone() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
         persist(dep, emp);
 
-        Option<Option<Money>> ret = dao.find(query.all(Employee.class), Project.value(Cast.optional(Employee_.optionalSalary)));
-        assertEquals("should be wrapped inside additional option", Some(None()), ret);
+        Optional<Optional<Money>> ret = dao.find(query.all(Employee.class), Project.value(Cast.optional(Employee_.optionalSalary)));
+        assertEquals("should be wrapped inside additional option", Optional.of(Optional.empty()), ret);
     }
 
     @Test
@@ -79,17 +76,17 @@ public class ProjectTest extends QueryTestBase {
         Employee emp = new Employee("", new Money(1), dep);
         persist(dep, emp);
 
-        Option<Option<Money>> ret = dao.findFirst(query.related(dep, Department_.employees), Project.value(Cast.optional(Employee_.optionalSalary)));
-        assertEquals(Some(Some(new Money(1))), ret);
+        Optional<Optional<Money>> ret = dao.findFirst(query.related(dep, Department_.employees), Project.value(Cast.optional(Employee_.optionalSalary)));
+        assertEquals(Optional.of(Optional.of(new Money(1))), ret);
     }
 
     @Test
-    public void option_findFirst_none() {
+    public void option_findFirstNone() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
         persist(dep, emp);
 
-        assertEquals(Some(None()), dao.findFirst(query.related(dep, Department_.employees), Project.value(Cast.optional(Employee_.optionalSalary))));
+        assertEquals(Optional.of(Optional.empty()), dao.findFirst(query.related(dep, Department_.employees), Project.value(Cast.optional(Employee_.optionalSalary))));
     }
 
     @Test
@@ -99,7 +96,7 @@ public class ProjectTest extends QueryTestBase {
         Employee emp2 = new Employee("", dep);
         persist(dep, emp1, emp2);
 
-        assertEquals(newSet(Some(new Money(1)), Option.<Money>None()), newSet(dao.getMany(query.all(Employee.class), Project.value(Cast.optional(Employee_.optionalSalary)))));
+        assertEquals(newSet(Optional.of(new Money(1)), Optional.empty()), newSet(dao.getMany(query.all(Employee.class), Project.value(Cast.optional(Employee_.optionalSalary)))));
     }
 
     @Test
@@ -108,8 +105,8 @@ public class ProjectTest extends QueryTestBase {
         Employee emp = new Employee("foo", new Money(1), dep);
         persist(dep, emp);
 
-        Pair<Option<Money>, String> pair = dao.get(query.all(Employee.class), Project.pair(Cast.optional(Employee_.optionalSalary), Employee_.mandatoryName));
-        assertEquals(Pair.of(Some(new Money(1)), "foo"), pair);
+        Pair<Optional<Money>, String> pair = dao.get(query.all(Employee.class), Project.pair(Cast.optional(Employee_.optionalSalary), Employee_.mandatoryName));
+        assertEquals(Pair.of(Optional.of(new Money(1)), "foo"), pair);
     }
 
     @Test
@@ -118,8 +115,8 @@ public class ProjectTest extends QueryTestBase {
         Employee emp = new Employee("foo", new Money(1), dep);
         persist(dep, emp);
 
-        Tuple3<Option<Money>, String, Option<Money>> tuple = dao.get(query.all(Employee.class), Project.tuple(Cast.optional(Employee_.optionalSalary), Employee_.mandatoryName, Cast.optional(Employee_.optionalSalary)));
-        assertEquals(Pair.of(Some(new Money(1)), "foo", Some(new Money(1))), tuple);
+        Tuple3<Optional<Money>, String, Optional<Money>> tuple = dao.get(query.all(Employee.class), Project.tuple(Cast.optional(Employee_.optionalSalary), Employee_.mandatoryName, Cast.optional(Employee_.optionalSalary)));
+        assertEquals(Pair.of(Optional.of(new Money(1)), "foo", Optional.of(new Money(1))), tuple);
     }
 
     @Test
@@ -162,12 +159,12 @@ public class ProjectTest extends QueryTestBase {
         Department dep2 = new Department("b", 2);
         persist(dep1, dep2);
 
-        assertEquals(Some(2), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
+        assertEquals(Optional.of(2), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
     }
     
     @Test
     public void max_empty() {
-        assertEquals(None(), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
+        assertEquals(Optional.empty(), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
     }
     
     @Test
@@ -176,12 +173,12 @@ public class ProjectTest extends QueryTestBase {
         Department dep2 = new Department("b", 2);
         persist(dep1, dep2);
 
-        assertEquals(Some(1), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
+        assertEquals(Optional.of(1), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
     }
     
     @Test
     public void min_empty() {
-        assertEquals(None(), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
+        assertEquals(Optional.empty(), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
     }
 
     @Test
@@ -190,12 +187,12 @@ public class ProjectTest extends QueryTestBase {
         Department dep2 = new Department("b", 2);
         persist(dep1, dep2);
 
-        assertEquals(Some(3), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
+        assertEquals(Optional.of(3), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
     }
 
     @Test
     public void sum_empty() {
-        assertEquals(None(), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
+        assertEquals(Optional.empty(), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
     }
 
     @Test
@@ -204,12 +201,12 @@ public class ProjectTest extends QueryTestBase {
         Department dep2 = new Department("bbb");
         persist(dep1, dep2);
 
-        assertEquals(Some("bbb"), dao.get(query.all(Department.class), Project.greatest(Department_.mandatoryDepName)));
+        assertEquals(Optional.of("bbb"), dao.get(query.all(Department.class), Project.greatest(Department_.mandatoryDepName)));
     }
 
     @Test
     public void greatest_empty() {
-        assertEquals(None(), dao.get(query.all(Department.class), Project.greatest(Department_.mandatoryDepName)));
+        assertEquals(Optional.empty(), dao.get(query.all(Department.class), Project.greatest(Department_.mandatoryDepName)));
     }
 
     @Test
@@ -218,12 +215,12 @@ public class ProjectTest extends QueryTestBase {
         Department dep2 = new Department("bbb");
         persist(dep1, dep2);
 
-        assertEquals(Some("aaa"), dao.get(query.all(Department.class), Project.least(Department_.mandatoryDepName)));
+        assertEquals(Optional.of("aaa"), dao.get(query.all(Department.class), Project.least(Department_.mandatoryDepName)));
     }
 
     @Test
     public void least_empty() {
-        assertEquals(None(), dao.get(query.all(Department.class), Project.least(Department_.mandatoryDepName)));
+        assertEquals(Optional.empty(), dao.get(query.all(Department.class), Project.least(Department_.mandatoryDepName)));
     }
 
     @Test
@@ -250,10 +247,10 @@ public class ProjectTest extends QueryTestBase {
         Employee emp = new Employee("bar", new Money(2), dep);
         persist(dep, emp);
 
-        Tuple4<Option<Money>, String, Option<Money>, String> tuple = dao.get(
+        Tuple4<Optional<Money>, String, Optional<Money>, String> tuple = dao.get(
             query.all(Employee.class),
             Project.tuple(Cast.optional(Employee_.optionalSalary), Employee_.mandatoryName, Cast.optional(Employee_.optionalSalary), Employee_.mandatoryName));
-        assertEquals(Pair.of(Some(new Money(2)), "bar", Some(new Money(2)), "bar"), tuple);
+        assertEquals(Pair.of(Optional.of(new Money(2)), "bar", Optional.of(new Money(2)), "bar"), tuple);
     }
 
     @Test

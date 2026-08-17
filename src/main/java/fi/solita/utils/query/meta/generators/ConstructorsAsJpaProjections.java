@@ -13,7 +13,6 @@ import static fi.solita.utils.functional.Functional.zip;
 import static fi.solita.utils.functional.Functional.zipWithIndex;
 import static fi.solita.utils.functional.FunctionalC.repeat;
 import static fi.solita.utils.functional.FunctionalS.range;
-import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.meta.Helpers.boxed;
 import static fi.solita.utils.meta.Helpers.containedType;
 import static fi.solita.utils.meta.Helpers.element2Constructors;
@@ -44,6 +43,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -58,23 +58,22 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import jakarta.persistence.metamodel.Attribute;
-import jakarta.persistence.metamodel.ListAttribute;
-import jakarta.persistence.metamodel.PluralAttribute;
-import jakarta.persistence.metamodel.SetAttribute;
-import jakarta.persistence.metamodel.SingularAttribute;
 
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Function1;
 import fi.solita.utils.functional.Function3;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pred;
 import fi.solita.utils.meta.Helpers;
 import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.meta.generators.GeneratorOptions;
 import fi.solita.utils.query.EntityRepresentation;
 import fi.solita.utils.query.Id;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.ListAttribute;
+import jakarta.persistence.metamodel.PluralAttribute;
+import jakarta.persistence.metamodel.SetAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaProjections.Options> {
 
@@ -149,7 +148,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                     Elements elements = helper.elementUtils;
                     Types types = helper.typeUtils;
                     
-                    boolean isExactlyOption = helper.isSameType(argumentType, Option.class);
+                    boolean isExactlyOption = helper.isSameType(argumentType, Optional.class);
                     boolean isList = helper.isSubtype(argumentType, List.class);
                     boolean isSet = helper.isSubtype(argumentType, Set.class);
                     boolean isExactlyCollection = helper.isSameType(argumentType, Collection.class);
@@ -162,7 +161,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                         TypeElement wrapperType = isSet ? elements.getTypeElement(Set.class.getName()) :
                                                   isList ? elements.getTypeElement(List.class.getName()) :
                                                   isExactlyCollection ? elements.getTypeElement(Collection.class.getName()) :
-                                                  elements.getTypeElement(Option.class.getName());
+                                                  elements.getTypeElement(Optional.class.getName());
                         
                         boolean isId = isId(argument, elements, types, wrapperType);
                         if (isId) {
@@ -191,7 +190,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
                         if (isExactlyCollection) {
                             otherTypeParams = "? extends " + importType(Collection.class) + "<" + elementType +  ">, " + elementType;
                         } else if (isExactlyOption) {
-                            otherTypeParams = "? extends " + importType(Option.class) + "<" + elementType + ">";
+                            otherTypeParams = "? extends " + importType(Optional.class) + "<" + elementType + ">";
                         } else {
                             otherTypeParams = elementType;
                         }
@@ -228,25 +227,25 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             
             Iterable<String> tryBlock = element.getKind().equals(ElementKind.METHOD)
                     ? (isPrivate
-                        ? Some(returnClause + "getMember().invoke(" + mkString(", ", cons("null", argumentNames)) + ");")
-                        : Some(returnClause + instanceName + "." + (typeParameters.isEmpty() ? "" : "<" + mkString(", ", map(simpleName, typeParameters)) + ">") + methodName + "(" + mkString(", ", argumentNames) + ");"))
+                        ? newList(returnClause + "getMember().invoke(" + mkString(", ", cons("null", argumentNames)) + ");")
+                        : newList(returnClause + instanceName + "." + (typeParameters.isEmpty() ? "" : "<" + mkString(", ", map(simpleName, typeParameters)) + ">") + methodName + "(" + mkString(", ", argumentNames) + ");"))
                     : isPrivate
-                    ? Some("return (" + returnTypeImported + ")getMember().newInstance(" + mkString(", ", argumentNames) + ");")
-                    : Some("return new " + returnTypeImported + "(" + mkString(", ", argumentNames) + ");");
+                    ? newList("return (" + returnTypeImported + ")getMember().newInstance(" + mkString(", ", argumentNames) + ");")
+                    : newList("return new " + returnTypeImported + "(" + mkString(", ", argumentNames) + ");");
             
             Iterable<String> tryCatchBlock = isPrivate || throwsChecked
                 ? concat(
-                    Some("try {"),
+                    newList("try {"),
                     map(padding, tryBlock),
                     catchBlock,
-                    Some("}"))
+                    newList("}"))
                 : tryBlock;
                     
             Iterable<String> applyBlock = concat(
-                Some("@Override"),
-                Some("public " + returnTypeImported + " apply(" + mkString(", ", map(joinWithSpace, zip(argumentTypes, argumentNames))) + ") {"),
+                newList("@Override"),
+                newList("public " + returnTypeImported + " apply(" + mkString(", ", map(joinWithSpace, zip(argumentTypes, argumentNames))) + ") {"),
                 map(padding, tryCatchBlock),
-                Some("}")
+                newList("}")
             );
             
             Iterable<String> getParametersBlock = newList(
@@ -269,13 +268,13 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             );
 
             return concat(
-                Some(declaration + "(" + mkString(", ", map(joinWithSpace, zip(map(x -> "final " + x, attributeTypes), attributeNames))) + ") {"),
+                newList(declaration + "(" + mkString(", ", map(joinWithSpace, zip(map(x -> "final " + x, attributeTypes), attributeNames))) + ") {"),
                 map(padding, concat(
-                    Some("return new " + fundef + "(" + mkString(", ", cons(importTypes(enclosingElementQualifiedName) + ".class", reflectionInvokationArgs(parameterTypesAsClasses(element, relevantTypeParamsForConstructor)))) + ") {"),
+                    newList("return new " + fundef + "(" + mkString(", ", cons(importTypes(enclosingElementQualifiedName) + ".class", reflectionInvokationArgs(parameterTypesAsClasses(element, relevantTypeParamsForConstructor)))) + ") {"),
                     map(padding, body),
-                    Some("};")
+                    newList("};")
                 )),
-                Some("}"),
+                newList("}"),
                 EmptyLine
             );
         }

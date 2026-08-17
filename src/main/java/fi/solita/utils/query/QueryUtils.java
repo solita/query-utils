@@ -1,5 +1,6 @@
 package fi.solita.utils.query;
 
+import static fi.solita.utils.functional.Collections.it;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newMutableList;
@@ -15,8 +16,6 @@ import static fi.solita.utils.functional.Functional.isEmpty;
 import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.repeat;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
 import static fi.solita.utils.query.attributes.AttributeProxy.canUnwrap;
 
@@ -30,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.hibernate.annotations.Columns;
@@ -38,7 +38,6 @@ import org.hibernate.query.sqm.internal.SqmCriteriaNodeBuilder;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 
 import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pred;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Order.Direction;
@@ -223,7 +222,7 @@ public class QueryUtils {
     }
     
     public final boolean wouldUseInClauseOptimizations(Set<?> vals) {
-        return config.getTableInClauseProvider().isDefined() && (useTableForInClause(vals) || useMemberOfForInClause(vals));
+        return config.getTableInClauseProvider().isPresent() && (useTableForInClause(vals) || useMemberOfForInClause(vals));
     }
     
     private <V, T> Expression<?> mkLiteral(CriteriaBuilder cb, Expression<?> path, V val) {
@@ -255,8 +254,8 @@ public class QueryUtils {
         List<Predicate> preds = null;
         
         if (optimizations != Optimization.DISABLED) {
-            for (TableInClauseOptimization provider: config.getTableInClauseProvider()) {
-                for (Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>> targetType: provider.getSqlTypeAndValues(vals)) {
+            for (TableInClauseOptimization provider: it(config.getTableInClauseProvider())) {
+                for (Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>> targetType: it(provider.getSqlTypeAndValues(vals))) {
                     // cannot make hibernate 6.6 work with composite types here anymore, so only optimize if a registration exists :(
                     
                     // only use table-expression for large sets since ora performs better with regular in-clause.
@@ -301,7 +300,7 @@ public class QueryUtils {
             // pad in-list to the next specified size, to avoid excessive hard parsing
             int targetSize = head(filter(greaterThanOrEqualTo(list.size()), config.getInClauseValuesAmounts()));
             @SuppressWarnings("unchecked")
-            T valueToRepeat = (T) config.getInListPadValue(last(list).getClass()).getOrElse(last(list));
+            T valueToRepeat = (T) config.getInListPadValue(last(list).getClass()).orElse(last(list));
             return newList(concat(list, repeat(valueToRepeat, targetSize-list.size())));
         } else {
             return list;
@@ -372,7 +371,7 @@ public class QueryUtils {
             return forall(QueryUtils_.isRequiredByMetamodel, ((JoiningAttribute) param).getAttributes());
         } else if (param instanceof JoiningAttribute) {
             return true;
-        } else if (!(param instanceof AdditionalQueryPerformingAttribute) && param instanceof Bindable && (Option.class.isAssignableFrom(((Bindable<?>) param).getBindableJavaType()) || !memberIsRequiredByType(param.getJavaMember()))) {
+        } else if (!(param instanceof AdditionalQueryPerformingAttribute) && param instanceof Bindable && (Optional.class.isAssignableFrom(((Bindable<?>) param).getBindableJavaType()) || !memberIsRequiredByType(param.getJavaMember()))) {
             return false;
         } else if (param instanceof SingularAttribute && ((SingularAttribute<?,?>)param).getPersistentAttributeType() == PersistentAttributeType.EMBEDDED) {
             if (!((SingularAttribute<?,?>)param).isOptional()) {
@@ -437,23 +436,23 @@ public class QueryUtils {
     }
     
     @SuppressWarnings("unchecked")
-    public static Option<Class<?>> getJavaType(Member member) {
-        return (Option<Class<?>>)
-               (member instanceof Field ? Some(((Field)member).getType()) :
-                member instanceof Method ? Some(((Method)member).getReturnType()) : None());
+    public static Optional<Class<?>> getJavaType(Member member) {
+        return (Optional<Class<?>>)
+               (member instanceof Field ? Optional.of(((Field)member).getType()) :
+                member instanceof Method ? Optional.of(((Method)member).getReturnType()) : Optional.empty());
     }
     
-    public static Option<Member> getJavaMember(Attribute<?,?> attr) {
-        return Option.of(attr.getJavaMember());
+    public static Optional<Member> getJavaMember(Attribute<?,?> attr) {
+        return Optional.ofNullable(attr.getJavaMember());
     }
     
-    public static Option<Member> getBindableJavaType(Attribute<?,?> attr) {
-        return Option.of(attr.getJavaMember());
+    public static Optional<Member> getBindableJavaType(Attribute<?,?> attr) {
+        return Optional.ofNullable(attr.getJavaMember());
     }
     
     public static boolean memberIsRequiredByType(Member member) {
-        Option<Class<?>> memberType = getJavaType(member);
-        return !memberType.isDefined() || !Option.class.isAssignableFrom(memberType.get());
+        Optional<Class<?>> memberType = getJavaType(member);
+        return !memberType.isPresent() || !Optional.class.isAssignableFrom(memberType.get());
     }
     
     public static boolean isRequiredByQueryAttribute(Attribute<?,?> param) {
@@ -478,7 +477,7 @@ public class QueryUtils {
             return false;
         }
         
-        if (param instanceof Bindable && (Option.class.isAssignableFrom(((Bindable<?>) param).getBindableJavaType()) || !memberIsRequiredByType(param.getJavaMember()))) {
+        if (param instanceof Bindable && (Optional.class.isAssignableFrom(((Bindable<?>) param).getBindableJavaType()) || !memberIsRequiredByType(param.getJavaMember()))) {
             return false;
         }
         

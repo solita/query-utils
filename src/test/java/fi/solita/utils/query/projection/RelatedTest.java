@@ -6,6 +6,8 @@ import static fi.solita.utils.query.projection.Select.literal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Optional;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -128,7 +130,7 @@ public class RelatedTest extends QueryTestBase {
             Cast.optional(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepMunicipality, Municipality_.optionalArea))));
         
         // optionalArea is an optional attribute, so it properly handles null values through the chain
-        assertEquals(fi.solita.utils.functional.Option.Some("testArea"), dto.value);
+        assertEquals(Optional.of("testArea"), dto.value);
         assertEquals(1, getQueryCount() - queryCount);
     }
     
@@ -147,7 +149,7 @@ public class RelatedTest extends QueryTestBase {
                 Department_.optionalDepMunicipality, Municipality_.optionalArea))));
         
         // Since the chain goes through optional attributes, result is wrapped in Option
-        assertEquals(fi.solita.utils.functional.Option.Some("outerArea"), dto.value);
+        assertEquals(Optional.of("outerArea"), dto.value);
         assertEquals(1, getQueryCount() - queryCount);
     }
 }

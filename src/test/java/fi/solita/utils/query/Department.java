@@ -1,12 +1,14 @@
 package fi.solita.utils.query;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.hibernate.annotations.AttributeAccessor;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JavaType;
 import org.hibernate.annotations.JavaTypeRegistration;
+import org.hibernate.type.descriptor.java.IntegerJavaType;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.backend.hibernate.OptionAwareDirectPropertyAccessor;
 import jakarta.persistence.Access;
 import jakarta.persistence.AttributeOverride;
@@ -43,7 +45,8 @@ public class Department implements IEntity<Department>, Identifiable<Department.
     private int mandatoryNumber;
     
     @AttributeAccessor(strategy = OptionAwareDirectPropertyAccessor.class)
-    private Option<Integer> optionSize;
+    @JavaType(IntegerJavaType.class)
+    private Optional<Integer> optionSize;
     
     private Money optionalBudget;
     
@@ -155,11 +158,11 @@ public class Department implements IEntity<Department>, Identifiable<Department.
         return optionalBudget;
     }
     
-    public Option<Integer> getOptionSize() {
+    public Optional<Integer> getOptionSize() {
         return optionSize;
     }
     
-    public void setOptionSize(Option<Integer> optionSize) {
+    public void setOptionSize(Optional<Integer> optionSize) {
         this.optionSize = optionSize;
     }
 }

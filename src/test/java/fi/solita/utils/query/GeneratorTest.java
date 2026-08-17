@@ -1,10 +1,9 @@
 package fi.solita.utils.query;
 
-import static fi.solita.utils.functional.Option.Some;
+import java.util.Optional;
 
 import org.junit.Test;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.X.A;
 import fi.solita.utils.query.X.B;
 import fi.solita.utils.query.X.C;
@@ -46,17 +45,17 @@ class FooDto {
     }
     public FooDto(X.B x, FooId a) {
     }
-    public FooDto(X.C x, Option<Id<Foo>> a) {
+    public FooDto(X.C x, Optional<Id<Foo>> a) {
     }
-    public FooDto(X.D x, Option<FooId> a) {
+    public FooDto(X.D x, Optional<FooId> a) {
     }
-    public FooDto(X.E x, Option<? extends Id<Foo>> a) {
+    public FooDto(X.E x, Optional<? extends Id<Foo>> a) {
     }
     public FooDto(X.F x, Foo a) {
     }
-    public FooDto(X.G x, Option<Foo> a) {
+    public FooDto(X.G x, Optional<Foo> a) {
     }
-    public FooDto(X.H x, Option<? extends Foo> a) {
+    public FooDto(X.H x, Optional<? extends Foo> a) {
     }
 }
 
@@ -66,11 +65,11 @@ public class GeneratorTest {
     public void generatedConstructorAcceptsIdRegardlessOfWhetherUsingInterfaceOrConcreteClass() {
          FooDto_.$$(Select.literal(A.a), Select.literal(new Foo()));
          FooDto_.$$$(Select.literal(B.b), Select.literal(new Foo()));
-         FooDto_.$$$$(Select.literal(C.c), Select.literal(Some(new Foo())));
-         FooDto_.$$$$$(Select.literal(D.d), Select.literal(Some(new Foo())));
-         FooDto_.$$$$$$(Select.literal(E.e), Select.literal(Some(new Foo())));
+         FooDto_.$$$$(Select.literal(C.c), Select.literal(Optional.of(new Foo())));
+         FooDto_.$$$$$(Select.literal(D.d), Select.literal(Optional.of(new Foo())));
+         FooDto_.$$$$$$(Select.literal(E.e), Select.literal(Optional.of(new Foo())));
          FooDto_.$$$$$$$(Select.literal(F.f), Select.literal(new Foo()));
-         FooDto_.$$$$$$$$(Select.literal(G.g), Select.literal(Some(new Foo())));
-         FooDto_.$$$$$$$$$(Select.literal(H.h), Select.literal(Some(new Foo())));
+         FooDto_.$$$$$$$$(Select.literal(G.g), Select.literal(Optional.of(new Foo())));
+         FooDto_.$$$$$$$$$(Select.literal(H.h), Select.literal(Optional.of(new Foo())));
     }
 }

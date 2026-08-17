@@ -1,24 +1,23 @@
 package fi.solita.utils.query.backend.hibernate;
 
-import static fi.solita.utils.functional.Option.None;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Root;
+import java.util.Optional;
 
 import org.junit.Test;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Employee;
 import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.QueryTestBase;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
 
 public class HibernateJpaCriteriaCopyTest extends QueryTestBase {
 
@@ -30,9 +29,9 @@ public class HibernateJpaCriteriaCopyTest extends QueryTestBase {
         CriteriaQuery<Department> q = cb.createQuery(Department.class);
         q.from(Department.class);
 
-        Option<CriteriaQuery<Department>> result = HibernateJpaCriteriaCopy.copyCriteria(q);
+        Optional<CriteriaQuery<Department>> result = HibernateJpaCriteriaCopy.copyCriteria(q);
 
-        assertTrue("Should return Some for SqmSelectStatement", result.isDefined());
+        assertTrue("Should return Some for SqmSelectStatement", result.isPresent());
     }
 
     @Test
@@ -194,9 +193,9 @@ public class HibernateJpaCriteriaCopyTest extends QueryTestBase {
 
         // A singular path (not a list join) should return None
         Path<?> namePath = root.get(Employee_.mandatoryName);
-        Option<jakarta.persistence.criteria.Order> result = HibernateJpaCriteriaCopy.createListIndexSortOrder(namePath);
+        Optional<jakarta.persistence.criteria.Order> result = HibernateJpaCriteriaCopy.createListIndexSortOrder(namePath);
 
-        assertEquals(None(), result);
+        assertEquals(Optional.empty(), result);
     }
 
     @Test
@@ -207,9 +206,9 @@ public class HibernateJpaCriteriaCopyTest extends QueryTestBase {
 
         // A regular join (ManyToOne) is not an SqmListJoin
         Path<?> deptPath = root.join(Employee_.mandatoryDepartment);
-        Option<jakarta.persistence.criteria.Order> result = HibernateJpaCriteriaCopy.createListIndexSortOrder(deptPath);
+        Optional<jakarta.persistence.criteria.Order> result = HibernateJpaCriteriaCopy.createListIndexSortOrder(deptPath);
 
-        assertEquals(None(), result);
+        assertEquals(Optional.empty(), result);
     }
 
     @Test
@@ -220,9 +219,9 @@ public class HibernateJpaCriteriaCopyTest extends QueryTestBase {
 
         // Department.employees is a @OrderColumn List — joining it yields SqmListJoin
         Path<?> listJoinPath = root.join(Department_.employees);
-        Option<jakarta.persistence.criteria.Order> result = HibernateJpaCriteriaCopy.createListIndexSortOrder(listJoinPath);
+        Optional<jakarta.persistence.criteria.Order> result = HibernateJpaCriteriaCopy.createListIndexSortOrder(listJoinPath);
 
-        assertTrue("Should return Some for list join", result.isDefined());
+        assertTrue("Should return Some for list join", result.isPresent());
         assertNotNull(result.get());
     }
 
@@ -233,9 +232,9 @@ public class HibernateJpaCriteriaCopyTest extends QueryTestBase {
         Root<Department> root = q.from(Department.class);
 
         // A root is not a list join
-        Option<jakarta.persistence.criteria.Order> result = HibernateJpaCriteriaCopy.createListIndexSortOrder(root);
+        Optional<jakarta.persistence.criteria.Order> result = HibernateJpaCriteriaCopy.createListIndexSortOrder(root);
 
-        assertEquals(None(), result);
+        assertEquals(Optional.empty(), result);
     }
 
     @Test
@@ -251,8 +250,8 @@ public class HibernateJpaCriteriaCopyTest extends QueryTestBase {
         jakarta.persistence.criteria.ListJoin<Department, Employee> listJoin = root.joinList("employees");
         q.select(listJoin.get(Employee_.mandatoryName));
 
-        Option<jakarta.persistence.criteria.Order> orderOpt = HibernateJpaCriteriaCopy.createListIndexSortOrder(listJoin);
-        assertTrue(orderOpt.isDefined());
+        Optional<jakarta.persistence.criteria.Order> orderOpt = HibernateJpaCriteriaCopy.createListIndexSortOrder(listJoin);
+        assertTrue(orderOpt.isPresent());
         q.orderBy(orderOpt.get());
 
         // Query should execute without errors using the list index ordering

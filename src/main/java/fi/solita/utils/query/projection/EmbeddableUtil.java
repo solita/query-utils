@@ -6,8 +6,7 @@ import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.sort;
 import static fi.solita.utils.functional.Functional.zip;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
+import static fi.solita.utils.functional.FunctionalA.head;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -15,7 +14,17 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import fi.solita.utils.functional.Tuple2;
+import fi.solita.utils.query.QueryUtils_;
+import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
+import fi.solita.utils.query.attributes.AttributeProxy;
+import fi.solita.utils.query.attributes.JoiningAttribute;
+import fi.solita.utils.query.attributes.PseudoAttribute;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Selection;
 import jakarta.persistence.metamodel.Attribute;
@@ -25,17 +34,6 @@ import jakarta.persistence.metamodel.EmbeddableType;
 import jakarta.persistence.metamodel.Metamodel;
 import jakarta.persistence.metamodel.PluralAttribute;
 import jakarta.persistence.metamodel.Type.PersistenceType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import fi.solita.utils.functional.Option;
-import fi.solita.utils.functional.Tuple2;
-import fi.solita.utils.query.QueryUtils_;
-import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
-import fi.solita.utils.query.attributes.AttributeProxy;
-import fi.solita.utils.query.attributes.JoiningAttribute;
-import fi.solita.utils.query.attributes.PseudoAttribute;
 
 public class EmbeddableUtil {
     
@@ -88,16 +86,16 @@ public class EmbeddableUtil {
         }
     }
     
-    static Option<? extends Attribute<?,?>> unwrapEmbeddableAttribute(Attribute<?,?> attribute) {
-        Option<? extends Attribute<?,?>> ret = None();
+    static Optional<? extends Attribute<?,?>> unwrapEmbeddableAttribute(Attribute<?,?> attribute) {
+        Optional<? extends Attribute<?,?>> ret = Optional.empty();
         if (attribute == null || attribute instanceof PseudoAttribute) {
-            ret = None();
+            ret = Optional.empty();
         } else if (attribute.getPersistentAttributeType() == PersistentAttributeType.EMBEDDED) {
-            ret = Some(attribute);
-        } else if (AttributeProxy.unwrap(PseudoAttribute.class, attribute).isDefined()) {
-            ret = None();
+            ret = Optional.of(attribute);
+        } else if (AttributeProxy.unwrap(PseudoAttribute.class, attribute).isPresent()) {
+            ret = Optional.empty();
         } else if (attribute instanceof JoiningAttribute && last(((JoiningAttribute) attribute).getAttributes()) instanceof PseudoAttribute) {
-            ret = None();
+            ret = Optional.empty();
         } else if (attribute instanceof AdditionalQueryPerformingAttribute) {
             List<Attribute<?, ?>> params = ((AdditionalQueryPerformingAttribute)attribute).getConstructor().getParameters();
             if (params.size() == 1) {

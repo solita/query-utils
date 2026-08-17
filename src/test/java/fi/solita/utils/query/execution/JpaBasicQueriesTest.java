@@ -3,18 +3,18 @@ package fi.solita.utils.query.execution;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Functional.range;
-import static fi.solita.utils.functional.Option.None;
+import static fi.solita.utils.functional.FunctionalS.range;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Optional;
 
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Employee;
@@ -40,7 +40,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     @Test
     public void persist() {
         Id<Department> id = dao.persist(new Department());
-        assertTrue(dao.find(id).isDefined());
+        assertTrue(dao.find(id).isPresent());
     }
 
     @Test
@@ -58,9 +58,9 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         Department dep = new Department();
         persist(dep);
 
-        assertTrue(dao.find(dep.getId()).isDefined());
+        assertTrue(dao.find(dep.getId()).isPresent());
         dao.remove(dep.getId());
-        assertFalse(dao.find(dep.getId()).isDefined());
+        assertFalse(dao.find(dep.getId()).isPresent());
     }
 
     @Test
@@ -73,8 +73,8 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         em.flush();
         em.clear();
 
-        assertFalse(dao.find(dep1.getId()).isDefined());
-        assertTrue(dao.find(dep2.getId()).isDefined());
+        assertFalse(dao.find(dep1.getId()).isPresent());
+        assertTrue(dao.find(dep2.getId()).isPresent());
     }
     
     @Test
@@ -89,7 +89,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
         em.flush();
         em.clear();
 
-        assertFalse(dao.find(dep.getId()).isDefined());
+        assertFalse(dao.find(dep.getId()).isPresent());
     }
 
     @Test
@@ -133,7 +133,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
     }
     
     @Test
-    public void getProxyFromEntity_none() {
+    public void getProxyFromEntityNone() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
         persist(dep, emp);
@@ -142,12 +142,12 @@ public class JpaBasicQueriesTest extends QueryTestBase {
 
         Employee v = dao.get(emp.getId());
         long fetched = em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount();
-        Option<Municipality> proxy = dao.toProxy(v, Cast.optional(Employee_.optionalMunicipality));
+        Optional<Municipality> proxy = dao.toProxy(v, Cast.optional(Employee_.optionalMunicipality));
         assertEquals(fetched, em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount());
-        assertEquals(None(), proxy);
+        assertEquals(Optional.empty(), proxy);
     }
     @Test
-    public void getProxyFromEntity_some() {
+    public void getProxyFromEntitySome() {
         Department dep = new Department();
         Municipality mun = new Municipality();
         Employee emp = new Employee("", dep, mun);
@@ -157,7 +157,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
 
         Employee v = dao.get(emp.getId());
         long fetched = em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount();
-        Option<Municipality> proxy = dao.toProxy(v, Cast.optional(Employee_.optionalMunicipality));
+        Optional<Municipality> proxy = dao.toProxy(v, Cast.optional(Employee_.optionalMunicipality));
         assertEquals(fetched, em.unwrap(Session.class).getSessionFactory().getStatistics().getEntityFetchCount());
         assertFalse(Hibernate.isInitialized(proxy.get()));
     }
@@ -247,7 +247,7 @@ public class JpaBasicQueriesTest extends QueryTestBase {
 
         assertEquals(dep.getId(), dao.find(dep.getId()).get().getId());
         em.remove(dao.get(dep.getId()));
-        assertFalse(dao.find(dep.getId()).isDefined());
+        assertFalse(dao.find(dep.getId()).isPresent());
     }
 
     @Test(expected = EntityNotFoundException.class)

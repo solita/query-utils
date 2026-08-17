@@ -4,6 +4,9 @@ import static fi.solita.utils.functional.Collections.newMutableSet;
 
 import java.util.Set;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JavaTypeRegistration;
+
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.Basic;
@@ -16,9 +19,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.JavaTypeRegistration;
 
 @Entity
 @Access(AccessType.FIELD)

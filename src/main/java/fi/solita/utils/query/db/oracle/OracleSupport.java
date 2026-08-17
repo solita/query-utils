@@ -1,9 +1,7 @@
 package fi.solita.utils.query.db.oracle;
 
-import static fi.solita.utils.functional.Functional.headOption;
+import static fi.solita.utils.functional.Functional.headOptional;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -12,12 +10,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Function;
 import fi.solita.utils.functional.Function1;
 import fi.solita.utils.functional.Function2;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Configuration;
@@ -32,10 +30,10 @@ public class OracleSupport implements TableInClauseOptimization {
     }
     
     @SuppressWarnings("unchecked")
-    public Option<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> getSqlTypeAndValues(final Iterable<?> values) {
-        Option<?> h = headOption(values);
-        if (!h.isDefined()) {
-            return None();
+    public Optional<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> getSqlTypeAndValues(final Iterable<?> values) {
+        Optional<?> h = headOptional(values);
+        if (!h.isPresent()) {
+            return Optional.empty();
         }
         
         Map<Class<?>, Tuple3<String, Class<?>, ? extends Function2<Connection, ?, ?>>> regTypes = config.getRegisteredTableTypes();
@@ -65,7 +63,7 @@ public class OracleSupport implements TableInClauseOptimization {
             // if no exact type found, try some registered for another superclass/interface
             for (Entry<Class<?>, Tuple3<String,Class<?>, ? extends Function2<Connection, ?, ?>>> entry: regTypes.entrySet()) {
                 if (entry.getKey().isAssignableFrom(h.get().getClass())) {
-                    return Some(foo(entry.getValue(), values));
+                    return Optional.of(foo(entry.getValue(), values));
                 }
             }
             
@@ -83,10 +81,10 @@ public class OracleSupport implements TableInClauseOptimization {
                 }
                 v = Function.constant(m);
             } else {
-                return None();
+                return Optional.empty();
             }
         }
-        return Some((Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>)(Object)Tuple.of(t, o, v));
+        return Optional.of((Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>)(Object)Tuple.of(t, o, v));
     }
 
     @SuppressWarnings("unchecked")

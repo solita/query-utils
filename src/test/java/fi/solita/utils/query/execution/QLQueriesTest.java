@@ -3,19 +3,18 @@ package fi.solita.utils.query.execution;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Page;
@@ -69,7 +68,7 @@ public class QLQueriesTest extends QueryTestBase {
 
     @Test
     public void find_hql_empty() {
-        assertFalse(dao.find(QLQuery.<Department>of("from Department")).isDefined());
+        assertFalse(dao.find(QLQuery.<Department>of("from Department")).isPresent());
     }
 
     @Test
@@ -89,19 +88,19 @@ public class QLQueriesTest extends QueryTestBase {
     public void findFirst_hql() {
         persist(new Department());
 
-        assertTrue(dao.findFirst(QLQuery.<Department>of("from Department")).isDefined());
+        assertTrue(dao.findFirst(QLQuery.<Department>of("from Department")).isPresent());
     }
 
     @Test
     public void findFirst_hql_empty() {
-        assertFalse(dao.findFirst(QLQuery.<Department>of("from Department")).isDefined());
+        assertFalse(dao.findFirst(QLQuery.<Department>of("from Department")).isPresent());
     }
 
     @Test
     public void findFirst_hql_multiple() {
         persist(new Department(), new Department());
 
-        assertTrue(dao.findFirst(QLQuery.<Department>of("from Department")).isDefined());
+        assertTrue(dao.findFirst(QLQuery.<Department>of("from Department")).isPresent());
     }
 
     @Test
@@ -163,36 +162,36 @@ public class QLQueriesTest extends QueryTestBase {
         Department dep = new Department("bar");
         persist(dep);
 
-        Option<String> name = dao.find(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+        Optional<String> name = dao.find(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
-        assertEquals(Some("BAR"), name);
+        assertEquals(Optional.of("BAR"), name);
     }
 
     @Test
     public void find_hql_with_constructor_empty() {
-        Option<String> name = dao.find(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+        Optional<String> name = dao.find(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
-        assertFalse(name.isDefined());
+        assertFalse(name.isPresent());
     }
 
     @Test
     public void findFirst_hql_with_constructor() {
         persist(new Department("first"), new Department("second"));
 
-        Option<String> name = dao.findFirst(QLQuery.<Department>of("from Department order by mandatoryDepName"), new Apply<Department, String>() {
+        Optional<String> name = dao.findFirst(QLQuery.<Department>of("from Department order by mandatoryDepName"), new Apply<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
-        assertEquals(Some("FIRST"), name);
+        assertEquals(Optional.of("FIRST"), name);
     }
 
     @Test
     public void findFirst_hql_with_constructor_empty() {
-        Option<String> name = dao.findFirst(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+        Optional<String> name = dao.findFirst(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
-        assertFalse(name.isDefined());
+        assertFalse(name.isPresent());
     }
 
     @Test

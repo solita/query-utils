@@ -1,15 +1,14 @@
 package fi.solita.utils.query.backend;
 
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Optional;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Employee;
 import fi.solita.utils.query.IEntity;
@@ -35,14 +34,14 @@ public class TypeProviderTest extends QueryTestBase {
 
     @Test
     public void getEnumType_returnsNone_forNonEnumClass() {
-        Option<Class<String>> result = HibernateTypeProvider.getEnumType(String.class);
-        assertEquals(None(), result);
+        Optional<Class<String>> result = HibernateTypeProvider.getEnumType(String.class);
+        assertEquals(Optional.empty(), result);
     }
 
     @Test
     public void getEnumType_returnsSome_forDirectEnum() {
-        Option<Class<SimpleEnum>> result = HibernateTypeProvider.getEnumType(SimpleEnum.class);
-        assertEquals(Some(SimpleEnum.class), result);
+        Optional<Class<SimpleEnum>> result = HibernateTypeProvider.getEnumType(SimpleEnum.class);
+        assertEquals(Optional.of(SimpleEnum.class), result);
     }
 
     @Test
@@ -50,15 +49,15 @@ public class TypeProviderTest extends QueryTestBase {
         // Enum constant with a body creates an anonymous subclass; its enclosing class is the enum
         Class<?> anonymousSubclass = EnumWithBody.A.getClass();
         assertTrue(anonymousSubclass.getEnclosingClass().isEnum());
-        Option<?> result = HibernateTypeProvider.getEnumType(anonymousSubclass);
-        assertTrue(result.isDefined());
+        Optional<?> result = HibernateTypeProvider.getEnumType(anonymousSubclass);
+        assertTrue(result.isPresent());
         assertEquals(EnumWithBody.class, result.get());
     }
 
     @Test
     public void getEnumType_returnsNone_forInteger() {
-        Option<Class<Integer>> result = HibernateTypeProvider.getEnumType(Integer.class);
-        assertEquals(None(), result);
+        Optional<Class<Integer>> result = HibernateTypeProvider.getEnumType(Integer.class);
+        assertEquals(Optional.empty(), result);
     }
 
     // --- type() ---
@@ -68,7 +67,7 @@ public class TypeProviderTest extends QueryTestBase {
         Type<Department> type = typeProvider.type(Department.class);
         assertNotNull(type);
         HibernateType<Department> ht = (HibernateType<Department>) type;
-        assertTrue("Expected entity type", ht.entity.isDefined());
+        assertTrue("Expected entity type", ht.entity.isPresent());
         assertEquals(Department.class, ht.entity.get());
     }
 

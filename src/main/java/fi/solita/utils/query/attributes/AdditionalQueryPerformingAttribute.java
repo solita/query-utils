@@ -1,13 +1,12 @@
 package fi.solita.utils.query.attributes;
 
 
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 import jakarta.persistence.metamodel.CollectionAttribute;
 import jakarta.persistence.metamodel.ListAttribute;
 import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
-
-import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 public interface AdditionalQueryPerformingAttribute {
     MetaJpaConstructor<?, ?, ?> getConstructor();

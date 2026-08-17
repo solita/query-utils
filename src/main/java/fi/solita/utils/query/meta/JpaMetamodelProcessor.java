@@ -3,7 +3,6 @@ package fi.solita.utils.query.meta;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.cons;
 import static fi.solita.utils.functional.Functional.mkString;
-import static fi.solita.utils.functional.Functional.remove;
 
 import java.util.List;
 import java.util.regex.Pattern;

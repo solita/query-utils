@@ -1,10 +1,10 @@
 package fi.solita.utils.query.backend.hibernate;
 
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
+import static fi.solita.utils.functional.Collections.it;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -18,7 +18,6 @@ import org.hibernate.type.spi.TypeConfiguration;
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Functional;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.backend.Type;
@@ -28,27 +27,27 @@ import jakarta.persistence.EntityManagerFactory;
 public class HibernateTypeProvider implements TypeProvider {
 
     public static class HibernateType<T> implements Type<T> {
-        public final Option<BindableType<T>> bindableType;
-        public final Option<Class<?>> entity;
-        public final Option<Class<?>> javaType;
+        public final Optional<BindableType<T>> bindableType;
+        public final Optional<Class<?>> entity;
+        public final Optional<Class<?>> javaType;
         
 
-        private HibernateType(Option<BindableType<T>> bindableType, Option<Class<?>> entity, Option<Class<?>> javaType) {
+        private HibernateType(Optional<BindableType<T>> bindableType, Optional<Class<?>> entity, Optional<Class<?>> javaType) {
             this.bindableType = bindableType;
             this.entity = entity;
             this.javaType = javaType;
         }
         
         public static <T> Type<T> bindable(BindableType<T> x) {
-            return new HibernateType<T>(Some(x), Option.<Class<?>>None(), Option.<Class<?>>None());
+            return new HibernateType<T>(Optional.of(x), Optional.empty(), Optional.empty());
         }
         
         public static <T> Type<T> entity(Class<T> x) {
-            return new HibernateType<T>(Option.<BindableType<T>>None(), Option.<Class<?>>Some(x), Option.<Class<?>>None());
+            return new HibernateType<T>(Optional.empty(), Optional.of(x), Optional.empty());
         }
         
         public static <T> Type<T> javaType(Class<T> x) {
-            return new HibernateType<T>(Option.<BindableType<T>>None(), Option.<Class<?>>None(), Option.<Class<?>>Some(x));
+            return new HibernateType<T>(Optional.empty(), Optional.empty(), Optional.of(x));
         }
     }
 
@@ -102,7 +101,7 @@ public class HibernateTypeProvider implements TypeProvider {
             return HibernateType.bindable(new BasicTypeReference<T>(basicType.getName(), clazz, basicType.getJdbcType().getDefaultSqlTypeCode()));
         }
         
-        for (Class<T> en: getEnumType(clazz)) {
+        for (Class<T> en: it(getEnumType(clazz))) {
             // hibernate doesn't recognize enum values with class bodies as enums themselves
             JavaType<Object> enumType = typeHelper.getJavaTypeRegistry().resolveDescriptor(en);
             if (enumType != null) {
@@ -122,14 +121,14 @@ public class HibernateTypeProvider implements TypeProvider {
     }
     
     @SuppressWarnings("unchecked")
-    public static <T> Option<Class<T>> getEnumType(Class<T> type) {
+    public static <T> Optional<Class<T>> getEnumType(Class<T> type) {
         if (type.isEnum()) {
-            return Some(type);
+            return Optional.of(type);
         }
         if (type.getEnclosingClass() != null && type.getEnclosingClass().isEnum()) {
-            return Some((Class<T>) type.getEnclosingClass());
+            return Optional.of((Class<T>) type.getEnclosingClass());
         }
-        return None();
+        return Optional.empty();
     }
 
     @Override

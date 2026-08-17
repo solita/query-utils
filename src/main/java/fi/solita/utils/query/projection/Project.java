@@ -7,10 +7,10 @@ import static fi.solita.utils.query.QueryUtils.checkOptionalAttributes;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Function;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple10;
@@ -107,7 +107,7 @@ public class Project {
     /**
      * Project the query result to the aggregate sum of <i>attribute</i>.
      */
-    public static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> sum(SingularAttribute<? super E, T> attribute) {
+    public static <E, T extends Number> MetaJpaConstructor<E,Optional<T>,Optional<T>> sum(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.sum(attribute);
     }
@@ -115,7 +115,7 @@ public class Project {
     /**
      * Project the query result to the aggregate max of <i>attribute</i>.
      */
-    public static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> max(SingularAttribute<? super E, T> attribute) {
+    public static <E, T extends Number> MetaJpaConstructor<E,Optional<T>,Optional<T>> max(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.max(attribute);
     }
@@ -123,7 +123,7 @@ public class Project {
     /**
      * Project the query result to the aggregate min of <i>attribute</i>.
      */
-    public static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> min(SingularAttribute<? super E, T> attribute) {
+    public static <E, T extends Number> MetaJpaConstructor<E,Optional<T>,Optional<T>> min(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.min(attribute);
     }
@@ -131,7 +131,7 @@ public class Project {
     /**
      * Project the query result to the aggregate max of <i>attribute</i>.
      */
-    public static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Option<T>,Option<T>> greatest(SingularAttribute<? super E, T> attribute) {
+    public static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Optional<T>,Optional<T>> greatest(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.greatest(attribute);
     }
@@ -139,7 +139,7 @@ public class Project {
     /**
      * Project the query result to the aggregate min of <i>attribute</i>.
      */
-    public static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Option<T>,Option<T>> least(SingularAttribute<? super E, T> attribute) {
+    public static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Optional<T>,Optional<T>> least(SingularAttribute<? super E, T> attribute) {
         checkOptionalAttributes(attribute);
         return Constructors.least(attribute);
     }

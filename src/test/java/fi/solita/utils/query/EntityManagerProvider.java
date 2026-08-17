@@ -1,9 +1,8 @@
 package fi.solita.utils.query;
 
+import fi.solita.utils.functional.Function0;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
-import fi.solita.utils.functional.Function0;
 
 public class EntityManagerProvider extends Function0<EntityManager> {
     

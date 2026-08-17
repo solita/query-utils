@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.junit.Test;
+
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Dto.COLLECTION_OF_IDS;
@@ -196,7 +197,7 @@ public class ProjectionUtilTest extends QueryTestBase {
     @Test
     public void isDistinctable_optionalIdAtIndex1_false() {
         // OPTIONAL_ID constructor: constructorParameterType at index 1 is Option.class (not Bindable)
-        // and attribute javaType is Option<Department.ID> (not NotDistinctable) → returns false
+        // and attribute javaType is Optional<Department.ID> (not NotDistinctable) → returns false
         MetaJpaConstructor<?, ?, ?> proj = Dto_.$$$$$$
                 (literal(OPTIONAL_ID.a), Cast.optional(Department_.id));
         assertFalse(ProjectionUtil.isDistinctable(proj, 1));

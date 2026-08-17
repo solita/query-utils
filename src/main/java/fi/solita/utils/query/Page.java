@@ -1,10 +1,7 @@
 package fi.solita.utils.query;
 
-import static fi.solita.utils.functional.Option.Some;
-
 import java.io.Serializable;
-
-import fi.solita.utils.functional.Option;
+import java.util.Optional;
 
 
 /**
@@ -19,7 +16,7 @@ public final class Page implements Serializable {
     private final int offset;
     private final int pageNumber;
     private final int pageSize;
-    private final Option<Integer> fetchSizeHint;
+    private final Optional<Integer> fetchSizeHint;
 
     public static final Page FIRST = Page.of(0);
 
@@ -40,7 +37,7 @@ public final class Page implements Serializable {
      *            Zero-based
      */
     public static Page of(int pageNumber, int pageSize) {
-        Page ret = new Page(pageNumber, pageSize, Option.<Integer>None(), 0);
+        Page ret = new Page(pageNumber, pageSize, Optional.empty(), 0);
         return ret.equals(NoPaging) ? NoPaging : ret;
     }
 
@@ -53,20 +50,20 @@ public final class Page implements Serializable {
     }
     
     public Page withFetchSizeHint(int fetchSizeHint) {
-        return new Page(pageNumber, pageSize, Some(fetchSizeHint), offset);
+        return new Page(pageNumber, pageSize, Optional.of(fetchSizeHint), offset);
     }
     
     public Page withOffset(int offset) {
         return new Page(pageNumber, pageSize, fetchSizeHint, offset);
     }
 
-    private Page(int pageNumber, int pageSize, Option<Integer> fetchSizeHint, int offset) {
+    private Page(int pageNumber, int pageSize, Optional<Integer> fetchSizeHint, int offset) {
         if (pageNumber < 0 || pageSize < 0 || offset < 0) {
             throw new IllegalArgumentException("arguments must be nonnegative");
         }
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
-        this.fetchSizeHint = !fetchSizeHint.isDefined() && pageSize == 1 ? Some(2) : fetchSizeHint;
+        this.fetchSizeHint = !fetchSizeHint.isPresent() && pageSize == 1 ? Optional.of(2) : fetchSizeHint;
         this.offset = offset;
     }
 
@@ -86,7 +83,7 @@ public final class Page implements Serializable {
         return pageNumber;
     }
     
-    public Option<Integer> getFetchSizeHint() {
+    public Optional<Integer> getFetchSizeHint() {
         return fetchSizeHint;
     }
 

@@ -1,7 +1,7 @@
 package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.newArray;
-import static fi.solita.utils.functional.Functional.headOption;
+import static fi.solita.utils.functional.Functional.headOptional;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Optional;
 
 import org.hibernate.HibernateException;
 import org.hibernate.annotations.TypeRegistration;
@@ -17,7 +18,6 @@ import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.usertype.UserType;
 
 import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.db.oracle.OracleSupport;
@@ -46,8 +46,8 @@ public class OracleTableValueType implements UserType<Table.Value>, Serializable
             Connection c = st.getConnection().unwrap(OracleSupport.oracleConnectionClass);
             Collection<?> values = value.values;
             
-            Option<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
-            if (sqlTypeAndValues.isDefined()) {
+            Optional<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
+            if (sqlTypeAndValues.isPresent()) {
                 try {
                     Object ad = OracleSupport.arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);
                     OracleSupport.oraclePreparedStatementMethod.invoke(st.unwrap(OracleSupport.oraclePreparedStatementClass), index, OracleSupport.ARRAYConstructor.newInstance(ad, c, newArray(Object.class, sqlTypeAndValues.get()._3.apply(c))));
@@ -55,7 +55,7 @@ public class OracleTableValueType implements UserType<Table.Value>, Serializable
                     throw new RuntimeException(e);
                 }
             } else {
-                throw new UnsupportedOperationException("type not implemented: " + headOption(values).map(OracleTableValueType_.className));
+                throw new UnsupportedOperationException("type not implemented: " + headOptional(values).map(OracleTableValueType_.className));
             }
         }
     }

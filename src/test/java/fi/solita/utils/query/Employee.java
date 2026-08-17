@@ -1,11 +1,14 @@
 package fi.solita.utils.query;
 
+import java.util.Optional;
+
 import org.hibernate.annotations.AttributeAccessor;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JavaType;
 import org.hibernate.annotations.JavaTypeRegistration;
 import org.hibernate.annotations.JavaTypeRegistrations;
+import org.hibernate.type.descriptor.java.IntegerJavaType;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.backend.hibernate.OptionAwareDirectPropertyAccessor;
 import jakarta.persistence.Access;
 import jakarta.persistence.Basic;
@@ -42,7 +45,8 @@ public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
     private Money optionalSalary;
     
     @AttributeAccessor(strategy = OptionAwareDirectPropertyAccessor.class)
-    private Option<Integer> optionAge;
+    @JavaType(IntegerJavaType.class)
+    private Optional<Integer> optionAge;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Department mandatoryDepartment;
@@ -98,11 +102,11 @@ public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
         return mandatoryName;
     }
 
-    public Option<Money> getOptionalSalary() {
-        return Option.of(optionalSalary);
+    public Optional<Money> getOptionalSalary() {
+        return Optional.ofNullable(optionalSalary);
     }
     
-    public Option<Integer> getOptionAge() {
+    public Optional<Integer> getOptionAge() {
         return optionAge;
     }
     
@@ -116,7 +120,7 @@ public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
         return this;
     }
     
-    public void setOptionAge(Option<Integer> optionAge) {
+    public void setOptionAge(Optional<Integer> optionAge) {
         this.optionAge = optionAge;
     }
 }

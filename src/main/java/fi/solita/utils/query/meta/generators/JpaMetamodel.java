@@ -1,5 +1,13 @@
 package fi.solita.utils.query.meta.generators;
 
+import static fi.solita.utils.functional.Collections.newList;
+import static fi.solita.utils.functional.Collections.newMutableList;
+import static fi.solita.utils.functional.Functional.concat;
+import static fi.solita.utils.functional.Functional.filter;
+import static fi.solita.utils.functional.Functional.flatMap;
+import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Functional.zipWithIndex;
+import static fi.solita.utils.functional.FunctionalC.init;
 import static fi.solita.utils.meta.Helpers.boxed;
 import static fi.solita.utils.meta.Helpers.containedType;
 import static fi.solita.utils.meta.Helpers.element2Fields;
@@ -9,14 +17,6 @@ import static fi.solita.utils.meta.Helpers.typeMirror2GenericQualifiedName;
 import static fi.solita.utils.meta.Helpers.typeParameter2String;
 import static fi.solita.utils.meta.Helpers.withAnnotations;
 import static fi.solita.utils.meta.generators.Content.EmptyLine;
-import static fi.solita.utils.functional.Collections.newMutableList;
-import static fi.solita.utils.functional.Functional.concat;
-import static fi.solita.utils.functional.Functional.filter;
-import static fi.solita.utils.functional.Functional.flatMap;
-import static fi.solita.utils.functional.Functional.init;
-import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Functional.zipWithIndex;
-import static fi.solita.utils.functional.Option.Some;
 
 import java.util.Collection;
 import java.util.List;
@@ -32,20 +32,20 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
+
+import fi.solita.utils.functional.Apply;
+import fi.solita.utils.functional.Function2;
+import fi.solita.utils.functional.Pair;
+import fi.solita.utils.functional.Pred;
+import fi.solita.utils.meta.Helpers;
+import fi.solita.utils.meta.generators.Generator;
+import fi.solita.utils.meta.generators.GeneratorOptions;
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
-
-import fi.solita.utils.meta.Helpers;
-import fi.solita.utils.meta.generators.Generator;
-import fi.solita.utils.meta.generators.GeneratorOptions;
-import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Function2;
-import fi.solita.utils.functional.Pair;
-import fi.solita.utils.functional.Pred;
 
 /**
  * Note! This implementation is not based on any spec, so it may not work correctly for all situations.
@@ -161,7 +161,7 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
             String type = "jakarta.persistence.metamodel." + attributeClass + "Attribute" + typeSignature;
             
             Iterable<String> res = concat(
-                Some("public static volatile " + type + " " + attributeName + ";"),
+                newList("public static volatile " + type + " " + attributeName + ";"),
                 EmptyLine
             );
             return res;

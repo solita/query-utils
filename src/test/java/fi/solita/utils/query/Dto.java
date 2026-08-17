@@ -2,9 +2,8 @@ package fi.solita.utils.query;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-
-import fi.solita.utils.functional.Option;
 
 public class Dto {
     // some placeholder to separate metaconstructors a bit more clearly
@@ -43,16 +42,16 @@ public class Dto {
     public Dto(EMBEDDABLE x, Report val) {
         this.value = val;
     }
-    public Dto(OPTIONAL_ID x, Option<Id<?>> val) {
+    public Dto(OPTIONAL_ID x, Optional<Id<?>> val) {
         this.value = val;
     }
-    public Dto(OPTIONAL_ENTITY x, Option<? extends IEntity<?>> val) {
+    public Dto(OPTIONAL_ENTITY x, Optional<? extends IEntity<?>> val) {
         this.value = val;
     }
-    public Dto(OPTIONAL_VALUE x, Option<?> val) {
+    public Dto(OPTIONAL_VALUE x, Optional<?> val) {
         this.value = val;
     }
-    public Dto(OPTIONAL_EMBEDDABLE x, Option<Report> val) {
+    public Dto(OPTIONAL_EMBEDDABLE x, Optional<Report> val) {
         this.value = val;
     }
     public Dto(COLLECTION_OF_IDS x, Collection<Id<?>> val) {

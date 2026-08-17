@@ -7,11 +7,11 @@ import static fi.solita.utils.functional.FunctionalA.sequence;
 import static fi.solita.utils.query.QueryUtils.id;
 import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
 
+import java.util.Optional;
 import java.util.Set;
 
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.ApplyZero;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.QueryUtils;
@@ -79,12 +79,12 @@ public class Predicates {
         };
     }
     
-    public <E, T> Apply<CriteriaQuery<E>,Predicate> equals(final SingularAttribute<? super E, T> attribute, final Option<T> value) {
+    public <E, T> Apply<CriteriaQuery<E>,Predicate> equals(final SingularAttribute<? super E, T> attribute, final Optional<T> value) {
         return new Apply<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                if (value.isDefined()) {
+                if (value.isPresent()) {
                     return cb().equal(selection.get(attribute), value.get());
                 } else {
                     return cb().isNull(selection.get(attribute));
@@ -93,12 +93,12 @@ public class Predicates {
         };
     }
     
-    public <E, T> Apply<CriteriaQuery<E>,Predicate> equalsOption(final SingularAttribute<? super E, Option<T>> attribute, final Option<T> value) {
+    public <E, T> Apply<CriteriaQuery<E>,Predicate> equalsOption(final SingularAttribute<? super E, Optional<T>> attribute, final Optional<T> value) {
         return new Apply<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                if (value.isDefined()) {
+                if (value.isPresent()) {
                     return cb().equal(selection.get(attribute), value.get());
                 } else {
                     return cb().isNull(selection.get(attribute));
@@ -107,12 +107,12 @@ public class Predicates {
         };
     }
     
-    public <E, T> Apply<CriteriaQuery<E>,Predicate> notEquals(final SingularAttribute<? super E, T> attribute, final Option<T> value) {
+    public <E, T> Apply<CriteriaQuery<E>,Predicate> notEquals(final SingularAttribute<? super E, T> attribute, final Optional<T> value) {
         return new Apply<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                if (value.isDefined()) {
+                if (value.isPresent()) {
                     return cb().notEqual(selection.get(attribute), value.get());
                 } else {
                     return cb().isNotNull(selection.get(attribute));
@@ -121,12 +121,12 @@ public class Predicates {
         };
     }
     
-    public <E, T> Apply<CriteriaQuery<E>,Predicate> notEqualsOption(final SingularAttribute<? super E, Option<T>> attribute, final Option<T> value) {
+    public <E, T> Apply<CriteriaQuery<E>,Predicate> notEqualsOption(final SingularAttribute<? super E, Optional<T>> attribute, final Optional<T> value) {
         return new Apply<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                if (value.isDefined()) {
+                if (value.isPresent()) {
                     return cb().notEqual(selection.get(attribute), value.get());
                 } else {
                     return cb().isNotNull(selection.get(attribute));
@@ -135,12 +135,12 @@ public class Predicates {
         };
     }
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> equalsIgnoreCase(final SingularAttribute<? super E, String> attribute, final Option<String> value) {
+    public <E> Apply<CriteriaQuery<E>,Predicate> equalsIgnoreCase(final SingularAttribute<? super E, String> attribute, final Optional<String> value) {
         return new Apply<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
-                if (value.isDefined()) {
+                if (value.isPresent()) {
                     return cb().equal(cb().lower(selection.get(attribute)), value.get().toLowerCase());
                 } else {
                     return cb().isNull(selection.get(attribute));
@@ -173,7 +173,7 @@ public class Predicates {
         };
     }
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> startsWithIgnoreCaseOption(final SingularAttribute<? super E, Option<String>> attribute, final String value) {
+    public <E> Apply<CriteriaQuery<E>,Predicate> startsWithIgnoreCaseOption(final SingularAttribute<? super E, Optional<String>> attribute, final String value) {
         return new Apply<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {

@@ -1,22 +1,19 @@
 package fi.solita.utils.query.backend.hibernate;
 
-import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Option.None;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Page;
@@ -148,19 +145,19 @@ public class HibernateQueryExecutorTest extends QueryTestBase {
         Department dep = new Department("findNative");
         persist(dep);
 
-        Option<Department> result = executor.find(
+        Optional<Department> result = executor.find(
             NativeQuery.of("SELECT * FROM Department").returns(typeProvider.type(Department.class)));
 
-        assertTrue(result.isDefined());
+        assertTrue(result.isPresent());
         assertEquals(dep.getId(), result.get().getId());
     }
 
     @Test
     public void find_nativeQuery_returnsNoneWhenEmpty() {
-        Option<Department> result = executor.find(
+        Optional<Department> result = executor.find(
             NativeQuery.of("SELECT * FROM Department").returns(typeProvider.type(Department.class)));
 
-        assertEquals(None(), result);
+        assertEquals(Optional.empty(), result);
     }
 
     @Test
@@ -234,16 +231,16 @@ public class HibernateQueryExecutorTest extends QueryTestBase {
         Department dep = new Department("findQL");
         persist(dep);
 
-        Option<Department> result = executor.find(QLQuery.<Department>of("from Department"));
+        Optional<Department> result = executor.find(QLQuery.<Department>of("from Department"));
 
-        assertTrue(result.isDefined());
+        assertTrue(result.isPresent());
         assertEquals(dep.getId(), result.get().getId());
     }
 
     @Test
     public void find_qlQuery_returnsNoneWhenEmpty() {
-        Option<Department> result = executor.find(QLQuery.<Department>of("from Department"));
-        assertEquals(None(), result);
+        Optional<Department> result = executor.find(QLQuery.<Department>of("from Department"));
+        assertEquals(Optional.empty(), result);
     }
 
     @Test

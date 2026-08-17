@@ -4,11 +4,11 @@ import static fi.solita.utils.functional.Collections.newMutableSet;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
@@ -114,14 +114,14 @@ public class RestrictTest extends QueryTestBase {
         persist(dep1, dep2, dep3);
 
         assertEquals("find single matching", dep1.getId(),
-            dao.get(restrict.equals(Department_.mandatoryDepName, Some("a"),
+            dao.get(restrict.equals(Department_.mandatoryDepName, Optional.of("a"),
                         query.all(Department.class))).getId());
         assertEquals("find multiple matching", newSet(dep2.getId(), dep3.getId()), newSet(map(Department_.getId,
-            dao.getMany(restrict.equals(Department_.mandatoryDepName, Some("b"),
+            dao.getMany(restrict.equals(Department_.mandatoryDepName, Optional.of("b"),
                         query.all(Department.class))))));
         assertFalse("find by multiple restrictions",
-            dao.exists(restrict.equals(Department_.mandatoryDepName, Some("a"),
-                       restrict.equals(Department_.mandatoryDepName, Some("b"),
+            dao.exists(restrict.equals(Department_.mandatoryDepName, Optional.of("a"),
+                       restrict.equals(Department_.mandatoryDepName, Optional.of("b"),
                         query.all(Department.class)))));
     }
 
@@ -276,8 +276,8 @@ public class RestrictTest extends QueryTestBase {
 
         assertEquals("and", dep1.getId(),
             dao.get(
-                restrict.by(predicates.and(predicates.equals(Department_.mandatoryDepName, Some("a")),
-                                           predicates.equals(Department_.mandatoryNumber, Some(1))),
+                restrict.by(predicates.and(predicates.equals(Department_.mandatoryDepName, Optional.of("a")),
+                                           predicates.equals(Department_.mandatoryNumber, Optional.of(1))),
                     query.all(Department.class))).getId());
     }
     
@@ -290,8 +290,8 @@ public class RestrictTest extends QueryTestBase {
 
         assertEquals("or", newSet(dep1.getId(), dep3.getId()), newSet(
             dao.getMany(
-                restrict.by(predicates.or(predicates.equals(Department_.mandatoryDepName, Some("a")),
-                                          predicates.equals(Department_.mandatoryNumber, Some(2))),
+                restrict.by(predicates.or(predicates.equals(Department_.mandatoryDepName, Optional.of("a")),
+                                          predicates.equals(Department_.mandatoryNumber, Optional.of(2))),
                     query.all(Department.class)), Project.id())));
     }
     
@@ -323,23 +323,23 @@ public class RestrictTest extends QueryTestBase {
         Employee emp3 = new Employee("", dep);
         persist(dep, emp1, emp2, emp3);
 
-        assertEquals(newSet(emp1.getId()), newSet(map(Employee_.getId, dao.getMany(restrict.equals(Employee_.optionalSalary, Some(new Money(1)), query.all(Employee.class))))));
+        assertEquals(newSet(emp1.getId()), newSet(map(Employee_.getId, dao.getMany(restrict.equals(Employee_.optionalSalary, Optional.of(new Money(1)), query.all(Employee.class))))));
     }
     
     // equalsOption test commented out: Hibernate doesn't support comparing Option-wrapped fields directly
-    // This is a known limitation where selection.get(attribute) returns Option<T> but Hibernate
+    // This is a known limitation where selection.get(attribute) returns Optional<T> but Hibernate
     // cannot compare it with the unwrapped value
     /*
     @Test
     public void equalsOption() {
         Department dep = new Department();
-        dep.setOptionSize(Some(25));
+        dep.setOptionSize(Optional.of(25));
         Department dep2 = new Department();
-        dep2.setOptionSize(Some(30));
+        dep2.setOptionSize(Optional.of(30));
         Department dep3 = new Department();
         persist(dep, dep2, dep3);
 
-        assertEquals(newSet(dep.getId()), newSet(map(Department_.getId, dao.getMany(restrict.equalsOption(Department_.optionSize, Some(25), query.all(Department.class))))));
+        assertEquals(newSet(dep.getId()), newSet(map(Department_.getId, dao.getMany(restrict.equalsOption(Department_.optionSize, Optional.of(25), query.all(Department.class))))));
     }
     */
     
@@ -349,7 +349,7 @@ public class RestrictTest extends QueryTestBase {
         Department dep2 = new Department("b");
         persist(dep1, dep2);
 
-        assertEquals(newSet(dep2.getId()), newSet(map(Department_.getId, dao.getMany(restrict.notEquals(Department_.mandatoryDepName, Some("a"), query.all(Department.class))))));
+        assertEquals(newSet(dep2.getId()), newSet(map(Department_.getId, dao.getMany(restrict.notEquals(Department_.mandatoryDepName, Optional.of("a"), query.all(Department.class))))));
     }
     
     @Test
@@ -359,7 +359,7 @@ public class RestrictTest extends QueryTestBase {
         Employee emp2 = new Employee("", new Money(2), dep);
         persist(dep, emp1, emp2);
 
-        assertEquals(newSet(emp2.getId()), newSet(map(Employee_.getId, dao.getMany(restrict.notEquals(Employee_.optionalSalary, Some(new Money(1)), query.all(Employee.class))))));
+        assertEquals(newSet(emp2.getId()), newSet(map(Employee_.getId, dao.getMany(restrict.notEquals(Employee_.optionalSalary, Optional.of(new Money(1)), query.all(Employee.class))))));
     }
     
     @Test
@@ -368,7 +368,7 @@ public class RestrictTest extends QueryTestBase {
         Department dep2 = new Department("def");
         persist(dep1, dep2);
 
-        assertEquals(dep1.getId(), dao.get(restrict.equalsIgnoreCase(Department_.mandatoryDepName, Some("ABC"), query.all(Department.class))).getId());
+        assertEquals(dep1.getId(), dao.get(restrict.equalsIgnoreCase(Department_.mandatoryDepName, Optional.of("ABC"), query.all(Department.class))).getId());
     }
     
     @Test

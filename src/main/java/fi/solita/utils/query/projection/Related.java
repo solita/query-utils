@@ -1,6 +1,9 @@
 package fi.solita.utils.query.projection;
 
 
+import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
+import fi.solita.utils.query.attributes.JoiningAttribute;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.CollectionAttribute;
@@ -8,10 +11,6 @@ import jakarta.persistence.metamodel.ListAttribute;
 import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
-
-import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
-import fi.solita.utils.query.attributes.JoiningAttribute;
-import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 public abstract class Related {
 

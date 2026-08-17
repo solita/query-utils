@@ -1,5 +1,6 @@
 package fi.solita.utils.query.projection;
 
+import static fi.solita.utils.functional.Collections.it;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
@@ -19,6 +20,7 @@ import static fi.solita.utils.query.projection.ProjectionResultUtil_.postProcess
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -27,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.solita.utils.functional.ApplyBi;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.QueryUtils;
@@ -143,7 +144,7 @@ class ProjectionResultUtil {
 
     static Object transformPseudoResultToActualValue(Attribute<?,?> attribute, Object resultFromDb) {
         Object ret = resultFromDb;
-        for (PseudoAttribute pseudo: unwrap(PseudoAttribute.class, attribute)) {
+        for (PseudoAttribute pseudo: it(unwrap(PseudoAttribute.class, attribute))) {
             ret = pseudo.getValueToReplaceResult(resultFromDb);
         }
         return ret;
@@ -154,14 +155,14 @@ class ProjectionResultUtil {
         Object ret;
         if (attribute.isCollection()) {
             if (!(resultFromDb instanceof Collection) && isOption(attribute)) {
-                ret = Option.of(resultFromDb);
+                ret = Optional.ofNullable(resultFromDb);
             } else {
                 ret = resultFromDb;
             }
         } else if (isRequiredByQueryAttribute(attribute)) {
             ret = resultFromDb;
         } else {
-            ret = Option.of(resultFromDb);
+            ret = Optional.ofNullable(resultFromDb);
         }
         return ret;
     }
@@ -170,8 +171,8 @@ class ProjectionResultUtil {
      *  So we instantiate the empty embeddable if the result has been left null but the attribute is required */
     static Object convertNullsToEmbeddableWhereRequired(Attribute<?,?> attribute, Object resultFromDb) {
         Object ret = resultFromDb;
-        Option<? extends Attribute<?, ?>> embeddable = EmbeddableUtil.unwrapEmbeddableAttribute(attribute);
-        if (embeddable.isDefined() && resultFromDb == null && isRequiredByMetamodel(attribute) && !(attribute instanceof PluralAttribute)) {
+        Optional<? extends Attribute<?, ?>> embeddable = EmbeddableUtil.unwrapEmbeddableAttribute(attribute);
+        if (embeddable.isPresent() && resultFromDb == null && isRequiredByMetamodel(attribute) && !(attribute instanceof PluralAttribute)) {
             Class<?> clazz = embeddable.get().getJavaType();
             logger.debug("Instantiating an empty Embeddable {} in place of a null result", clazz);
             ret = EmbeddableUtil.instantiate(clazz);
@@ -180,7 +181,7 @@ class ProjectionResultUtil {
     }
     
     static boolean isOption(Attribute<?,?> attr) {
-        return !QueryUtils.getJavaMember(attr).map(QueryUtils_.memberIsRequiredByType).getOrElse(true);
+        return !QueryUtils.getJavaMember(attr).map(QueryUtils_.memberIsRequiredByType).orElse(true);
     }
     
     /**
@@ -192,11 +193,11 @@ class ProjectionResultUtil {
             return resultFromDb;
         }
         if (resultFromDb instanceof List) {
-            ret = newList(map(optionGet, filter(x -> !isNoneOrNull(x), (Collection<?>)resultFromDb)));
+            ret = newList(map(ProjectionResultUtil::optionGet, filter(x -> !isNoneOrNull(x), (Collection<?>)resultFromDb)));
         } else if (resultFromDb instanceof SortedSet) {
-            ret = new TreeSet<Object>(newList(map(optionGet, filter(x -> !isNoneOrNull(x), (Collection<?>)resultFromDb))));
+            ret = new TreeSet<Object>(newList(map(ProjectionResultUtil::optionGet, filter(x -> !isNoneOrNull(x), (Collection<?>)resultFromDb))));
         } else if (resultFromDb instanceof Set) {
-            ret = newSet(map(optionGet, filter(x -> !isNoneOrNull(x), (Collection<?>)resultFromDb)));
+            ret = newSet(map(ProjectionResultUtil::optionGet, filter(x -> !isNoneOrNull(x), (Collection<?>)resultFromDb)));
         } else {
             ret = resultFromDb;
         }
@@ -206,16 +207,16 @@ class ProjectionResultUtil {
     static final boolean isNoneOrNull(Object possiblyOption) {
         if (possiblyOption == null) {
             return true;
-        } else if (possiblyOption instanceof Option) {
-            return !((Option<?>) possiblyOption).isDefined();
+        } else if (possiblyOption instanceof Optional) {
+            return !((Optional<?>) possiblyOption).isPresent();
         } else {
             return false;
         }
     }
     
     static final Object optionGet(Object possiblyOption) {
-        if (possiblyOption instanceof Option) {
-            return ((Option<?>) possiblyOption).get();
+        if (possiblyOption instanceof Optional) {
+            return ((Optional<?>) possiblyOption).get();
         } else {
             return possiblyOption;
         }

@@ -1,10 +1,8 @@
 package fi.solita.utils.query.attributes;
 
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
-
 import java.io.Serializable;
 import java.lang.reflect.Member;
+import java.util.Optional;
 
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.metamodel.AttributeClassification;
@@ -26,7 +24,6 @@ import org.hibernate.query.sqm.tree.from.SqmFrom;
 import org.hibernate.query.sqm.tree.from.SqmJoin;
 import org.hibernate.type.descriptor.java.JavaType;
 
-import fi.solita.utils.functional.Option;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.PluralAttribute;
@@ -35,17 +32,17 @@ import jakarta.persistence.metamodel.Type;
 
 public abstract class AttributeProxy {
     @SuppressWarnings("unchecked")
-    public static <T> Option<T> unwrap(Class<T> type, Attribute<?,?> attribute) {
+    public static <T> Optional<T> unwrap(Class<T> type, Attribute<?,?> attribute) {
         if (type.isInstance(attribute)) {
-            return Some((T)attribute);
+            return Optional.of((T)attribute);
         }
         if (attribute instanceof AbstractAttributeProxy) {
             if (((AbstractAttributeProxy<?,?,?>) attribute).proxyTarget == null) {
-                return None();
+                return Optional.empty();
             }
             return unwrap(type, ((AbstractAttributeProxy<?,?,?>) attribute).proxyTarget);
         }
-        return None();
+        return Optional.empty();
     }
     
     public static <T> boolean canUnwrap(Class<T> type, Attribute<?,?> attribute) {

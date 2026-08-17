@@ -1,10 +1,9 @@
 package fi.solita.utils.query.attributes;
 
+import fi.solita.utils.query.IEntity;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
-
-import fi.solita.utils.query.IEntity;
 
 
 class SelfAttribute<X, T> extends SingularAttributeProxy<X, T> implements PseudoAttribute {

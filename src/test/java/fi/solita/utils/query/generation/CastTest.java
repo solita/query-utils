@@ -72,36 +72,16 @@ public class CastTest extends QueryTestBase {
     public void cannotWrapSelfAttribute_subtype() {
          Cast.optionalSubtype(Select.self());
     }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void cannotWrapOption() {
-         Cast.optional(Employee_.optionAge);
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void cannotWrapOption_subtype() {
-         Cast.optionalSubtype(Employee_.optionAge);
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void cannotWrapWrappedOption() {
-         Cast.optional(Related.value(Department_.optionalManager, Employee_.optionAge));
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void cannotWrapProjectedOption() {
-         Cast.optional(Related.projection(Department_.optionalManager, Project.value(Employee_.optionAge)));
-    }
-    
+   
     @Test
-    public void canWrapProjectedOptionIfInsideAnotherObject() {
+    public void canWrapProjectedOptionalIfInsideAnotherObject() {
          Cast.optional(Related.projection(Department_.optionalManager, Project.pair(Employee_.optionAge, Employee_.mandatoryName)));
     }
     
     @Test
     public void optional_Type_creates_OptionalType() {
         Type<String> stringType = HibernateTypeProvider.HibernateType.javaType(String.class);
-        Type.Optional<String> optionalType = Cast.optional(stringType);
+        Type.OptionalType<String> optionalType = Cast.optional(stringType);
         assertNotNull(optionalType);
         assertEquals(stringType, optionalType.type);
     }

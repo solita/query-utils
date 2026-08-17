@@ -7,21 +7,20 @@ import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.metamodel.Attribute;
-import jakarta.persistence.metamodel.PluralAttribute;
-import jakarta.persistence.metamodel.SingularAttribute;
+import java.util.Optional;
 
 import fi.solita.utils.functional.Collections;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.Identifiable;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.PluralAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 public class Constructors {
     
@@ -37,23 +36,23 @@ public class Constructors {
         return new IdProjection<E>();
     }
     
-    static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> sum(SingularAttribute<? super E, T> attribute) {
+    static <E, T extends Number> MetaJpaConstructor<E,Optional<T>,Optional<T>> sum(SingularAttribute<? super E, T> attribute) {
         return new SumAttributeProjection<E,T>(Cast.optional(attribute));
     }
     
-    static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> max(SingularAttribute<? super E, T> attribute) {
+    static <E, T extends Number> MetaJpaConstructor<E,Optional<T>,Optional<T>> max(SingularAttribute<? super E, T> attribute) {
         return new MaxAttributeProjection<E,T>(Cast.optional(attribute));
     }
     
-    static <E, T extends Number> MetaJpaConstructor<E,Option<T>,Option<T>> min(SingularAttribute<? super E, T> attribute) {
+    static <E, T extends Number> MetaJpaConstructor<E,Optional<T>,Optional<T>> min(SingularAttribute<? super E, T> attribute) {
         return new MinAttributeProjection<E,T>(Cast.optional(attribute));
     }
     
-    static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Option<T>,Option<T>> greatest(SingularAttribute<? super E, T> attribute) {
+    static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Optional<T>,Optional<T>> greatest(SingularAttribute<? super E, T> attribute) {
         return new GreatestAttributeProjection<E,T>(Cast.optional(attribute));
     }
     
-    static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Option<T>,Option<T>> least(SingularAttribute<? super E, T> attribute) {
+    static <E, T extends Comparable<? super T>> MetaJpaConstructor<E,Optional<T>,Optional<T>> least(SingularAttribute<? super E, T> attribute) {
         return new LeastAttributeProjection<E,T>(Cast.optional(attribute));
     }
 
@@ -231,8 +230,8 @@ public class Constructors {
         }
     }
     
-    private static final class SumAttributeProjection<E,R extends Number> extends ValueAttributeProjection<E, Option<R>> implements ExpressionProjection<R> {
-        public SumAttributeProjection(Attribute<? super E, Option<R>> attribute) {
+    private static final class SumAttributeProjection<E,R extends Number> extends ValueAttributeProjection<E, Optional<R>> implements ExpressionProjection<R> {
+        public SumAttributeProjection(Attribute<? super E, Optional<R>> attribute) {
             super(attribute);
         }
 
@@ -242,8 +241,8 @@ public class Constructors {
         }
     }
     
-    private static final class MaxAttributeProjection<E,R extends Number> extends ValueAttributeProjection<E, Option<R>> implements ExpressionProjection<R> {
-        public MaxAttributeProjection(Attribute<? super E, Option<R>> attribute) {
+    private static final class MaxAttributeProjection<E,R extends Number> extends ValueAttributeProjection<E, Optional<R>> implements ExpressionProjection<R> {
+        public MaxAttributeProjection(Attribute<? super E, Optional<R>> attribute) {
             super(attribute);
         }
 
@@ -253,8 +252,8 @@ public class Constructors {
         }
     }
     
-    private static final class MinAttributeProjection<E,R extends Number> extends ValueAttributeProjection<E, Option<R>> implements ExpressionProjection<R> {
-        public MinAttributeProjection(Attribute<? super E, Option<R>> attribute) {
+    private static final class MinAttributeProjection<E,R extends Number> extends ValueAttributeProjection<E, Optional<R>> implements ExpressionProjection<R> {
+        public MinAttributeProjection(Attribute<? super E, Optional<R>> attribute) {
             super(attribute);
         }
 
@@ -264,8 +263,8 @@ public class Constructors {
         }
     }
     
-    private static final class GreatestAttributeProjection<E,R extends Comparable<? super R>> extends ValueAttributeProjection<E, Option<R>> implements ExpressionProjection<R> {
-        public GreatestAttributeProjection(Attribute<? super E, Option<R>> attribute) {
+    private static final class GreatestAttributeProjection<E,R extends Comparable<? super R>> extends ValueAttributeProjection<E, Optional<R>> implements ExpressionProjection<R> {
+        public GreatestAttributeProjection(Attribute<? super E, Optional<R>> attribute) {
             super(attribute);
         }
 
@@ -275,8 +274,8 @@ public class Constructors {
         }
     }
     
-    private static final class LeastAttributeProjection<E,R extends Comparable<? super R>> extends ValueAttributeProjection<E, Option<R>> implements ExpressionProjection<R> {
-        public LeastAttributeProjection(Attribute<? super E, Option<R>> attribute) {
+    private static final class LeastAttributeProjection<E,R extends Comparable<? super R>> extends ValueAttributeProjection<E, Optional<R>> implements ExpressionProjection<R> {
+        public LeastAttributeProjection(Attribute<? super E, Optional<R>> attribute) {
             super(attribute);
         }
 

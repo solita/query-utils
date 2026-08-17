@@ -5,13 +5,12 @@ import java.util.List;
 import org.hibernate.metamodel.model.domain.ListPersistentAttribute;
 import org.hibernate.query.sqm.SqmPathSource;
 
+import fi.solita.utils.query.IEntity;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.ListAttribute;
 import jakarta.persistence.metamodel.Type;
-
-import fi.solita.utils.query.IEntity;
-import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 class RelationListAttribute<E, R, A extends Attribute<E, List<R>> & Bindable<R>> extends PluralAttributeProxy<E, List<R>, R, A> implements ListAttribute<E,R>, AdditionalQueryPerformingAttribute, ListPersistentAttribute<E,R> {
     private final MetaJpaConstructor<? extends IEntity<?>, R, ?> constructor;

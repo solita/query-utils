@@ -6,7 +6,6 @@ import static fi.solita.utils.functional.Functional.mkString;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.persistence.metamodel.Attribute;
 import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Tuple0;
 import fi.solita.utils.functional.Tuple10;
@@ -53,6 +52,7 @@ import fi.solita.utils.functional.Tuple8;
 import fi.solita.utils.functional.Tuple9;
 import fi.solita.utils.meta.MetaConstructor;
 import fi.solita.utils.meta.MetaConstructors;
+import jakarta.persistence.metamodel.Attribute;
 
 public interface MetaJpaConstructor<OWNER,R,PARAMS> extends MetaConstructor<PARAMS,R> {
     public static abstract class C0<OWNER,R> extends MetaConstructors.C0<R> implements MetaJpaConstructor<OWNER,R,Tuple0> {

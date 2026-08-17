@@ -1,17 +1,15 @@
 package fi.solita.utils.query.generation;
 
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.junit.Test;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.backend.Type;
 import fi.solita.utils.query.generation.NativeQuery.NativeQueryPair;
@@ -84,23 +82,23 @@ public class NativeQueryTest {
     @Test
     public void returns_entityType_storesTypeInRetvals() {
         NativeQuery<?> result = NativeQuery.of("select * from T").returns(DEPT_TYPE);
-        assertTrue(result.retvals.get(0)._2.isDefined());
+        assertTrue(result.retvals.get(0)._2.isPresent());
     }
 
     // ---------------------------------------------------------------------------
-    // returnsOptional(Type.Optional) – optional entity type
+    // returnsOptional(Type.OptionalType) – optional entity type
     // ---------------------------------------------------------------------------
 
     @Test
     public void returnsOptional_createsNativeQuerySingleEntity() {
-        Type.Optional<Department> optType = new Type.Optional<Department>(DEPT_TYPE);
+        Type.OptionalType<Department> optType = new Type.OptionalType<Department>(DEPT_TYPE);
         NativeQuerySingleEntity<?> result = NativeQuery.of("select * from T").returnsOptional(optType);
         assertNotNull(result);
     }
 
     @Test
     public void returnsOptional_addsEntityReturnValueAlias() {
-        Type.Optional<Department> optType = new Type.Optional<Department>(DEPT_TYPE);
+        Type.OptionalType<Department> optType = new Type.OptionalType<Department>(DEPT_TYPE);
         NativeQuery<?> result = NativeQuery.of("select * from T").returnsOptional(optType);
         assertEquals(1, result.retvals.size());
         assertEquals(NativeQuery.ENTITY_RETURN_VALUE, result.retvals.get(0)._1);
@@ -108,9 +106,9 @@ public class NativeQueryTest {
 
     @Test
     public void returnsOptional_storesTypeInRetvals() {
-        Type.Optional<Department> optType = new Type.Optional<Department>(DEPT_TYPE);
+        Type.OptionalType<Department> optType = new Type.OptionalType<Department>(DEPT_TYPE);
         NativeQuery<?> result = NativeQuery.of("select * from T").returnsOptional(optType);
-        assertTrue(result.retvals.get(0)._2.isDefined());
+        assertTrue(result.retvals.get(0)._2.isPresent());
     }
 
     // ---------------------------------------------------------------------------
@@ -139,7 +137,7 @@ public class NativeQueryTest {
     @Test
     public void returns_aliasOnly_hasNoTypeInRetvals() {
         NativeQuery<?> result = NativeQuery.of("select 1 as a").returns("a");
-        assertTrue(result.retvals.get(0)._2 instanceof Option && !result.retvals.get(0)._2.isDefined());
+        assertTrue(result.retvals.get(0)._2 instanceof Optional && !result.retvals.get(0)._2.isPresent());
     }
 
     // ---------------------------------------------------------------------------
@@ -162,7 +160,7 @@ public class NativeQueryTest {
     @Test
     public void returns_aliasAndType_storesTypeInRetvals() {
         NativeQuery<?> result = NativeQuery.of("select 1 as a").returns("a", STRING_TYPE);
-        assertTrue(result.retvals.get(0)._2.isDefined());
+        assertTrue(result.retvals.get(0)._2.isPresent());
     }
 
     @Test(expected = NullPointerException.class)
@@ -251,12 +249,12 @@ public class NativeQueryTest {
     public void setParameter_noneOption_throwsUnsupportedOperationException() {
         NativeQuery.of("select :p")
                 .returns("a", STRING_TYPE)
-                .setParameter("p", None());
+                .setParameter("p", Optional.empty());
     }
 
     @Test
     public void setParameter_someOption_addsToParams() {
-        Option<String> someVal = Some("hello");
+        Optional<String> someVal = Optional.of("hello");
         NativeQuery<?> result = NativeQuery.of("select :p")
                 .returns("a", STRING_TYPE)
                 .setParameter("p", someVal);
@@ -274,7 +272,7 @@ public class NativeQueryTest {
                 .setParameter("p", "value", STRING_TYPE);
         assertTrue(result.params.containsKey("p"));
         assertEquals("value", result.params.get("p")._1);
-        assertTrue(result.params.get("p")._2.isDefined());
+        assertTrue(result.params.get("p")._2.isPresent());
     }
 
     @Test
@@ -329,7 +327,7 @@ public class NativeQueryTest {
                 .returns("a", STRING_TYPE)
                 .setParameterList("p", Arrays.asList("a", "b"), STRING_TYPE);
         assertTrue(result.params.containsKey("p"));
-        assertTrue(result.params.get("p")._2.isDefined());
+        assertTrue(result.params.get("p")._2.isPresent());
     }
 
     @Test(expected = NullPointerException.class)

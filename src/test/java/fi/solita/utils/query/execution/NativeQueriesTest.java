@@ -3,8 +3,6 @@ package fi.solita.utils.query.execution;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -12,12 +10,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Department;
@@ -81,7 +79,7 @@ public class NativeQueriesTest extends QueryTestBase {
 
     @Test
     public void find_sql_empty() {
-        assertFalse(dao.find(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).isDefined());
+        assertFalse(dao.find(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).isPresent());
     }
 
     @Test
@@ -101,19 +99,19 @@ public class NativeQueriesTest extends QueryTestBase {
     public void findFirst_sql() {
         persist(new Department());
 
-        assertTrue(dao.findFirst(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).isDefined());
+        assertTrue(dao.findFirst(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).isPresent());
     }
 
     @Test
     public void findFirst_sql_empty() {
-        assertFalse(dao.findFirst(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).isDefined());
+        assertFalse(dao.findFirst(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).isPresent());
     }
 
     @Test
     public void findFirst_sql_multiple() {
         persist(new Department(), new Department());
 
-        assertTrue(dao.findFirst(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).isDefined());
+        assertTrue(dao.findFirst(NativeQuery.of("select * from Department").returns(typeProvider.type(Department.class))).isPresent());
     }
 
     @Test
@@ -198,20 +196,20 @@ public class NativeQueriesTest extends QueryTestBase {
         persist(dep);
         em.flush();
 
-        NativeQuery<Option<Money>> q = NativeQuery.of("select optionalBudget as eka from Department")
+        NativeQuery<Optional<Money>> q = NativeQuery.of("select optionalBudget as eka from Department")
                                   .returns("eka", Cast.optional(typeProvider.type(Money.class)));
-        assertEquals(Some(dep.getBudget()), dao.get(q));
+        assertEquals(Optional.of(dep.getBudget()), dao.get(q));
     }
     
     @Test
-    public void get_sql_optional_none() {
+    public void get_sql_optionalNone() {
         Department dep = new Department();
         persist(dep);
         em.flush();
 
-        NativeQuery<Option<Money>> q = NativeQuery.of("select optionalBudget as eka from Department")
+        NativeQuery<Optional<Money>> q = NativeQuery.of("select optionalBudget as eka from Department")
                                   .returns("eka", Cast.optional(typeProvider.type(Money.class)));
-        assertEquals(None(), dao.get(q));
+        assertEquals(Optional.empty(), dao.get(q));
     }
     
     @Test
@@ -221,19 +219,19 @@ public class NativeQueriesTest extends QueryTestBase {
         persist(mun);
         persist(dep);
 
-        NativeQuery<Option<Municipality>> q = NativeQuery.of("select m.* from Department d left join Municipality m on d.optionalDepMunicipality_id=m.id")
+        NativeQuery<Optional<Municipality>> q = NativeQuery.of("select m.* from Department d left join Municipality m on d.optionalDepMunicipality_id=m.id")
                                         .returnsOptional(Cast.optional(typeProvider.type(Municipality.class)));
         assertEquals(mun.getId(), dao.get(q).get().getId());
     }
     
     @Test
-    public void get_sql_optional_entity_none() {
+    public void get_sql_optional_entityNone() {
         Department dep = new Department();
         persist(dep);
 
-        NativeQuery<Option<Municipality>> q = NativeQuery.of("select m.* from Department d left join Municipality m on d.optionalDepMunicipality_id=m.id")
+        NativeQuery<Optional<Municipality>> q = NativeQuery.of("select m.* from Department d left join Municipality m on d.optionalDepMunicipality_id=m.id")
                                         .returnsOptional(Cast.optional(typeProvider.type(Municipality.class)));
-        assertEquals(None(), dao.get(q));
+        assertEquals(Optional.empty(), dao.get(q));
     }
 
     @Test
@@ -286,20 +284,20 @@ public class NativeQueriesTest extends QueryTestBase {
 
         NativeQuery<String> q = NativeQuery.of("select mandatoryDepName as n from Department")
                 .returns("n", typeProvider.type(String.class));
-        Option<String> name = dao.find(q, new Apply<String, String>() {
+        Optional<String> name = dao.find(q, new Apply<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
         });
-        assertEquals(Some("BAR"), name);
+        assertEquals(Optional.of("BAR"), name);
     }
 
     @Test
     public void find_sql_with_constructor_empty() {
         NativeQuery<String> q = NativeQuery.of("select mandatoryDepName as n from Department")
                 .returns("n", typeProvider.type(String.class));
-        Option<String> name = dao.find(q, new Apply<String, String>() {
+        Optional<String> name = dao.find(q, new Apply<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
         });
-        assertFalse(name.isDefined());
+        assertFalse(name.isPresent());
     }
 
     @Test
@@ -308,10 +306,10 @@ public class NativeQueriesTest extends QueryTestBase {
 
         NativeQuery<String> q = NativeQuery.of("select mandatoryDepName as n from Department order by mandatoryDepName")
                 .returns("n", typeProvider.type(String.class));
-        Option<String> name = dao.findFirst(q, new Apply<String, String>() {
+        Optional<String> name = dao.findFirst(q, new Apply<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
         });
-        assertEquals(Some("FIRST"), name);
+        assertEquals(Optional.of("FIRST"), name);
     }
 
     @Test
@@ -320,7 +318,7 @@ public class NativeQueriesTest extends QueryTestBase {
                 .returns("n", typeProvider.type(String.class));
         assertFalse(dao.findFirst(q, new Apply<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
-        }).isDefined());
+        }).isPresent());
     }
 
     @Test

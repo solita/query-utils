@@ -2,8 +2,6 @@ package fi.solita.utils.query.projection;
 
 import static fi.solita.utils.functional.Collections.emptyList;
 import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -11,15 +9,11 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.metamodel.Attribute;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.functional.Tuple3;
@@ -30,6 +24,9 @@ import fi.solita.utils.query.Id;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.metamodel.Attribute;
 
 public class ConstructorsTest extends QueryTestBase {
 
@@ -282,7 +279,7 @@ public class ConstructorsTest extends QueryTestBase {
 
     @Test
     public void sum_getParameters_returnsOptionalWrappedAttribute() {
-        MetaJpaConstructor<Department, Option<Integer>, Option<Integer>> proj = Constructors.sum(Department_.mandatoryNumber);
+        MetaJpaConstructor<Department, Optional<Integer>, Optional<Integer>> proj = Constructors.sum(Department_.mandatoryNumber);
         List<Attribute<?, ?>> params = proj.getParameters();
         assertEquals(1, params.size());
         assertNotNull(params.get(0));
@@ -300,7 +297,7 @@ public class ConstructorsTest extends QueryTestBase {
 
     @Test
     public void sum_isExpressionProjection() {
-        MetaJpaConstructor<Department, Option<Integer>, Option<Integer>> proj = Constructors.sum(Department_.mandatoryNumber);
+        MetaJpaConstructor<Department, Optional<Integer>, Optional<Integer>> proj = Constructors.sum(Department_.mandatoryNumber);
         assertTrue(proj instanceof Constructors.ExpressionProjection);
         assertTrue(proj instanceof Constructors.TransparentProjection);
     }
@@ -319,12 +316,12 @@ public class ConstructorsTest extends QueryTestBase {
     @Test
     public void sum_viaDao_returnsSum() {
         persist(new Department("a", 3), new Department("b", 4));
-        assertEquals(Some(7), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
+        assertEquals(Optional.of(7), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
     }
 
     @Test
     public void sum_viaDao_emptyTable_returnsNone() {
-        assertEquals(None(), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
+        assertEquals(Optional.empty(), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
     }
 
     // =========================================================================
@@ -365,12 +362,12 @@ public class ConstructorsTest extends QueryTestBase {
     @Test
     public void max_viaDao_returnsMax() {
         persist(new Department("a", 1), new Department("b", 9));
-        assertEquals(Some(9), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
+        assertEquals(Optional.of(9), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
     }
 
     @Test
     public void max_viaDao_emptyTable_returnsNone() {
-        assertEquals(None(), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
+        assertEquals(Optional.empty(), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
     }
 
     // =========================================================================
@@ -411,12 +408,12 @@ public class ConstructorsTest extends QueryTestBase {
     @Test
     public void min_viaDao_returnsMin() {
         persist(new Department("a", 1), new Department("b", 9));
-        assertEquals(Some(1), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
+        assertEquals(Optional.of(1), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
     }
 
     @Test
     public void min_viaDao_emptyTable_returnsNone() {
-        assertEquals(None(), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
+        assertEquals(Optional.empty(), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
     }
 
     // =========================================================================
@@ -457,12 +454,12 @@ public class ConstructorsTest extends QueryTestBase {
     @Test
     public void greatest_viaDao_returnsGreatest() {
         persist(new Department("aaa"), new Department("zzz"));
-        assertEquals(Some("zzz"), dao.get(query.all(Department.class), Project.greatest(Department_.mandatoryDepName)));
+        assertEquals(Optional.of("zzz"), dao.get(query.all(Department.class), Project.greatest(Department_.mandatoryDepName)));
     }
 
     @Test
     public void greatest_viaDao_emptyTable_returnsNone() {
-        assertEquals(None(), dao.get(query.all(Department.class), Project.greatest(Department_.mandatoryDepName)));
+        assertEquals(Optional.empty(), dao.get(query.all(Department.class), Project.greatest(Department_.mandatoryDepName)));
     }
 
     // =========================================================================
@@ -503,12 +500,12 @@ public class ConstructorsTest extends QueryTestBase {
     @Test
     public void least_viaDao_returnsLeast() {
         persist(new Department("aaa"), new Department("zzz"));
-        assertEquals(Some("aaa"), dao.get(query.all(Department.class), Project.least(Department_.mandatoryDepName)));
+        assertEquals(Optional.of("aaa"), dao.get(query.all(Department.class), Project.least(Department_.mandatoryDepName)));
     }
 
     @Test
     public void least_viaDao_emptyTable_returnsNone() {
-        assertEquals(None(), dao.get(query.all(Department.class), Project.least(Department_.mandatoryDepName)));
+        assertEquals(Optional.empty(), dao.get(query.all(Department.class), Project.least(Department_.mandatoryDepName)));
     }
 
     // =========================================================================
@@ -517,36 +514,36 @@ public class ConstructorsTest extends QueryTestBase {
 
     @Test
     public void sum_apply_returnsIdentity() {
-        Option<Integer> val = Some(42);
-        MetaJpaConstructor<Department, Option<Integer>, Option<Integer>> proj = Constructors.sum(Department_.mandatoryNumber);
+        Optional<Integer> val = Optional.of(42);
+        MetaJpaConstructor<Department, Optional<Integer>, Optional<Integer>> proj = Constructors.sum(Department_.mandatoryNumber);
         assertSame(val, proj.apply(val));
     }
 
     @Test
     public void max_apply_returnsIdentity() {
-        Option<Integer> val = Some(7);
-        MetaJpaConstructor<Department, Option<Integer>, Option<Integer>> proj = Constructors.max(Department_.mandatoryNumber);
+        Optional<Integer> val = Optional.of(7);
+        MetaJpaConstructor<Department, Optional<Integer>, Optional<Integer>> proj = Constructors.max(Department_.mandatoryNumber);
         assertSame(val, proj.apply(val));
     }
 
     @Test
     public void min_apply_returnsIdentity() {
-        Option<Integer> val = None();
-        MetaJpaConstructor<Department, Option<Integer>, Option<Integer>> proj = Constructors.min(Department_.mandatoryNumber);
+        Optional<Integer> val = Optional.empty();
+        MetaJpaConstructor<Department, Optional<Integer>, Optional<Integer>> proj = Constructors.min(Department_.mandatoryNumber);
         assertSame(val, proj.apply(val));
     }
 
     @Test
     public void greatest_apply_returnsIdentity() {
-        Option<String> val = Some("x");
-        MetaJpaConstructor<Department, Option<String>, Option<String>> proj = Constructors.greatest(Department_.mandatoryDepName);
+        Optional<String> val = Optional.of("x");
+        MetaJpaConstructor<Department, Optional<String>, Optional<String>> proj = Constructors.greatest(Department_.mandatoryDepName);
         assertSame(val, proj.apply(val));
     }
 
     @Test
     public void least_apply_returnsIdentity() {
-        Option<String> val = None();
-        MetaJpaConstructor<Department, Option<String>, Option<String>> proj = Constructors.least(Department_.mandatoryDepName);
+        Optional<String> val = Optional.empty();
+        MetaJpaConstructor<Department, Optional<String>, Optional<String>> proj = Constructors.least(Department_.mandatoryDepName);
         assertSame(val, proj.apply(val));
     }
 
@@ -578,18 +575,18 @@ public class ConstructorsTest extends QueryTestBase {
     @Test
     public void sum_optionalField_viaDao_withData_returnsSome() {
         persist(new Department("a", 10), new Department("b", 20));
-        assertEquals(Some(30), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
+        assertEquals(Optional.of(30), dao.get(query.all(Department.class), Project.sum(Department_.mandatoryNumber)));
     }
 
     @Test
     public void max_optionalField_viaDao_withData_returnsSome() {
         persist(new Department("a", 5), new Department("b", 15));
-        assertEquals(Some(15), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
+        assertEquals(Optional.of(15), dao.get(query.all(Department.class), Project.max(Department_.mandatoryNumber)));
     }
 
     @Test
     public void min_optionalField_viaDao_withData_returnsSome() {
         persist(new Department("a", 5), new Department("b", 15));
-        assertEquals(Some(5), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
+        assertEquals(Optional.of(5), dao.get(query.all(Department.class), Project.min(Department_.mandatoryNumber)));
     }
 }

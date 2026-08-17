@@ -1,36 +1,35 @@
 package fi.solita.utils.query.generation;
 
 import static fi.solita.utils.functional.FunctionalM.with;
-import static fi.solita.utils.functional.Option.Some;
 
 import java.util.Map;
+import java.util.Optional;
 
 import fi.solita.utils.functional.Collections;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.SemiGroups;
 import fi.solita.utils.query.backend.Type;
 
 public class QLQuery<T> {
     public final String query;
-    public final Map<String, Pair<?, Option<Type<?>>>> params;
+    public final Map<String, Pair<?, Optional<Type<?>>>> params;
 
     public static final <T> QLQuery<T> of(String query) {
-        return new QLQuery<T>(query, Collections.<String, Pair<?, Option<Type<?>>>>emptyMap());
+        return new QLQuery<T>(query, Collections.<String, Pair<?, Optional<Type<?>>>>emptyMap());
     }
 
-    private QLQuery(String query, Map<String, Pair<?, Option<Type<?>>>> params) {
+    private QLQuery(String query, Map<String, Pair<?, Optional<Type<?>>>> params) {
         this.query = query;
         this.params = params;
     }
 
     public QLQuery<T> setParameter(String name, Object val) {
-        return new QLQuery<T>(query, with(SemiGroups.<Pair<?,Option<Type<?>>>>fail(), name, Pair.of(val, Option.<Type<?>>None()), params));
+        return new QLQuery<T>(query, with(SemiGroups.<Pair<?,Optional<Type<?>>>>fail(), name, Pair.of(val, Optional.empty()), params));
     }
 
     public QLQuery<T> setParameter(String name, Object val, Type<?> type) {
         @SuppressWarnings("unchecked")
-        Option<Type<?>> t = (Option<Type<?>>)(Object)Some(type);
-        return new QLQuery<T>(query, with(SemiGroups.<Pair<?,Option<Type<?>>>>fail(), name, Pair.of(val, t), params));
+        Optional<Type<?>> t = (Optional<Type<?>>)(Object)Optional.of(type);
+        return new QLQuery<T>(query, with(SemiGroups.<Pair<?,Optional<Type<?>>>>fail(), name, Pair.of(val, t), params));
     }
 }

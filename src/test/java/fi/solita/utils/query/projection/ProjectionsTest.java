@@ -6,10 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.NonUniqueResultException;
-import jakarta.persistence.criteria.CriteriaQuery;
-
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,6 +17,9 @@ import fi.solita.utils.query.Order;
 import fi.solita.utils.query.Page;
 import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.generation.JpaCriteriaQuery;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.criteria.CriteriaQuery;
 
 public class ProjectionsTest extends QueryTestBase {
 
@@ -60,7 +59,7 @@ public class ProjectionsTest extends QueryTestBase {
 
     @Test
     public void find_projectEmpty() {
-        assertFalse(dao.find(query.all(Department.class), Project.id()).isDefined());
+        assertFalse(dao.find(query.all(Department.class), Project.id()).isPresent());
     }
 
     @Test(expected = NonUniqueResultException.class)
@@ -74,19 +73,19 @@ public class ProjectionsTest extends QueryTestBase {
     public void findFirst_projectSingle() {
         persist(new Department());
 
-        assertTrue(dao.findFirst(allDepartmentsOrdered(), Project.id()).isDefined());
+        assertTrue(dao.findFirst(allDepartmentsOrdered(), Project.id()).isPresent());
     }
 
     @Test
     public void findFirst_projectEmpty() {
-        assertFalse(dao.findFirst(allDepartmentsOrdered(), Project.id()).isDefined());
+        assertFalse(dao.findFirst(allDepartmentsOrdered(), Project.id()).isPresent());
     }
 
     @Test
     public void findFirst_projectMultiple() {
         persist(new Department(), new Department());
 
-        assertTrue(dao.findFirst(allDepartmentsOrdered(), Project.id()).isDefined());
+        assertTrue(dao.findFirst(allDepartmentsOrdered(), Project.id()).isPresent());
     }
 
     @Test

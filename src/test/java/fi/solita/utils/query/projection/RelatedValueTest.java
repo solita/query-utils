@@ -7,12 +7,11 @@ import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.functional.Functional.tail;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.query.projection.Select.literal;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +78,7 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$(literal(OPTIONAL_ID.a), Cast.optional(Related.value(Employee_.optionalMunicipality, Municipality_.id))));
-        assertEquals(Some(mun.getId()), dto.value);
+        assertEquals(Optional.of(mun.getId()), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -92,7 +91,7 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$(literal(OPTIONAL_ID.a), Cast.optional(Related.value(Employee_.optionalMunicipality, Municipality_.id))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -119,7 +118,7 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$(literal(OPTIONAL_VALUE.a), Cast.optional(Related.value(Employee_.optionalMunicipality, Municipality_.id))));
-        assertEquals(Some(mun.getId()), dto.value);
+        assertEquals(Optional.of(mun.getId()), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -132,39 +131,39 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$(literal(OPTIONAL_VALUE.a), Cast.optional(Related.value(Employee_.optionalMunicipality, Municipality_.id))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_value_mandatory_some() {
+    public void getRelatedValue_value_mandatorySome() {
         Department dep = new Department(new Money(42));
         Employee emp = new Employee("", dep);
         persist(dep, emp);
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$(literal(OPTIONAL_VALUE.a), Related.value(Employee_.mandatoryDepartment, Cast.optional(Department_.optionalBudget))));
-        assertEquals(Some(dep.getBudget()), dto.value);
+        assertEquals(Optional.of(dep.getBudget()), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_value_mandatory_none() {
+    public void getRelatedValue_value_mandatoryNone() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
         persist(dep, emp);
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$(literal(OPTIONAL_VALUE.a), Related.value(Employee_.mandatoryDepartment, Cast.optional(Department_.optionalBudget))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_value_some_some() {
+    public void getRelatedValue_value_someSome() {
         Department dep = new Department();
         Municipality mun = new Municipality("foo");
         Employee emp = new Employee("", dep, mun);
@@ -172,13 +171,13 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$(literal(OPTIONAL_VALUE.a), Related.value(Employee_.optionalMunicipality, Cast.optional(Municipality_.optionalArea))));
-        assertEquals(Some(mun.getOptionalArea()), dto.value);
+        assertEquals(Optional.of(mun.getOptionalArea()), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_value_some_none() {
+    public void getRelatedValue_value_someNone() {
         Department dep = new Department();
         Municipality mun = new Municipality();
         Employee emp = new Employee("", dep, mun);
@@ -186,7 +185,7 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$(literal(OPTIONAL_VALUE.a), Related.value(Employee_.optionalMunicipality, Cast.optional(Municipality_.optionalArea))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -199,7 +198,7 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$(literal(OPTIONAL_VALUE.a), Related.value(Employee_.optionalMunicipality, Cast.optional(Municipality_.optionalArea))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -226,8 +225,8 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$$$$$(literal(OPTIONAL_ENTITY.a), Cast.optional(Related.value(Department_.optionalManager, Employee_.mandatoryDepartment))), Order.by(Department_.mandatoryDepName));
-        assertEquals(Some(mandep), head(dtos).value);
-        assertEquals(None(), head(tail(dtos)).value);
+        assertEquals(Optional.of(mandep), head(dtos).value);
+        assertEquals(Optional.empty(), head(tail(dtos)).value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -239,13 +238,13 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Department.class), Dto_.$$$$$$$(literal(OPTIONAL_ENTITY.a), Cast.optional(Related.value(Department_.optionalManager, Employee_.mandatoryDepartment))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_entity_mandatory_some() {
+    public void getRelatedValue_entity_mandatorySome() {
         Department mandep = new Department();
         Employee manemp = new Employee("b", mandep);
         Department dep = new Department("", manemp);
@@ -254,27 +253,27 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         List<Dto> dtos = dao.getMany(query.all(Employee.class), Dto_.$$$$$$$(literal(OPTIONAL_ENTITY.a), Related.value(Employee_.mandatoryDepartment, Cast.optional(Department_.optionalManager))), Order.by(Employee_.mandatoryName));
-        assertEquals(Some(manemp), head(dtos).value);
-        assertEquals(None(), head(tail(dtos)).value);
+        assertEquals(Optional.of(manemp), head(dtos).value);
+        assertEquals(Optional.empty(), head(tail(dtos)).value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_entity_mandatory_none() {
+    public void getRelatedValue_entity_mandatoryNone() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
         persist(dep, emp);
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$(literal(OPTIONAL_ENTITY.a), Related.value(Employee_.mandatoryDepartment, Cast.optional(Department_.optionalManager))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_entity_some_some() {
+    public void getRelatedValue_entity_someSome() {
         Department mandep = new Department("b");
         Municipality mun = new Municipality();
         Employee emp = new Employee("", mandep, mun);
@@ -283,14 +282,14 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$$$$$(literal(OPTIONAL_ENTITY.a), Related.value(Department_.optionalManager, Cast.optional(Employee_.optionalMunicipality))), Order.by(Department_.mandatoryDepName));
-        assertEquals(Some(mun), head(dtos).value);
-        assertEquals(None(), head(tail(dtos)).value);
+        assertEquals(Optional.of(mun), head(dtos).value);
+        assertEquals(Optional.empty(), head(tail(dtos)).value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_entity_some_none() {
+    public void getRelatedValue_entity_someNone() {
         Department mandep = new Department("b");
         Employee emp = new Employee("", mandep);
         Department dep = new Department("a", emp);
@@ -298,8 +297,8 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$$$$$(literal(OPTIONAL_ENTITY.a), Related.value(Department_.optionalManager, Cast.optional(Employee_.optionalMunicipality))), Order.by(Department_.mandatoryDepName));
-        assertEquals(None(), head(dtos).value);
-        assertEquals(None(), head(tail(dtos)).value);
+        assertEquals(Optional.empty(), head(dtos).value);
+        assertEquals(Optional.empty(), head(tail(dtos)).value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -312,7 +311,7 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Department.class), Dto_.$$$$$$$(literal(OPTIONAL_ENTITY.a), Related.value(Department_.optionalManager, Cast.optional(Employee_.optionalMunicipality))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -332,7 +331,7 @@ public class RelatedValueTest extends QueryTestBase {
     }
     
     @Test
-    public void getRelatedValue_entity2id_mandatory_some() {
+    public void getRelatedValue_entity2id_mandatorySome() {
         Department d = new Department("a");
         Employee manager = new Employee("a", d);
         Department dep = new Department("b", manager);
@@ -341,21 +340,21 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         List<Dto> dtos = dao.getMany(query.all(Employee.class), Dto_.$$$$$$(literal(OPTIONAL_ID.a), Related.value(Employee_.mandatoryDepartment, Cast.optional(Department_.optionalManager))), Order.by(Employee_.mandatoryName));
-        assertEquals(None(), head(dtos).value);
-        assertEquals(Some(manager.getId()), head(tail(dtos)).value);
+        assertEquals(Optional.empty(), head(dtos).value);
+        assertEquals(Optional.of(manager.getId()), head(tail(dtos)).value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_entity2id_mandatory_none() {
+    public void getRelatedValue_entity2id_mandatoryNone() {
         Department dep = new Department("b");
         Employee emp = new Employee("", dep);
         persist(dep, emp);
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$(literal(OPTIONAL_ID.a), Related.value(Employee_.mandatoryDepartment, Cast.optional(Department_.optionalManager))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -369,8 +368,8 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$$$$(literal(OPTIONAL_ID.a), Cast.optional(Related.value(Department_.optionalManager, Employee_.mandatoryDepartment))), Order.by(Department_.mandatoryDepName));
-        assertEquals(Some(mandep.getId()), head(dtos).value);
-        assertEquals(None(), head(tail(dtos)).value);
+        assertEquals(Optional.of(mandep.getId()), head(dtos).value);
+        assertEquals(Optional.empty(), head(tail(dtos)).value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -382,13 +381,13 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Department.class), Dto_.$$$$$$(literal(OPTIONAL_ID.a), Cast.optional(Related.value(Department_.optionalManager, Employee_.mandatoryDepartment))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_entity2id_some_some() {
+    public void getRelatedValue_entity2id_someSome() {
         Department mandep = new Department("b");
         Municipality mun = new Municipality();
         Employee emp = new Employee("", mandep, mun);
@@ -397,14 +396,14 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$$$$(literal(OPTIONAL_ID.a), Related.value(Department_.optionalManager, Cast.optional(Employee_.optionalMunicipality))), Order.by(Department_.mandatoryDepName));
-        assertEquals(Some(mun.getId()), head(dtos).value);
-        assertEquals(None(), head(tail(dtos)).value);
+        assertEquals(Optional.of(mun.getId()), head(dtos).value);
+        assertEquals(Optional.empty(), head(tail(dtos)).value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_entity2id_some_none() {
+    public void getRelatedValue_entity2id_someNone() {
         Department mandep = new Department("b");
         Employee emp = new Employee("", mandep);
         Department dep = new Department("a", emp);
@@ -412,8 +411,8 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$$$$(literal(OPTIONAL_ID.a), Related.value(Department_.optionalManager, Cast.optional(Employee_.optionalMunicipality))), Order.by(Department_.mandatoryDepName));
-        assertEquals(None(), head(dtos).value);
-        assertEquals(None(), head(tail(dtos)).value);
+        assertEquals(Optional.empty(), head(dtos).value);
+        assertEquals(Optional.empty(), head(tail(dtos)).value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -426,7 +425,7 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Department.class), Dto_.$$$$$$(literal(OPTIONAL_ID.a), Related.value(Department_.optionalManager, Cast.optional(Employee_.optionalMunicipality))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -466,7 +465,7 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$$(literal(OPTIONAL_EMBEDDABLE.a), Cast.optional(Related.value(Employee_.optionalMunicipality, Municipality_.mandatoryReport))));
-        assertEquals(Some(new Report(42)), dto.value);
+        assertEquals(Optional.of(new Report(42)), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -480,39 +479,39 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$$(literal(OPTIONAL_EMBEDDABLE.a), Cast.optional(Related.value(Employee_.optionalMunicipality, Municipality_.mandatoryReport))));
-        assertEquals(Some(new Report(42)), dto.value);
+        assertEquals(Optional.of(new Report(42)), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_embeddable_mandatory_some() {
+    public void getRelatedValue_embeddable_mandatorySome() {
         Department dep = new Department(new Report(42));
         Employee emp = new Employee("", dep);
         persist(dep, emp);
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$$(literal(OPTIONAL_EMBEDDABLE.a), Related.value(Employee_.mandatoryDepartment, Cast.optional(Department_.optionalDepReport))));
-        assertEquals(Some(new Report(42)), dto.value);
+        assertEquals(Optional.of(new Report(42)), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_embeddable_mandatory_none() {
+    public void getRelatedValue_embeddable_mandatoryNone() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
         persist(dep, emp);
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$$(literal(OPTIONAL_EMBEDDABLE.a), Related.value(Employee_.mandatoryDepartment, Cast.optional(Department_.optionalDepReport))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_embeddable_some_some() {
+    public void getRelatedValue_embeddable_someSome() {
         Department d = new Department("a");
         Employee manager = new Employee("", d, new Report(42));
         Department dep = new Department("b", manager);
@@ -521,14 +520,14 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$$$$$$$(literal(OPTIONAL_EMBEDDABLE.a), Related.value(Department_.optionalManager, Cast.optional(Employee_.optionalReport))), Order.by(Department_.mandatoryDepName));
-        assertEquals(None(), head(dtos).value);
-        assertEquals(Some(new Report(42)), head(tail(dtos)).value);
+        assertEquals(Optional.empty(), head(dtos).value);
+        assertEquals(Optional.of(new Report(42)), head(tail(dtos)).value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
     
     @Test
-    public void getRelatedValue_embeddable_some_none() {
+    public void getRelatedValue_embeddable_someNone() {
         Department d = new Department("a");
         Employee manager = new Employee("", d);
         Department dep = new Department("b", manager);
@@ -537,8 +536,8 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         List<Dto> dtos = dao.getMany(query.all(Department.class), Dto_.$$$$$$$$$(literal(OPTIONAL_EMBEDDABLE.a), Related.value(Department_.optionalManager, Cast.optional(Employee_.optionalReport))), Order.by(Department_.mandatoryDepName));
-        assertEquals(None(), head(dtos).value);
-        assertEquals(None(), head(tail(dtos)).value);
+        assertEquals(Optional.empty(), head(dtos).value);
+        assertEquals(Optional.empty(), head(tail(dtos)).value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -551,7 +550,7 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Department.class), Dto_.$$$$$$$$$(literal(OPTIONAL_EMBEDDABLE.a), Related.value(Department_.optionalManager, Cast.optional(Employee_.optionalReport))));
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
         
         assertEquals(1, getQueryCount() - queryCount);
     }
@@ -570,7 +569,7 @@ public class RelatedValueTest extends QueryTestBase {
     }
     
     @Test
-    public void getRelatedValue_set_none() {
+    public void getRelatedValue_setNone() {
         Municipality mun = new Municipality();
         Department dep = new Department();
         persist(mun, dep);
@@ -624,7 +623,7 @@ public class RelatedValueTest extends QueryTestBase {
     }
     
     @Test
-    public void getRelatedValue_set_multiple_none() {
+    public void getRelatedValue_set_multipleNone() {
         Municipality mun = new Municipality();
         Department dep = new Department();
         Employee emp = new Employee("", dep, mun);
@@ -638,7 +637,7 @@ public class RelatedValueTest extends QueryTestBase {
     }
     
     @Test
-    public void getRelatedValue_set_multiple_some() {
+    public void getRelatedValue_set_multipleSome() {
         Municipality mun = new Municipality();
         Department dep = new Department();
         Employee emp = new Employee("", dep, mun);
@@ -764,7 +763,7 @@ public class RelatedValueTest extends QueryTestBase {
     }
     
     @Test
-    public void getRelatedValue_list_multiple_none() {
+    public void getRelatedValue_list_multipleNone() {
         Department dep = new Department();
         Employee emp = new Employee("", dep);
         persist(dep, emp);
@@ -777,7 +776,7 @@ public class RelatedValueTest extends QueryTestBase {
     }
     
     @Test
-    public void getRelatedValue_list_multiple_some() {
+    public void getRelatedValue_list_multipleSome() {
         Department dep = new Department();
         Employee emp = new Employee("", dep).setOptionalSalary(new Money(42));
         persist(dep, emp);
@@ -825,7 +824,7 @@ public class RelatedValueTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         Dto dto = dao.get(query.all(Employee.class), Dto_.$$$$$$$$$$$$$$$$$$$$$(literal(LIST_OF_EMBEDDABLES.a), Related.list(Employee_.mandatoryDepartment, Department_.reports)));
-        assertEquals(newList(Some(new Report(42))), dto.value);
+        assertEquals(newList(Optional.of(new Report(42))), dto.value);
         
         assertEquals(2, getQueryCount() - queryCount);
     }

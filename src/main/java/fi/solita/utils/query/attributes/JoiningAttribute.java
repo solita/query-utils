@@ -1,19 +1,19 @@
 package fi.solita.utils.query.attributes;
 
 import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Functional.mkString;
 import static fi.solita.utils.functional.Functional.map;
+import static fi.solita.utils.functional.Functional.mkString;
 
 import java.util.List;
 
+import fi.solita.utils.functional.Apply;
+import fi.solita.utils.functional.Pred;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.CollectionAttribute;
 import jakarta.persistence.metamodel.ListAttribute;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
-import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Pred;
 
 /**
  * 

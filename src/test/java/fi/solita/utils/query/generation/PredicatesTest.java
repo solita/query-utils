@@ -3,16 +3,15 @@ package fi.solita.utils.query.generation;
 import static fi.solita.utils.functional.Collections.newMutableSet;
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import fi.solita.utils.functional.Collections;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Dao;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
@@ -46,8 +45,8 @@ public class PredicatesTest extends QueryTestBase {
 
         assertEquals(dep1.getId(),
             dao.get(
-                restrict.by(predicates.and(predicates.equals(Department_.mandatoryDepName, Some("a")),
-                                           predicates.equals(Department_.mandatoryNumber, Some(1))),
+                restrict.by(predicates.and(predicates.equals(Department_.mandatoryDepName, Optional.of("a")),
+                                           predicates.equals(Department_.mandatoryNumber, Optional.of(1))),
                     query.all(Department.class))).getId());
     }
 
@@ -60,8 +59,8 @@ public class PredicatesTest extends QueryTestBase {
 
         assertEquals(newSet(dep1.getId(), dep2.getId()), newSet(
             dao.getMany(
-                restrict.by(predicates.or(predicates.equals(Department_.mandatoryDepName, Some("a")),
-                                          predicates.equals(Department_.mandatoryDepName, Some("b"))),
+                restrict.by(predicates.or(predicates.equals(Department_.mandatoryDepName, Optional.of("a")),
+                                          predicates.equals(Department_.mandatoryDepName, Optional.of("b"))),
                     query.all(Department.class)), Project.id())));
     }
 
@@ -96,7 +95,7 @@ public class PredicatesTest extends QueryTestBase {
         persist(dep, emp1, emp2, emp3);
 
         assertEquals(newSet(emp1.getId()), newSet(map(Employee_.getId,
-            dao.getMany(restrict.by(predicates.equals(Employee_.optionalSalary, Some(new Money(1))), query.all(Employee.class))))));
+            dao.getMany(restrict.by(predicates.equals(Employee_.optionalSalary, Optional.of(new Money(1))), query.all(Employee.class))))));
     }
 
     @Test
@@ -107,7 +106,7 @@ public class PredicatesTest extends QueryTestBase {
         persist(dep, emp1, emp2);
 
         assertEquals(newSet(emp2.getId()), newSet(map(Employee_.getId,
-            dao.getMany(restrict.by(predicates.equals(Employee_.optionalSalary, Option.<Money>None()), query.all(Employee.class))))));
+            dao.getMany(restrict.by(predicates.equals(Employee_.optionalSalary, Optional.empty()), query.all(Employee.class))))));
     }
 
     @Test
@@ -117,7 +116,7 @@ public class PredicatesTest extends QueryTestBase {
         persist(dep1, dep2);
 
         assertEquals(newSet(dep2.getId()), newSet(map(Department_.getId,
-            dao.getMany(restrict.by(predicates.notEquals(Department_.mandatoryDepName, Some("a")), query.all(Department.class))))));
+            dao.getMany(restrict.by(predicates.notEquals(Department_.mandatoryDepName, Optional.of("a")), query.all(Department.class))))));
     }
 
     @Test
@@ -128,17 +127,17 @@ public class PredicatesTest extends QueryTestBase {
         persist(dep, emp1, emp2);
 
         assertEquals(newSet(emp1.getId()), newSet(map(Employee_.getId,
-            dao.getMany(restrict.by(predicates.notEquals(Employee_.optionalSalary, Option.<Money>None()), query.all(Employee.class))))));
+            dao.getMany(restrict.by(predicates.notEquals(Employee_.optionalSalary, Optional.empty()), query.all(Employee.class))))));
     }
 
     @Test
-    public void equalsIgnoreCase_some() {
+    public void equalsIgnoreCaseSome() {
         Department dep1 = new Department("abc");
         Department dep2 = new Department("def");
         persist(dep1, dep2);
 
         assertEquals(dep1.getId(),
-            dao.get(restrict.by(predicates.equalsIgnoreCase(Department_.mandatoryDepName, Some("ABC")), query.all(Department.class))).getId());
+            dao.get(restrict.by(predicates.equalsIgnoreCase(Department_.mandatoryDepName, Optional.of("ABC")), query.all(Department.class))).getId());
     }
 
     @Test
@@ -148,9 +147,9 @@ public class PredicatesTest extends QueryTestBase {
         Employee emp2 = new Employee("b", dep);
         persist(dep, emp1, emp2);
 
-        // mandatoryName is not nullable — just verify that some() match works case-insensitively
+        // mandatoryName is not nullable — just verify that Optional.of() match works case-insensitively
         assertEquals(newSet(emp1.getId()), newSet(map(Employee_.getId,
-            dao.getMany(restrict.by(predicates.equalsIgnoreCase(Employee_.mandatoryName, Some("A")), query.all(Employee.class))))));
+            dao.getMany(restrict.by(predicates.equalsIgnoreCase(Employee_.mandatoryName, Optional.of("A")), query.all(Employee.class))))));
     }
 
     @Test

@@ -4,8 +4,6 @@ import static fi.solita.utils.functional.Collections.emptyList;
 import static fi.solita.utils.functional.Collections.emptySet;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.query.projection.Select.literal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -13,12 +11,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.Dao;
 import fi.solita.utils.query.Department;
@@ -135,10 +133,10 @@ public class ProjectionHelperTest extends QueryTestBase {
         Employee emp = new Employee("", new Money(99), dep);
         persist(dep, emp);
 
-        Option<Money> result = dao.get(query.all(Employee.class),
+        Optional<Money> result = dao.get(query.all(Employee.class),
                 Project.value(Cast.optional(Employee_.optionalSalary)));
 
-        assertEquals(Some(new Money(99)), result);
+        assertEquals(Optional.of(new Money(99)), result);
     }
 
     @Test
@@ -147,10 +145,10 @@ public class ProjectionHelperTest extends QueryTestBase {
         Employee emp = new Employee("", dep);
         persist(dep, emp);
 
-        Option<Money> result = dao.get(query.all(Employee.class),
+        Optional<Money> result = dao.get(query.all(Employee.class),
                 Project.value(Cast.optional(Employee_.optionalSalary)));
 
-        assertEquals(None(), result);
+        assertEquals(Optional.empty(), result);
     }
 
     @Test
@@ -204,12 +202,12 @@ public class ProjectionHelperTest extends QueryTestBase {
         Department dep = new Department(report);
         persist(dep);
 
-        // $$$$$$$$$ (9 $'s) = Dto(OPTIONAL_EMBEDDABLE, Option<Report>)
+        // $$$$$$$$$ (9 $'s) = Dto(OPTIONAL_EMBEDDABLE, Optional<Report>)
         Dto dto = dao.get(query.all(Department.class),
                 Dto_.$$$$$$$$$(literal(OPTIONAL_EMBEDDABLE.a), Cast.optional(Department_.optionalDepReport)));
 
-        Option<?> optVal = (Option<?>) dto.value;
-        assertTrue(optVal.isDefined());
+        Optional<?> optVal = (Optional<?>) dto.value;
+        assertTrue(optVal.isPresent());
         assertEquals(2025, ((Report) optVal.get()).getYear().intValue());
     }
 
@@ -221,7 +219,7 @@ public class ProjectionHelperTest extends QueryTestBase {
         Dto dto = dao.get(query.all(Department.class),
                 Dto_.$$$$$$$$$(literal(OPTIONAL_EMBEDDABLE.a), Cast.optional(Department_.optionalDepReport)));
 
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
     }
 
     // -------------------------------------------------------------------------
@@ -311,13 +309,13 @@ public class ProjectionHelperTest extends QueryTestBase {
         Employee emp = new Employee("", dep, mun);
         persist(dep, mun, emp);
 
-        // $$$$$$$$ (8 $'s) = Dto(OPTIONAL_VALUE, Option<?>)
+        // $$$$$$$$ (8 $'s) = Dto(OPTIONAL_VALUE, Optional<?>)
         // Use Related.value to project the optional municipality id
         Dto dto = dao.get(query.all(Employee.class),
                 Dto_.$$$$$$$$(literal(OPTIONAL_VALUE.a),
                         Cast.optional(Related.value(Employee_.optionalMunicipality, Municipality_.id))));
 
-        assertTrue(((Option<?>) dto.value).isDefined());
+        assertTrue(((Optional<?>) dto.value).isPresent());
     }
 
     @Test
@@ -330,7 +328,7 @@ public class ProjectionHelperTest extends QueryTestBase {
                 Dto_.$$$$$$$$(literal(OPTIONAL_VALUE.a),
                         Cast.optional(Related.value(Employee_.optionalMunicipality, Municipality_.id))));
 
-        assertEquals(None(), dto.value);
+        assertEquals(Optional.empty(), dto.value);
     }
 
     @Test

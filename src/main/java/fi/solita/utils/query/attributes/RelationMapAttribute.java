@@ -6,13 +6,12 @@ import org.hibernate.metamodel.model.domain.MapPersistentAttribute;
 import org.hibernate.metamodel.model.domain.SimpleDomainType;
 import org.hibernate.query.sqm.SqmPathSource;
 
+import fi.solita.utils.query.IEntity;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.persistence.metamodel.Type;
-
-import fi.solita.utils.query.IEntity;
-import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 class RelationMapAttribute<E, K, R, A extends Attribute<E, Map<K,R>> & Bindable<R>> extends PluralAttributeProxy<E, Map<K,R>, R, A> implements MapAttribute<E,K,R>, AdditionalQueryPerformingAttribute, MapPersistentAttribute<E,K,R> {
     private final MetaJpaConstructor<? extends IEntity<?>, R, ?> constructor;

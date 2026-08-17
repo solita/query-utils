@@ -2,26 +2,17 @@ package fi.solita.utils.query.execution;
 
 import static fi.solita.utils.functional.Collections.newMutableList;
 import static fi.solita.utils.functional.Functional.head;
-import static fi.solita.utils.functional.Functional.headOption;
+import static fi.solita.utils.functional.Functional.headOptional;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.query.QueryUtils.applyOrder;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.LockModeType;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.NonUniqueResultException;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.From;
+import java.util.Optional;
 
 import fi.solita.utils.functional.ApplyZero;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Order;
@@ -33,6 +24,12 @@ import fi.solita.utils.query.meta.MetaJpaConstructor;
 import fi.solita.utils.query.projection.ProjectionHelper;
 import fi.solita.utils.query.projection.ProjectionUtil;
 import fi.solita.utils.query.projection.ProjectionUtil_;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
 
 public class JpaProjectionQueries {
 
@@ -56,20 +53,20 @@ public class JpaProjectionQueries {
         return head(projectionSupport.finalizeProjectingQuery(constructor, res));
     }
     
-    public <E, R> Option<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, LockModeType lock) throws NonUniqueResultException {
+    public <E, R> Optional<R> find(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, LockModeType lock) throws NonUniqueResultException {
         try {
-            return Some(get(query, constructor, lock));
+            return Optional.of(get(query, constructor, lock));
         } catch (NoResultException e) {
-            return None();
+            return Optional.empty();
         }
     }
     
-    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, LockModeType lock) throws NoOrderingSpecifiedException {
-        return headOption(getMany(query, constructor, Page.FIRST.withSize(1), lock));
+    public <E,R> Optional<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, LockModeType lock) throws NoOrderingSpecifiedException {
+        return headOptional(getMany(query, constructor, Page.FIRST.withSize(1), lock));
     }
 
-    public <E,R> Option<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
-        return headOption(getMany(query, constructor, Page.FIRST.withSize(1), ordering, lock));
+    public <E,R> Optional<R> findFirst(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
+        return headOptional(getMany(query, constructor, Page.FIRST.withSize(1), ordering, lock));
     }
 
     public <E,R> Collection<R> getMany(CriteriaQuery<E> query, MetaJpaConstructor<? super E,? extends R, ?> constructor, LockModeType lock) throws NoOrderingSpecifiedException {

@@ -1,7 +1,6 @@
 package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -10,23 +9,23 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.query.backend.Type;
 import fi.solita.utils.query.generation.NativeQuery;
 
 public class OptionResultTransformerTest {
 
-    private static Pair<String, Option<Type<?>>> retval(String col, Option<Type<?>> type) {
+    private static Pair<String, Optional<Type<?>>> retval(String col, Optional<Type<?>> type) {
         return Pair.of(col, type);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Option<Type<?>> optional() {
-        return (Option<Type<?>>) (Option) Some(new Type.Optional<>(new DummyType()));
+    private static Optional<Type<?>> optional() {
+        return (Optional<Type<?>>) (Optional) Optional.of(new Type.OptionalType<>(new DummyType()));
     }
 
     // -------------------------------------------------------------------------
@@ -35,18 +34,18 @@ public class OptionResultTransformerTest {
 
     @Test
     public void constructor_acceptsEmptyList() {
-        new OptionResultTransformer(Collections.<Pair<String, Option<Type<?>>>>emptyList());
+        new OptionResultTransformer(Collections.<Pair<String, Optional<Type<?>>>>emptyList());
     }
 
     @Test
     public void constructor_acceptsSingleRetval() {
-        new OptionResultTransformer(newList(retval("col", Option.<Type<?>>None())));
+        new OptionResultTransformer(newList(retval("col", Optional.empty())));
     }
 
     @Test
     public void constructor_acceptsMultipleRetvals() {
         new OptionResultTransformer(newList(
-                retval("col1", Option.<Type<?>>None()),
+                retval("col1", Optional.empty()),
                 retval("col2", optional())));
     }
 
@@ -56,7 +55,7 @@ public class OptionResultTransformerTest {
 
     @Test
     public void transformList_returnsOriginalCollection() {
-        OptionResultTransformer transformer = new OptionResultTransformer(Collections.<Pair<String, Option<Type<?>>>>emptyList());
+        OptionResultTransformer transformer = new OptionResultTransformer(Collections.<Pair<String, Optional<Type<?>>>>emptyList());
         List<Object> collection = Arrays.<Object>asList("a", "b", "c");
         List<Object> result = transformer.transformList(collection);
         assertSame(collection, result);
@@ -64,7 +63,7 @@ public class OptionResultTransformerTest {
 
     @Test
     public void transformList_returnsEmptyListUnchanged() {
-        OptionResultTransformer transformer = new OptionResultTransformer(Collections.<Pair<String, Option<Type<?>>>>emptyList());
+        OptionResultTransformer transformer = new OptionResultTransformer(Collections.<Pair<String, Optional<Type<?>>>>emptyList());
         List<Object> collection = Collections.<Object>emptyList();
         List<Object> result = transformer.transformList(collection);
         assertTrue(result.isEmpty());
@@ -77,7 +76,7 @@ public class OptionResultTransformerTest {
     @Test
     public void transformTuple_returnsSingleValue_whenOnlyOneElement() {
         OptionResultTransformer transformer = new OptionResultTransformer(
-                newList(retval("col", Option.<Type<?>>None())));
+                newList(retval("col", Optional.empty())));
         Object result = transformer.transformTuple(new Object[]{"value"}, new String[]{"col"});
         assertEquals("value", result);
     }
@@ -85,7 +84,7 @@ public class OptionResultTransformerTest {
     @Test
     public void transformTuple_returnsNullValue_whenValueIsNullAndTypeIsNone() {
         OptionResultTransformer transformer = new OptionResultTransformer(
-                newList(retval("col", Option.<Type<?>>None())));
+                newList(retval("col", Optional.empty())));
         Object result = transformer.transformTuple(new Object[]{null}, new String[]{"col"});
         assertEquals(null, result);
     }
@@ -99,9 +98,9 @@ public class OptionResultTransformerTest {
         OptionResultTransformer transformer = new OptionResultTransformer(
                 newList(retval("col", optional())));
         Object result = transformer.transformTuple(new Object[]{"value"}, new String[]{"col"});
-        assertTrue("Result should be an Option", result instanceof Option);
-        Option<?> opt = (Option<?>) result;
-        assertTrue("Option should be defined", opt.isDefined());
+        assertTrue("Result should be an Option", result instanceof Optional);
+        Optional<?> opt = (Optional<?>) result;
+        assertTrue("Option should be defined", opt.isPresent());
         assertEquals("value", opt.get());
     }
 
@@ -110,9 +109,9 @@ public class OptionResultTransformerTest {
         OptionResultTransformer transformer = new OptionResultTransformer(
                 newList(retval("col", optional())));
         Object result = transformer.transformTuple(new Object[]{null}, new String[]{"col"});
-        assertTrue("Result should be an Option", result instanceof Option);
-        Option<?> opt = (Option<?>) result;
-        assertFalse("Option should be empty (None) for null value", opt.isDefined());
+        assertTrue("Result should be an Option", result instanceof Optional);
+        Optional<?> opt = (Optional<?>) result;
+        assertFalse("Option should be empty (None) for null value", opt.isPresent());
     }
 
     // -------------------------------------------------------------------------
@@ -122,8 +121,8 @@ public class OptionResultTransformerTest {
     @Test
     public void transformTuple_returnsArray_whenMultipleElements() {
         OptionResultTransformer transformer = new OptionResultTransformer(newList(
-                retval("col1", Option.<Type<?>>None()),
-                retval("col2", Option.<Type<?>>None())));
+                retval("col1", Optional.empty()),
+                retval("col2", Optional.empty())));
         Object result = transformer.transformTuple(new Object[]{"a", "b"}, new String[]{"col1", "col2"});
         assertTrue("Result should be an Object array", result instanceof Object[]);
         Object[] arr = (Object[]) result;
@@ -135,25 +134,25 @@ public class OptionResultTransformerTest {
     @Test
     public void transformTuple_wrapsOptionalColumn_inMultiColumnResult() {
         OptionResultTransformer transformer = new OptionResultTransformer(newList(
-                retval("col1", Option.<Type<?>>None()),
+                retval("col1", Optional.empty()),
                 retval("col2", optional())));
         Object result = transformer.transformTuple(new Object[]{"a", "b"}, new String[]{"col1", "col2"});
         Object[] arr = (Object[]) result;
         assertEquals("a", arr[0]);
-        assertTrue("Second element should be wrapped in Option", arr[1] instanceof Option);
-        assertEquals("b", ((Option<?>) arr[1]).get());
+        assertTrue("Second element should be wrapped in Option", arr[1] instanceof Optional);
+        assertEquals("b", ((Optional<?>) arr[1]).get());
     }
 
     @Test
     public void transformTuple_wrapsNullOptionalColumn_inMultiColumnResult() {
         OptionResultTransformer transformer = new OptionResultTransformer(newList(
-                retval("col1", Option.<Type<?>>None()),
+                retval("col1", Optional.empty()),
                 retval("col2", optional())));
         Object result = transformer.transformTuple(new Object[]{"a", null}, new String[]{"col1", "col2"});
         Object[] arr = (Object[]) result;
         assertEquals("a", arr[0]);
-        assertTrue("Second element should be an Option", arr[1] instanceof Option);
-        assertFalse("Second element should be None for null value", ((Option<?>) arr[1]).isDefined());
+        assertTrue("Second element should be an Option", arr[1] instanceof Optional);
+        assertFalse("Second element should be None for null value", ((Optional<?>) arr[1]).isPresent());
     }
 
     // -------------------------------------------------------------------------
@@ -165,14 +164,14 @@ public class OptionResultTransformerTest {
         OptionResultTransformer transformer = new OptionResultTransformer(
                 newList(retval(NativeQuery.ENTITY_RETURN_VALUE, optional())));
         Object result = transformer.transformTuple(new Object[]{"entity"}, new String[]{NativeQuery.ENTITY_RETURN_VALUE});
-        assertTrue("Result should be an Option", result instanceof Option);
-        assertEquals("entity", ((Option<?>) result).get());
+        assertTrue("Result should be an Option", result instanceof Optional);
+        assertEquals("entity", ((Optional<?>) result).get());
     }
 
     @Test
     public void transformTuple_handlesEntityReturnValue_withNoneType() {
         OptionResultTransformer transformer = new OptionResultTransformer(
-                newList(retval(NativeQuery.ENTITY_RETURN_VALUE, Option.<Type<?>>None())));
+                newList(retval(NativeQuery.ENTITY_RETURN_VALUE, Optional.empty())));
         Object result = transformer.transformTuple(new Object[]{"entity"}, new String[]{NativeQuery.ENTITY_RETURN_VALUE});
         assertEquals("entity", result);
     }
@@ -184,8 +183,8 @@ public class OptionResultTransformerTest {
                 newList(retval(NativeQuery.ENTITY_RETURN_VALUE, optional())));
         // Aliases with one entry and retvals with one key matching ENTITY_RETURN_VALUE by identity
         Object result = transformer.transformTuple(new Object[]{"entity"}, new String[]{NativeQuery.ENTITY_RETURN_VALUE});
-        assertTrue(result instanceof Option);
-        assertTrue(((Option<?>) result).isDefined());
+        assertTrue(result instanceof Optional);
+        assertTrue(((Optional<?>) result).isPresent());
     }
 
     // -------------------------------------------------------------------------

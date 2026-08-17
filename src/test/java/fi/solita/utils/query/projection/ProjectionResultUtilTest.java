@@ -3,8 +3,6 @@ package fi.solita.utils.query.projection;
 import static fi.solita.utils.functional.Collections.emptyList;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Collections.newSet;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -14,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -43,13 +42,13 @@ public class ProjectionResultUtilTest extends QueryTestBase {
     }
 
     @Test
-    public void isNoneOrNull_none() {
-        assertTrue(ProjectionResultUtil.isNoneOrNull(None()));
+    public void isNoneOrNullNone() {
+        assertTrue(ProjectionResultUtil.isNoneOrNull(Optional.empty()));
     }
 
     @Test
-    public void isNoneOrNull_some() {
-        assertFalse(ProjectionResultUtil.isNoneOrNull(Some("value")));
+    public void isNoneOrNullSome() {
+        assertFalse(ProjectionResultUtil.isNoneOrNull(Optional.of("value")));
     }
 
     @Test
@@ -63,8 +62,8 @@ public class ProjectionResultUtilTest extends QueryTestBase {
     // -------------------------------------------------------------------------
 
     @Test
-    public void optionGet_some() {
-        assertEquals("value", ProjectionResultUtil.optionGet(Some("value")));
+    public void optionGetSome() {
+        assertEquals("value", ProjectionResultUtil.optionGet(Optional.of("value")));
     }
 
     @Test
@@ -81,7 +80,7 @@ public class ProjectionResultUtilTest extends QueryTestBase {
     public void wrapNullsToOptionsWhereAppropriate_optionalAttribute_null_becomesNone() {
         // Cast.optional() marks the attribute as optional for the query framework → null becomes None
         Object result = ProjectionResultUtil.wrapNullsToOptionsWhereAppropriate(Cast.optional(Employee_.optionalSalary), null);
-        assertEquals(None(), result);
+        assertEquals(Optional.empty(), result);
     }
 
     @Test
@@ -89,14 +88,14 @@ public class ProjectionResultUtilTest extends QueryTestBase {
         // Cast.optional() marks the attribute as optional for the query framework → value becomes Some
         Money salary = new Money(100);
         Object result = ProjectionResultUtil.wrapNullsToOptionsWhereAppropriate(Cast.optional(Employee_.optionalSalary), salary);
-        assertEquals(Some(salary), result);
+        assertEquals(Optional.of(salary), result);
     }
 
     @Test
     public void wrapNullsToOptionsWhereAppropriate_optionTypedAttribute_null_becomesNone() {
-        // Employee.optionAge is an Option<Integer> field → recognized as optional → null becomes None
+        // Employee.optionAge is an Optional<Integer> field → recognized as optional → null becomes None
         Object result = ProjectionResultUtil.wrapNullsToOptionsWhereAppropriate(Employee_.optionAge, null);
-        assertEquals(None(), result);
+        assertEquals(Optional.empty(), result);
     }
 
     @Test
@@ -128,9 +127,9 @@ public class ProjectionResultUtilTest extends QueryTestBase {
     public void removeNonesAndSomesFromCollections_list_removesNones_unwrapsSomes() {
         // Department.employees is a list attribute (plural)
         List<Object> input = new ArrayList<>();
-        input.add(Some("a"));
-        input.add(None());
-        input.add(Some("b"));
+        input.add(Optional.of("a"));
+        input.add(Optional.empty());
+        input.add(Optional.of("b"));
         input.add(null);
 
         Object result = ProjectionResultUtil.removeNonesAndSomesFromCollections(Department_.employees, input);
@@ -141,7 +140,7 @@ public class ProjectionResultUtilTest extends QueryTestBase {
     public void removeNonesAndSomesFromCollections_set_removesNones_unwrapsSomes() {
         // Department.employees is a list; use numbers as a different collection type
         // Use a plain Set input to exercise the Set branch
-        Set<Object> input = newSet((Object)Some("x"), None(), Some("y"));
+        Set<Object> input = newSet((Object)Optional.of("x"), Optional.empty(), Optional.of("y"));
 
         Object result = ProjectionResultUtil.removeNonesAndSomesFromCollections(Department_.employees, input);
         assertTrue(result instanceof Set);
@@ -224,7 +223,7 @@ public class ProjectionResultUtilTest extends QueryTestBase {
     public void postProcessValue_optionalAttribute_null_becomesNone() {
         // Cast.optional() makes the attribute recognized as optional → null becomes None
         Object result = ProjectionResultUtil.postProcessValue(Cast.optional(Employee_.optionalSalary), null);
-        assertEquals(None(), result);
+        assertEquals(Optional.empty(), result);
     }
 
     @Test
@@ -232,7 +231,7 @@ public class ProjectionResultUtilTest extends QueryTestBase {
         // Cast.optional() makes the attribute recognized as optional → value becomes Some
         Money salary = new Money(42);
         Object result = ProjectionResultUtil.postProcessValue(Cast.optional(Employee_.optionalSalary), salary);
-        assertEquals(Some(salary), result);
+        assertEquals(Optional.of(salary), result);
     }
 
     // -------------------------------------------------------------------------

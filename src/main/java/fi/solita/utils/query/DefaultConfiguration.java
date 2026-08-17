@@ -2,15 +2,13 @@ package fi.solita.utils.query;
 
 import static fi.solita.utils.functional.Collections.emptyMap;
 import static fi.solita.utils.functional.Collections.newSortedSet;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 
 import java.sql.Connection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedSet;
 
 import fi.solita.utils.functional.Function2;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.db.TableInClauseOptimization;
 
@@ -30,11 +28,11 @@ public class DefaultConfiguration implements Configuration {
     @Override
     public SortedSet<Integer> getInClauseValuesAmounts() {
         // ora has a limit of 1000. Don't know of other db verndors.
-        return newSortedSet(Some(1000));
+        return newSortedSet(Optional.of(1000));
     }
     
-    public Option<String> wrapComparedNumbersWithFunction() {
-        return None();
+    public Optional<String> wrapComparedNumbersWithFunction() {
+        return Optional.empty();
     }
     
     public boolean makeProjectionQueriesDistinct() {
@@ -45,12 +43,12 @@ public class DefaultConfiguration implements Configuration {
         return emptyMap();
     }
 
-    public Option<TableInClauseOptimization> getTableInClauseProvider() {
-        return None();
+    public Optional<TableInClauseOptimization> getTableInClauseProvider() {
+        return Optional.empty();
     }
     
     @Override
-    public Option<Object> getInListPadValue(Class<?> valueType) {
-        return None();
+    public Optional<Object> getInListPadValue(Class<?> valueType) {
+        return Optional.empty();
     }
 }

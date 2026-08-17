@@ -1,25 +1,18 @@
 package fi.solita.utils.query.projection;
 
 import static fi.solita.utils.functional.Collections.newList;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import jakarta.persistence.metamodel.Attribute;
-import jakarta.persistence.metamodel.EmbeddableType;
-import jakarta.persistence.metamodel.Metamodel;
+import java.util.Optional;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
-
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Employee_;
 import fi.solita.utils.query.Municipality_;
@@ -27,6 +20,9 @@ import fi.solita.utils.query.QueryTestBase;
 import fi.solita.utils.query.Report;
 import fi.solita.utils.query.Report_;
 import fi.solita.utils.query.generation.Cast;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.EmbeddableType;
+import jakarta.persistence.metamodel.Metamodel;
 
 public class EmbeddableUtilTest extends QueryTestBase {
 
@@ -187,39 +183,39 @@ public class EmbeddableUtilTest extends QueryTestBase {
 
     @Test
     public void unwrapEmbeddableAttribute_null_returnsNone() {
-        assertEquals(None(), EmbeddableUtil.unwrapEmbeddableAttribute(null));
+        assertEquals(Optional.empty(), EmbeddableUtil.unwrapEmbeddableAttribute(null));
     }
 
     @Test
     public void unwrapEmbeddableAttribute_embeddedAttribute_returnsSome() {
         // mandatoryReport is @Embedded → EMBEDDED persistent type
-        Option<? extends Attribute<?, ?>> result = EmbeddableUtil.unwrapEmbeddableAttribute(Department_.mandatoryReport);
-        assertEquals(Some(Department_.mandatoryReport), result);
+        Optional<? extends Attribute<?, ?>> result = EmbeddableUtil.unwrapEmbeddableAttribute(Department_.mandatoryReport);
+        assertEquals(Optional.of(Department_.mandatoryReport), result);
     }
 
     @Test
     public void unwrapEmbeddableAttribute_optionalEmbeddedAttribute_returnsSome() {
         // optionalDepReport is @Embedded → EMBEDDED
-        Option<? extends Attribute<?, ?>> result = EmbeddableUtil.unwrapEmbeddableAttribute(Department_.optionalDepReport);
-        assertEquals(Some(Department_.optionalDepReport), result);
+        Optional<? extends Attribute<?, ?>> result = EmbeddableUtil.unwrapEmbeddableAttribute(Department_.optionalDepReport);
+        assertEquals(Optional.of(Department_.optionalDepReport), result);
     }
 
     @Test
     public void unwrapEmbeddableAttribute_singularBasicAttribute_returnsNone() {
         // mandatoryDepName is a basic attribute (BASIC), not embedded
-        assertEquals(None(), EmbeddableUtil.unwrapEmbeddableAttribute(Department_.mandatoryDepName));
+        assertEquals(Optional.empty(), EmbeddableUtil.unwrapEmbeddableAttribute(Department_.mandatoryDepName));
     }
 
     @Test
     public void unwrapEmbeddableAttribute_manyToOneAttribute_returnsNone() {
         // mandatoryDepartment is MANY_TO_ONE, not EMBEDDED
-        assertEquals(None(), EmbeddableUtil.unwrapEmbeddableAttribute(Employee_.mandatoryDepartment));
+        assertEquals(Optional.empty(), EmbeddableUtil.unwrapEmbeddableAttribute(Employee_.mandatoryDepartment));
     }
 
     @Test
     public void unwrapEmbeddableAttribute_pseudoAttribute_returnsNone() {
         // Select.literal creates a PseudoAttribute
-        assertEquals(None(), EmbeddableUtil.unwrapEmbeddableAttribute(Select.literal(42)));
+        assertEquals(Optional.empty(), EmbeddableUtil.unwrapEmbeddableAttribute(Select.literal(42)));
     }
 
     @Test
@@ -228,9 +224,9 @@ public class EmbeddableUtilTest extends QueryTestBase {
         // The outer proxy itself has PersistentAttributeType EMBEDDED (delegating to the wrapped attribute),
         // so unwrapEmbeddableAttribute returns Some wrapping that proxy.
         // Report.year1 is nullable so must be wrapped with Cast.optional().
-        Option<? extends Attribute<?, ?>> result = EmbeddableUtil.unwrapEmbeddableAttribute(
+        Optional<? extends Attribute<?, ?>> result = EmbeddableUtil.unwrapEmbeddableAttribute(
             Related.projection(Department_.mandatoryReport, Project.value(Cast.optional(Report_.year1))));
-        assertTrue(result.isDefined());
+        assertTrue(result.isPresent());
     }
 
     @Test
@@ -238,9 +234,9 @@ public class EmbeddableUtilTest extends QueryTestBase {
         // When the single parameter of Related.projection is a non-embedded attribute, result is None.
         // Employee_.mandatoryDepartment is SingularAttribute<Employee, Department>, so the
         // projection constructor must be MetaJpaConstructor<? super Department, ?, ?>.
-        Option<? extends Attribute<?, ?>> result = EmbeddableUtil.unwrapEmbeddableAttribute(
+        Optional<? extends Attribute<?, ?>> result = EmbeddableUtil.unwrapEmbeddableAttribute(
             Related.projection(Employee_.mandatoryDepartment, Project.value(Department_.mandatoryDepName)));
-        assertEquals(None(), result);
+        assertEquals(Optional.empty(), result);
     }
 
     @Test
@@ -248,7 +244,7 @@ public class EmbeddableUtilTest extends QueryTestBase {
         // Cast.optional wraps in OptionalAttributeImpl (not PseudoAttribute), which proxies
         // the underlying embedded attribute → getPersistentAttributeType() is still EMBEDDED
         // → unwrapEmbeddableAttribute returns Some with the optional wrapper attribute.
-        Option<? extends Attribute<?, ?>> result = EmbeddableUtil.unwrapEmbeddableAttribute(Cast.optional(Department_.optionalDepReport));
-        assertTrue(result.isDefined());
+        Optional<? extends Attribute<?, ?>> result = EmbeddableUtil.unwrapEmbeddableAttribute(Cast.optional(Department_.optionalDepReport));
+        assertTrue(result.isPresent());
     }
 }

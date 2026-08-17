@@ -1,18 +1,16 @@
 package fi.solita.utils.query.execution;
 
-import static fi.solita.utils.functional.Functional.headOption;
+import static fi.solita.utils.functional.Functional.headOptional;
 import static fi.solita.utils.functional.Functional.isEmpty;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 import static fi.solita.utils.query.QueryUtils.applyOrder;
 import static fi.solita.utils.query.QueryUtils.checkOrdering;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import fi.solita.utils.functional.ApplyZero;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Order;
@@ -50,20 +48,20 @@ public class JpaCriteriaQueries {
         return queryExecutor.get(query, lock);
     }
     
-    public <T> Option<T> find(CriteriaQuery<T> query, LockModeType lock) throws NonUniqueResultException {
+    public <T> Optional<T> find(CriteriaQuery<T> query, LockModeType lock) throws NonUniqueResultException {
         try {
-            return Some(get(query, lock));
+            return Optional.of(get(query, lock));
         } catch (NoResultException e) {
-            return None();
+            return Optional.empty();
         }
     }
 
-    public <T> Option<T> findFirst(CriteriaQuery<T> query, LockModeType lock) throws NoOrderingSpecifiedException {
-        return headOption(getMany(query, Page.FIRST.withSize(1), lock));
+    public <T> Optional<T> findFirst(CriteriaQuery<T> query, LockModeType lock) throws NoOrderingSpecifiedException {
+        return headOptional(getMany(query, Page.FIRST.withSize(1), lock));
     }
 
-    public <E> Option<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
-        return headOption(getMany(query, Page.FIRST.withSize(1), ordering, lock));
+    public <E> Optional<E> findFirst(CriteriaQuery<E> query, Iterable<? extends Order<? super E,?>> ordering, LockModeType lock) {
+        return headOptional(getMany(query, Page.FIRST.withSize(1), ordering, lock));
     }
 
     public <T> Collection<T> getMany(CriteriaQuery<T> query, LockModeType lock) {

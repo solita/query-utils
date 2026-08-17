@@ -2,9 +2,10 @@ package fi.solita.utils.query.generation;
 
 import static fi.solita.utils.functional.Collections.newSet;
 import static fi.solita.utils.functional.Functional.map;
-import static fi.solita.utils.functional.Option.Some;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
+import java.util.Optional;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,11 +157,11 @@ public class JpaCriteriaQueryTest extends QueryTestBase {
         assertEquals(newSet(mun.getId(), mun2.getId()), newSet(map(Municipality_.getId, dao.getMany(queryWithoutRestrictions))));
         
         CriteriaQuery<Municipality> queryWithRestrictions =
-            restrict.equals(Municipality_.optionalArea, Some("mun"),                // drop emp2 since its municipality has wrong area
+            restrict.equals(Municipality_.optionalArea, Optional.of("mun"),                // drop emp2 since its municipality has wrong area
                 query.related(Employee_.optionalMunicipality,                       // drop emp3 since it has no municipality
-                    restrict.equals(Employee_.mandatoryName, Some("emp"),           // drop dep3 since its employee has wrong name
+                    restrict.equals(Employee_.mandatoryName, Optional.of("emp"),           // drop dep3 since its employee has wrong name
                         query.related(Department_.employees,                        // drop (by inner join) dep2 since it has no employees
-                            restrict.equals(Department_.mandatoryDepName, Some("dep"),
+                            restrict.equals(Department_.mandatoryDepName, Optional.of("dep"),
                                 query.all(Department.class))))));                   // start with both departments...
         
         assertEquals(mun.getId(), dao.get(queryWithRestrictions).getId());
@@ -269,7 +270,7 @@ public class JpaCriteriaQueryTest extends QueryTestBase {
     }
     
     // matchingOption tests removed - the method doesn't work correctly with Hibernate's Option type handling
-    // as it tries to compare Option<T> field with T value directly, which Hibernate rejects
+    // as it tries to compare Optional<T> field with T value directly, which Hibernate rejects
     
     // relatedSingular tests removed - these methods use Oracle-specific rownum function and multiselect,
     // which makes testing complex and database-dependent. The method signature suggests it returns Pair,

@@ -10,6 +10,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 
@@ -282,14 +283,14 @@ public class QueryUtilsTest extends QueryTestBase {
     public void getJavaType_field() {
         // Test getJavaType for field member
         Attribute<?,?> attr = Employee_.mandatoryName;
-        fi.solita.utils.functional.Option<Class<?>> type = QueryUtils.getJavaType(attr.getJavaMember());
-        assertTrue(type.isDefined());
+        Optional<Class<?>> type = QueryUtils.getJavaType(attr.getJavaMember());
+        assertTrue(type.isPresent());
     }
     
     @Test
     public void getJavaMember_returnsOptionOfMember() {
-        fi.solita.utils.functional.Option<java.lang.reflect.Member> member = QueryUtils.getJavaMember(Employee_.mandatoryName);
-        assertTrue(member.isDefined());
+        Optional<java.lang.reflect.Member> member = QueryUtils.getJavaMember(Employee_.mandatoryName);
+        assertTrue(member.isPresent());
     }
     
     @Test

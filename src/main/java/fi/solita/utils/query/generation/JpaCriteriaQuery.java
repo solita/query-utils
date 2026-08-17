@@ -4,10 +4,10 @@ import static fi.solita.utils.functional.FunctionalA.init;
 import static fi.solita.utils.functional.FunctionalA.last;
 import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
+import java.util.Optional;
 import java.util.Set;
 
 import fi.solita.utils.functional.ApplyZero;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple1;
 import fi.solita.utils.functional.Tuple2;
@@ -130,7 +130,7 @@ public class JpaCriteriaQuery {
         return query;
     }
     
-    public <E, A> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> first, Id<A> firstId) {
+    public <E, A> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,Optional<? super A>> first, Id<A> firstId) {
         CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
@@ -154,7 +154,7 @@ public class JpaCriteriaQuery {
         return query;
     }
     
-    public <E, A> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> relation, A value) {
+    public <E, A> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,Optional<? super A>> relation, A value) {
         CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) relation.getDeclaringType().getJavaType();
@@ -187,7 +187,7 @@ public class JpaCriteriaQuery {
         return query;
     }
     
-    public <E, A, B> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> first, SingularAttribute<? super E,? extends Option<? super B>> second, Id<A> firstId, Id<B> secondId) {
+    public <E, A, B> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,Optional<? super A>> first, SingularAttribute<? super E,Optional<? super B>> second, Id<A> firstId, Id<B> secondId) {
         CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
@@ -213,7 +213,7 @@ public class JpaCriteriaQuery {
         return query;
     }
     
-    public <E, A, B> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> first, SingularAttribute<? super E,? extends Option<? super B>> second, A firstValue, B secondValue) {
+    public <E, A, B> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,Optional<? super A>> first, SingularAttribute<? super E,Optional<? super B>> second, A firstValue, B secondValue) {
         CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
@@ -252,7 +252,7 @@ public class JpaCriteriaQuery {
         return query;
     }
     
-    public <E, A, B, C> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> first, SingularAttribute<? super E,? extends Option<? super B>> second, SingularAttribute<? super E,? extends Option<? super C>> third, Id<A> firstId, Id<B> secondId, Id<C> thirdId) {
+    public <E, A, B, C> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,Optional<? super A>> first, SingularAttribute<? super E,Optional<? super B>> second, SingularAttribute<? super E,Optional<? super C>> third, Id<A> firstId, Id<B> secondId, Id<C> thirdId) {
         CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();
@@ -280,7 +280,7 @@ public class JpaCriteriaQuery {
         return query;
     }
     
-    public <E, A, B, C> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,? extends Option<? super A>> first, SingularAttribute<? super E,? extends Option<? super B>> second, SingularAttribute<? super E,? extends Option<? super C>> third, A firstValue, B secondValue, C thirdValue) {
+    public <E, A, B, C> CriteriaQuery<E> matchingOption(SingularAttribute<? super E,Optional<? super A>> first, SingularAttribute<? super E,Optional<? super B>> second, SingularAttribute<? super E,Optional<? super C>> third, A firstValue, B secondValue, C thirdValue) {
         CriteriaBuilder cb = emf.get().getCriteriaBuilder();
         @SuppressWarnings("unchecked")
         Class<E> rootType = (Class<E>) first.getDeclaringType().getJavaType();

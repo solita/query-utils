@@ -1,19 +1,15 @@
 package fi.solita.utils.query.projection;
 
+import static fi.solita.utils.functional.Collections.it;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.init;
 import static fi.solita.utils.functional.Functional.last;
+import static fi.solita.utils.query.attributes.AttributeProxy.canUnwrap;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.metamodel.Attribute;
-import jakarta.persistence.metamodel.Bindable;
-import jakarta.persistence.metamodel.PluralAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +24,11 @@ import fi.solita.utils.query.attributes.JoiningAttribute;
 import fi.solita.utils.query.attributes.PseudoAttribute;
 import fi.solita.utils.query.attributes.RestrictingAttribute;
 import fi.solita.utils.query.meta.MetaJpaConstructor;
-import static fi.solita.utils.query.attributes.AttributeProxy.*;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.Bindable;
+import jakarta.persistence.metamodel.PluralAttribute;
 
 public class ProjectionUtil {
     
@@ -75,7 +75,7 @@ public class ProjectionUtil {
     }
     
     static <A extends From<?,?>> A doRestrictions(A from, Attribute<?,?> a) {
-        for (RestrictingAttribute r: unwrap(RestrictingAttribute.class, a)) {
+        unwrap(RestrictingAttribute.class, a).ifPresent(r -> {
             logger.debug("Adding restrictions from: {}", from);
             From<?, ?> join = from;
             for (Attribute<?,?> rest: r.getRestrictionChain()) {
@@ -83,7 +83,7 @@ public class ProjectionUtil {
                 join = QueryUtils.join(join, rest, JoinType.INNER);
                 doRestrictions(join, rest);
             }
-        }
+        });
         return from;
     }
 
@@ -94,11 +94,11 @@ public class ProjectionUtil {
         Map<Attribute<?,?>,From<?,?>> actualJoins = new HashMap<Attribute<?, ?>, From<?, ?>>();
         actualJoins.put(target, root);
         From<?,?> previous = root;
-        for (JoiningAttribute joining: unwrap(JoiningAttribute.class, target)) {
+        for (JoiningAttribute joining: it(unwrap(JoiningAttribute.class, target))) {
             logger.debug("JoiningAttribute detected. Performing joins from: {}", root);
             List<? extends Attribute<?, ?>> attributes = joining.getAttributes();
             for (Attribute<?,?> join: init(attributes)) {
-                if (unwrap(JoiningAttribute.class, join).isDefined()) {
+                if (unwrap(JoiningAttribute.class, join).isPresent()) {
                     Tuple3<Map<Attribute<?,?>,From<?,?>>,From<?,?>,Attribute<?,?>> res = doJoins(previous, join, type);
                     previous = QueryUtils.join(res._2, join, type);
                     actualJoins.putAll(res._1);
@@ -109,7 +109,7 @@ public class ProjectionUtil {
                 }
             }
             for (Attribute<?,?> join: newList(last(attributes))) {
-                if (unwrap(JoiningAttribute.class, join).isDefined()) {
+                if (unwrap(JoiningAttribute.class, join).isPresent()) {
                     Tuple3<Map<Attribute<?,?>,From<?,?>>,From<?,?>,Attribute<?,?>> res = doJoins(previous, join, type);
                     previous = res._2;
                     actualJoins.putAll(res._1);

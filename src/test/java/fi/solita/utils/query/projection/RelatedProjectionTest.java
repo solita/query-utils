@@ -9,12 +9,12 @@ import static fi.solita.utils.query.projection.Select.literal;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.query.Dao;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
@@ -189,7 +189,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(mun, dep, emp);
         long queryCount = getQueryCount();
         
-        Option<Id<Municipality>> munid = dao.get(query.all(Employee.class), Project.value(Cast.optional(Related.projection(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepMunicipality),
+        Optional<Id<Municipality>> munid = dao.get(query.all(Employee.class), Project.value(Cast.optional(Related.projection(Related.value(Employee_.mandatoryDepartment, Department_.optionalDepMunicipality),
                                                                                                      Project.<Municipality>id()))));
         assertEquals(mun.getId(), munid.get());
         
@@ -289,8 +289,8 @@ public class RelatedProjectionTest extends QueryTestBase {
         long queryCount = getQueryCount();
 
         // Employee_.optionalMunicipality is optional so must use Cast.optional.
-        // Related.projection with an optional singular returns Option<Set<Report>>.
-        Option<Set<Report>> reports = dao.get(query.all(Employee.class), Project.value(Cast.optional(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.reports)))));
+        // Related.projection with an optional singular returns Optional<Set<Report>>.
+        Optional<Set<Report>> reports = dao.get(query.all(Employee.class), Project.value(Cast.optional(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.reports)))));
         assertEquals(newSet(new Report(77)), reports.get());
 
         assertEquals(3, getQueryCount() - queryCount);
@@ -304,7 +304,7 @@ public class RelatedProjectionTest extends QueryTestBase {
         persist(mun, dep, emp);
         long queryCount = getQueryCount();
 
-        Option<Set<Report>> reports = dao.get(query.all(Employee.class), Project.value(Cast.optional(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.reports)))));
+        Optional<Set<Report>> reports = dao.get(query.all(Employee.class), Project.value(Cast.optional(Related.projection(Employee_.optionalMunicipality, Project.value(Municipality_.reports)))));
         assertEquals(emptySet(), reports.get());
 
         assertEquals(3, getQueryCount() - queryCount);

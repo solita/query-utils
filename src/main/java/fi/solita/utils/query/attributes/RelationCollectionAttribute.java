@@ -4,13 +4,12 @@ import java.util.Collection;
 
 import org.hibernate.metamodel.model.domain.BagPersistentAttribute;
 
+import fi.solita.utils.query.IEntity;
+import fi.solita.utils.query.meta.MetaJpaConstructor;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.CollectionAttribute;
 import jakarta.persistence.metamodel.Type;
-
-import fi.solita.utils.query.IEntity;
-import fi.solita.utils.query.meta.MetaJpaConstructor;
 
 class RelationCollectionAttribute<E, R, A extends Attribute<E, Collection<R>> & Bindable<R>> extends PluralAttributeProxy<E, Collection<R>, R, A> implements CollectionAttribute<E,R>, AdditionalQueryPerformingAttribute, BagPersistentAttribute<E,R> {
     private final MetaJpaConstructor<? extends IEntity<?>, R, ?> constructor;

@@ -1,18 +1,18 @@
 package fi.solita.utils.query.backend.hibernate;
 
+import static fi.solita.utils.functional.Collections.it;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.concat;
 import static fi.solita.utils.functional.Functional.head;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.min;
-import static fi.solita.utils.functional.Option.None;
-import static fi.solita.utils.functional.Option.Some;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.hibernate.Session;
 import org.hibernate.proxy.HibernateProxy;
@@ -22,7 +22,6 @@ import org.hibernate.query.TupleTransformer;
 import org.hibernate.type.BasicTypeReference;
 
 import fi.solita.utils.functional.ApplyZero;
-import fi.solita.utils.functional.Option;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.Page;
@@ -67,7 +66,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
                 q.setFirstResult(page.getFirstResult());
             }
             if (page.getMaxResults() != Integer.MAX_VALUE) {
-                q.setHint(HINT_FETCH_SIZE, page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE-1)).get() + 1));
+                q.setHint(HINT_FETCH_SIZE, page.getFetchSizeHint().orElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE-1)).get() + 1));
                 q.setMaxResults(page.getMaxResults());
             }
         }
@@ -97,13 +96,13 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> Option<T> find(NativeQuery<? extends T> query) {
+    public <T> Optional<T> find(NativeQuery<? extends T> query) {
         org.hibernate.query.NativeQuery<?> q = em.get().unwrap(Session.class).createNativeQuery(query.query);
         q = bindParams(q, query.params);
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
         q.setFetchSize(2);
-        return Option.of(replaceProxy((T)q.uniqueResult()));
+        return Optional.ofNullable(replaceProxy((T)q.uniqueResult()));
     }
 
     @SuppressWarnings("unchecked")
@@ -114,18 +113,18 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         q = bindReturnValues(q, query.retvals);
         q = bindTransformer(q, query);
         if (page != Page.NoPaging) {
-            q.setFetchSize(page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE-1)).get() + 1));
+            q.setFetchSize(page.getFetchSizeHint().orElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE-1)).get() + 1));
         }
         return (List<T>) newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> Option<T> find(QLQuery<T> query) {
+    public <T> Optional<T> find(QLQuery<T> query) {
         Query<?> q = em.get().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
         q.setFetchSize(2);
-        return Option.of(replaceProxy((T)q.uniqueResult()));
+        return Optional.ofNullable(replaceProxy((T)q.uniqueResult()));
     }
 
     @SuppressWarnings("unchecked")
@@ -134,7 +133,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         Query<?> q = em.get().unwrap(Session.class).createQuery(query.query);
         q = bindParams(q, query.params);
         if (page != Page.NoPaging) {
-            q.setFetchSize(page.getFetchSizeHint().getOrElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE-1)).get() + 1));
+            q.setFetchSize(page.getFetchSizeHint().orElse(min(newList(page.getMaxResults(), MAX_FETCH_SIZE-1)).get() + 1));
         }
         return (List<T>) newList(map(HibernateQueryExecutor_.replaceProxy(), applyPaging(q, page).list()));
     }
@@ -153,13 +152,13 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
         return entityOrProxy;
     }
 
-    private final org.hibernate.query.NativeQuery<?> bindReturnValues(org.hibernate.query.NativeQuery<?> q, List<Pair<String, Option<Type<?>>>> retvals) {
-        for (Entry<String, Option<Type<?>>> param: retvals) {
+    private final org.hibernate.query.NativeQuery<?> bindReturnValues(org.hibernate.query.NativeQuery<?> q, List<Pair<String, Optional<Type<?>>>> retvals) {
+        for (Entry<String, Optional<Type<?>>> param: retvals) {
             HibernateTypeProvider.HibernateType<?> ht;
-            if (param.getValue().isDefined()) {
+            if (param.getValue().isPresent()) {
                 Type<?> type = param.getValue().get();
-                if (type instanceof Type.Optional) {
-                    type = ((Type.Optional<?>)type).type;
+                if (type instanceof Type.OptionalType) {
+                    type = ((Type.OptionalType<?>)type).type;
                 }
                 ht = ((HibernateTypeProvider.HibernateType<?>)type);
             } else {
@@ -167,10 +166,10 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
                 ht = (HibernateTypeProvider.HibernateType<?>)typeProvider.type(param.getKey().getClass());
             }
             if (NativeQuery.ENTITY_RETURN_VALUE.equals(param.getKey())) {
-                q.addEntity(head(concat(ht.entity, ht.javaType)));
-            } else if (ht.entity.isDefined()) {
+                q.addEntity(head(concat(it(ht.entity), it(ht.javaType))));
+            } else if (ht.entity.isPresent()) {
                 q.addEntity(param.getKey(), ht.entity.get());
-            } else if (ht.bindableType.isDefined()) {
+            } else if (ht.bindableType.isPresent()) {
                 q.addScalar(param.getKey(), (BasicTypeReference<?>) ht.bindableType.get());
             } else {
                 q.addScalar(param.getKey(), ht.javaType.get());
@@ -200,42 +199,42 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     }
 
     @SuppressWarnings("unchecked")
-    private final <T extends Query<?>> T bindParams(T q, Map<String, Pair<?, Option<Type<?>>>> params) {
-        for (Entry<String, Pair<?, Option<Type<?>>>> param: params.entrySet()) {
+    private final <T extends Query<?>> T bindParams(T q, Map<String, Pair<?, Optional<Type<?>>>> params) {
+        for (Entry<String, Pair<?, Optional<Type<?>>>> param: params.entrySet()) {
             if (param.getValue()._1 instanceof Collection) {
                 Collection<?> col = (Collection<?>)param.getValue()._1;
-                Option<HibernateTypeProvider.HibernateType<Object>> ht;
-                if (param.getValue()._2.isDefined()) {
-                    ht = Some((HibernateTypeProvider.HibernateType<Object>)param.getValue()._2.get());
+                Optional<HibernateTypeProvider.HibernateType<Object>> ht;
+                if (param.getValue()._2.isPresent()) {
+                    ht = Optional.of((HibernateTypeProvider.HibernateType<Object>)param.getValue()._2.get());
                 } else if (!col.isEmpty()) {
                     // try to find a type
-                    ht = Some((HibernateTypeProvider.HibernateType<Object>)typeProvider.type(head(col).getClass()));
+                    ht = Optional.of((HibernateTypeProvider.HibernateType<Object>)typeProvider.type(head(col).getClass()));
                 } else {
                     // fallback to hibernate heuristics when empty collection
-                    ht = None();
+                    ht = Optional.empty();
                     q.setParameterList(param.getKey(), (Collection<?>) param.getValue()._1);
 
                 }
-                for (HibernateTypeProvider.HibernateType<Object> h: ht) {
-                    for (BindableType<Object> s: h.bindableType) {
+                ht.ifPresent(h -> {
+                    h.bindableType.ifPresent(s -> {
                         q.setParameterList(param.getKey(), (Collection<?>) param.getValue()._1, s);
-                    }
-                    for (Class<?> s: h.javaType) {
+                    });
+                    h.javaType.ifPresent(s -> {
                         q.setParameterList(param.getKey(), (Collection<?>) param.getValue()._1, (Class<Object>)s);
-                    }
-                    for (Class<?> s: h.entity) {
+                    });
+                    h.entity.ifPresent(s -> {
                         q.setParameterList(param.getKey(), (Collection<?>) param.getValue()._1, (Class<Object>)s);
-                    }
-                }
+                    });
+                });
             } else {
                 HibernateTypeProvider.HibernateType<Object> ht;
                 Object value;
-                if (param.getValue()._2.isDefined()) {
+                if (param.getValue()._2.isPresent()) {
                     Type<?> type = param.getValue()._2.get();
                     value = param.getValue()._1;
-                    if (type instanceof Type.Optional) {
-                        type = ((Type.Optional<?>) type).type;
-                        value = ((Option<?>)value).getOrElse(null);
+                    if (type instanceof Type.OptionalType) {
+                        type = ((Type.OptionalType<?>) type).type;
+                        value = ((Optional<?>)value).orElse(null);
                     }
                     ht = ((HibernateTypeProvider.HibernateType<Object>)type);
                 } else {
@@ -243,15 +242,16 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
                     value = param.getValue()._1;
                     ht = (HibernateTypeProvider.HibernateType<Object>)typeProvider.type(param.getValue()._1.getClass());
                 }
-                for (BindableType<Object> s: ht.bindableType) {
-                    q.setParameter(param.getKey(), value, s);
-                }
-                for (Class<?> s: ht.javaType) {
-                    q.setParameter(param.getKey(), value, (Class<Object>)s);
-                }
-                for (Class<?> s: ht.entity) {
-                    q.setParameter(param.getKey(), value, (Class<Object>)s);
-                }
+                Object val = value;
+                ht.bindableType.ifPresent(s -> {
+                    q.setParameter(param.getKey(), val, s);
+                });
+                ht.javaType.ifPresent(s -> {
+                    q.setParameter(param.getKey(), val, (Class<Object>)s);
+                });
+                ht.entity.ifPresent(s -> {
+                    q.setParameter(param.getKey(), val, (Class<Object>)s);
+                });
             }
         }
         return q;
