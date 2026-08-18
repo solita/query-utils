@@ -5,9 +5,8 @@ import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.mkString;
 
 import java.util.List;
+import java.util.function.Predicate;
 
-import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Pred;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.CollectionAttribute;
@@ -23,7 +22,7 @@ import jakarta.persistence.metamodel.SingularAttribute;
  * attribute itself, thus changing the resulting type of the original attribute.
  */
 public interface JoiningAttribute {
-    public static Pred<Attribute<?,?>> illegalContainedAttribute = new Pred<Attribute<?,?>>() {
+    public static Predicate<Attribute<?,?>> illegalContainedAttribute = new Predicate<Attribute<?,?>>() {
         @Override
         public boolean test(Attribute<?, ?> candidate) {
             return candidate instanceof PseudoAttribute ||
@@ -138,12 +137,7 @@ public interface JoiningAttribute {
         
         
         static <A extends Attribute<?,?> & JoiningAttribute> String joiningAttributeToString(A a) {
-            return a.getClass().getSimpleName() + "(" + mkString("->", map(new Apply<Attribute<?,?>,String>() {
-                @Override
-                public String apply(Attribute<?,?> source) {
-                    return source.getDeclaringType() == null ? "?" : source.getDeclaringType().getJavaType().getSimpleName() + "." + source.getName();
-                }
-            }, a.getAttributes())) + ")";
+            return a.getClass().getSimpleName() + "(" + mkString("->", map(source -> source.getDeclaringType() == null ? "?" : source.getDeclaringType().getJavaType().getSimpleName() + "." + source.getName(), a.getAttributes())) + ")";
         }
     }
 }

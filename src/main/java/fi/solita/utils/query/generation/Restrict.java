@@ -5,8 +5,8 @@ import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.attributes.RestrictingAttribute;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -277,7 +277,7 @@ public class Restrict {
     /**
      * Modifies existing query!
      */
-    public <E> CriteriaQuery<E> by(Apply<CriteriaQuery<E>,Predicate> predicate, CriteriaQuery<E> query) {
+    public <E> CriteriaQuery<E> by(Function<CriteriaQuery<E>,Predicate> predicate, CriteriaQuery<E> query) {
         return query.getRestriction() != null ? query.where(query.getRestriction(), predicate.apply(query)) : query.where(predicate.apply(query));
     }
     

@@ -6,7 +6,6 @@ import static fi.solita.utils.functional.Functional.last;
 import static fi.solita.utils.functional.Functional.map;
 import static fi.solita.utils.functional.Functional.sort;
 import static fi.solita.utils.functional.Functional.zip;
-import static fi.solita.utils.functional.FunctionalA.head;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -20,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.solita.utils.functional.Tuple2;
-import fi.solita.utils.query.QueryUtils_;
+import fi.solita.utils.query.QueryUtils;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
 import fi.solita.utils.query.attributes.AttributeProxy;
 import fi.solita.utils.query.attributes.JoiningAttribute;
@@ -40,7 +39,7 @@ public class EmbeddableUtil {
     private static final Logger logger = LoggerFactory.getLogger(EmbeddableUtil.class);
 
     static Iterable<? extends Selection<?>> breakEmbeddableToParts(Metamodel metamodel, Bindable<?> target, final Path<?> source) {
-        return map(QueryUtils_.get.ap(source), getEmbeddableAttributes(target, metamodel));
+        return map(x -> QueryUtils.get(source, x), getEmbeddableAttributes(target, metamodel));
     }
     
     static Object instantiate(Class<?> clazz) {

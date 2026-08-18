@@ -4,12 +4,12 @@ import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.cons;
 
 import java.util.List;
+import java.util.function.Function;
 
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
 import javax.lang.model.SourceVersion;
 
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.meta.CommonMetadataProcessor;
 import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.query.meta.generators.ConstructorsAsJpaProjections;
@@ -106,7 +106,7 @@ public class JpaConstructorProcessor extends CommonMetadataProcessor<JpaConstruc
     public static abstract class ExtendedGeneratorOptions extends CommonMetadataProcessor.CombinedGeneratorOptions implements ConstructorsAsJpaProjections.Options {
         @SuppressWarnings("rawtypes")
         @Override
-        public Class<? extends Apply> getClassForJpaConstructors(int argCount) {
+        public Class<? extends Function> getClassForJpaConstructors(int argCount) {
             switch (argCount) {
             case 0: return MetaJpaConstructor.C0.class;
             case 1: return MetaJpaConstructor.C1.class;

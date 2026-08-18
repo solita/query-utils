@@ -5,6 +5,8 @@ import static fi.solita.utils.functional.Collections.it;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -15,8 +17,6 @@ import org.hibernate.type.BasicTypeReference;
 import org.hibernate.type.descriptor.java.JavaType;
 import org.hibernate.type.spi.TypeConfiguration;
 
-import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Functional;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Identifiable;
@@ -51,23 +51,23 @@ public class HibernateTypeProvider implements TypeProvider {
         }
     }
 
-    private final ApplyZero<EntityManagerFactory> emf;
+    private final Supplier<EntityManagerFactory> emf;
     
-    static Apply<List<org.hibernate.type.Type>, org.hibernate.type.Type> head = new Apply<List<org.hibernate.type.Type>,org.hibernate.type.Type>() {
+    static Function<List<org.hibernate.type.Type>, org.hibernate.type.Type> head = new Function<List<org.hibernate.type.Type>,org.hibernate.type.Type>() {
         @Override
         public org.hibernate.type.Type apply(List<org.hibernate.type.Type> source) {
             return Functional.head(source);
         }
     };
     
-    static Apply<Iterable<?>, Long> size = new Apply<Iterable<?>,Long>() {
+    static Function<Iterable<?>, Long> size = new Function<Iterable<?>,Long>() {
         @Override
         public Long apply(Iterable<?> source) {
             return Functional.size(source);
         }
     };
     
-    public HibernateTypeProvider(ApplyZero<EntityManagerFactory> emf) {
+    public HibernateTypeProvider(Supplier<EntityManagerFactory> emf) {
         this.emf = emf;
     }
     

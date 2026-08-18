@@ -10,11 +10,11 @@ import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.query.Department;
 import fi.solita.utils.query.Department_;
 import fi.solita.utils.query.Page;
@@ -151,7 +151,7 @@ public class QLQueriesTest extends QueryTestBase {
         Department dep = new Department("foo");
         persist(dep);
 
-        String name = dao.get(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+        String name = dao.get(QLQuery.<Department>of("from Department"), new Function<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
         assertEquals("FOO", name);
@@ -162,7 +162,7 @@ public class QLQueriesTest extends QueryTestBase {
         Department dep = new Department("bar");
         persist(dep);
 
-        Optional<String> name = dao.find(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+        Optional<String> name = dao.find(QLQuery.<Department>of("from Department"), new Function<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
         assertEquals(Optional.of("BAR"), name);
@@ -170,7 +170,7 @@ public class QLQueriesTest extends QueryTestBase {
 
     @Test
     public void find_hql_with_constructor_empty() {
-        Optional<String> name = dao.find(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+        Optional<String> name = dao.find(QLQuery.<Department>of("from Department"), new Function<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
         assertFalse(name.isPresent());
@@ -180,7 +180,7 @@ public class QLQueriesTest extends QueryTestBase {
     public void findFirst_hql_with_constructor() {
         persist(new Department("first"), new Department("second"));
 
-        Optional<String> name = dao.findFirst(QLQuery.<Department>of("from Department order by mandatoryDepName"), new Apply<Department, String>() {
+        Optional<String> name = dao.findFirst(QLQuery.<Department>of("from Department order by mandatoryDepName"), new Function<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
         assertEquals(Optional.of("FIRST"), name);
@@ -188,7 +188,7 @@ public class QLQueriesTest extends QueryTestBase {
 
     @Test
     public void findFirst_hql_with_constructor_empty() {
-        Optional<String> name = dao.findFirst(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+        Optional<String> name = dao.findFirst(QLQuery.<Department>of("from Department"), new Function<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
         assertFalse(name.isPresent());
@@ -198,7 +198,7 @@ public class QLQueriesTest extends QueryTestBase {
     public void getMany_hql_with_constructor() {
         persist(new Department("a"), new Department("b"));
 
-        Collection<String> names = dao.getMany(QLQuery.<Department>of("from Department"), new Apply<Department, String>() {
+        Collection<String> names = dao.getMany(QLQuery.<Department>of("from Department"), new Function<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
         assertEquals(newSet("A", "B"), newSet(names));
@@ -208,12 +208,12 @@ public class QLQueriesTest extends QueryTestBase {
     public void getMany_hql_paging_with_constructor() {
         persist(new Department("a"), new Department("b"));
 
-        Collection<String> firstPage = dao.getMany(QLQuery.<Department>of("from Department order by mandatoryDepName"), Page.FIRST.withSize(1), new Apply<Department, String>() {
+        Collection<String> firstPage = dao.getMany(QLQuery.<Department>of("from Department order by mandatoryDepName"), Page.FIRST.withSize(1), new Function<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
         assertEquals(newList("A"), newList(firstPage));
 
-        Collection<String> secondPage = dao.getMany(QLQuery.<Department>of("from Department order by mandatoryDepName"), Page.FIRST.withSize(1).nextPage(), new Apply<Department, String>() {
+        Collection<String> secondPage = dao.getMany(QLQuery.<Department>of("from Department order by mandatoryDepName"), Page.FIRST.withSize(1).nextPage(), new Function<Department, String>() {
             public String apply(Department d) { return d.getMandatoryName().toUpperCase(); }
         });
         assertEquals(newList("B"), newList(secondPage));

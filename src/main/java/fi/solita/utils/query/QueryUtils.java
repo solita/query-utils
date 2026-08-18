@@ -31,14 +31,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.Formula;
 import org.hibernate.query.sqm.internal.SqmCriteriaNodeBuilder;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 
-import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Pred;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Order.Direction;
 import fi.solita.utils.query.attributes.AdditionalQueryPerformingAttribute;
@@ -102,12 +101,7 @@ public class QueryUtils {
         }
     }
     
-    public static final Pred<Class<?>> ImplementsProjectWithRegularInClause = new Pred<Class<?>>() {
-        @Override
-        public boolean test(Class<?> candidate) {
-            return ProjectWithRegularInClause.class.isAssignableFrom(candidate);
-        }
-    };
+    public static final java.util.function.Predicate<Class<?>> ImplementsProjectWithRegularInClause = x -> ProjectWithRegularInClause.class.isAssignableFrom(x);
 
     private final Configuration config;
     
@@ -255,7 +249,7 @@ public class QueryUtils {
         
         if (optimizations != Optimization.DISABLED) {
             for (TableInClauseOptimization provider: it(config.getTableInClauseProvider())) {
-                for (Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>> targetType: it(provider.getSqlTypeAndValues(vals))) {
+                for (Tuple3<String,Class<?>,Function<Connection,Iterable<Object>>> targetType: it(provider.getSqlTypeAndValues(vals))) {
                     // cannot make hibernate 6.6 work with composite types here anymore, so only optimize if a registration exists :(
                     
                     // only use table-expression for large sets since ora performs better with regular in-clause.
@@ -328,7 +322,7 @@ public class QueryUtils {
     }
     
     public static Iterable<Join<?,?>> getAllJoins(From<?, ?> parent) {
-        return flatMap(new Apply<Join<?,?>,Iterable<Join<?,?>>>() {
+        return flatMap(new Function<Join<?,?>,Iterable<Join<?,?>>>() {
             @Override
             public Iterable<Join<?, ?>> apply(Join<?, ?> source) {
                 return cons(source, getAllJoins(source));
@@ -337,7 +331,7 @@ public class QueryUtils {
     }
     
     public static Iterable<Fetch<?,?>> getAllFetches(FetchParent<?, ?> parent) {
-        return flatMap(new Apply<Fetch<?,?>,Iterable<Fetch<?,?>>>() {
+        return flatMap(new Function<Fetch<?,?>,Iterable<Fetch<?,?>>>() {
             @Override
             public Iterable<Fetch<?, ?>> apply(Fetch<?, ?> source) {
                 return cons(source, getAllFetches(source));

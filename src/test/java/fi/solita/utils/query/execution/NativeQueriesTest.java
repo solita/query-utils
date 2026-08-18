@@ -11,11 +11,11 @@ import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Department;
@@ -270,7 +270,7 @@ public class NativeQueriesTest extends QueryTestBase {
 
         NativeQuery<String> q = NativeQuery.of("select mandatoryDepName as n from Department")
                 .returns("n", typeProvider.type(String.class));
-        String name = dao.get(q, new Apply<String, String>() {
+        String name = dao.get(q, new Function<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
         });
         assertEquals("FOO", name);
@@ -284,7 +284,7 @@ public class NativeQueriesTest extends QueryTestBase {
 
         NativeQuery<String> q = NativeQuery.of("select mandatoryDepName as n from Department")
                 .returns("n", typeProvider.type(String.class));
-        Optional<String> name = dao.find(q, new Apply<String, String>() {
+        Optional<String> name = dao.find(q, new Function<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
         });
         assertEquals(Optional.of("BAR"), name);
@@ -294,7 +294,7 @@ public class NativeQueriesTest extends QueryTestBase {
     public void find_sql_with_constructor_empty() {
         NativeQuery<String> q = NativeQuery.of("select mandatoryDepName as n from Department")
                 .returns("n", typeProvider.type(String.class));
-        Optional<String> name = dao.find(q, new Apply<String, String>() {
+        Optional<String> name = dao.find(q, new Function<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
         });
         assertFalse(name.isPresent());
@@ -306,7 +306,7 @@ public class NativeQueriesTest extends QueryTestBase {
 
         NativeQuery<String> q = NativeQuery.of("select mandatoryDepName as n from Department order by mandatoryDepName")
                 .returns("n", typeProvider.type(String.class));
-        Optional<String> name = dao.findFirst(q, new Apply<String, String>() {
+        Optional<String> name = dao.findFirst(q, new Function<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
         });
         assertEquals(Optional.of("FIRST"), name);
@@ -316,7 +316,7 @@ public class NativeQueriesTest extends QueryTestBase {
     public void findFirst_sql_with_constructor_empty() {
         NativeQuery<String> q = NativeQuery.of("select mandatoryDepName as n from Department")
                 .returns("n", typeProvider.type(String.class));
-        assertFalse(dao.findFirst(q, new Apply<String, String>() {
+        assertFalse(dao.findFirst(q, new Function<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
         }).isPresent());
     }
@@ -327,7 +327,7 @@ public class NativeQueriesTest extends QueryTestBase {
 
         NativeQuery<String> q = NativeQuery.of("select mandatoryDepName as n from Department")
                 .returns("n", typeProvider.type(String.class));
-        Collection<String> names = dao.getMany(q, new Apply<String, String>() {
+        Collection<String> names = dao.getMany(q, new Function<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
         });
         assertEquals(newSet("A", "B"), newSet(names));
@@ -339,11 +339,11 @@ public class NativeQueriesTest extends QueryTestBase {
 
         NativeQuery<String> q = NativeQuery.of("select mandatoryDepName as n from Department order by mandatoryDepName")
                 .returns("n", typeProvider.type(String.class));
-        Collection<String> firstPage = dao.getMany(q, Page.FIRST.withSize(1), new Apply<String, String>() {
+        Collection<String> firstPage = dao.getMany(q, Page.FIRST.withSize(1), new Function<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
         });
         assertEquals(newList("A"), newList(firstPage));
-        Collection<String> secondPage = dao.getMany(q, Page.FIRST.withSize(1).nextPage(), new Apply<String, String>() {
+        Collection<String> secondPage = dao.getMany(q, Page.FIRST.withSize(1).nextPage(), new Function<String, String>() {
             public String apply(String s) { return s.toUpperCase(); }
         });
         assertEquals(newList("B"), newList(secondPage));

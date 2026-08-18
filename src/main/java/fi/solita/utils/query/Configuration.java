@@ -4,8 +4,8 @@ import java.sql.Connection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.function.BiFunction;
 
-import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.db.TableInClauseOptimization;
 
@@ -20,7 +20,7 @@ public interface Configuration {
     
     public boolean makeProjectionQueriesDistinct();
     
-    public Map<Class<?>, Tuple3<String, Class<?>, ? extends Function2<Connection,?,?>>> getRegisteredTableTypes();
+    public Map<Class<?>, Tuple3<String, Class<?>, ? extends BiFunction<Connection,?,?>>> getRegisteredTableTypes();
     
     public Optional<TableInClauseOptimization> getTableInClauseProvider();
 

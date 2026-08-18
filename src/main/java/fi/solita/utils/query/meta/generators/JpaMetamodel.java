@@ -22,6 +22,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,10 +36,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
 
-import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Pair;
-import fi.solita.utils.functional.Pred;
 import fi.solita.utils.meta.Helpers;
 import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.meta.generators.GeneratorOptions;
@@ -57,8 +57,8 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
     
     public static JpaMetamodel instance = new JpaMetamodel();
 
-    public static final Pred<Element> withModifier(final Modifier modifier) {
-        return new Pred<Element>() {
+    public static final Predicate<Element> withModifier(final Modifier modifier) {
+        return new Predicate<Element>() {
             @Override
             public boolean test(Element candidate) {
                 return candidate.getModifiers().contains(modifier);
@@ -66,30 +66,30 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
         };
     }
     
-    public static final Pred<Element> isTransient = x -> withModifier(Modifier.TRANSIENT).test(x) || withAnnotations(Transient.class.getName(), false).test(x);
+    public static final Predicate<Element> isTransient = x -> withModifier(Modifier.TRANSIENT).test(x) || withAnnotations(Transient.class.getName(), false).test(x);
     
-    public static final Pred<Element> isPersistentClass = x ->
+    public static final Predicate<Element> isPersistentClass = x ->
         withAnnotations(Entity.class.getName(), false).test(x) ||
         withAnnotations(MappedSuperclass.class.getName(), false).test(x) ||
         withAnnotations(Embeddable.class.getName(), false).test(x);
     
     @Override
     public Iterable<String> apply(ProcessingEnvironment processingEnv, Options options, TypeElement source) {
-        if (!isPersistentClass.apply(source)) {
+        if (!isPersistentClass.test(source)) {
             return newMutableList();
         }
         
         Access classAccess = source.getAnnotation(Access.class);
         final AccessType defaultAccess = classAccess == null ? resolveAccessTypeFromId(source) : classAccess.value();
         
-        Iterable<? extends Element> fields = filter(isTransient.negate().and(new Pred<Element>() {
+        Iterable<? extends Element> fields = filter(isTransient.negate().and(new Predicate<Element>() {
             @Override
             public boolean test(Element candidate) {
                 Access acc = candidate.getAnnotation(Access.class);
                 return defaultAccess == AccessType.FIELD && acc == null || acc != null && acc.value() == AccessType.FIELD;
             }
         })::test, element2Fields.apply(source));
-        Iterable<? extends Element> methods = filter(isTransient.negate().and(new Pred<Element>() {
+        Iterable<? extends Element> methods = filter(isTransient.negate().and(new Predicate<Element>() {
             @Override
             public boolean test(Element candidate) {
                 Access acc = candidate.getAnnotation(Access.class);
@@ -97,7 +97,7 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
             }
         })::test, element2Methods.apply(source));
         
-        return flatMap(singleElementHandler.ap(new Helpers.EnvDependent(processingEnv)), zipWithIndex(concat(fields, methods)));
+        return flatMap(x -> singleElementHandler.apply(new Helpers.EnvDependent(processingEnv), x), zipWithIndex(concat(fields, methods)));
     }
 
     private AccessType resolveAccessTypeFromId(TypeElement source) {
@@ -114,7 +114,7 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
         return propertyName;
     }
 
-    public static Function2<Helpers.EnvDependent, Map.Entry<Integer, ? extends Element>, Iterable<String>> singleElementHandler = new Function2<Helpers.EnvDependent, Map.Entry<Integer, ? extends Element>, Iterable<String>>() {
+    public static BiFunction<Helpers.EnvDependent, Map.Entry<Integer, ? extends Element>, Iterable<String>> singleElementHandler = new BiFunction<Helpers.EnvDependent, Map.Entry<Integer, ? extends Element>, Iterable<String>>() {
         @Override
         public Iterable<String> apply(Helpers.EnvDependent helper, Map.Entry<Integer, ? extends Element> entry) {
             Element member = entry.getValue();
@@ -137,7 +137,7 @@ public class JpaMetamodel extends Generator<JpaMetamodel.Options> {
                                    isCollection ? "Collection" :
                                    "Singular";
             
-            Iterable<Pair<String, String>> classTypeParameters = map(new Apply<TypeParameterElement, Pair<String,String>>() {
+            Iterable<Pair<String, String>> classTypeParameters = map(new Function<TypeParameterElement, Pair<String,String>>() {
                 @Override
                 public Pair<String, String> apply(TypeParameterElement source) {
                     return Pair.of(simpleName.apply(source), typeParameter2String.apply(source));

@@ -3,15 +3,14 @@ package fi.solita.utils.query.attributes;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.exists;
 import static fi.solita.utils.functional.Functional.head;
-import static fi.solita.utils.functional.FunctionalA.exists;
 import static fi.solita.utils.functional.FunctionalA.last;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.hibernate.metamodel.model.domain.ManagedDomainType;
 import org.hibernate.metamodel.model.domain.SingularPersistentAttribute;
 
-import fi.solita.utils.functional.Pred;
 import jakarta.persistence.metamodel.SingularAttribute;
 
 class JoiningSingularAttribute<E,R> extends SingularAttributeProxy<E,R> implements JoiningAttribute, SingularPersistentAttribute<E,R> {
@@ -33,7 +32,7 @@ class JoiningSingularAttribute<E,R> extends SingularAttributeProxy<E,R> implemen
 
     @Override
     public boolean isOptional() {
-        return exists(new Pred<SingularAttribute<?,?>>() {
+        return exists(new Predicate<SingularAttribute<?,?>>() {
             @Override
             public boolean test(SingularAttribute<?, ?> candidate) {
                 return candidate.isOptional();

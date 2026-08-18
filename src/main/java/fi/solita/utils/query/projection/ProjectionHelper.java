@@ -24,9 +24,6 @@ import static fi.solita.utils.functional.Functional.size;
 import static fi.solita.utils.functional.Functional.tail;
 import static fi.solita.utils.functional.Functional.transpose;
 import static fi.solita.utils.functional.Functional.zip;
-import static fi.solita.utils.functional.FunctionalA.head;
-import static fi.solita.utils.functional.FunctionalA.tail;
-import static fi.solita.utils.functional.FunctionalC.filter;
 import static fi.solita.utils.functional.FunctionalM.find;
 import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.functional.Predicates.greaterThanOrEqualTo;
@@ -59,13 +56,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Apply3;
-import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Collections;
 import fi.solita.utils.functional.Either;
 import fi.solita.utils.functional.Tuple3;
@@ -103,12 +100,12 @@ public class ProjectionHelper {
     
     private static final Logger logger = LoggerFactory.getLogger(ProjectionHelper.class);
 
-    private final ApplyZero<EntityManagerFactory> emf;
+    private final Supplier<EntityManagerFactory> emf;
     private final JpaCriteriaQueryExecutor queryExecutor;
     private final Configuration config;
     private final QueryUtils queryUtils;
     
-    public ProjectionHelper(ApplyZero<EntityManagerFactory> emf, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
+    public ProjectionHelper(Supplier<EntityManagerFactory> emf, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.emf = emf;
         this.queryExecutor = queryExecutor;
         this.config = config;
@@ -227,7 +224,7 @@ public class ProjectionHelper {
         logger.debug("doAdditionalQuery({},{},{},{},{},{})", new Object[] {projectionType, attr, isId, isWrapperOfIds, isDistinctable, sourceIdsToQuery});
         final Map<?, List<Object>> targetQueryResults = queryTargetsOfSources(attr, isId, isWrapperOfIds, isDistinctable, newSet(sourceIdsToQuery));
 
-        Iterable<List<Object>> results = map(new Apply<Object,List<Object>>() {
+        Iterable<List<Object>> results = map(new Function<Object,List<Object>>() {
             @SuppressWarnings("unchecked")
             @Override
             public List<Object> apply(Object source) {
@@ -244,13 +241,13 @@ public class ProjectionHelper {
         Collection<Object[]> results = queryTargets(target, isId, isWrapperOfIds, isDistinctable, sourceIds);
         
         @SuppressWarnings("unchecked")
-        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(new Apply<Object[],Object>() {
+        Iterable<Id<SOURCE>> ids = (Iterable<Id<SOURCE>>)(Object)map(new Function<Object[],Object>() {
             @Override
             public Object apply(Object[] source) {
                 return head(source);
             }
         }, results);
-        Iterable<Iterable<Object>> actualResultRows = map(new Apply<Object[],Iterable<Object>>() {
+        Iterable<Iterable<Object>> actualResultRows = map(new Function<Object[],Iterable<Object>>() {
             @Override
             public Iterable<Object> apply(Object[] source) {
                 return tail(source);
@@ -268,7 +265,7 @@ public class ProjectionHelper {
                 logger.debug("Target is AdditionalQueryPerformingAttribute. Finalizing: {}", target);
                 result = finalizeProjectingQuery(rel.get().getConstructor(), actualResultRows);
             } else {
-                if (!isEmpty(flatMap(new Apply<Iterable<Object>,Iterable<Object>>() {
+                if (!isEmpty(flatMap(new Function<Iterable<Object>,Iterable<Object>>() {
                     @Override
                     public Iterable<Object> apply(Iterable<Object> source) {
                         return tail(source);
@@ -276,7 +273,7 @@ public class ProjectionHelper {
                 }, actualResultRows))) {
                     throw new RuntimeException("whoops");
                 }
-                result = map(new Apply<Iterable<Object>,Object>() {
+                result = map(new Function<Iterable<Object>,Object>() {
                     @Override
                     public Object apply(Iterable<Object> source) {
                         return ProjectionResultUtil.postProcessValue(target, head(source));
@@ -425,7 +422,7 @@ public class ProjectionHelper {
 
         Collection<Object[]> ret = queryExecutor.getMany(query, Page.NoPaging, LockModeType.NONE);
         if (logger.isDebugEnabled()) {
-            logger.debug("queryTargets -> {}", newList(map(new Apply<Object[],String>() {
+            logger.debug("queryTargets -> {}", newList(map(new Function<Object[],String>() {
                 @Override
                 public String apply(Object[] source) {
                     return Arrays.toString(source);

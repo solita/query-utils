@@ -11,11 +11,9 @@ import java.sql.PreparedStatement;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
-import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Function;
-import fi.solita.utils.functional.Function1;
-import fi.solita.utils.functional.Function2;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Configuration;
@@ -30,38 +28,38 @@ public class OracleSupport implements TableInClauseOptimization {
     }
     
     @SuppressWarnings("unchecked")
-    public Optional<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> getSqlTypeAndValues(final Iterable<?> values) {
+    public Optional<Tuple3<String,Class<?>,Function<Connection,Iterable<Object>>>> getSqlTypeAndValues(final Iterable<?> values) {
         Optional<?> h = headOptional(values);
         if (!h.isPresent()) {
             return Optional.empty();
         }
         
-        Map<Class<?>, Tuple3<String, Class<?>, ? extends Function2<Connection, ?, ?>>> regTypes = config.getRegisteredTableTypes();
+        Map<Class<?>, Tuple3<String, Class<?>, ? extends BiFunction<Connection, ?, ?>>> regTypes = config.getRegisteredTableTypes();
         
         String t;
         Class<?> o;
-        Apply<Connection,Iterable<Object>> v;
+        Function<Connection,Iterable<Object>> v;
         if (regTypes.containsKey(h.get().getClass())) {
-            final Tuple3<String,Class<?>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass());
-            Tuple3<String,Class<?>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
+            final Tuple3<String,Class<?>,? extends BiFunction<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass());
+            Tuple3<String,Class<?>,Function<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
             t = res._1;
             o = res._2;
             v = res._3;
         } else if (h.get().getClass().getSuperclass() != null && regTypes.containsKey(h.get().getClass().getSuperclass())) {
-            final Tuple3<String,Class<?>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass().getSuperclass());
-            Tuple3<String,Class<?>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
+            final Tuple3<String,Class<?>,? extends BiFunction<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass().getSuperclass());
+            Tuple3<String,Class<?>,Function<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
             t = res._1;
             o = res._2;
             v = res._3;
         } else if (h.get().getClass().getSuperclass().getSuperclass() != null && regTypes.containsKey(h.get().getClass().getSuperclass().getSuperclass())) {
-            final Tuple3<String,Class<?>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass().getSuperclass().getSuperclass());
-            Tuple3<String,Class<?>,Apply<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
+            final Tuple3<String,Class<?>,? extends BiFunction<Connection, ?, ?>> tabletypeAndConverter = regTypes.get(h.get().getClass().getSuperclass().getSuperclass());
+            Tuple3<String,Class<?>,Function<Connection, Iterable<Object>>> res = foo(tabletypeAndConverter, values);
             t = res._1;
             o = res._2;
             v = res._3;
         } else {
             // if no exact type found, try some registered for another superclass/interface
-            for (Entry<Class<?>, Tuple3<String,Class<?>, ? extends Function2<Connection, ?, ?>>> entry: regTypes.entrySet()) {
+            for (Entry<Class<?>, Tuple3<String,Class<?>, ? extends BiFunction<Connection, ?, ?>>> entry: regTypes.entrySet()) {
                 if (entry.getKey().isAssignableFrom(h.get().getClass())) {
                     return Optional.of(foo(entry.getValue(), values));
                 }
@@ -71,7 +69,7 @@ public class OracleSupport implements TableInClauseOptimization {
                 t = "SYS.ODCIVARCHAR2LIST";
                 o = String.class;
                 Iterable<Object> m = (Iterable<Object>)(Object)map(OracleSupport_.toStr, (Iterable<CharSequence>)values);
-                v = Function.constant(m);
+                v = x -> m;
             } else if (h.get() instanceof Number) {
                 t = "SYS.ODCINUMBERLIST";
                 o = Number.class;
@@ -79,23 +77,24 @@ public class OracleSupport implements TableInClauseOptimization {
                 if (h.get() instanceof Short) {
                     m = map(OracleSupport_.castShortToLong, m);
                 }
-                v = Function.constant(m);
+                Iterable<Object> m2 = m;
+                v = x -> m2;
             } else {
                 return Optional.empty();
             }
         }
-        return Optional.of((Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>)(Object)Tuple.of(t, o, v));
+        return Optional.of((Tuple3<String,Class<?>,Function<Connection,Iterable<Object>>>)(Object)Tuple.of(t, o, v));
     }
 
     @SuppressWarnings("unchecked")
-    public static Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>> foo(final Tuple3<String,Class<?>,? extends Function2<Connection, ?, ?>> tabletypeAndConverter, final Iterable<?> values) {
-        Apply<Connection,Iterable<Object>> v = new Function1<Connection, Iterable<Object>>() {
+    public static Tuple3<String,Class<?>,Function<Connection,Iterable<Object>>> foo(final Tuple3<String,Class<?>,? extends BiFunction<Connection, ?, ?>> tabletypeAndConverter, final Iterable<?> values) {
+        Function<Connection,Iterable<Object>> v = new Function<Connection, Iterable<Object>>() {
             @Override
             public Iterable<Object> apply(Connection t) {
-                return map((Apply<Object,Object>)tabletypeAndConverter._3.ap(t), (Iterable<Object>)values);
+                return map(x -> ((BiFunction<Connection,Object,Object>)tabletypeAndConverter._3).apply(t, x), (Iterable<Object>)values);
             }
         };
-        return (Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>)(Object)Tuple.of(tabletypeAndConverter._1, tabletypeAndConverter._2, v); 
+        return (Tuple3<String,Class<?>,Function<Connection,Iterable<Object>>>)(Object)Tuple.of(tabletypeAndConverter._1, tabletypeAndConverter._2, v); 
     }
     
     public static Class<? extends Connection> oracleConnectionClass;

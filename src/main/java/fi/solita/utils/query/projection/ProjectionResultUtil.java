@@ -13,8 +13,6 @@ import static fi.solita.utils.functional.FunctionalS.range;
 import static fi.solita.utils.query.QueryUtils.isRequiredByMetamodel;
 import static fi.solita.utils.query.QueryUtils.isRequiredByQueryAttribute;
 import static fi.solita.utils.query.attributes.AttributeProxy.unwrap;
-import static fi.solita.utils.query.projection.ProjectionResultUtil_.isNoneOrNull;
-import static fi.solita.utils.query.projection.ProjectionResultUtil_.optionGet;
 import static fi.solita.utils.query.projection.ProjectionResultUtil_.postProcessValue;
 
 import java.util.ArrayList;
@@ -24,11 +22,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.BiFunction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.solita.utils.functional.ApplyBi;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple2;
 import fi.solita.utils.query.QueryUtils;
@@ -77,12 +75,12 @@ class ProjectionResultUtil {
     }
     
     static Iterable<Object> postProcessRow(List<Attribute<?,?>> projectionParameters, Iterable<Object> row) {
-        Iterable<Object> ret = map((ApplyBi<Attribute<?, ?>, Object, Object>)postProcessValue, zip(projectionParameters, row));
+        Iterable<Object> ret = map((BiFunction<Attribute<?, ?>, Object, Object>)postProcessValue, zip(projectionParameters, row));
         return ret;
     }
 
     static <R> Iterable<R> transformAllRows(MetaJpaConstructor<?, R, ?> projection, Iterable<Iterable<Object>> rows) {
-        Iterable<R> ret = map(ProjectionResultUtil_.<R>transformRow().ap(projection), rows);
+        Iterable<R> ret = map(x -> transformRow(projection, x), rows);
         return ret;
     }
     

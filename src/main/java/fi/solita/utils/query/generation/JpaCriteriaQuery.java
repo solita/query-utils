@@ -6,8 +6,8 @@ import static fi.solita.utils.query.QueryUtils.resolveSelection;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
-import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple1;
 import fi.solita.utils.functional.Tuple2;
@@ -38,11 +38,11 @@ import jakarta.persistence.metamodel.SingularAttribute;
 
 public class JpaCriteriaQuery {
 
-    private final ApplyZero<EntityManagerFactory> emf;
+    private final Supplier<EntityManagerFactory> emf;
     private final TypeProvider typeProvider;
     private final QueryUtils queryUtils;
     
-    public JpaCriteriaQuery(ApplyZero<EntityManagerFactory> emf, TypeProvider typeProvider, Configuration config) {
+    public JpaCriteriaQuery(Supplier<EntityManagerFactory> emf, TypeProvider typeProvider, Configuration config) {
         this.emf = emf;
         this.typeProvider = typeProvider;
         this.queryUtils = new QueryUtils(config);

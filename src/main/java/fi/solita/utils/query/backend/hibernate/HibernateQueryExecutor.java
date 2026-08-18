@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.hibernate.Session;
 import org.hibernate.proxy.HibernateProxy;
@@ -21,7 +22,6 @@ import org.hibernate.query.Query;
 import org.hibernate.query.TupleTransformer;
 import org.hibernate.type.BasicTypeReference;
 
-import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.Page;
@@ -42,10 +42,10 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
     public static final String HINT_FETCH_SIZE = "org.hibernate.fetchSize";
     public static final int MAX_FETCH_SIZE = 500;
 
-    private final ApplyZero<EntityManager> em;
+    private final Supplier<EntityManager> em;
     private final TypeProvider typeProvider;
     
-    public HibernateQueryExecutor(ApplyZero<EntityManager> em, TypeProvider typeProvider, Configuration config) {
+    public HibernateQueryExecutor(Supplier<EntityManager> em, TypeProvider typeProvider, Configuration config) {
         this.em = em;
         this.typeProvider = typeProvider;
     }
@@ -166,7 +166,7 @@ public class HibernateQueryExecutor implements JpaCriteriaQueryExecutor, NativeQ
                 ht = (HibernateTypeProvider.HibernateType<?>)typeProvider.type(param.getKey().getClass());
             }
             if (NativeQuery.ENTITY_RETURN_VALUE.equals(param.getKey())) {
-                q.addEntity(head(concat(it(ht.entity), it(ht.javaType))));
+                q.addEntity(head(concat(ht.entity, ht.javaType)));
             } else if (ht.entity.isPresent()) {
                 q.addEntity(param.getKey(), ht.entity.get());
             } else if (ht.bindableType.isPresent()) {

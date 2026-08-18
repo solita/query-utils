@@ -7,10 +7,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import org.junit.Test;
 
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple;
 import fi.solita.utils.functional.Tuple1;
@@ -209,7 +209,7 @@ public class TupleResultTransformerTest {
     public void getter_returnsCorrectValue_forKnownAlias() {
         List<String> aliases = Arrays.asList("x", "y", "z");
         Object[] tuple = new Object[]{"vx", "vy", "vz"};
-        Apply<String, Object> getter = TupleResultTransformer.getter(aliases, tuple);
+        Function<String, Object> getter = TupleResultTransformer.getter(aliases, tuple);
         assertEquals("vx", getter.apply("x"));
         assertEquals("vy", getter.apply("y"));
         assertEquals("vz", getter.apply("z"));
@@ -219,7 +219,7 @@ public class TupleResultTransformerTest {
     public void getter_returnsNull_whenValueIsNull() {
         List<String> aliases = Arrays.asList("a", "b");
         Object[] tuple = new Object[]{null, "v"};
-        Apply<String, Object> getter = TupleResultTransformer.getter(aliases, tuple);
+        Function<String, Object> getter = TupleResultTransformer.getter(aliases, tuple);
         assertEquals(null, getter.apply("a"));
     }
 }

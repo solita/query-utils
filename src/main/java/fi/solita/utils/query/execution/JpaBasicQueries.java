@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -29,7 +30,6 @@ import jakarta.persistence.metamodel.PluralAttribute;
 import jakarta.persistence.metamodel.SetAttribute;
 import jakarta.persistence.metamodel.SingularAttribute;
 
-import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.IEntity;
 import fi.solita.utils.query.Id;
@@ -46,8 +46,8 @@ import fi.solita.utils.query.projection.ProjectionHelper;
 
 public class JpaBasicQueries {
 
-    private final ApplyZero<EntityManager> em;
-    private final ApplyZero<EntityManagerFactory> emf;
+    private final Supplier<EntityManager> em;
+    private final Supplier<EntityManagerFactory> emf;
 
     private final TypeProvider typeProvider;
     private final JpaCriteriaQueryExecutor queryExecutor;
@@ -55,7 +55,7 @@ public class JpaBasicQueries {
     
     private final Configuration config;
     
-    public JpaBasicQueries(ApplyZero<EntityManagerFactory> emf, ApplyZero<EntityManager> em, ProjectionHelper projectionSupport, TypeProvider typeProvider, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
+    public JpaBasicQueries(Supplier<EntityManagerFactory> emf, Supplier<EntityManager> em, ProjectionHelper projectionSupport, TypeProvider typeProvider, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.em = em;
         this.emf = emf;
         this.typeProvider = typeProvider;
@@ -110,7 +110,7 @@ public class JpaBasicQueries {
     }
     
     public <E extends IEntity<?>> Iterable<E> toProxies(Iterable<? extends Id<E>> ids) {
-        return map(JpaBasicQueries_.<E>toProxy().ap(this), ids);
+        return map(this::toProxy, ids);
     }
     
     public <E extends IEntity<?>> Iterable<E> toProxies(Class<E> clazz, Iterable<? extends Id<? super E>> ids) {
@@ -179,6 +179,6 @@ public class JpaBasicQueries {
         query.where(em.get().getCriteriaBuilder().equal(root.get(QueryUtils.id(root.getJavaType(), emf.get())), entity.getId()));
         query.select(((Join<?,T>)QueryUtils.join((Root<?>)root, (Attribute<?,?>)relation, JoinType.INNER)).get(id));
         
-        return map(JpaBasicQueries_.<T>toProxy().ap(this), queryExecutor.getMany(query, Page.NoPaging, LockModeType.NONE));
+        return map(this::toProxy, queryExecutor.getMany(query, Page.NoPaging, LockModeType.NONE));
     }
 }

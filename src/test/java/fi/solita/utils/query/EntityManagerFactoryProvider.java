@@ -1,17 +1,21 @@
 package fi.solita.utils.query;
 
-import fi.solita.utils.functional.Function0;
+import java.util.function.Supplier;
+
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceUnit;
 
-public class EntityManagerFactoryProvider extends Function0<EntityManagerFactory> {
+public class EntityManagerFactoryProvider implements Supplier<EntityManagerFactory> {
     
     @PersistenceUnit
     private EntityManagerFactory emf;
 
-    @Override
     public EntityManagerFactory apply() {
-        return emf;
+        return get();
     }
 
+    @Override
+    public EntityManagerFactory get() {
+        return emf;
+    }
 }

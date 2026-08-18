@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.hibernate.HibernateException;
 import org.hibernate.annotations.TypeRegistration;
@@ -17,7 +18,6 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.usertype.UserType;
 
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.db.oracle.OracleSupport;
@@ -46,7 +46,7 @@ public class OracleTableValueType implements UserType<Table.Value>, Serializable
             Connection c = st.getConnection().unwrap(OracleSupport.oracleConnectionClass);
             Collection<?> values = value.values;
             
-            Optional<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
+            Optional<Tuple3<String,Class<?>,Function<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
             if (sqlTypeAndValues.isPresent()) {
                 try {
                     Object ad = OracleSupport.arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);

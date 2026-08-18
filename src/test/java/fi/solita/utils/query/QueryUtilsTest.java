@@ -11,11 +11,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.junit.Test;
 
-import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.Pred;
 import fi.solita.utils.query.generation.Cast;
 import fi.solita.utils.query.projection.Project;
 import fi.solita.utils.query.projection.Related;
@@ -24,7 +23,7 @@ import jakarta.persistence.metamodel.Attribute;
 
 public class QueryUtilsTest extends QueryTestBase {
     
-    static final List<? extends Pred<Attribute<?,?>>> bothFunctions = newList(isRequiredByMetamodel, isRequiredByQueryAttribute);
+    static final List<? extends Predicate<Attribute<?,?>>> bothFunctions = newList(isRequiredByMetamodel, isRequiredByQueryAttribute);
 
     @Test
     public void selfAttributeAndLiteralAttributesAreAlwaysRequired() throws Exception {
@@ -34,9 +33,9 @@ public class QueryUtilsTest extends QueryTestBase {
                 Select.literal(newSet(42)),
                 Select.literal(newList(42)));
         
-        for (Apply<Attribute<?,?>,Boolean> f: bothFunctions) {
+        for (Predicate<Attribute<?,?>> f: bothFunctions) {
             for (Attribute<?,?> a: testset) {
-                assertTrue(f.apply(a));
+                assertTrue(f.test(a));
             }
         }
     }
@@ -51,9 +50,9 @@ public class QueryUtilsTest extends QueryTestBase {
                 Municipality_.emps,        // set
                 Department_.employees);         // list
         
-        for (Apply<Attribute<?,?>,Boolean> f: bothFunctions) {
+        for (Predicate<Attribute<?,?>> f: bothFunctions) {
             for (Attribute<?,?> a: testset) {
-                assertTrue(f.apply(a));
+                assertTrue(f.test(a));
             }
         }
     }

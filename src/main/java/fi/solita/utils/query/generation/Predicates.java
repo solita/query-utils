@@ -9,9 +9,9 @@ import static fi.solita.utils.query.QueryUtils.resolveSelectionPath;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-import fi.solita.utils.functional.Apply;
-import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.Id;
 import fi.solita.utils.query.QueryUtils;
@@ -26,11 +26,11 @@ import jakarta.persistence.metamodel.SingularAttribute;
 
 public class Predicates {
     
-    private final ApplyZero<EntityManagerFactory> emf;
+    private final Supplier<EntityManagerFactory> emf;
 
     private final QueryUtils queryUtils;
     
-    public Predicates(ApplyZero<EntityManagerFactory> emf, Configuration config) {
+    public Predicates(Supplier<EntityManagerFactory> emf, Configuration config) {
         this.emf = emf;
         this.queryUtils = new QueryUtils(config);
     }
@@ -40,8 +40,8 @@ public class Predicates {
     }
     
     @SafeVarargs
-    public final <E> Apply<CriteriaQuery<E>,Predicate> and(final Apply<CriteriaQuery<E>,Predicate>... predicates) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public final <E> Function<CriteriaQuery<E>,Predicate> and(final Function<CriteriaQuery<E>,Predicate>... predicates) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> t) {
                 return cb().and(newArray(Predicate.class, sequence(t, predicates)));
@@ -50,8 +50,8 @@ public class Predicates {
     }
     
     @SafeVarargs
-    public final <E> Apply<CriteriaQuery<E>,Predicate> or(final Apply<CriteriaQuery<E>,Predicate>... predicates) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public final <E> Function<CriteriaQuery<E>,Predicate> or(final Function<CriteriaQuery<E>,Predicate>... predicates) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> t) {
                 return cb().or(newArray(Predicate.class, sequence(t, predicates)));
@@ -59,8 +59,8 @@ public class Predicates {
         };
     }
 
-    public <E, T> Apply<CriteriaQuery<E>,Predicate> isDefined(final SingularAttribute<? super E, T> attribute) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T> Function<CriteriaQuery<E>,Predicate> isDefined(final SingularAttribute<? super E, T> attribute) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -69,8 +69,8 @@ public class Predicates {
         };
     }
     
-    public <E, T> Apply<CriteriaQuery<E>,Predicate> isNotDefined(final SingularAttribute<? super E, T> attribute) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T> Function<CriteriaQuery<E>,Predicate> isNotDefined(final SingularAttribute<? super E, T> attribute) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -79,8 +79,8 @@ public class Predicates {
         };
     }
     
-    public <E, T> Apply<CriteriaQuery<E>,Predicate> equals(final SingularAttribute<? super E, T> attribute, final Optional<T> value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T> Function<CriteriaQuery<E>,Predicate> equals(final SingularAttribute<? super E, T> attribute, final Optional<T> value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -93,8 +93,8 @@ public class Predicates {
         };
     }
     
-    public <E, T> Apply<CriteriaQuery<E>,Predicate> equalsOption(final SingularAttribute<? super E, Optional<T>> attribute, final Optional<T> value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T> Function<CriteriaQuery<E>,Predicate> equalsOption(final SingularAttribute<? super E, Optional<T>> attribute, final Optional<T> value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -107,8 +107,8 @@ public class Predicates {
         };
     }
     
-    public <E, T> Apply<CriteriaQuery<E>,Predicate> notEquals(final SingularAttribute<? super E, T> attribute, final Optional<T> value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T> Function<CriteriaQuery<E>,Predicate> notEquals(final SingularAttribute<? super E, T> attribute, final Optional<T> value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -121,8 +121,8 @@ public class Predicates {
         };
     }
     
-    public <E, T> Apply<CriteriaQuery<E>,Predicate> notEqualsOption(final SingularAttribute<? super E, Optional<T>> attribute, final Optional<T> value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T> Function<CriteriaQuery<E>,Predicate> notEqualsOption(final SingularAttribute<? super E, Optional<T>> attribute, final Optional<T> value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -135,8 +135,8 @@ public class Predicates {
         };
     }
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> equalsIgnoreCase(final SingularAttribute<? super E, String> attribute, final Optional<String> value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> equalsIgnoreCase(final SingularAttribute<? super E, String> attribute, final Optional<String> value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -149,8 +149,8 @@ public class Predicates {
         };
     }
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> containsIgnoreCase(final SingularAttribute<? super E, String> attribute, final String value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> containsIgnoreCase(final SingularAttribute<? super E, String> attribute, final String value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -161,8 +161,8 @@ public class Predicates {
         };
     }
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> startsWithIgnoreCase(final SingularAttribute<? super E, String> attribute, final String value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> startsWithIgnoreCase(final SingularAttribute<? super E, String> attribute, final String value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -173,8 +173,8 @@ public class Predicates {
         };
     }
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> startsWithIgnoreCaseOption(final SingularAttribute<? super E, Optional<String>> attribute, final String value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> startsWithIgnoreCaseOption(final SingularAttribute<? super E, Optional<String>> attribute, final String value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -185,8 +185,8 @@ public class Predicates {
         };
     }
 
-    public <E, A> Apply<CriteriaQuery<E>,Predicate> in(final SingularAttribute<? super E, A> attribute, final Set<? super A> values) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, A> Function<CriteriaQuery<E>,Predicate> in(final SingularAttribute<? super E, A> attribute, final Set<? super A> values) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selectionPath = resolveSelectionPath(query);
@@ -201,8 +201,8 @@ public class Predicates {
      * Like {@link #in(SingularAttribute, Iterable, CriteriaQuery)}
      * but always explodes arguments to an ordinary in-clause. So doesn't use table/collection optimizations.
      */
-    public <E, A> Apply<CriteriaQuery<E>,Predicate> in_regularForm(final SingularAttribute<? super E, A> attribute, final Set<? super A> values) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, A> Function<CriteriaQuery<E>,Predicate> in_regularForm(final SingularAttribute<? super E, A> attribute, final Set<? super A> values) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<A> path = resolveSelectionPath(query).get(attribute);
@@ -215,8 +215,8 @@ public class Predicates {
      * Like {@link #in(SingularAttribute, Iterable, CriteriaQuery)}
      * but always use table in-clause.
      */
-    public <E, A> Apply<CriteriaQuery<E>,Predicate> in_tableForm(final SingularAttribute<? super E, A> attribute, final Set<? super A> values) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, A> Function<CriteriaQuery<E>,Predicate> in_tableForm(final SingularAttribute<? super E, A> attribute, final Set<? super A> values) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<A> path = resolveSelectionPath(query).get(attribute);
@@ -225,8 +225,8 @@ public class Predicates {
         };
     }
     
-    public <E, A> Apply<CriteriaQuery<E>,Predicate> notIn(final SingularAttribute<? super E, A> attribute, final Set<? super A> values) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, A> Function<CriteriaQuery<E>,Predicate> notIn(final SingularAttribute<? super E, A> attribute, final Set<? super A> values) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selectionPath = resolveSelectionPath(query);
@@ -241,8 +241,8 @@ public class Predicates {
      * Like {@link #notIn(SingularAttribute, Iterable, CriteriaQuery)}
      * but always explodes arguments to an ordinary in-clause. So doesn't use table/collection optimizations.
      */
-    public <E, A> Apply<CriteriaQuery<E>,Predicate> notIn_regularForm(final SingularAttribute<? super E, A> attribute, final Set<? super A> values) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, A> Function<CriteriaQuery<E>,Predicate> notIn_regularForm(final SingularAttribute<? super E, A> attribute, final Set<? super A> values) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<A> path = resolveSelectionPath(query).get(attribute);
@@ -251,8 +251,8 @@ public class Predicates {
         };
     }
     
-    public <E, A> Apply<CriteriaQuery<E>,Predicate> inIds(final SingularAttribute<? super E, A> attribute, final Set<? extends Id<? super A>> values) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, A> Function<CriteriaQuery<E>,Predicate> inIds(final SingularAttribute<? super E, A> attribute, final Set<? extends Id<? super A>> values) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<A> path = resolveSelectionPath(query).get(attribute);
@@ -261,8 +261,8 @@ public class Predicates {
         };
     }
 
-    public <E> Apply<CriteriaQuery<E>,Predicate> excluding(final Id<? super E> idToExclude) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> excluding(final Id<? super E> idToExclude) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selectionPath = resolveSelectionPath(query);
@@ -272,8 +272,8 @@ public class Predicates {
         };
     }
 
-    public <E> Apply<CriteriaQuery<E>,Predicate> excluding(final Set<? extends Id<? super E>> idsToExclude) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> excluding(final Set<? extends Id<? super E>> idsToExclude) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selectionPath = resolveSelectionPath(query);
@@ -283,8 +283,8 @@ public class Predicates {
         };
     }
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> including(final Id<? super E> idToInclude) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> including(final Id<? super E> idToInclude) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selectionPath = resolveSelectionPath(query);
@@ -294,8 +294,8 @@ public class Predicates {
         };
     }
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> including(final Set<? extends Id<? super E>> idsToInclude) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> including(final Set<? extends Id<? super E>> idsToInclude) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selectionPath = resolveSelectionPath(query);
@@ -305,8 +305,8 @@ public class Predicates {
         };
     }
 
-    public <S,E extends S> Apply<CriteriaQuery<S>,Predicate> typeIs(final Class<E> type) {
-        return new Apply<CriteriaQuery<S>, Predicate>() {
+    public <S,E extends S> Function<CriteriaQuery<S>,Predicate> typeIs(final Class<E> type) {
+        return new Function<CriteriaQuery<S>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<S> query) {
                 Path<S> path = resolveSelectionPath(query);
@@ -315,8 +315,8 @@ public class Predicates {
         };
     }
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> typeIsNot(final Class<? extends E> type) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> typeIsNot(final Class<? extends E> type) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> path = resolveSelectionPath(query);
@@ -325,8 +325,8 @@ public class Predicates {
         };
     }
 
-    public <E> Apply<CriteriaQuery<E>,Predicate> typeIn(final Set<Class<? extends E>> classes) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> typeIn(final Set<Class<? extends E>> classes) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> path = resolveSelectionPath(query);
@@ -335,8 +335,8 @@ public class Predicates {
         };
     }
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> typeNotIn(final Set<Class<? extends E>> classes) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> typeNotIn(final Set<Class<? extends E>> classes) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> path = resolveSelectionPath(query);
@@ -345,8 +345,8 @@ public class Predicates {
         };
     }
 
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> lessThan(final SingularAttribute<? super E, T> attribute, final T value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> lessThan(final SingularAttribute<? super E, T> attribute, final T value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -355,8 +355,8 @@ public class Predicates {
         };
     };
     
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> lessThan(final T value, final SingularAttribute<? super E, T> attribute) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> lessThan(final T value, final SingularAttribute<? super E, T> attribute) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -365,8 +365,8 @@ public class Predicates {
         };
     };
 
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> lessThanOrEqual(final SingularAttribute<? super E, T> attribute, final T value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> lessThanOrEqual(final SingularAttribute<? super E, T> attribute, final T value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -375,8 +375,8 @@ public class Predicates {
         };
     };
     
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> lessThanOrEqual(final T value, final SingularAttribute<? super E, T> attribute) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> lessThanOrEqual(final T value, final SingularAttribute<? super E, T> attribute) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -385,8 +385,8 @@ public class Predicates {
         };
     };
 
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> greaterThan(final SingularAttribute<? super E, T> attribute, final T value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> greaterThan(final SingularAttribute<? super E, T> attribute, final T value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -395,8 +395,8 @@ public class Predicates {
         };
     };
     
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> greaterThan(final T value, final SingularAttribute<? super E, T> attribute) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> greaterThan(final T value, final SingularAttribute<? super E, T> attribute) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -405,8 +405,8 @@ public class Predicates {
         };
     };
 
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> greaterThanOrEqual(final SingularAttribute<? super E, T> attribute, final T value) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> greaterThanOrEqual(final SingularAttribute<? super E, T> attribute, final T value) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -415,8 +415,8 @@ public class Predicates {
         };
     };
     
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> greaterThanOrEqual(final T value, final SingularAttribute<? super E, T> attribute) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> greaterThanOrEqual(final T value, final SingularAttribute<? super E, T> attribute) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -430,8 +430,8 @@ public class Predicates {
         return (Expression<T>) cb().coalesce().value(val).value(val); // .literal doesn't seem to support type conversions at least in <= hibernate 6.5
     }
     
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> between(final T value, final SingularAttribute<? super E, T> a1, final SingularAttribute<? super E, T> a2) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> between(final T value, final SingularAttribute<? super E, T> a1, final SingularAttribute<? super E, T> a2) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -440,8 +440,8 @@ public class Predicates {
         };
     };
     
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> between(final SingularAttribute<? super E, T> a, final T value1, final T value2) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> between(final SingularAttribute<? super E, T> a, final T value1, final T value2) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -450,8 +450,8 @@ public class Predicates {
         };
     };
     
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> notBetween(final T value, final SingularAttribute<? super E, T> a1, final SingularAttribute<? super E, T> a2) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> notBetween(final T value, final SingularAttribute<? super E, T> a1, final SingularAttribute<? super E, T> a2) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -460,8 +460,8 @@ public class Predicates {
         };
     };
     
-    public <E, T extends Comparable<? super T>> Apply<CriteriaQuery<E>,Predicate> notBetween(final SingularAttribute<? super E, T> a, final T value1, final T value2) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E, T extends Comparable<? super T>> Function<CriteriaQuery<E>,Predicate> notBetween(final SingularAttribute<? super E, T> a, final T value1, final T value2) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -470,8 +470,8 @@ public class Predicates {
         };
     };
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> like(final SingularAttribute<? super E, String> a, final String pattern) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> like(final SingularAttribute<? super E, String> a, final String pattern) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -480,8 +480,8 @@ public class Predicates {
         };
     };
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> notLike(final SingularAttribute<? super E, String> a, final String pattern) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> notLike(final SingularAttribute<? super E, String> a, final String pattern) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -490,8 +490,8 @@ public class Predicates {
         };
     };
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> likeIgnoreCase(final SingularAttribute<? super E, String> a, final String pattern) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> likeIgnoreCase(final SingularAttribute<? super E, String> a, final String pattern) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);
@@ -500,8 +500,8 @@ public class Predicates {
         };
     };
     
-    public <E> Apply<CriteriaQuery<E>,Predicate> notLikeIgnoreCase(final SingularAttribute<? super E, String> a, final String pattern) {
-        return new Apply<CriteriaQuery<E>, Predicate>() {
+    public <E> Function<CriteriaQuery<E>,Predicate> notLikeIgnoreCase(final SingularAttribute<? super E, String> a, final String pattern) {
+        return new Function<CriteriaQuery<E>, Predicate>() {
             @Override
             public Predicate apply(CriteriaQuery<E> query) {
                 Path<E> selection = resolveSelectionPath(query);

@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.hibernate.type.descriptor.ValueBinder;
 import org.hibernate.type.descriptor.ValueExtractor;
@@ -26,7 +27,6 @@ import org.hibernate.type.descriptor.jdbc.BasicExtractor;
 import org.hibernate.type.descriptor.jdbc.JdbcType;
 import org.hibernate.type.spi.TypeConfiguration;
 
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Tuple3;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.db.oracle.OracleSupport;
@@ -78,7 +78,7 @@ public class OracleTableValueJDBCType implements JdbcType {
                 Connection c = st.getConnection().unwrap(OracleSupport.oracleConnectionClass);
                 Collection<?> values = javaType.unwrap(value, Collection.class, options);
                 
-                Optional<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
+                Optional<Tuple3<String,Class<?>,Function<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
                 if (sqlTypeAndValues.isPresent()) {
                     try {
                         Object ad = OracleSupport.arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);
@@ -100,7 +100,7 @@ public class OracleTableValueJDBCType implements JdbcType {
                 Connection c = st.getConnection().unwrap(OracleSupport.oracleConnectionClass);
                 Collection<?> values = javaType.unwrap(value, Collection.class, options);
                 
-                Optional<Tuple3<String,Class<?>,Apply<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
+                Optional<Tuple3<String,Class<?>,Function<Connection,Iterable<Object>>>> sqlTypeAndValues = new OracleSupport(config).getSqlTypeAndValues(values);
                 if (sqlTypeAndValues.isPresent()) {
                     try {
                         Object ad = OracleSupport.arrayDescriptorMethod.invoke(null, sqlTypeAndValues.get()._1, c);

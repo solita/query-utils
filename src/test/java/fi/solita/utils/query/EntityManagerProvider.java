@@ -1,17 +1,22 @@
 package fi.solita.utils.query;
 
-import fi.solita.utils.functional.Function0;
+import java.util.function.Supplier;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-public class EntityManagerProvider extends Function0<EntityManager> {
+public class EntityManagerProvider implements Supplier<EntityManager> {
     
     @PersistenceContext
     private EntityManager em;
 
     @Override
-    public EntityManager apply() {
+    public EntityManager get() {
         return em;
+    }
+    
+    public EntityManager apply() {
+        return get();
     }
 
 }

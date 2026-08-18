@@ -8,8 +8,8 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.functional.Function;
 import fi.solita.utils.functional.Pair;
 import fi.solita.utils.functional.Tuple;
@@ -66,9 +66,9 @@ import jakarta.persistence.metamodel.SingularAttribute;
 
 public class Project {
     
-    public static final <S,T,P> MetaJpaConstructor<S, T, P> recurse(final ApplyZero<? extends MetaJpaConstructor<S, T, P>> f) {
+    public static final <S,T,P> MetaJpaConstructor<S, T, P> recurse(final Supplier<? extends MetaJpaConstructor<S, T, P>> f) {
         return new MetaJpaConstructor<S, T, P>() {
-            private final ApplyZero<? extends MetaJpaConstructor<S, T, P>> c = Function.memoize(f);
+            private final Supplier<? extends MetaJpaConstructor<S, T, P>> c = Function.memoize(f);
             
             @Override
             public List<Class<?>> getConstructorParameterTypes() {

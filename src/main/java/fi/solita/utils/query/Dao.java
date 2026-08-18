@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.query.QueryUtils.NoOrderingSpecifiedException;
 import fi.solita.utils.query.execution.JpaBasicQueries;
 import fi.solita.utils.query.execution.JpaCriteriaQueries;
@@ -426,7 +426,7 @@ public class Dao {
     /**
      * Get the single row of <i>query</i>, projecting the result. Fails if multiple or no rows found.
      */
-    public <T, P> P get(NativeQuery<? extends T> query, Apply<T, P> constructor) {
+    public <T, P> P get(NativeQuery<? extends T> query, Function<T, P> constructor) {
         return nativeQueries.get(query, constructor);
     }
 
@@ -440,7 +440,7 @@ public class Dao {
     /**
      * Get the only row of <i>query</i>, if any, projecting the result. Fails if multiple rows found.
      */
-    public <T, P> Optional<P> find(NativeQuery<? extends T> query, Apply<T, P> constructor) {
+    public <T, P> Optional<P> find(NativeQuery<? extends T> query, Function<T, P> constructor) {
         return nativeQueries.find(query, constructor);
     }
 
@@ -454,7 +454,7 @@ public class Dao {
     /**
      * Get the first row of <i>query</i>, if any, projecting the result. Remember that the query should have an ordering, although this is not checked.
      */
-    public <T, P> Optional<P> findFirst(NativeQuery<? extends T> query, Apply<T, P> constructor) {
+    public <T, P> Optional<P> findFirst(NativeQuery<? extends T> query, Function<T, P> constructor) {
         return nativeQueries.findFirst(query, constructor);
     }
 
@@ -468,7 +468,7 @@ public class Dao {
     /**
      * Get all rows of <i>query</i>, projecting the result.
      */
-    public <T, P> Collection<P> getMany(NativeQuery<? extends T> query, Apply<T, P> constructor) {
+    public <T, P> Collection<P> getMany(NativeQuery<? extends T> query, Function<T, P> constructor) {
         return nativeQueries.getMany(query, constructor);
     }
     
@@ -482,7 +482,7 @@ public class Dao {
     /**
      * Get rows of <i>query</i> considering <i>page</i>, projecting the result.. Remember that the query should have an ordering, although this is not checked.
      */
-    public <T, P> List<P> getMany(NativeQuery<? extends T> query, Page page, Apply<T, P> constructor) {
+    public <T, P> List<P> getMany(NativeQuery<? extends T> query, Page page, Function<T, P> constructor) {
         return nativeQueries.getMany(query, page, constructor);
     }
 
@@ -511,7 +511,7 @@ public class Dao {
     /**
      * Get the single row of <i>query</i>, projecting the result. Fails if multiple or no rows found.
      */
-    public <T, P> P get(QLQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> P get(QLQuery<T> query, Function<T, P> constructor) {
         return qlQueries.get(query, constructor);
     }
 
@@ -525,7 +525,7 @@ public class Dao {
     /**
      * Get the only row of <i>query</i>, if any, projecting the result. Fails if multiple rows found.
      */
-    public <T, P> Optional<P> find(QLQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Optional<P> find(QLQuery<T> query, Function<T, P> constructor) {
         return qlQueries.find(query, constructor);
     }
 
@@ -539,7 +539,7 @@ public class Dao {
     /**
      * Get the first row of <i>query</i>, if any, projecting the result. Remember that the query should have an ordering, although this is not checked.
      */
-    public <T, P> Optional<P> findFirst(QLQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Optional<P> findFirst(QLQuery<T> query, Function<T, P> constructor) {
         return qlQueries.find(query, constructor);
     }
 
@@ -553,7 +553,7 @@ public class Dao {
     /**
      * Get all rows of <i>query</i>, projecting the result
      */
-    public <T, P> Collection<P> getMany(QLQuery<T> query, Apply<T, P> constructor) {
+    public <T, P> Collection<P> getMany(QLQuery<T> query, Function<T, P> constructor) {
         return qlQueries.getMany(query, constructor);
     }
 
@@ -567,7 +567,7 @@ public class Dao {
     /**
      * Get rows of <i>query</i> considering <i>page</i>, projecting the result. Remember that the query should have an ordering, although this is not checked.
      */
-    public <T, P> List<P> getMany(QLQuery<T> query, Page page, Apply<T, P> constructor) {
+    public <T, P> List<P> getMany(QLQuery<T> query, Page page, Function<T, P> constructor) {
         return qlQueries.getMany(query, page, constructor);
     }
 }

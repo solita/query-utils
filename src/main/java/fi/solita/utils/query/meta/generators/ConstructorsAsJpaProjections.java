@@ -45,6 +45,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ElementKind;
@@ -59,11 +61,8 @@ import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import fi.solita.utils.functional.Apply;
 import fi.solita.utils.functional.Collections;
-import fi.solita.utils.functional.Function1;
 import fi.solita.utils.functional.Function3;
-import fi.solita.utils.functional.Pred;
 import fi.solita.utils.meta.Helpers;
 import fi.solita.utils.meta.generators.Generator;
 import fi.solita.utils.meta.generators.GeneratorOptions;
@@ -81,7 +80,7 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
         boolean onlyPublicMembers();
         boolean includePrivateMembers();
         @SuppressWarnings("rawtypes")
-        Class<? extends Apply> getClassForJpaConstructors(int argCount);
+        Class<? extends Function> getClassForJpaConstructors(int argCount);
         public String includesAnnotation();
     }
     
@@ -100,20 +99,20 @@ public class ConstructorsAsJpaProjections extends Generator<ConstructorsAsJpaPro
             elements = filter(privateElement.negate()::test, elements);
         }
         // include only constructors/methods annotated with includesAnnotation, or all of them is present on class
-        elements = filter(new Pred<ExecutableElement>() {
+        elements = filter(new Predicate<ExecutableElement>() {
             @Override
             public boolean test(ExecutableElement candidate) {
                 return options.includesAnnotation().isEmpty() || // no includesAnnotation -> include all
-                       withAnnotations(options.includesAnnotation(), false).apply(source) || // annotation present on this class
-                       withAnnotations(options.includesAnnotation(), false).apply(candidate); // annotation present on this contructor
+                       withAnnotations(options.includesAnnotation(), false).test(source) || // annotation present on this class
+                       withAnnotations(options.includesAnnotation(), false).test(candidate); // annotation present on this contructor
             }
         }, elements);
 
-        Function1<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = elementGen.ap(new Helpers.EnvDependent(processingEnv), options);
+        Function<Entry<Integer, ExecutableElement>, Iterable<String>> singleElementTransformer = elementGen.ap(new Helpers.EnvDependent(processingEnv), options);
         return flatMap(singleElementTransformer, zipWithIndex(elements));
     }
     
-    static Apply<CharSequence,String> helpersImportTypes = new Apply<CharSequence,String>() {
+    static Function<CharSequence,String> helpersImportTypes = new Function<CharSequence,String>() {
         @Override
         public String apply(CharSequence source) {
             return Helpers.importTypes(source);

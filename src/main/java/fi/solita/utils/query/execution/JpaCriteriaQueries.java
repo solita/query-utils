@@ -9,8 +9,8 @@ import static fi.solita.utils.query.QueryUtils.resolveSelection;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Order;
@@ -26,9 +26,9 @@ import jakarta.persistence.criteria.CriteriaQuery;
 public class JpaCriteriaQueries {
 
     private final JpaCriteriaQueryExecutor queryExecutor;
-    private final ApplyZero<EntityManagerFactory> emf;
+    private final Supplier<EntityManagerFactory> emf;
 
-    public JpaCriteriaQueries(ApplyZero<EntityManagerFactory> emf, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
+    public JpaCriteriaQueries(Supplier<EntityManagerFactory> emf, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.emf = emf;
         this.queryExecutor = queryExecutor;
     }

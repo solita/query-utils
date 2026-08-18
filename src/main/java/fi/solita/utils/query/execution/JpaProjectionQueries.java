@@ -11,8 +11,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-import fi.solita.utils.functional.ApplyZero;
 import fi.solita.utils.query.Configuration;
 import fi.solita.utils.query.JpaCriteriaCopy;
 import fi.solita.utils.query.Order;
@@ -34,10 +34,10 @@ import jakarta.persistence.criteria.From;
 public class JpaProjectionQueries {
 
     private final ProjectionHelper projectionSupport;
-    private final ApplyZero<EntityManagerFactory> emf;
+    private final Supplier<EntityManagerFactory> emf;
     private final JpaCriteriaQueryExecutor queryExecutor;
 
-    public JpaProjectionQueries(ApplyZero<EntityManagerFactory> emf, ProjectionHelper projectionSupport, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
+    public JpaProjectionQueries(Supplier<EntityManagerFactory> emf, ProjectionHelper projectionSupport, JpaCriteriaQueryExecutor queryExecutor, Configuration config) {
         this.emf = emf;
         this.projectionSupport = projectionSupport;
         this.queryExecutor = queryExecutor;
