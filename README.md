@@ -1,5 +1,9 @@
 # A layer on top of JPA2 to make querying a database even more complex ;)
 
+## Java6?
+
+Looking for Java6 compatible version? See branch `java6`.
+
 ## Motivation
 
 Pure SQL is not enough. Some layer on top of it is needed.  
