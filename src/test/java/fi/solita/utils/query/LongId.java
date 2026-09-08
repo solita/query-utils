@@ -2,12 +2,14 @@ package fi.solita.utils.query;
 
 import java.io.Serializable;
 
+import fi.solita.utils.meta.NoMetadataGeneration;
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
 @Access(AccessType.FIELD)
+@NoMetadataGeneration
 class LongId<T> implements Id<T>, Serializable {
 
     long id;

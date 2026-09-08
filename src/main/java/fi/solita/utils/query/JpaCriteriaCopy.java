@@ -4,8 +4,8 @@ import static fi.solita.utils.functional.Collections.it;
 
 import fi.solita.utils.query.backend.hibernate.HibernateJpaCriteriaCopy;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Order;
 
 public class JpaCriteriaCopy {
     public static <T> CriteriaQuery<T> copyCriteria(CriteriaQuery<T> q) {
@@ -21,4 +21,5 @@ public class JpaCriteriaCopy {
         }
         throw new RuntimeException("Not implemented for: " + listAttributePath.getClass().getName());
     }
+
 }

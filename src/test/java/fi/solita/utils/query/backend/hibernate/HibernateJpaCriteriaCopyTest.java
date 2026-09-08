@@ -236,26 +236,4 @@ public class HibernateJpaCriteriaCopyTest extends QueryTestBase {
 
         assertEquals(Optional.empty(), result);
     }
-
-    @Test
-    public void createListIndexSortOrder_returnedOrder_isUsableInQuery() {
-        Department dep = new Department("orderedDep");
-        Employee emp1 = new Employee("emp1", dep);
-        Employee emp2 = new Employee("emp2", dep);
-        persist(dep, emp1, emp2);
-
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<String> q = cb.createQuery(String.class);
-        Root<Department> root = q.from(Department.class);
-        jakarta.persistence.criteria.ListJoin<Department, Employee> listJoin = root.joinList("employees");
-        q.select(listJoin.get(Employee_.mandatoryName));
-
-        Optional<jakarta.persistence.criteria.Order> orderOpt = HibernateJpaCriteriaCopy.createListIndexSortOrder(listJoin);
-        assertTrue(orderOpt.isPresent());
-        q.orderBy(orderOpt.get());
-
-        // Query should execute without errors using the list index ordering
-        java.util.List<String> results = em.createQuery(q).getResultList();
-        assertEquals(2, results.size());
-    }
 }

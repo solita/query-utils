@@ -4,7 +4,6 @@ import static fi.solita.utils.functional.Collections.newMutableSet;
 
 import java.util.Set;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JavaTypeRegistration;
 
 import jakarta.persistence.Access;
@@ -15,7 +14,6 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
@@ -82,8 +80,7 @@ public class Municipality implements IEntity<Municipality>, Identifiable<Municip
     
     @Override
     @jakarta.persistence.EmbeddedId
-    @GeneratedValue(generator = "IdGenerator")
-    @GenericGenerator(name = "IdGenerator", strategy = "fi.solita.utils.query.IdGenerator")
+    @CustomIdGenerator
     @Access(AccessType.PROPERTY)
     public ID getId() {
         return id;

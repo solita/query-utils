@@ -10,12 +10,12 @@ import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.ListAttribute;
 
 
-class LiteralListAttribute<X, Y, A extends Attribute<X, List<Y>> & Bindable<Y>> extends PluralAttributeProxy<X, List<Y>, Y, A> implements ListAttribute<X, Y>, PseudoAttribute {
+class LiteralListAttribute<X, Y, A extends Attribute<X, List<Y>> & Bindable<Y>> extends ListAttributeProxy<X, Y, A> implements ListAttribute<X, Y>, PseudoAttribute {
 
     private final List<Y> value;
 
     public LiteralListAttribute(List<Y> value) {
-        super(null, CollectionType.LIST, null);
+        super(null, null);
         this.value = value;
     }
 

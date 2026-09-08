@@ -7,15 +7,14 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.Bindable;
-import jakarta.persistence.metamodel.CollectionAttribute;
 
 
-class LiteralCollectionAttribute<X, Y, A extends Attribute<X, Collection<Y>> & Bindable<Y>> extends PluralAttributeProxy<X, Collection<Y>, Y, A> implements CollectionAttribute<X, Y>, PseudoAttribute {
+class LiteralCollectionAttribute<X, Y, A extends Attribute<X, Collection<Y>> & Bindable<Y>> extends CollectionAttributeProxy<X, Y, A> implements PseudoAttribute {
 
     private final Collection<Y> value;
 
     public LiteralCollectionAttribute(Collection<Y> value) {
-        super(null, CollectionType.COLLECTION, null);
+        super(null, null);
         this.value = value;
     }
 

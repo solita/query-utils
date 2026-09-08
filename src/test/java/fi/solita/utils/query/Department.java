@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.hibernate.annotations.AttributeAccessor;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JavaType;
 import org.hibernate.annotations.JavaTypeRegistration;
 import org.hibernate.type.descriptor.java.IntegerJavaType;
@@ -17,9 +16,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Transient;
 
@@ -64,7 +63,7 @@ public class Department implements IEntity<Department>, Identifiable<Department.
     private List<Integer> numbers;
 
     @OneToMany(mappedBy = "mandatoryDepartment")
-    @OrderColumn(name = "index")
+    @OrderBy("id")
     private List<Employee> employees;
 
     @ElementCollection
@@ -135,8 +134,7 @@ public class Department implements IEntity<Department>, Identifiable<Department.
 
     @Override
     @jakarta.persistence.EmbeddedId
-    @GeneratedValue(generator = "IdGenerator")
-    @GenericGenerator(name = "IdGenerator", strategy = "fi.solita.utils.query.IdGenerator")
+    @CustomIdGenerator
     @Access(jakarta.persistence.AccessType.PROPERTY)
     public ID getId() {
         return id;

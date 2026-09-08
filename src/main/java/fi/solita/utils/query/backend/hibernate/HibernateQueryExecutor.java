@@ -1,6 +1,5 @@
 package fi.solita.utils.query.backend.hibernate;
 
-import static fi.solita.utils.functional.Collections.it;
 import static fi.solita.utils.functional.Collections.newArray;
 import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.concat;
@@ -17,7 +16,6 @@ import java.util.function.Supplier;
 
 import org.hibernate.Session;
 import org.hibernate.proxy.HibernateProxy;
-import org.hibernate.query.BindableType;
 import org.hibernate.query.Query;
 import org.hibernate.query.TupleTransformer;
 import org.hibernate.type.BasicTypeReference;

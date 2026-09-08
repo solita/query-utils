@@ -47,7 +47,6 @@ public class IdGenerator extends SequenceStyleGenerator {
             int initialValue,
             int incrementSize) {
         return new SequenceStructure(
-                jdbcEnvironment,
                 determineContributor( params ),
                 sequenceName,
                 initialValue,
@@ -68,7 +67,6 @@ public class IdGenerator extends SequenceStyleGenerator {
         final String contributor = determineContributor( params );
 
         return new TableStructure(
-                jdbcEnvironment,
                 contributor,
                 sequenceName,
                 valueColumnName,

@@ -44,6 +44,12 @@ class RelationMapAttribute<E, K, R, A extends Attribute<E, Map<K,R>> & Bindable<
     @SuppressWarnings("unchecked")
     @Override
     public SqmPathSource<K> getKeyPathSource() {
-        return proxyTarget == null ? null :  ((MapPersistentAttribute<E,K,R>)(Object)proxyTarget).getKeyPathSource();
+        return proxyTarget == null ? null :  (SqmPathSource<K>) ((MapPersistentAttribute<E,K,R>)(Object)proxyTarget).getKeyPathSource();
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public SimpleDomainType<K> getKeyGraphType() {
+        return proxyTarget == null ? null :  ((MapPersistentAttribute<E,K,R>) proxyTarget).getKeyGraphType();
     }
 }

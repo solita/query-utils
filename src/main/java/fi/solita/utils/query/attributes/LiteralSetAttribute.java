@@ -11,12 +11,12 @@ import jakarta.persistence.metamodel.Bindable;
 import jakarta.persistence.metamodel.SetAttribute;
 
 
-class LiteralSetAttribute<X, Y, A extends Attribute<X, Set<Y>> & Bindable<Y>> extends PluralAttributeProxy<X, Set<Y>, Y, A> implements SetAttribute<X, Y>, PseudoAttribute {
+class LiteralSetAttribute<X, Y, A extends Attribute<X, Set<Y>> & Bindable<Y>> extends SetAttributeProxy<X, Y, A> implements SetAttribute<X, Y>, PseudoAttribute {
 
     private final Set<Y> value;
 
     public LiteralSetAttribute(Set<Y> value) {
-        super(null, CollectionType.SET, null);
+        super(null, null);
         this.value = value;
     }
 

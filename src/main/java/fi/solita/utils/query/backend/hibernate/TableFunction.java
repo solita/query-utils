@@ -3,7 +3,7 @@ package fi.solita.utils.query.backend.hibernate;
 import java.util.List;
 
 import org.hibernate.dialect.function.array.ArrayViaArgumentReturnTypeResolver;
-import org.hibernate.query.ReturnableType;
+import org.hibernate.metamodel.model.domain.ReturnableType;
 import org.hibernate.query.sqm.function.AbstractSqmSelfRenderingFunctionDescriptor;
 import org.hibernate.query.sqm.produce.function.ArgumentTypesValidator;
 import org.hibernate.query.sqm.produce.function.FunctionParameterType;

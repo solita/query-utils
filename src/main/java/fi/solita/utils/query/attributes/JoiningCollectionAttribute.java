@@ -8,21 +8,19 @@ import static fi.solita.utils.functional.Functional.last;
 import java.util.Collection;
 import java.util.List;
 
-import org.hibernate.metamodel.model.domain.BagPersistentAttribute;
 import org.hibernate.metamodel.model.domain.ManagedDomainType;
 
 import fi.solita.utils.query.QueryUtils;
 import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.Bindable;
-import jakarta.persistence.metamodel.CollectionAttribute;
 
 @SuppressWarnings("unchecked")
-class JoiningCollectionAttribute<E, R, A extends Attribute<E, Collection<R>> & Bindable<R>> extends PluralAttributeProxy<E,Collection<R>,R,A> implements CollectionAttribute<E,R>, JoiningAttribute, BagPersistentAttribute<E,R> {
+class JoiningCollectionAttribute<E, R, A extends Attribute<E, Collection<R>> & Bindable<R>> extends CollectionAttributeProxy<E,R,A> implements JoiningAttribute {
     
     private final List<? extends Attribute<?, ?>> attributes;
 
     JoiningCollectionAttribute(Iterable<Attribute<?,?>> attrs) {
-        super((A) last(attrs), CollectionType.COLLECTION, QueryUtils.<R>getElementType(last(attrs)));
+        super((A) last(attrs), QueryUtils.<R>getElementType(last(attrs)));
         if (exists(JoiningAttribute.illegalContainedAttribute, attrs)) {
             throw new IllegalArgumentException("Cannot use attributes of types defined in JoiningAttribute.illegalContainedAttribute within JoiningAttributes!");
         }
@@ -39,18 +37,8 @@ class JoiningCollectionAttribute<E, R, A extends Attribute<E, Collection<R>> & B
     }
     
     @Override
-    public CollectionType getCollectionType() {
-        return CollectionType.COLLECTION;
-    }
-    
-    @Override
     public Class<Collection<R>> getJavaType() {
         return (Class<Collection<R>>)(Object)Collection.class;
-    }
-    
-    @Override
-    public boolean isCollection() {
-        return true;
     }
     
     @Override

@@ -1,7 +1,6 @@
 package fi.solita.utils.query.backend.hibernate;
 
 import static fi.solita.utils.functional.Collections.it;
-import static fi.solita.utils.functional.Collections.newList;
 import static fi.solita.utils.functional.Functional.find;
 import static fi.solita.utils.functional.Functional.flatMap;
 import static fi.solita.utils.functional.FunctionalA.concat;

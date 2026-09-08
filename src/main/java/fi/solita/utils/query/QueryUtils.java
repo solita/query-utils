@@ -33,8 +33,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.SQLOrder;
 import org.hibernate.query.sqm.internal.SqmCriteriaNodeBuilder;
 import org.hibernate.query.sqm.tree.expression.SqmExpression;
 
@@ -52,6 +52,7 @@ import fi.solita.utils.query.projection.Constructors.TransparentProjection;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -116,9 +117,25 @@ public class QueryUtils {
     }
     
     public static String resolveOrderColumn(ListAttribute<?,?> attr) {
-        OrderColumn annotation = ((AnnotatedElement)attr.getJavaMember()).getAnnotation(OrderColumn.class);
-        String specifiedValue = annotation.name();
-        return specifiedValue != "" ? specifiedValue : attr.getName() + "_" + "ORDER";
+        for (OrderColumn annotation: it(Optional.ofNullable(((AnnotatedElement)attr.getJavaMember()).getAnnotation(OrderColumn.class)))) {
+            String specifiedValue = annotation.name();
+            if (specifiedValue != null) {
+                return specifiedValue;
+            }
+        }
+        for (OrderBy annotation: it(Optional.ofNullable(((AnnotatedElement)attr.getJavaMember()).getAnnotation(OrderBy.class)))) {
+            String specifiedValue = annotation.value();
+            if (specifiedValue != null) {
+                return specifiedValue;
+            }
+        }
+        for (SQLOrder annotation: it(Optional.ofNullable(((AnnotatedElement)attr.getJavaMember()).getAnnotation(SQLOrder.class)))) {
+            String specifiedValue = annotation.value();
+            if (specifiedValue != null) {
+                return specifiedValue;
+            }
+        }
+        return attr.getName() + "_" + "ORDER";
     }
 
     public static void addListAttributeOrdering(CriteriaQuery<?> query, Path<?> listAttributePath, String orderColumn, CriteriaBuilder cb) {
@@ -126,7 +143,11 @@ public class QueryUtils {
         if (query.getOrderList() != null) {
             orders.addAll(query.getOrderList());
         }
-        orders.add(JpaCriteriaCopy.createListIndexSortOrder(listAttributePath));
+        if (((AnnotatedElement)((ListAttribute<?,?>)((Path<?>) listAttributePath).getModel()).getJavaMember()).isAnnotationPresent(OrderColumn.class)) {
+            orders.add(JpaCriteriaCopy.createListIndexSortOrder(listAttributePath));
+        } else {
+            orders.add(cb.asc(listAttributePath.get(orderColumn)));
+        }
         query.orderBy(orders);
     }
 
@@ -405,16 +426,10 @@ public class QueryUtils {
     }
 
     private static boolean memberIsRequiredByMetamodel(Member member) {
-        Column column = ((AnnotatedElement)member).getAnnotation(Column.class);
-        if (column != null) {
-            return !column.nullable();
-        }
-        Columns columns = ((AnnotatedElement)member).getAnnotation(Columns.class);
-        if (columns != null) {
-            for (Column c : columns.columns()) {
-                if (!c.nullable()) {
-                    return true;
-                }
+        Column[] columns = ((AnnotatedElement)member).getAnnotationsByType(Column.class);
+        for (Column column: columns) {
+            if (!column.nullable()) {
+                return true;
             }
         }
         Basic basic = ((AnnotatedElement)member).getAnnotation(Basic.class);

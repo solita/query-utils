@@ -12,7 +12,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.metamodel.MappingMetamodel;
 import org.hibernate.metamodel.model.domain.JpaMetamodel;
-import org.hibernate.query.BindableType;
+import org.hibernate.type.BindableType;
 import org.hibernate.type.BasicTypeReference;
 import org.hibernate.type.descriptor.java.JavaType;
 import org.hibernate.type.spi.TypeConfiguration;
@@ -90,7 +90,7 @@ public class HibernateTypeProvider implements TypeProvider {
         }
         
         // javatype?
-        JavaType<Object> javaType = typeHelper.getJavaTypeRegistry().findDescriptor(clazz);
+        JavaType<T> javaType = typeHelper.getJavaTypeRegistry().findDescriptor(clazz);
         if (javaType != null) {
             return HibernateType.javaType(clazz);
         }
@@ -103,7 +103,7 @@ public class HibernateTypeProvider implements TypeProvider {
         
         for (Class<T> en: it(getEnumType(clazz))) {
             // hibernate doesn't recognize enum values with class bodies as enums themselves
-            JavaType<Object> enumType = typeHelper.getJavaTypeRegistry().resolveDescriptor(en);
+            JavaType<T> enumType = typeHelper.getJavaTypeRegistry().resolveDescriptor(en);
             if (enumType != null) {
                 return HibernateType.javaType(en);
             }
@@ -111,7 +111,7 @@ public class HibernateTypeProvider implements TypeProvider {
         
         if (clazz.isArray()) {
             // array types seem to be created dynamically, so lets resolve one here
-            JavaType<Object> arrayType = typeHelper.getJavaTypeRegistry().resolveDescriptor(clazz);
+            JavaType<T> arrayType = typeHelper.getJavaTypeRegistry().resolveDescriptor(clazz);
             if (arrayType != null) {
                 return HibernateType.javaType(clazz);
             }

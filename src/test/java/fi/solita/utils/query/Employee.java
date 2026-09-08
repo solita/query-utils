@@ -3,7 +3,6 @@ package fi.solita.utils.query;
 import java.util.Optional;
 
 import org.hibernate.annotations.AttributeAccessor;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JavaType;
 import org.hibernate.annotations.JavaTypeRegistration;
 import org.hibernate.annotations.JavaTypeRegistrations;
@@ -16,7 +15,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Transient;
 
@@ -87,8 +85,7 @@ public class Employee implements IEntity<Employee>, Identifiable<Employee.ID> {
 
     @Override
     @jakarta.persistence.EmbeddedId
-    @GeneratedValue(generator = "IdGenerator")
-    @GenericGenerator(name = "IdGenerator", strategy = "fi.solita.utils.query.IdGenerator")
+    @CustomIdGenerator
     @Access(jakarta.persistence.AccessType.PROPERTY)
     public ID getId() {
         return id;
