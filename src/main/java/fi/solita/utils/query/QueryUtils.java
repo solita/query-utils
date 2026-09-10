@@ -241,13 +241,13 @@ public class QueryUtils {
     }
     
     private <V, T> Expression<?> mkLiteral(CriteriaBuilder cb, Expression<?> path, V val) {
-        if (cb instanceof SqmCriteriaNodeBuilder) {
+        /*if (cb instanceof SqmCriteriaNodeBuilder) {
             // Hibernate specific. literal doesn't work at least with Hibernate <= 6.6.0
             return ((SqmCriteriaNodeBuilder)cb).value(val, ((SqmExpression<?>)path).cast(Array.newInstance(path.getJavaType(), 0).getClass())); // .literal ei toimi ainakaan hibernate <=6.6.0
-        } else {
+        } else {*/
             // fallback to how it _should_ work 
             return cb.literal(val);
-        }
+        //}
     }
     
     public enum Optimization {
