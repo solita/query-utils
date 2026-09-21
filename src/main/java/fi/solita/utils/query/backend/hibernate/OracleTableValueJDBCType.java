@@ -24,6 +24,7 @@ import org.hibernate.type.descriptor.ValueExtractor;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.JavaType;
 import org.hibernate.type.descriptor.jdbc.BasicExtractor;
+import org.hibernate.type.descriptor.jdbc.JdbcLiteralFormatter;
 import org.hibernate.type.descriptor.jdbc.JdbcType;
 import org.hibernate.type.spi.TypeConfiguration;
 
@@ -61,6 +62,11 @@ public class OracleTableValueJDBCType implements JdbcType {
     @Override
     public <X> ValueExtractor<X> getExtractor(final JavaType<X> javaType) {
         return new TableValueExtractor<X>(javaType, this);
+    }
+    
+    @Override
+    public <T> JdbcLiteralFormatter<T> getJdbcLiteralFormatter(JavaType<T> javaType) {
+        return null;
     }
 
     private static final class TableValueBinder<J> implements ValueBinder<J> {
